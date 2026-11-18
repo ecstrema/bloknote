@@ -1,0 +1,63 @@
+{
+  "lexicon": 1,
+  "id": "org.openstreetmap.review",
+  "description": "Review and rating for an OpenStreetMap element (node, way, or relation)",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "org.openstreetmap.core.defs#elementRef",
+            "description": "The OpenStreetMap element (node, way, or relation) being reviewed"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 10000,
+            "description": "Review text"
+          },
+          "rating": {
+            "type": "float",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Normalized rating from 0.0 (no stars) to 1.0 (full rating), adaptable to 3-star, 4-star, or 5-star display systems"
+          },
+          "proposedTags": {
+            "type": "array",
+            "description": "Proposed changes to OpenStreetMap tags (e.g. name corrections, new grade suggestions)",
+            "items": {
+              "type": "ref",
+              "ref": "#proposedTag"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "ISO 8601 timestamp of the review submission"
+          }
+        }
+      }
+    },
+    "proposedTag": {
+      "type": "object",
+      "description": "A proposed change or addition to an OpenStreetMap tag key-value pair",
+      "required": ["key", "value"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "OpenStreetMap tag key (e.g. 'name', 'climbing:grade:french', 'climbing:grade:yds')"
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Proposed tag value"
+        }
+      }
+    }
+  }
+}

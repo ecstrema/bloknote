@@ -24,6 +24,12 @@
 
 - `src/overpass.ts` provides typed models for raw Overpass responses, geometry tags, and feature representations.
 
+### AT Protocol Models & Helpers
+
+- `src/atproto/types.ts`: TypeScript interfaces mirroring the AT Protocol Lexicons (`app.climbhub.*` and `org.openstreetmap.*`) for ticks (`TickRecord`), reviews (`ReviewRecord`), stars (`StarRecord`), and user profiles (`ProfileRecord`), along with ATProto Spaces wrappers.
+- `src/atproto/stats.ts`: `computeUserStats(ticks)` dynamically aggregates user statistics (sends, attempts, style breakdown, grade pyramid) client-side from ticks without requiring a separate stats record.
+- `src/atproto/recovery.ts`: `findOsmRecoveryCandidates` and `relinkOsmElement` provide candidate recovery matching when an OpenStreetMap element is deleted/converted, using historical element data queried from the OSM API history.
+
 ---
 
 ## 2. Invariants

@@ -1,0 +1,42 @@
+{
+  "lexicon": 1,
+  "id": "app.climbhub.actor.profile",
+  "description": "Climber preferences and default grading scales stored on the user's repository",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "literal:self",
+      "record": {
+        "type": "object",
+        "required": ["createdAt"],
+        "properties": {
+          "preferredRouteScale": {
+            "type": "string",
+            "knownValues": [
+              "French",
+              "YDS",
+              "UIAA",
+              "Saxon",
+              "UKTech",
+              "Scandinavian",
+              "Ewbank",
+              "Polish"
+            ],
+            "description": "User's preferred route grading scale. Should be unset to use the default notation for the place (crag or region)."
+          },
+          "preferredBoulderScale": {
+            "type": "string",
+            "knownValues": ["FB", "Hueco"],
+            "description": "User's preferred boulder grading scale. Should be unset to use the default notation for the place (crag or region)."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "ISO 8601 timestamp when profile was created"
+          }
+        }
+      }
+    }
+  }
+}
+

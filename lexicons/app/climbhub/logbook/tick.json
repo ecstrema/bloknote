@@ -1,0 +1,71 @@
+{
+  "lexicon": 1,
+  "id": "app.climbhub.logbook.tick",
+  "description": "A climber's personal logbook tick recording an ascent or attempt on a route",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "style", "climbedAt", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "org.openstreetmap.core.defs#elementRef",
+            "description": "The OpenStreetMap climbing route, pitch, or boulder being ticked"
+          },
+          "style": {
+            "type": "ref",
+            "ref": "#ascentStyle",
+            "description": "Style of ascent: strictly onsight, flash, redpoint, or attempt"
+          },
+          "ascentInfo": {
+            "type": "array",
+            "description": "Additional climbing style qualifiers (clean, toprope, lead, solo, second, aid, pinkpoint, hangdog)",
+            "items": {
+              "type": "ref",
+              "ref": "#ascentInfo"
+            }
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 3000,
+            "description": "Personal comment or notes on the ascent"
+          },
+          "climbedAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "ISO 8601 timestamp of when the climb occurred"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "ISO 8601 timestamp when this tick record was created"
+          }
+        }
+      }
+    },
+    "ascentStyle": {
+      "type": "string",
+      "description": "Ascent style for a climbing tick (strictly onsight, flash, redpoint, or attempt)",
+      "knownValues": ["onsight", "flash", "redpoint", "attempt"]
+    },
+    "ascentInfo": {
+      "type": "string",
+      "description": "Additional climbing style/ascent qualifier",
+      "knownValues": [
+        "clean",
+        "toprope",
+        "lead",
+        "solo",
+        "second",
+        "aid",
+        "pinkpoint",
+        "hangdog"
+      ]
+    }
+  }
+}
+
+

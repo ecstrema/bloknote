@@ -1,0 +1,42 @@
+{
+  "lexicon": 1,
+  "id": "org.openstreetmap.core.defs",
+  "description": "Shared definitions and types for OpenStreetMap elements",
+  "defs": {
+    "elementRef": {
+      "type": "object",
+      "description": "Reference to an OpenStreetMap element (node, way, or relation)",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "knownValues": ["node", "way", "relation"],
+          "description": "OpenStreetMap element type"
+        },
+        "id": {
+          "type": "integer",
+          "description": "OpenStreetMap element numeric ID"
+        }
+      }
+    },
+    "geoPoint": {
+      "type": "object",
+      "description": "Geographic coordinate pair",
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": {
+          "type": "float",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Latitude in decimal degrees"
+        },
+        "longitude": {
+          "type": "float",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "Longitude in decimal degrees"
+        }
+      }
+    }
+  }
+}
