@@ -1,6 +1,13 @@
 <script module lang="ts">
   import "maplibre-gl/dist/maplibre-gl.css";
-  import { Map as MapLibreMap, Marker, NavigationControl, Popup, type GeoJSONSource } from "maplibre-gl";
+  import {
+    GeolocateControl,
+    Map as MapLibreMap,
+    Marker,
+    NavigationControl,
+    Popup,
+    type GeoJSONSource,
+  } from "maplibre-gl";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { dataClient } from "#lib/data/network/data-client.js";
@@ -168,6 +175,13 @@
     map.touchZoomRotate.disableRotation();
     map.keyboard.disableRotation();
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+    map.addControl(
+      new GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: false,
+      }),
+      "top-right",
+    );
 
     map.on("load", () => {
       // Hide basemap climbing POIs so vector tiles do not duplicate or conflict with our data
