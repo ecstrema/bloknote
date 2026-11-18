@@ -112,7 +112,6 @@ describe("gym phone numbers", () => {
   });
 });
 
-
 describe("isProjectRoute", () => {
   it("detects routes with 'project' or variations in name", () => {
     expect(isProjectRoute({ name: "Project" })).toBe(true);

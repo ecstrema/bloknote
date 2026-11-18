@@ -41,7 +41,8 @@
     <TriangleAlertIcon class="size-4 text-amber-600 dark:text-amber-400" />
     <Alert.Title>Graded project warning</Alert.Title>
     <Alert.Description>
-      This route is named "{feature.tags?.name}" but has a grade assigned ({grade.v.v}). Projects are typically unclimbed and ungraded.
+      This route is named "{feature.tags?.name}" but has a grade assigned ({grade.v.v}). Projects are typically
+      unclimbed and ungraded.
     </Alert.Description>
   </Alert.Root>
 {/if}

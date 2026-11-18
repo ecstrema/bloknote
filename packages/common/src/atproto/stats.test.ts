@@ -86,5 +86,3 @@ describe("computeUserStats", () => {
     expect(stats.lastClimbedAt).toBeUndefined();
   });
 });
-
-

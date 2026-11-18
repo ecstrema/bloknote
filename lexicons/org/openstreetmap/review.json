@@ -28,7 +28,7 @@
           },
           "proposedTags": {
             "type": "array",
-            "description": "Proposed changes to OpenStreetMap tags (e.g. name corrections, new grade suggestions)",
+            "description": "Proposed changes to OpenStreetMap tags (e.g. name corrections, new climbing grade suggestions)",
             "items": {
               "type": "ref",
               "ref": "#proposedTag"

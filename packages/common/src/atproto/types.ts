@@ -32,15 +32,7 @@ export interface ClimbingGradeRef {
 export type AscentStyle = "onsight" | "flash" | "redpoint" | "attempt";
 
 /** Additional climbing style / ascent qualifiers (tags) */
-export type AscentInfo =
-  | "clean"
-  | "toprope"
-  | "lead"
-  | "solo"
-  | "second"
-  | "aid"
-  | "pinkpoint"
-  | "hangdog";
+export type AscentInfo = "clean" | "toprope" | "lead" | "solo" | "second" | "aid" | "pinkpoint" | "hangdog";
 
 /**
  * Reference to an OpenStreetMap element (node, way, or relation).
@@ -147,5 +139,3 @@ export function starsToNormalizedRating(stars: number, maxStars: number = 5): nu
 export function getProposedTag(review: ReviewRecord, key: string): string | undefined {
   return review.proposedTags?.find((t) => t.key === key)?.value;
 }
-
-

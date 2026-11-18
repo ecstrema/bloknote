@@ -38,7 +38,6 @@ export function isProjectRoute(tags: Tags | undefined): boolean {
   return /\b(project|projet|projekt|progetto)\b/i.test(tags.name);
 }
 
-
 const climbingStyleLabels = [
   ["sport", "Sport"],
   ["trad", "Trad"],

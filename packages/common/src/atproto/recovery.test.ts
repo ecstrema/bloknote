@@ -79,4 +79,3 @@ describe("OSM recovery mechanism", () => {
     expect(candidates[0]?.nameMatch).toBe("exact");
   });
 });
-

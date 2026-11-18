@@ -54,18 +54,7 @@
     "ascentInfo": {
       "type": "string",
       "description": "Additional climbing style/ascent qualifier",
-      "knownValues": [
-        "clean",
-        "toprope",
-        "lead",
-        "solo",
-        "second",
-        "aid",
-        "pinkpoint",
-        "hangdog"
-      ]
+      "knownValues": ["clean", "toprope", "lead", "solo", "second", "aid", "pinkpoint", "hangdog"]
     }
   }
 }
-
-

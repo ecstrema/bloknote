@@ -12,16 +12,7 @@
         "properties": {
           "preferredRouteScale": {
             "type": "string",
-            "knownValues": [
-              "French",
-              "YDS",
-              "UIAA",
-              "Saxon",
-              "UKTech",
-              "Scandinavian",
-              "Ewbank",
-              "Polish"
-            ],
+            "knownValues": ["French", "YDS", "UIAA", "Saxon", "UKTech", "Scandinavian", "Ewbank", "Polish"],
             "description": "User's preferred route grading scale. Should be unset to use the default notation for the place (crag or region)."
           },
           "preferredBoulderScale": {
@@ -39,4 +30,3 @@
     }
   }
 }
-

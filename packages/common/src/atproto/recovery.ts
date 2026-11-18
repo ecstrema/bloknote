@@ -88,11 +88,7 @@ export function findOsmRecoveryCandidates(
     }
 
     // Small bonus if grade matches historical grade
-    if (
-      deletedFeature.grade &&
-      feature.grade &&
-      feature.grade.toLowerCase() === deletedFeature.grade.toLowerCase()
-    ) {
+    if (deletedFeature.grade && feature.grade && feature.grade.toLowerCase() === deletedFeature.grade.toLowerCase()) {
       confidence = Math.min(1.0, confidence + 0.1);
     }
 
@@ -121,4 +117,3 @@ export function relinkOsmElement(replacement: CandidateFeature): OsmElementRef {
 
 /** Backward-compatibility alias */
 export const relinkOsmSubject = relinkOsmElement;
-

@@ -94,5 +94,3 @@ export function computeUserStats(
   stats.pyramid = Array.from(pyramidMap.values());
   return stats;
 }
-
-
