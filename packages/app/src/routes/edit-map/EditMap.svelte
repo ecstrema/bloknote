@@ -9,7 +9,7 @@
     type ExpressionSpecification,
     type MapLayerMouseEvent,
     type MapMouseEvent,
-  } from "maplibre-gl";
+  } from "#lib/maplibre.js";
   import type { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from "geojson";
   import { onMount } from "svelte";
   import { PersistentState } from "@friendofsvelte/state";

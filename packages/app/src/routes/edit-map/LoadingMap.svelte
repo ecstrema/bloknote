@@ -1,6 +1,6 @@
 <script lang="ts">
   import "maplibre-gl/dist/maplibre-gl.css";
-  import { Map as MapLibreMap, type GeoJSONSource } from "maplibre-gl";
+  import { Map as MapLibreMap, type GeoJSONSource } from "#lib/maplibre.js";
   import type { Feature } from "geojson";
   import { onMount } from "svelte";
 

@@ -9,7 +9,7 @@ import {
 } from "#lib/data/parse/route-styles.js";
 import { getCoordinates, getGrade } from "#lib/data/parse/osm-tags.js";
 import { getColorFromGrade } from "#lib/data/network/grade.js";
-import type { LayerSpecification } from "maplibre-gl";
+import type { LayerSpecification } from "#lib/maplibre.js";
 
 export const VECTOR_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 

@@ -7,7 +7,7 @@
     NavigationControl,
     Popup,
     type GeoJSONSource,
-  } from "maplibre-gl";
+  } from "#lib/maplibre.js";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { dataClient } from "#lib/data/network/data-client.js";
