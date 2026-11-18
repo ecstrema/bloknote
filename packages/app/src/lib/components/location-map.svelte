@@ -359,8 +359,6 @@
   }
 
   function getEffectiveCoordinates(): { lat: number; lon: number } | undefined {
-    if (coordinates) return coordinates;
-    if (!currentSlug) return undefined;
     const cleanSlug = currentSlug.replace(/^world\//, "");
     const feat = cachedCollection.features.find(
       (f) =>
@@ -368,6 +366,13 @@
         f.properties.slug === cleanSlug ||
         f.properties.slug === `world/${cleanSlug}`,
     );
+    const isSector = feat?.properties.elementType === "sector";
+    if (isSector && (shared?.map?.getZoom() ?? 15) >= 13) {
+      return undefined;
+    }
+
+    if (coordinates) return coordinates;
+    if (!currentSlug) return undefined;
     if (!feat) return undefined;
     if (feat.geometry.type === "Point") {
       const [lon, lat] = feat.geometry.coordinates as [number, number];
@@ -422,8 +427,11 @@
       });
     }
 
+    map.on("zoom", updateDraggableMarker);
+
     return () => {
       attached = false;
+      map.off("zoom", updateDraggableMarker);
       if (element.parentElement === host) element.remove();
     };
   });
