@@ -25,7 +25,16 @@ export const ROUTE_STYLE_LABELS: Record<string, string> = {
 };
 
 export function extractRouteStyle(tags: Record<string, string>): string {
-  if (tags["climbing:boulder"] === "yes" || tags.climbing === "boulder" || tags.climbing === "bouldering") {
+  if (
+    tags["climbing:boulder"] === "yes" ||
+    tags.climbing === "boulder" ||
+    tags.climbing === "bouldering" ||
+    tags["climbing:grade:fb"] ||
+    tags["climbing:grade:font"] ||
+    tags["climbing:grade:fontainebleau"] ||
+    tags["climbing:grade:hueco"] ||
+    tags["climbing:grade:vscale"]
+  ) {
     return "boulder";
   }
   if (tags["climbing:aid"] === "yes" || tags["climbing:grade:aid"]) {

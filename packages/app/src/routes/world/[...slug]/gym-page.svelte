@@ -59,7 +59,6 @@
 <EditableOpeningHours {feature} featureSlug={slug} />
 
 {#if coordinates}
-  <p class="text-sm text-muted-foreground">{coordinates.lat}, {coordinates.lon}</p>
   <MapLinks {coordinates} name={feature.tags?.name} />
 {/if}
 

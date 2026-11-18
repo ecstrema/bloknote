@@ -8,18 +8,21 @@
     MIN_OPENING_DURATION,
     parseOpeningHours,
     snapMinutes,
+    type OpeningHoursCoordinates,
     type OpeningHoursDrag,
     type WeekHours,
   } from "#lib/data/parse/opening-hours.js";
 
   let {
     value,
+    coordinates,
     editable = false,
     onchangestart,
     onchange,
     onchangeend,
   }: {
     value: string;
+    coordinates?: OpeningHoursCoordinates;
     editable?: boolean;
     onchangestart?: () => void;
     onchange?: (value: string | undefined) => void;
@@ -40,7 +43,7 @@
   let lastEmitted: string | undefined;
 
   const trimmed = $derived(value.trim());
-  const parsed = $derived(trimmed ? parseOpeningHours(trimmed) : DAYS.map(() => []));
+  const parsed = $derived(trimmed ? parseOpeningHours(trimmed, coordinates) : DAYS.map(() => []));
   const week = $derived(draftWeek ?? parsed);
 
   type DisplayedSegment = { start: number; end: number; source: "own" | "previous"; index: number };

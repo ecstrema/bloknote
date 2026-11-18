@@ -6,6 +6,7 @@ import {
   getGrade,
   getLength,
   getPhone,
+  getRelatedGradeScales,
   getTagRule,
   isProjectRoute,
   parseClimbingLength,
@@ -146,8 +147,18 @@ describe("deprecated tags in processedTags / getTagRule", () => {
 
   it("keeps regular validators and unknown tags unaffected", () => {
     expect(typeof getTagRule("route", "name")).toBe("function");
+    expect(typeof getTagRule("route", "description:fr")).toBe("function");
+    expect(typeof getTagRule("gym", "opening_hours")).toBe("function");
     expect(typeof getTagRule("route", "climbing:length")).toBe("function");
     expect(getTagRule("route", "element" as any)).toBeUndefined();
     expect(getTagRule(undefined, "ele")).toBeUndefined();
+  });
+
+  it("offers grading scales matching the climbing style", () => {
+    expect(getRelatedGradeScales({ "climbing:boulder": "yes" }).map((s) => s.id)).toEqual(["FB", "Hueco"]);
+    expect(getRelatedGradeScales({ "climbing:ice": "yes" }).map((s) => s.id)).toEqual(["WI", "Mixed", "DryTooling"]);
+    expect(getRelatedGradeScales({ "climbing:aid": "yes" }).map((s) => s.id)).toEqual(["Aid"]);
+    expect(getRelatedGradeScales({ "climbing:sport": "yes" }).map((s) => s.id)).toContain("French");
+    expect(getRelatedGradeScales({ "climbing:sport": "yes" }).map((s) => s.id)).not.toContain("FB");
   });
 });

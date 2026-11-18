@@ -6,7 +6,7 @@
   import CommonsTopo from "#lib/components/commons-topo.svelte";
   import type { DataTree } from "#lib/types.js";
   import type { OsmFeature } from "osm-api";
-  import { getCoordinates, getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
+  import { getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
   import { isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
   import * as Alert from "#components/ui/alert/index.js";
@@ -22,7 +22,6 @@
 
   const feature = $derived(item.feature);
 
-  let coordinates = $derived(getCoordinates(item.feature));
   let grade = $derived(feature.tags ? getGrade(feature.tags) : undefined);
   const isProject = $derived(isProjectRoute(feature.tags));
 </script>
@@ -47,10 +46,6 @@
 {/if}
 
 <ClimbingStyles {feature} />
-
-{#if coordinates}
-  <p class="text-sm text-muted-foreground">{coordinates.lat}, {coordinates.lon}</p>
-{/if}
 
 <EditableDescription {feature} featureSlug={slug} />
 

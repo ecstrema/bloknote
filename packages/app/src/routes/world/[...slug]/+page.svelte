@@ -229,8 +229,11 @@
 
   {#if item.feature.type !== "geographic"}
     <Tabs.Content value="osm" class="flex flex-col gap-4">
-      <div class="flex items-center gap-3 text-sm text-muted-foreground">
+      <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
         <span>{item.feature.type}/{item.feature.id}</span>
+        {#if coordinates}
+          <span>{coordinates.lat}, {coordinates.lon}</span>
+        {/if}
         {#if item.feature.id > 0}
           <a
             href={`https://www.openstreetmap.org/${item.feature.type}/${item.feature.id}`}

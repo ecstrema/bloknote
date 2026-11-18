@@ -1,8 +1,21 @@
 import type { OsmFeature } from "osm-api";
 import type { Coordinates } from "@bloknote/climbing-data-gen";
-import { allScales, getReference, getScale, parseGrade, type Scale, type ScaleId } from "@bloknote/holy-grade";
+import {
+  allAidScales,
+  allBoulderScales,
+  allDangerScales,
+  allIceScales,
+  allRouteScales,
+  allScales,
+  getReference,
+  getScale,
+  parseGrade,
+  type Scale,
+  type ScaleId,
+} from "@bloknote/holy-grade";
 import type { Key, Tags } from "osm-api";
 import type { Grade } from "#lib/types.js";
+import { isValidOpeningHours } from "./opening-hours.js";
 
 export type DeprecatedTag = { deprecated: string };
 export type TagRule = ((value: string) => boolean) | DeprecatedTag;
@@ -101,6 +114,49 @@ const processedGrades: ProcessedTags = {
 
 export function scaleIdToTag(s: ScaleId): Key | undefined {
   return gradeTags.find(([, scale]) => scale === s)?.[0];
+}
+
+/** Returns all grading scales relevant to the feature's climbing styles (and current scale if set). */
+export function getRelatedGradeScales(tags: Tags, currentScale?: ScaleId | "unknown"): Scale[] {
+  const scales = new Map<ScaleId, Scale>();
+  const addAll = (list: Scale[]) => {
+    for (const s of list) scales.set(s.id, s);
+  };
+
+  const isBoulder =
+    tags["climbing:boulder"] === "yes" ||
+    tags.climbing === "boulder" ||
+    tags.climbing === "bouldering";
+  const isIce =
+    tags["climbing:ice"] === "yes" ||
+    tags["climbing:mixed"] === "yes" ||
+    tags["climbing:dry"] === "yes" ||
+    tags.climbing === "drytooling";
+  const isAid = tags["climbing:aid"] === "yes";
+  const isRockRoute =
+    tags["climbing:sport"] === "yes" ||
+    tags["climbing:trad"] === "yes" ||
+    tags["climbing:toprope"] === "yes" ||
+    tags["climbing:multipitch"] === "yes" ||
+    tags["climbing:speed"] === "yes" ||
+    tags["climbing:deepwater"] === "yes";
+
+  if (isBoulder) addAll(allBoulderScales);
+  if (isIce) addAll(allIceScales);
+  if (isAid) addAll(allAidScales);
+  if (isRockRoute) addAll(allRouteScales);
+
+  if (currentScale && currentScale !== "unknown") {
+    const type = getScale(currentScale)?.gradeType;
+    if (type === "boulder") addAll(allBoulderScales);
+    else if (type === "ice") addAll(allIceScales);
+    else if (type === "aid") addAll(allAidScales);
+    else if (type === "danger") addAll(allDangerScales);
+    else if (type === "route") addAll(allRouteScales);
+  }
+
+  if (scales.size === 0) addAll(allRouteScales);
+  return [...scales.values()];
 }
 
 /** See https://wiki.openstreetmap.org/wiki/Climbing#Grading */
@@ -281,19 +337,22 @@ export const processedTags: Record<OSMClimbingFeatureType, ProcessedTags> = {
     website: allowAll,
     "contact:website": allowAll,
     url: allowAll,
-    opening_hours: allowAll,
+    opening_hours: isValidOpeningHours,
     fee: allowMultipleValues(new Set(["yes", "no"])),
     charge: allowAll,
   },
 };
 
-const deprecatedTagPrefixes: [prefix: string, targetKey: Key][] = [["ele:", "ele"]];
+const tagPrefixes: [prefix: string, targetKey: Key][] = [
+  ["ele:", "ele"],
+  ["description:", "description"],
+];
 
 export function getTagRule(featureType: OSMClimbingFeatureType | undefined, key: Key): TagRule | undefined {
   if (!featureType) return undefined;
   const rules = processedTags[featureType];
   if (rules[key]) return rules[key];
-  const alias = deprecatedTagPrefixes.find(([prefix]) => key.startsWith(prefix))?.[1];
+  const alias = tagPrefixes.find(([prefix]) => key.startsWith(prefix))?.[1];
   return alias ? rules[alias] : undefined;
 }
 

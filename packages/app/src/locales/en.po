@@ -14868,151 +14868,124 @@ msgstr "A new version of Bloknote is available"
 msgid "Climbing styles"
 msgstr "Climbing styles"
 
-#: src/lib/components/commons-topo.svelte
-#: src/lib/components/commons-topo.svelte
-msgid "Wikimedia user"
-msgstr "Wikimedia user"
+#~ msgid "Wikimedia user"
+#~ msgstr "Wikimedia user"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/topo-viewer.svelte
 msgid "The path exceeds the 255-character OSM tag limit."
 msgstr "The path exceeds the 255-character OSM tag limit."
 
-#. 0: uploadedTitle
-#: src/lib/components/commons-topo.svelte
-msgid "{0} is in your pending OpenStreetMap edits."
-msgstr "{0} is in your pending OpenStreetMap edits."
+#~ msgid "{0} is in your pending OpenStreetMap edits."
+#~ msgstr "{0} is in your pending OpenStreetMap edits."
 
-#: src/lib/components/commons-topo.svelte
-msgid "Uploading to Wikimedia Commons…"
-msgstr "Uploading to Wikimedia Commons…"
+#~ msgid "Uploading to Wikimedia Commons…"
+#~ msgstr "Uploading to Wikimedia Commons…"
 
-#. 0: uploadedTitle
-#: src/lib/components/commons-topo.svelte
-msgid "Uploaded {0}."
-msgstr "Uploaded {0}."
+#~ msgid "Uploaded {0}."
+#~ msgstr "Uploaded {0}."
 
-#: src/lib/components/commons-topo.svelte
-msgid "Wikimedia Commons images"
-msgstr "Wikimedia Commons images"
+#~ msgid "Wikimedia Commons images"
+#~ msgstr "Wikimedia Commons images"
 
-#: src/lib/components/commons-topo.svelte
-msgid "Wikimedia Commons"
-msgstr "Wikimedia Commons"
+#~ msgid "Wikimedia Commons"
+#~ msgstr "Wikimedia Commons"
 
-#: src/lib/components/commons-topo.svelte
-msgid "<0/> Upload image"
-msgstr "<0/> Upload image"
+#~ msgid "<0/> Upload image"
+#~ msgstr "<0/> Upload image"
 
 #~ msgid "Wikimedia uploads are not configured for this deployment."
 #~ msgstr "Wikimedia uploads are not configured for this deployment."
 
-#: src/lib/components/commons-topo.svelte
-msgid "Sign in with Wikimedia Commons to upload. Bloknote never asks for or stores your password."
-msgstr "Sign in with Wikimedia Commons to upload. Bloknote never asks for or stores your password."
+#~ msgid "Sign in with Wikimedia Commons to upload. Bloknote never asks for or stores your password."
+#~ msgstr "Sign in with Wikimedia Commons to upload. Bloknote never asks for or stores your password."
 
-#: src/lib/components/commons-topo.svelte
-msgid "Log in with Wikimedia Commons"
-msgstr "Log in with Wikimedia Commons"
+#~ msgid "Log in with Wikimedia Commons"
+#~ msgstr "Log in with Wikimedia Commons"
 
-#. 0: commonsUsername || "Wikimedia user"
-#: src/lib/components/commons-topo.svelte
+#. 0: commonsUsername || "uploader"
+#: src/lib/components/topo/add-image-dialog.svelte
 msgid "Signed in as {0}"
 msgstr "Signed in as {0}"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/add-image-dialog.svelte
 msgid "Log out"
 msgstr "Log out"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/add-image-dialog.svelte
 msgid "Uploading…"
 msgstr "Uploading…"
 
-#: src/lib/components/commons-topo.svelte
-msgid "Upload to Commons"
-msgstr "Upload to Commons"
+#~ msgid "Upload to Commons"
+#~ msgstr "Upload to Commons"
 
-#: src/lib/components/commons-topo.svelte
-msgid "Log in to OpenStreetMap to link"
-msgstr "Log in to OpenStreetMap to link"
+#~ msgid "Log in to OpenStreetMap to link"
+#~ msgstr "Log in to OpenStreetMap to link"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/add-image-dialog.svelte
 msgid "Image file <0/>"
 msgstr "Image file <0/>"
 
-#: src/lib/components/commons-topo.svelte
-msgid "Commons filename <0/>"
-msgstr "Commons filename <0/>"
+#~ msgid "Commons filename <0/>"
+#~ msgstr "Commons filename <0/>"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/add-image-dialog.svelte
 msgid "Description <0/>"
 msgstr "Description <0/>"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/add-image-dialog.svelte
 msgid "Source <0/>"
 msgstr "Source <0/>"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/add-image-dialog.svelte
 msgid "Author <0/>"
 msgstr "Author <0/>"
 
-#: src/lib/components/commons-topo.svelte
-msgid "Free license <0/>"
-msgstr "Free license <0/>"
+#~ msgid "Free license <0/>"
+#~ msgstr "Free license <0/>"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/add-image-dialog.svelte
 msgid "<0/> I have the rights to publish this image under the selected free license."
 msgstr "<0/> I have the rights to publish this image under the selected free license."
 
-#: src/lib/components/commons-topo.svelte
-msgid "Add to this feature"
-msgstr "Add to this feature"
+#~ msgid "Add to this feature"
+#~ msgstr "Add to this feature"
 
-#. 0: uploadedTitle
-#: src/lib/components/commons-topo.svelte
-msgid "Open {0} on Commons"
-msgstr "Open {0} on Commons"
+#~ msgid "Open {0} on Commons"
+#~ msgstr "Open {0} on Commons"
 
-#: src/lib/components/commons-topo.svelte
-msgid "Cancel path edits"
-msgstr "Cancel path edits"
+#~ msgid "Cancel path edits"
+#~ msgstr "Cancel path edits"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/topo-viewer.svelte
 msgid "<0/> Save path"
 msgstr "<0/> Save path"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/topo-viewer.svelte
 msgid "<0/> Remove point"
 msgstr "<0/> Remove point"
 
-#: src/lib/components/commons-topo.svelte
-msgid "Marker <0/>"
-msgstr "Marker <0/>"
+#~ msgid "Marker <0/>"
+#~ msgstr "Marker <0/>"
 
-#: src/lib/components/commons-topo.svelte
-msgid "<0/> Dotted after"
-msgstr "<0/> Dotted after"
+#~ msgid "<0/> Dotted after"
+#~ msgstr "<0/> Dotted after"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/topo-viewer.svelte
 msgid "<0/> Edit path"
 msgstr "<0/> Edit path"
 
-#: src/lib/components/commons-topo.svelte
-#: src/lib/components/commons-topo.svelte
-msgid "Open image on Wikimedia Commons"
-msgstr "Open image on Wikimedia Commons"
+#~ msgid "Open image on Wikimedia Commons"
+#~ msgstr "Open image on Wikimedia Commons"
 
-#: src/lib/components/commons-topo.svelte
-msgid "Add or move route points on the image"
-msgstr "Add or move route points on the image"
+#~ msgid "Add or move route points on the image"
+#~ msgstr "Add or move route points on the image"
 
-#: src/lib/components/commons-topo.svelte
+#: src/lib/components/topo/topo-viewer.svelte
 msgid "Loading image…"
 msgstr "Loading image…"
 
-#. 0: image.title
-#: src/lib/components/commons-topo.svelte
-msgid "Image unavailable: {0}"
-msgstr "Image unavailable: {0}"
+#~ msgid "Image unavailable: {0}"
+#~ msgstr "Image unavailable: {0}"
 
 #. 0: value || 'None'
 #: src/lib/components/opening-hours.svelte
@@ -15217,6 +15190,7 @@ msgstr "Checking login status..."
 msgid "Log out of OpenStreetMap"
 msgstr "Log out of OpenStreetMap"
 
+#: src/lib/components/topo/add-image-dialog.svelte
 #: src/routes/settings/+page.svelte
 msgid "Log in with OpenStreetMap"
 msgstr "Log in with OpenStreetMap"
@@ -15240,7 +15214,7 @@ msgstr "Enter description..."
 #~ msgid "Change Grading Scale"
 #~ msgstr "Change Grading Scale"
 
-#: src/lib/components/editable/editable-grade.svelte
+#: src/lib/components/editable/editable-grade-value.svelte
 msgid "Add Grade"
 msgstr "Add Grade"
 
@@ -15248,9 +15222,8 @@ msgstr "Add Grade"
 msgid "Route length"
 msgstr "Route length"
 
-#: src/lib/components/editable/editable-length.svelte
-msgid "Length"
-msgstr "Length"
+#~ msgid "Length"
+#~ msgstr "Length"
 
 #: src/lib/components/editable/editable-length.svelte
 #: src/lib/components/editable/editable-length.svelte
@@ -15273,9 +15246,8 @@ msgstr "Feet are not an officially supported length unit."
 msgid "Rewrite as meters"
 msgstr "Rewrite as meters"
 
-#: src/lib/components/editable/editable-length.svelte
-msgid "<0/> m <1/>"
-msgstr "<0/> m <1/>"
+#~ msgid "<0/> m <1/>"
+#~ msgstr "<0/> m <1/>"
 
 #: src/lib/components/editable/editable-name.svelte
 msgid "Enter Name..."
@@ -15289,9 +15261,8 @@ msgstr "Opening hours"
 msgid "Mo-Fr 10:00-22:00; Sa-Su 10:00-18:00"
 msgstr "Mo-Fr 10:00-22:00; Sa-Su 10:00-18:00"
 
-#: src/lib/components/editable/editable-opening-hours.svelte
-msgid "This syntax is not shown in the graph."
-msgstr "This syntax is not shown in the graph."
+#~ msgid "This syntax is not shown in the graph."
+#~ msgstr "This syntax is not shown in the graph."
 
 #: src/lib/components/editable/editable-tags.svelte
 msgid "Keys are limited to 255 characters"
@@ -15357,6 +15328,7 @@ msgstr "Add"
 
 #: src/lib/components/editable/editable-tags.svelte
 #: src/lib/components/shell/osm-changes.svelte
+#: src/lib/components/topo/topo-viewer.svelte
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -16317,8 +16289,9 @@ msgstr "Language of the interface and of the names of the regions"
 #~ msgid "Files to delete (the upload page of GitHub cannot delete them):"
 #~ msgstr "Files to delete (the upload page of GitHub cannot delete them):"
 
-#~ msgid "Delete"
-#~ msgstr "Delete"
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "Delete"
+msgstr "Delete"
 
 #~ msgid "Backspace"
 #~ msgstr "Backspace"
@@ -27366,9 +27339,8 @@ msgstr "LineString"
 #~ msgid "Android"
 #~ msgstr "Android"
 
-#: src/lib/components/editable/editable-grade-value.svelte
-msgid "Unknown"
-msgstr "Unknown"
+#~ msgid "Unknown"
+#~ msgstr "Unknown"
 
 #~ msgid "Ctrl"
 #~ msgstr "Ctrl"
@@ -28213,32 +28185,24 @@ msgstr "Graded project warning"
 msgid "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
 msgstr "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
 
-#: src/lib/components/editable/editable-grade.svelte
-msgid "Delete grade"
-msgstr "Delete grade"
+#~ msgid "Delete grade"
+#~ msgstr "Delete grade"
 
-#: src/lib/components/editable/editable-grade-value.svelte
 #: src/lib/components/opening-hours.svelte
 msgid "None"
 msgstr "None"
 
-#. 0: grade.v.scale || "None"
-#: src/lib/components/editable/editable-grade-value.svelte
-msgid "Change scale ({0})"
-msgstr "Change scale ({0})"
+#~ msgid "Change scale ({0})"
+#~ msgstr "Change scale ({0})"
 
-#: src/lib/components/editable/editable-grade-value.svelte
-msgid "Grading Scale"
-msgstr "Grading Scale"
+#~ msgid "Grading Scale"
+#~ msgstr "Grading Scale"
 
-#. 0: grade.v.scale || "Unknown"
-#: src/lib/components/editable/editable-grade-value.svelte
-msgid "Select Grade ({0})"
-msgstr "Select Grade ({0})"
+#~ msgid "Select Grade ({0})"
+#~ msgstr "Select Grade ({0})"
 
-#: src/lib/components/editable/editable-grade-value.svelte
-msgid "<0/> Delete Grade"
-msgstr "<0/> Delete Grade"
+#~ msgid "<0/> Delete Grade"
+#~ msgstr "<0/> Delete Grade"
 
 #~ msgid "AT Protocol & Lexicons"
 #~ msgstr "AT Protocol & Lexicons"
@@ -28348,3 +28312,173 @@ msgstr "Drag vertically to copy {0} hours to other days"
 #: src/lib/components/opening-hours.svelte
 msgid "Clear {0}"
 msgstr "Clear {0}"
+
+#: src/lib/components/editable/editable-opening-hours.svelte
+msgid "This opening_hours syntax could not be parsed."
+msgstr "This opening_hours syntax could not be parsed."
+
+#: src/lib/components/editable/editable-opening-hours.svelte
+msgid "Complex rules can be edited in the text field above."
+msgstr "Complex rules can be edited in the text field above."
+
+#: src/lib/components/editable/editable-length.svelte
+msgid "Boulder height"
+msgstr "Boulder height"
+
+#: src/lib/components/editable/editable-length.svelte
+msgid "Enter height..."
+msgstr "Enter height..."
+
+#: src/lib/components/editable/editable-length.svelte
+msgid "Enter length..."
+msgstr "Enter length..."
+
+#: src/lib/components/editable/editable-length.svelte
+msgid "m"
+msgstr "m"
+
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "Grades"
+msgstr "Grades"
+
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "Grading systems"
+msgstr "Grading systems"
+
+#: src/lib/components/commons-topo.svelte
+#: src/lib/components/commons-topo.svelte
+msgid "Images"
+msgstr "Images"
+
+#: src/lib/components/commons-topo.svelte
+msgid "Expand image"
+msgstr "Expand image"
+
+#: src/lib/components/commons-topo.svelte
+msgid "Climbing image"
+msgstr "Climbing image"
+
+#: src/lib/components/commons-topo.svelte
+msgid "Loading…"
+msgstr "Loading…"
+
+#: src/lib/components/commons-topo.svelte
+msgid "Image unavailable"
+msgstr "Image unavailable"
+
+#: src/lib/components/commons-topo.svelte
+msgid "Add image..."
+msgstr "Add image..."
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Image"
+msgstr "Image"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Expanded image"
+msgstr "Expanded image"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Tap or drag to add or move route points"
+msgstr "Tap or drag to add or move route points"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Previous point"
+msgstr "Previous point"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Next point"
+msgstr "Next point"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Point marker"
+msgstr "Point marker"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "No marker"
+msgstr "No marker"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Bolt / ring"
+msgstr "Bolt / ring"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Anchor"
+msgstr "Anchor"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Piton"
+msgstr "Piton"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Fixed sling"
+msgstr "Fixed sling"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Unfinished"
+msgstr "Unfinished"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "<0/> Undo"
+msgstr "<0/> Undo"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Dotted"
+msgstr "Dotted"
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "<0/> Remove image"
+msgstr "<0/> Remove image"
+
+#. 0: editingRoute?.name
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Drawing: {0}. Tap on the image to add points, drag points to adjust."
+msgstr "Drawing: {0}. Tap on the image to add points, drag points to adjust."
+
+#: src/lib/components/topo/topo-viewer.svelte
+msgid "Drag a route onto the image to place its start, or tap a route to draw its path:"
+msgstr "Drag a route onto the image to place its start, or tap a route to draw its path:"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Account"
+msgstr "Account"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Uploading image…"
+msgstr "Uploading image…"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Add image"
+msgstr "Add image"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Images are hosted on Wikimedia Commons under a free license and linked to this climbing feature on OpenStreetMap."
+msgstr "Images are hosted on Wikimedia Commons under a free license and linked to this climbing feature on OpenStreetMap."
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Log in with OpenStreetMap to attach images to this feature."
+msgstr "Log in with OpenStreetMap to attach images to this feature."
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Use an existing image from this area"
+msgstr "Use an existing image from this area"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Sign in to upload an image"
+msgstr "Sign in to upload an image"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Own work"
+msgstr "Own work"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Upload image"
+msgstr "Upload image"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Filename <0/>"
+msgstr "Filename <0/>"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "License <0/>"
+msgstr "License <0/>"

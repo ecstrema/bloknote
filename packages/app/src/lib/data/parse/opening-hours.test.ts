@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   applyOpeningHoursDrag,
+  canEditOpeningHoursGraph,
   DAYS,
   formatOpeningHours,
   formatTime,
+  isValidOpeningHours,
   normalizeRanges,
   parseOpeningHours,
+  prettifyOpeningHours,
   snapMinutes,
   type WeekHours,
 } from "./opening-hours.js";
@@ -55,6 +58,48 @@ describe("opening-hours", () => {
     const parsedLate = parseOpeningHours(late)!;
     expect(formatOpeningHours(parsedLate)).toBe(late);
     expect(parseOpeningHours(formatOpeningHours(parsedLate)!)).toEqual(parsedLate);
+  });
+
+  it("parses complex OSM opening_hours rules via the opening_hours library", () => {
+    // 24/7
+    expect(parseOpeningHours("24/7")).toEqual(DAYS.map(() => [{ start: 0, end: 1440 }]));
+
+    // Rule subtraction / off override
+    const withBreak = parseOpeningHours("Mo-Fr 08:00-22:00; We 10:00-14:00 off")!;
+    expect(withBreak[0]).toEqual([{ start: 480, end: 1320 }]);
+    expect(withBreak[2]).toEqual([
+      { start: 480, end: 600 },
+      { start: 840, end: 1320 },
+    ]);
+
+    // Sunday overnight spillover stays attached to Sunday rather than duplicating on Monday
+    const sundayLate = parseOpeningHours("Su 18:00-02:00")!;
+    expect(sundayLate[0]).toEqual([]);
+    expect(sundayLate[6]).toEqual([{ start: 1080, end: 1560 }]);
+
+    // Public holiday rule, open-ended hours, comments, and sunrise-sunset
+    expect(parseOpeningHours("Mo-Fr 09:00-22:00; Sa,Su 10:00-20:00; PH closed")).toBeDefined();
+    expect(parseOpeningHours("Mo-Fr 09:00+")).toBeDefined();
+    expect(parseOpeningHours("sunrise-sunset", { lat: 48.8566, lon: 2.3522 })).toBeDefined();
+    expect(parseOpeningHours('Mo-Fr 09:00-18:00 "by appointment"')).toBeDefined();
+
+    // Daily times without explicit weekday prefix
+    expect(parseOpeningHours("09:00-21:00")).toEqual(DAYS.map(() => [{ start: 540, end: 1260 }]));
+
+    // Invalid syntax returns undefined
+    expect(parseOpeningHours("not valid hours")).toBeUndefined();
+    expect(isValidOpeningHours("Mo-Fr 09:00-18:00")).toBe(true);
+    expect(isValidOpeningHours("not valid hours")).toBe(false);
+  });
+
+  it("prettifies and detects whether a schedule can be losslessly edited in the graph", () => {
+    expect(prettifyOpeningHours("mo-fr 9:00-22:00")).toBe("Mo-Fr 09:00-22:00");
+    expect(canEditOpeningHoursGraph("")).toBe(true);
+    expect(canEditOpeningHoursGraph("Mo-Fr 09:00-22:00; Sa-Su 10:00-18:00")).toBe(true);
+    expect(canEditOpeningHoursGraph("Mo-Fr 08:00-22:00; We 10:00-14:00 off")).toBe(true);
+    expect(canEditOpeningHoursGraph("Mo-Fr 09:00-22:00; PH off")).toBe(false);
+    expect(canEditOpeningHoursGraph('Mo-Fr 09:00-18:00 "note"')).toBe(false);
+    expect(canEditOpeningHoursGraph("invalid")).toBe(false);
   });
 
   it("applies resize, move, create, and copy-day drag operations", () => {

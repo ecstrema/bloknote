@@ -1,3 +1,5 @@
+import opening_hours from "opening_hours";
+
 export const DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] as const;
 
 /** Minutes since midnight, `end` may be above 1440 for ranges closing after midnight */
@@ -8,68 +10,132 @@ export interface TimeRange {
 
 export type WeekHours = TimeRange[][];
 
-const emptyWeek = (): WeekHours => DAYS.map(() => []);
-
-function parseTime(s: string): number | undefined {
-  const m = s.match(/^(\d{1,2}):(\d{2})$/);
-  if (!m) return;
-  const minutes = Number(m[1]) * 60 + Number(m[2]);
-  return minutes <= 24 * 60 ? minutes : undefined;
+export interface OpeningHoursCoordinates {
+  lat: number;
+  lon: number;
 }
 
-function parseDays(s: string): number[] | undefined {
-  const days = new Set<number>();
-  for (const part of s.split(",")) {
-    const p = part.trim();
-    if (p === "PH" || p === "SH") continue;
-    const [a, b] = p.split("-").map((d) => DAYS.indexOf(d as (typeof DAYS)[number]));
-    if (a === undefined || a < 0) return;
-    if (p.includes("-")) {
-      if (b === undefined || b < 0) return;
-      for (let i = a; ; i = (i + 1) % 7) {
-        days.add(i);
-        if (i === b) break;
-      }
-    } else {
-      days.add(a);
-    }
+const emptyWeek = (): WeekHours => DAYS.map(() => []);
+
+function toNominatim(coordinates?: OpeningHoursCoordinates) {
+  return coordinates ? { lat: String(coordinates.lat), lon: String(coordinates.lon) } : null;
+}
+
+function createOpeningHours(value: string, coordinates?: OpeningHoursCoordinates): opening_hours | undefined {
+  const text = value.trim();
+  if (!text) return undefined;
+  try {
+    return new opening_hours(text, toNominatim(coordinates));
+  } catch {
+    return undefined;
   }
-  return [...days];
+}
+
+/** Monday 00:00 of the current week in local time */
+function getCurrentWeekMonday(): Date {
+  const now = new Date();
+  const mondayOffset = (now.getDay() + 6) % 7;
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() - mondayOffset, 0, 0, 0, 0);
+}
+
+function addDays(base: Date, days: number): Date {
+  return new Date(base.getFullYear(), base.getMonth(), base.getDate() + days, 0, 0, 0, 0);
+}
+
+function localMinutes(date: Date): number {
+  return date.getHours() * 60 + date.getMinutes();
 }
 
 /**
- * Parses the common subset of the OSM `opening_hours` syntax: `24/7`, day ranges and time ranges.
- * Returns undefined for anything else (months, weeks, sunrise, ...).
+ * Parses an OSM `opening_hours` string using the `opening_hours` library into a 7-day schedule.
+ * Returns `undefined` when the string is empty or has invalid OSM syntax.
  */
-export function parseOpeningHours(value: string | undefined): WeekHours | undefined {
-  const text = value?.trim();
-  if (!text) return;
-  const week = emptyWeek();
-  if (text === "24/7") return week.map(() => [{ start: 0, end: 1440 }]);
+export function parseOpeningHours(
+  value: string | undefined,
+  coordinates?: OpeningHoursCoordinates,
+): WeekHours | undefined {
+  if (!value) return undefined;
+  const oh = createOpeningHours(value, coordinates);
+  if (!oh) return undefined;
 
-  for (const rule of text.split(";")) {
-    const r = rule.trim();
-    if (!r) continue;
-    const m = r.match(/^(?:([A-Za-z,\- ]+?)\s+)?([\d:,\- ]+|off|closed)$/);
-    if (!m) return;
-    const days = m[1] ? parseDays(m[1].replace(/\s+/g, "")) : [0, 1, 2, 3, 4, 5, 6];
-    if (!days) return;
-    const times = m[2]!.trim();
-    // A later rule overrides the days it names
-    for (const d of days) week[d] = [];
-    if (times === "off" || times === "closed") continue;
-    const ranges: TimeRange[] = [];
-    for (const range of times.split(",")) {
-      const [from, to] = range
-        .trim()
-        .split("-")
-        .map((t) => parseTime(t.trim()));
-      if (from === undefined || to === undefined) return;
-      ranges.push({ start: from, end: to <= from ? to + 1440 : to });
+  const mon = getCurrentWeekMonday();
+  const dayMidnights = Array.from({ length: 9 }, (_, i) => addDays(mon, i));
+  const intervals = oh.getOpenIntervals(dayMidnights[0]!, dayMidnights[8]!);
+
+  const week = emptyWeek();
+
+  for (const [start, end] of intervals) {
+    if (end <= dayMidnights[0]! || start >= dayMidnights[7]!) continue;
+
+    for (let day = 0; day < 7; day++) {
+      const dayStart = dayMidnights[day]!;
+      const dayEnd = dayMidnights[day + 1]!;
+      const nextDayEnd = dayMidnights[day + 2]!;
+
+      if (end <= dayStart || start >= dayEnd) continue;
+
+      const startsOnThisDay = start >= dayStart;
+      const startMin = startsOnThisDay ? localMinutes(start) : 0;
+
+      // Overnight closing past midnight (e.g. 18:00-02:00) stays attached to the opening day
+      if (startsOnThisDay && end > dayEnd && end < nextDayEnd) {
+        const endNextMin = localMinutes(end);
+        if (endNextMin > 0 && endNextMin < startMin) {
+          week[day]!.push({ start: startMin, end: 1440 + endNextMin });
+          break;
+        }
+      }
+
+      const endMin = end >= dayEnd ? 1440 : localMinutes(end);
+      if (endMin > startMin) {
+        week[day]!.push({ start: startMin, end: endMin });
+      }
     }
-    for (const d of days) week[d] = ranges;
   }
-  return week;
+
+  // Remove Sunday overnight spillover duplicated at the start of Monday
+  const sundaySpill = week[6]!.find((r) => r.end > 1440);
+  if (sundaySpill) {
+    const spillEnd = sundaySpill.end - 1440;
+    week[0] = week[0]!.flatMap((r) => {
+      if (r.start === 0 && r.end <= spillEnd) return [];
+      if (r.start === 0 && r.end > spillEnd && r.end < 1440) return [{ start: spillEnd, end: r.end }];
+      return [r];
+    });
+  }
+
+  return week.map((ranges) => normalizeRanges(ranges));
+}
+
+export function isValidOpeningHours(value: string | undefined, coordinates?: OpeningHoursCoordinates): boolean {
+  return !!value && createOpeningHours(value, coordinates) !== undefined;
+}
+
+export function prettifyOpeningHours(
+  value: string,
+  coordinates?: OpeningHoursCoordinates,
+): string | undefined {
+  return createOpeningHours(value, coordinates)?.prettifyValue();
+}
+
+/**
+ * Returns true when `value` can be losslessly edited via the weekly bar graph
+ * (empty, or a week-stable schedule whose canonical `formatOpeningHours` round-trip matches).
+ */
+export function canEditOpeningHoursGraph(
+  value: string | undefined,
+  coordinates?: OpeningHoursCoordinates,
+): boolean {
+  const text = value?.trim();
+  if (!text) return true;
+  const oh = createOpeningHours(text, coordinates);
+  if (!oh || !oh.isWeekStable()) return false;
+  const week = parseOpeningHours(text, coordinates);
+  if (!week) return false;
+  const formatted = formatOpeningHours(week);
+  if (!formatted) return false;
+  const roundTripped = createOpeningHours(formatted, coordinates);
+  return roundTripped ? oh.isEqualTo(roundTripped)[0] : false;
 }
 
 export function formatTime(minutes: number): string {
@@ -218,5 +284,6 @@ export function formatOpeningHours(week: WeekHours): string | undefined {
 
   if (bySchedule.size === 0) return undefined;
 
-  return [...bySchedule.entries()].map(([schedule, days]) => `${formatDayGroup(days)} ${schedule}`).join("; ");
+  const raw = [...bySchedule.entries()].map(([schedule, days]) => `${formatDayGroup(days)} ${schedule}`).join("; ");
+  return prettifyOpeningHours(raw) ?? raw;
 }

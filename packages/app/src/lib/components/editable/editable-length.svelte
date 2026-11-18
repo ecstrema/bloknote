@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
   import { parseClimbingLength } from "#lib/data/parse/osm-tags.js";
+  import { extractRouteStyle } from "#lib/data/parse/route-styles.js";
   import { cn } from "#lib/utils.js";
   import type { OsmFeature } from "osm-api";
   import EditableTextarea from "./editable-textarea.svelte";
@@ -21,12 +22,13 @@
   const parsedLength = $derived(parseClimbingLength(rawLength));
   const length = $derived(parsedLength?.meters);
   const formatted = $derived(length === undefined ? "" : `${length}`);
+  const isBoulder = $derived(extractRouteStyle(feature.tags ?? {}) === "boulder");
 
   let draft = $state("");
   let focused = $state(false);
-  const inputValue = $derived(focused ? draft : formatted);
-
   let invalid = $state(false);
+  const inputValue = $derived(focused ? draft : formatted);
+  const hasValidNumber = $derived(!invalid && /^\d+(?:[.,]\d+)?$/.test(inputValue.trim()));
 
   /** Applies the length live. Accepts a number of metres, or an empty value to remove the length. */
   function setLength(input: string) {
@@ -48,12 +50,12 @@
 
 {#if length !== undefined || appState.osmUser.loggedIn}
   <div class="flex flex-col items-start gap-1">
-    <span class="flex items-baseline gap-1 text-muted-foreground" title="Route length">
+    <span class="flex items-baseline gap-1 text-muted-foreground" title={isBoulder ? "Boulder height" : "Route length"}>
       <EditableTextarea
         singleLine
-        class={cn("min-w-[3ch] text-right", invalid && "text-destructive")}
+        class={cn(invalid && "text-destructive")}
         value={inputValue}
-        placeholder="Length"
+        placeholder={isBoulder ? "Enter height..." : "Enter length..."}
         oninput={(event) => {
           draft = event.currentTarget.value;
           setLength(draft);
@@ -67,7 +69,9 @@
           invalid = false;
         }}
       />
-      m
+      {#if hasValidNumber}
+        <span>m</span>
+      {/if}
       {#if length !== undefined && length > 30}
         <TriangleAlertIcon
           class="size-3 text-amber-600"

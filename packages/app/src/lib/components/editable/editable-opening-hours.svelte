@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
-  import { parseOpeningHours } from "#lib/data/parse/opening-hours.js";
+  import { canEditOpeningHoursGraph, parseOpeningHours } from "#lib/data/parse/opening-hours.js";
+  import { getCoordinates } from "#lib/data/parse/osm-tags.js";
   import type { OsmFeature } from "osm-api";
   import OpeningHours from "#components/opening-hours.svelte";
   import EditableTextarea from "./editable-textarea.svelte";
@@ -11,7 +12,10 @@
 
   const appState = getAppState();
   const value = $derived(feature.tags?.opening_hours?.trim() ?? "");
-  const unparsable = $derived(value !== "" && !parseOpeningHours(value));
+  const coordinates = $derived(getCoordinates(feature));
+  const parsed = $derived(value ? parseOpeningHours(value, coordinates) : undefined);
+  const unparsable = $derived(value !== "" && !parsed);
+  const graphEditable = $derived(!!appState.osmUser.loggedIn && canEditOpeningHoursGraph(value, coordinates));
 </script>
 
 {#if value || appState.osmUser.loggedIn}
@@ -21,21 +25,28 @@
       <span class="text-muted-foreground">Opening hours</span>
     </p>
     {#if !unparsable}
-      <EditableTooltip>
-        {#snippet children(tooltipProps)}
-          <div {...tooltipProps} class="self-start w-full max-w-md">
-            <OpeningHours
-              {value}
-              editable={!!appState.osmUser.loggedIn}
-              onchangestart={() => appState.undoStack.beginGroup()}
-              onchange={(next) => appState.setTag(featureSlug, "opening_hours", next)}
-              onchangeend={() => appState.undoStack.endGroup()}
-            />
-          </div>
-        {/snippet}
-      </EditableTooltip>
+      {#if graphEditable}
+        <EditableTooltip>
+          {#snippet children(tooltipProps)}
+            <div {...tooltipProps} class="self-start w-full max-w-md">
+              <OpeningHours
+                {value}
+                {coordinates}
+                editable={true}
+                onchangestart={() => appState.undoStack.beginGroup()}
+                onchange={(next) => appState.setTag(featureSlug, "opening_hours", next)}
+                onchangeend={() => appState.undoStack.endGroup()}
+              />
+            </div>
+          {/snippet}
+        </EditableTooltip>
+      {:else}
+        <div class="self-start w-full max-w-md">
+          <OpeningHours {value} {coordinates} />
+        </div>
+      {/if}
     {:else}
-      <OpeningHours {value} />
+      <OpeningHours {value} {coordinates} />
     {/if}
     <EditableTextarea
       singleLine
@@ -44,7 +55,9 @@
       bind:value={() => value, (v) => appState.setTag(featureSlug, "opening_hours", v.trim() || undefined)}
     />
     {#if unparsable}
-      <p class="text-xs text-muted-foreground">This syntax is not shown in the graph.</p>
+      <p class="text-xs text-muted-foreground">This opening_hours syntax could not be parsed.</p>
+    {:else if appState.osmUser.loggedIn && !graphEditable}
+      <p class="text-xs text-muted-foreground">Complex rules can be edited in the text field above.</p>
     {/if}
   </div>
 {/if}

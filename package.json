@@ -29,6 +29,7 @@
       "layerchart": "^2.9.2",
       "maplibre-gl": "^6.16.0",
       "mode-watcher": "^1.1.0",
+      "opening_hours": "^3.16.0",
       "osm-api": "^4.0.1",
       "osmtogeojson": "^3.0.0-beta.5",
       "polygon-clipping": "^0.15.7",

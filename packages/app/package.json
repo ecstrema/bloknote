@@ -24,6 +24,7 @@
     "d3-scale": "catalog:",
     "layerchart": "catalog:",
     "mode-watcher": "catalog:",
+    "opening_hours": "catalog:",
     "osm-api": "catalog:",
     "polygon-clipping": "catalog:"
   },

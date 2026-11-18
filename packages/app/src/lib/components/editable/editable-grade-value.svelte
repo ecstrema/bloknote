@@ -1,12 +1,18 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
-  import { type WithSourceTag, scaleIdToTag } from "#lib/data/parse/osm-tags.js";
+  import { getRelatedGradeScales, scaleIdToTag, type WithSourceTag } from "#lib/data/parse/osm-tags.js";
   import type { Grade } from "#lib/types.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
-  import Button from "#components/ui/button/button.svelte";
-  import * as DropdownMenu from "#components/ui/dropdown-menu/index.ts";
-  import { allRouteScales, convertGrade, getGradeFromReference, getScale, type ScaleId } from "@bloknote/holy-grade";
+  import { Button } from "#components/ui/button/index.js";
+  import * as Popover from "#components/ui/popover/index.js";
+  import {
+    getPreferredBoulderGradingScale,
+    getPreferredRouteGradingScale,
+  } from "#components/shell/providers/settings.svelte.js";
+  import { convertGrade, getGradeFromReference, getScale, type ScaleId } from "@bloknote/holy-grade";
   import type { OsmFeature } from "osm-api";
+  import CheckIcon from "@lucide/svelte/icons/check";
+  import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
   import Trash2Icon from "@lucide/svelte/icons/trash-2";
 
   const {
@@ -14,40 +20,57 @@
     feature,
     featureSlug,
   }: {
-    grade: WithSourceTag<Grade>;
+    grade: WithSourceTag<Grade> | undefined;
     feature: OsmFeature;
     featureSlug: string;
   } = $props();
 
   const appState = getAppState();
+  const preferredRouteScale = getPreferredRouteGradingScale();
+  const preferredBoulderScale = getPreferredBoulderGradingScale();
 
-  const scale = $derived.by(() => {
-    if (!grade || grade.v.scale === "unknown") return;
-
-    return getScale(grade.v.scale);
-  });
+  let open = $state(false);
+  let choosingScale = $state(false);
+  let draftScaleId = $state<ScaleId>();
 
   const tags = $derived(feature.tags || {});
+  const relatedScales = $derived(getRelatedGradeScales(tags, grade?.v.scale));
 
-  const gradeTagKey = $derived(grade.source || "climbing:grade:yds_class");
-
-  function changeGradingScale(targetScaleId: string) {
-    const scaleToConvertTo = getScale(targetScaleId as ScaleId);
-    if (!scaleToConvertTo) return;
-
-    const newGradeKey = scaleIdToTag(targetScaleId as ScaleId);
-    if (!newGradeKey) return;
-
-    if (grade.v.scale === "unknown") {
-      appState.deleteTag(featureSlug, grade.source);
-      appState.setTag(featureSlug, newGradeKey, getGradeFromReference(50, scaleToConvertTo));
-      return;
+  const defaultScaleId = $derived.by((): ScaleId => {
+    const first = relatedScales[0];
+    if (first?.gradeType === "boulder" && preferredBoulderScale.current !== "local") {
+      return preferredBoulderScale.current;
     }
+    if (first?.gradeType === "route" && preferredRouteScale.current !== "local") {
+      return preferredRouteScale.current;
+    }
+    return first?.id ?? "YDS";
+  });
 
-    const currentScale = getScale(grade.v.scale);
-    if (!currentScale) return;
+  const activeScaleId = $derived(
+    grade && grade.v.scale !== "unknown" ? grade.v.scale : (draftScaleId ?? defaultScaleId),
+  );
+  const activeScale = $derived(getScale(activeScaleId) ?? relatedScales[0]!);
+  const gradeTagKey = $derived(grade?.source || scaleIdToTag(activeScale.id) || "climbing:grade:yds_class");
+  const currentGradeValue = $derived(grade ? tags[gradeTagKey] ?? grade.v.v : undefined);
 
-    const newGrade = convertGrade(grade.v.v, currentScale, scaleToConvertTo);
+  function selectGrade(value: string) {
+    appState.setTag(featureSlug, gradeTagKey, value);
+  }
+
+  function changeGradingScale(targetScaleId: ScaleId) {
+    choosingScale = false;
+    draftScaleId = targetScaleId;
+    if (!grade) return;
+
+    const scaleToConvertTo = getScale(targetScaleId);
+    const newGradeKey = scaleIdToTag(targetScaleId);
+    if (!scaleToConvertTo || !newGradeKey) return;
+
+    const newGrade =
+      grade.v.scale === "unknown"
+        ? getGradeFromReference(50, scaleToConvertTo)
+        : convertGrade(grade.v.v, grade.v.scale, scaleToConvertTo);
     if (!newGrade) return;
 
     appState.deleteTag(featureSlug, grade.source);
@@ -55,80 +78,103 @@
   }
 
   function deleteGrade() {
+    if (!grade) return;
     appState.deleteTag(featureSlug, grade.source);
     if (grade.source !== "climbing:grade" && tags["climbing:grade"]) {
       appState.deleteTag(featureSlug, "climbing:grade");
     }
+    open = false;
   }
 
   function scrollIfSelected(node: HTMLElement, isSelected: boolean) {
-    if (isSelected) {
-      requestAnimationFrame(() => {
-        node.scrollIntoView({ block: "center" });
-      });
-    }
+    if (isSelected) requestAnimationFrame(() => node.scrollIntoView({ block: "center" }));
     return {
       update(selected: boolean) {
-        if (selected) {
-          requestAnimationFrame(() => {
-            node.scrollIntoView({ block: "center" });
-          });
-        }
+        if (selected) requestAnimationFrame(() => node.scrollIntoView({ block: "center" }));
       },
     };
   }
 </script>
 
-<DropdownMenu.Root>
-  <DropdownMenu.Trigger disabled={!appState.osmUser.loggedIn}>
+<Popover.Root
+  bind:open
+  onOpenChange={(isOpen) => {
+    if (!isOpen) choosingScale = false;
+  }}
+>
+  <Popover.Trigger disabled={!appState.osmUser.loggedIn}>
     {#snippet child({ props })}
-      <Button {...props} variant="ghost">
-        <HolyGrade class="font-semibold text-sm" grade={grade?.v} />
-      </Button>
+      {#if grade}
+        <Button {...props} variant="ghost">
+          <HolyGrade class="font-semibold text-sm" grade={grade.v} />
+        </Button>
+      {:else}
+        <Button {...props} class="text-muted-foreground" variant="outline">Add Grade</Button>
+      {/if}
     {/snippet}
-  </DropdownMenu.Trigger>
-  <DropdownMenu.Content class="max-h-[50vh] w-56 overflow-y-auto">
-    <DropdownMenu.Label class="text-xs text-muted-foreground">
-      Select Grade ({grade.v.scale || "Unknown"})
-    </DropdownMenu.Label>
-    <DropdownMenu.RadioGroup bind:value={() => tags[gradeTagKey], (v) => appState.setTag(featureSlug, gradeTagKey, v)}>
-      {#each scale?.gradeMapping.keys() as name (name)}
-        <DropdownMenu.RadioItem value={name} class="whitespace-nowrap">
-          {#snippet children({ checked })}
-            <span class="w-full" use:scrollIfSelected={checked}>
-              <HolyGrade grade={{ v: name, scale: scale?.id || "YDS" }} convert={true} />
+  </Popover.Trigger>
+
+  <Popover.Content class="w-auto p-2">
+    <div class="flex items-start gap-2">
+      <div class="flex max-h-60 min-w-28 flex-col gap-0.5 overflow-y-auto pr-1" role="listbox" aria-label="Grades">
+        {#each activeScale.gradeMapping.keys() as name (name)}
+          {@const selected = currentGradeValue === name}
+          <Button
+            variant={selected ? "secondary" : "ghost"}
+            size="sm"
+            class="w-full justify-between px-2 font-normal"
+            role="option"
+            aria-selected={selected}
+            onclick={() => selectGrade(name)}
+          >
+            <span use:scrollIfSelected={selected}>
+              <HolyGrade grade={{ v: name, scale: activeScale.id }} convert={true} />
             </span>
-          {/snippet}
-        </DropdownMenu.RadioItem>
-      {/each}
-    </DropdownMenu.RadioGroup>
+            {#if selected}
+              <CheckIcon class="size-3.5 text-muted-foreground" />
+            {/if}
+          </Button>
+        {/each}
+      </div>
 
-    <DropdownMenu.Separator />
+      <div class="flex min-w-36 flex-col gap-1.5 border-l pl-2">
+        <Button
+          variant="outline"
+          size="sm"
+          class="w-full justify-between gap-2"
+          aria-expanded={choosingScale}
+          onclick={() => (choosingScale = !choosingScale)}
+        >
+          <span>{activeScale.id}</span>
+          <ChevronsUpDownIcon class="size-3.5 text-muted-foreground" />
+        </Button>
 
-    <DropdownMenu.Sub>
-      <DropdownMenu.SubTrigger class="cursor-pointer">
-        <span>Change scale ({grade.v.scale || "None"})</span>
-      </DropdownMenu.SubTrigger>
-      <DropdownMenu.SubContent class="max-h-[50vh] w-48 overflow-y-auto">
-        <DropdownMenu.RadioGroup onValueChange={changeGradingScale} value={grade.v.scale}>
-          <DropdownMenu.GroupHeading>Grading Scale</DropdownMenu.GroupHeading>
-          {#each allRouteScales as s (s.id)}
-            <DropdownMenu.RadioItem value={s.id} class="whitespace-nowrap">
-              {s.id}
-            </DropdownMenu.RadioItem>
-          {/each}
-        </DropdownMenu.RadioGroup>
-      </DropdownMenu.SubContent>
-    </DropdownMenu.Sub>
+        {#if choosingScale}
+          <div class="flex max-h-40 flex-col gap-0.5 overflow-y-auto rounded-md border p-1" role="listbox" aria-label="Grading systems">
+            {#each relatedScales as s (s.id)}
+              <Button
+                variant={s.id === activeScale.id ? "secondary" : "ghost"}
+                size="xs"
+                class="w-full justify-start"
+                onclick={() => changeGradingScale(s.id)}
+              >
+                {s.id}
+              </Button>
+            {/each}
+          </div>
+        {/if}
 
-    <DropdownMenu.Separator />
-
-    <DropdownMenu.Item
-      class="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer flex items-center"
-      onclick={deleteGrade}
-    >
-      <Trash2Icon class="mr-2 size-4" />
-      Delete Grade
-    </DropdownMenu.Item>
-  </DropdownMenu.Content>
-</DropdownMenu.Root>
+        <Button
+          variant="outline"
+          size="sm"
+          class="w-full justify-start gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          disabled={!grade}
+          onclick={deleteGrade}
+        >
+          <Trash2Icon class="size-3.5" />
+          <span>Delete</span>
+        </Button>
+      </div>
+    </div>
+  </Popover.Content>
+</Popover.Root>
