@@ -270,7 +270,7 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
     id: "selected-ring",
     type: "circle",
     source: "climbing-elements",
-    filter: ["==", ["get", "slug"], ""],
+    filter: ["all", ["==", ["geometry-type"], "Point"], ["!=", ["get", "elementType"], "sector"], ["==", ["get", "slug"], ""]],
     paint: {
       "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 6, 12, 9, 15, 12, 18, 15],
       "circle-color": "transparent",

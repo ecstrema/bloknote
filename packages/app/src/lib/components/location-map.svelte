@@ -285,9 +285,10 @@
     const cleanSlug = slug.replace(/^world\//, "");
     if (shared.map.getLayer("selected-ring")) {
       shared.map.setFilter("selected-ring", [
-        "in",
-        ["get", "slug"],
-        ["literal", [slug, cleanSlug, `world/${cleanSlug}`]],
+        "all",
+        ["==", ["geometry-type"], "Point"],
+        ["!=", ["get", "elementType"], "sector"],
+        ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
       ]);
     }
     if (shared.map.getLayer("selected-sector")) {
