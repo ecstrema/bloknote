@@ -1,6 +1,6 @@
 {
   "lexicon": 1,
-  "id": "app.climbhub.actor.profile",
+  "id": "org.bloknote.actor.profile",
   "description": "Climber preferences and default grading scales stored on the user's repository",
   "defs": {
     "main": {

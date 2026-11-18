@@ -14792,11 +14792,8 @@ msgstr "Wallis e Futuna"
 #~ msgid "Explore climbing areas and routes around the world, and compare grades across climbing styles."
 #~ msgstr "Esplora zone e vie di arrampicata in tutto il mondo e confronta i gradi tra gli stili di arrampicata."
 
-#: src/routes/+page.svelte
-#: src/routes/+page.svelte
-#: src/routes/settings/+page.svelte
-msgid "Climbhub"
-msgstr ""
+#~ msgid "Bloknote"
+#~ msgstr ""
 
 #: src/routes/+page.svelte
 msgid "Main navigation"
@@ -14817,8 +14814,8 @@ msgstr "Navigazione principale"
 #~ msgid "Browse places to climb, explore route details, and compare the grading systems you know."
 #~ msgstr "Cerca luoghi dove arrampicare, scopri i dettagli delle vie e confronta i sistemi di graduazione che conosci."
 
-#~ msgid "Explore Climbhub"
-#~ msgstr "Esplora Climbhub"
+#~ msgid "Explore Bloknote"
+#~ msgstr "Esplora Bloknote"
 
 #~ msgid "Explore by region"
 #~ msgstr "Esplora per regione"
@@ -14860,9 +14857,8 @@ msgstr "Aggiorna"
 msgid "Dismiss"
 msgstr "Ignora"
 
-#: src/routes/+layout.svelte
-msgid "A new version of Climbhub is available"
-msgstr "È disponibile una nuova versione di Climbhub"
+#~ msgid "A new version of Bloknote is available"
+#~ msgstr "È disponibile una nuova versione di Bloknote"
 
 #: src/lib/components/climbing-styles.svelte
 msgid "Climbing styles"
@@ -14906,9 +14902,8 @@ msgstr "<0/> Carica immagine"
 #~ msgid "Wikimedia uploads are not configured for this deployment."
 #~ msgstr ""
 
-#: src/lib/components/commons-topo.svelte
-msgid "Sign in with Wikimedia Commons to upload. Climbhub never asks for or stores your password."
-msgstr "Accedi a Wikimedia Commons per caricare. Climbhub non richiede né memorizza mai la tua password."
+#~ msgid "Sign in with Wikimedia Commons to upload. Bloknote never asks for or stores your password."
+#~ msgstr "Accedi a Wikimedia Commons per caricare. Bloknote non richiede né memorizza mai la tua password."
 
 #: src/lib/components/commons-topo.svelte
 msgid "Log in with Wikimedia Commons"
@@ -15036,6 +15031,7 @@ msgstr ""
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
 msgid "Point"
 msgstr ""
 
@@ -15054,7 +15050,7 @@ msgstr "Trascina per ridimensionare la mappa"
 #~ msgid "Completing Wikimedia sign-in…"
 #~ msgstr ""
 
-#~ msgid "Wikimedia sign-in | Climbhub"
+#~ msgid "Wikimedia sign-in | Bloknote"
 #~ msgstr ""
 
 #~ msgid "Wikimedia sign-in"
@@ -15111,9 +15107,8 @@ msgstr "Scala"
 msgid "Reference"
 msgstr "Riferimento"
 
-#: src/routes/settings/+page.svelte
-msgid "Settings | Climbhub"
-msgstr "Impostazioni | Climbhub"
+#~ msgid "Settings | Bloknote"
+#~ msgstr "Impostazioni | Bloknote"
 
 #: src/routes/settings/+page.svelte
 msgid "<0/> Back"
@@ -15192,9 +15187,8 @@ msgstr "Scegli come mostrare i gradi dei boulder."
 msgid "Data usage"
 msgstr "Uso dei dati"
 
-#: src/routes/settings/+page.svelte
-msgid "When enabled, Climbhub does not automatically download the full climbing dataset. Areas load as you visit them, so search may only include areas you have already opened. You can still download all data from the sidebar when you need complete search coverage."
-msgstr "Se attivata, Climbhub non scarica automaticamente l'intero dataset di arrampicata. Le zone vengono caricate quando le visiti, quindi la ricerca può includere solo le zone già aperte. Puoi comunque scaricare tutti i dati dalla barra laterale quando ti serve una ricerca completa."
+#~ msgid "When enabled, Bloknote does not automatically download the full climbing dataset. Areas load as you visit them, so search may only include areas you have already opened. You can still download all data from the sidebar when you need complete search coverage."
+#~ msgstr "Se attivata, Bloknote non scarica automaticamente l'intero dataset di arrampicata. Le zone vengono caricate quando le visiti, quindi la ricerca può includere solo le zone già aperte. Puoi comunque scaricare tutti i dati dalla barra laterale quando ti serve una ricerca completa."
 
 #: src/routes/settings/+page.svelte
 msgid "<0/> Low data usage"
@@ -15223,16 +15217,15 @@ msgstr "Accedi con OpenStreetMap"
 #~ msgid "PhOrL2FCMUtJ5v3WrOAfVh5qdI5CIzQ6Wsf_YVpBNtg"
 #~ msgstr ""
 
-#~ msgid "Edit from Climbhub"
+#~ msgid "Edit from Bloknote"
 #~ msgstr ""
 
 #: src/lib/components/editable/editable-description.svelte
 msgid "Enter description..."
 msgstr "Inserisci una descrizione..."
 
-#: src/lib/components/editable/editable-grade-value.svelte
-msgid "Change Grade"
-msgstr "Cambia grado"
+#~ msgid "Change Grade"
+#~ msgstr "Cambia grado"
 
 #: src/lib/components/editable/editable-grade-scale.svelte
 msgid "No scale"
@@ -15365,10 +15358,8 @@ msgstr "Annulla"
 msgid "<0>Log in with OSM</0> to edit"
 msgstr "<0>Accedi con OSM</0> per modificare"
 
-#. 0: isDev ? "[DEV] " \\: ""; 1: name ? ` - ${name}` \\: ""
-#: src/lib/components/shell/head.svelte
-msgid "{0}Climbhub{1}"
-msgstr ""
+#~ msgid "{0}Bloknote{1}"
+#~ msgstr ""
 
 #. 0: slug
 #: src/lib/components/shell/osm-changes.svelte
@@ -15431,10 +15422,8 @@ msgstr "Commento (facoltativo)"
 msgid "This feature has been removed"
 msgstr "Questo elemento è stato rimosso"
 
-#. 0: getStaticIdentifier(feature.type, feature.id)
-#: src/lib/components/shell/osm-missing-feature.svelte
-msgid "OSM could not find {0}. It may have been deleted or is not present on this server, so it cannot be edited from Climbhub."
-msgstr "OSM non ha trovato {0}. Potrebbe essere stato eliminato o non essere presente su questo server, quindi non può essere modificato da Climbhub."
+#~ msgid "OSM could not find {0}. It may have been deleted or is not present on this server, so it cannot be edited from Bloknote."
+#~ msgstr "OSM non ha trovato {0}. Potrebbe essere stato eliminato o non essere presente su questo server, quindi non può essere modificato da Bloknote."
 
 #. 0: item.stats.totalRoutes
 #: src/routes/world/[...slug]/area-page.svelte
@@ -15491,30 +15480,20 @@ msgstr "Gratuito"
 #~ msgid "Drag the marker to move the route."
 #~ msgstr "Trascina l'indicatore per spostare la via."
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/aid/+page.svelte
-msgid "{0}Climbhub - Aid Grade Comparison"
-msgstr "{0}Climbhub - Confronto dei gradi di artificiale"
+#~ msgid "{0}Bloknote - Aid Grade Comparison"
+#~ msgstr "{0}Bloknote - Confronto dei gradi di artificiale"
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/boulder/+page.svelte
-msgid "{0}Climbhub - Boulder Grade Comparison"
-msgstr "{0}Climbhub - Confronto dei gradi di boulder"
+#~ msgid "{0}Bloknote - Boulder Grade Comparison"
+#~ msgstr "{0}Bloknote - Confronto dei gradi di boulder"
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/ice/+page.svelte
-msgid "{0}Climbhub - Ice Grade Comparison"
-msgstr "{0}Climbhub - Confronto dei gradi di ghiaccio"
+#~ msgid "{0}Bloknote - Ice Grade Comparison"
+#~ msgstr "{0}Bloknote - Confronto dei gradi di ghiaccio"
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/danger/+page.svelte
-msgid "{0}Climbhub - Danger Grade Comparison"
-msgstr "{0}Climbhub - Confronto dei gradi di pericolo"
+#~ msgid "{0}Bloknote - Danger Grade Comparison"
+#~ msgstr "{0}Bloknote - Confronto dei gradi di pericolo"
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/route/+page.svelte
-msgid "{0}Climbhub - Route Grade Comparison"
-msgstr "{0}Climbhub - Confronto dei gradi delle vie"
+#~ msgid "{0}Bloknote - Route Grade Comparison"
+#~ msgstr "{0}Bloknote - Confronto dei gradi delle vie"
 
 #: src/lib/components/shell/sidebar/app-sidebar-children.svelte
 msgid "Add Route"
@@ -16316,7 +16295,7 @@ msgstr "Lingua dell'interfaccia e dei nomi delle regioni"
 #~ msgid "Backspace"
 #~ msgstr ""
 
-#~ msgid "{0}Climbhub - Boundary editor"
+#~ msgid "{0}Bloknote - Boundary editor"
 #~ msgstr ""
 
 #~ msgid "Started at {0}"
@@ -16467,19 +16446,19 @@ msgstr ""
 #~ msgid "Failed to analyze this element. "
 #~ msgstr ""
 
-#~ msgid "Climbhub - Aid Grade Comparison"
+#~ msgid "Bloknote - Aid Grade Comparison"
 #~ msgstr ""
 
-#~ msgid "Climbhub - Boulder Grade Comparison"
+#~ msgid "Bloknote - Boulder Grade Comparison"
 #~ msgstr ""
 
-#~ msgid "Climbhub - Ice Grade Comparison"
+#~ msgid "Bloknote - Ice Grade Comparison"
 #~ msgstr ""
 
-#~ msgid "Climbhub - Danger Grade Comparison"
+#~ msgid "Bloknote - Danger Grade Comparison"
 #~ msgstr ""
 
-#~ msgid "Climbhub - Route Grade Comparison"
+#~ msgid "Bloknote - Route Grade Comparison"
 #~ msgstr ""
 
 #~ msgid "Searching... "
@@ -21089,7 +21068,7 @@ msgstr ""
 #~ msgid "Finde Kletterorte, sieh dir Routendetails an und vergleiche die dir bekannten Bewertungssysteme."
 #~ msgstr ""
 
-#~ msgid "Climbhub entdecken"
+#~ msgid "Bloknote entdecken"
 #~ msgstr ""
 
 #~ msgid "Nach Region entdecken"
@@ -21122,7 +21101,7 @@ msgstr ""
 #~ msgid "Schließen"
 #~ msgstr ""
 
-#~ msgid "Eine neue Version von Climbhub ist verfügbar"
+#~ msgid "Eine neue Version von Bloknote ist verfügbar"
 #~ msgstr ""
 
 #~ msgid "Abmelden"
@@ -21146,7 +21125,7 @@ msgstr ""
 #~ msgid "Referenz"
 #~ msgstr ""
 
-#~ msgid "Einstellungen | Climbhub"
+#~ msgid "Einstellungen | Bloknote"
 #~ msgstr ""
 
 #~ msgid "Routen durchsuchen"
@@ -25697,7 +25676,7 @@ msgstr ""
 #~ msgid "Parcourez les lieux d'escalade, consultez le détail des voies et comparez les systèmes de cotation que vous connaissez."
 #~ msgstr ""
 
-#~ msgid "Explorer Climbhub"
+#~ msgid "Explorer Bloknote"
 #~ msgstr ""
 
 #~ msgid "Explorer par région"
@@ -25730,7 +25709,7 @@ msgstr ""
 #~ msgid "Ignorer"
 #~ msgstr ""
 
-#~ msgid "Une nouvelle version de Climbhub est disponible"
+#~ msgid "Une nouvelle version de Bloknote est disponible"
 #~ msgstr ""
 
 #~ msgid "Se déconnecter"
@@ -25757,7 +25736,7 @@ msgstr ""
 #~ msgid "Référence"
 #~ msgstr ""
 
-#~ msgid "Paramètres | Climbhub"
+#~ msgid "Paramètres | Bloknote"
 #~ msgstr ""
 
 #~ msgid "Parcourir les voies"
@@ -25952,7 +25931,7 @@ msgstr ""
 #~ msgid "Bearer {0}"
 #~ msgstr ""
 
-#~ msgid "Uploaded from Climbhub"
+#~ msgid "Uploaded from Bloknote"
 #~ msgstr ""
 
 #~ msgid "Success"
@@ -26226,7 +26205,7 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid ""
-#~ "Boundaries exported by the boundary editor of Climbhub (/edit-map).\n"
+#~ "Boundaries exported by the boundary editor of Bloknote (/edit-map).\n"
 #~ "\n"
 #~ "Replace packages/reverse-geocoding-data/data with the data/ directory of this archive:\n"
 #~ "\n"
@@ -27340,8 +27319,9 @@ msgstr ""
 #~ msgid "Android"
 #~ msgstr ""
 
-#~ msgid "Unknown"
-#~ msgstr ""
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "Unknown"
+msgstr ""
 
 #~ msgid "Ctrl"
 #~ msgstr ""
@@ -27871,7 +27851,7 @@ msgstr ""
 #~ msgid "Loading the boundaries from GitHub: "
 #~ msgstr ""
 
-#~ msgid "Climbhub - Boundary editor"
+#~ msgid "Bloknote - Boundary editor"
 #~ msgstr ""
 
 #~ msgid "Started at "
@@ -28056,9 +28036,8 @@ msgstr ""
 msgid "New climbing data is available. Download it in the background?"
 msgstr ""
 
-#: src/routes/world/+error.svelte
-msgid "Page not found | Climbhub"
-msgstr ""
+#~ msgid "Page not found | Bloknote"
+#~ msgstr ""
 
 #: src/routes/world/+error.svelte
 msgid "This page doesn't exist anymore"
@@ -28171,4 +28150,263 @@ msgstr ""
 
 #: src/lib/components/map-legend.svelte
 msgid "Gym"
+msgstr ""
+
+#: src/routes/world/[...slug]/route-page.svelte
+msgid "Graded project warning"
+msgstr ""
+
+#. 0: feature.tags?.name; 1: grade.v.v
+#: src/routes/world/[...slug]/route-page.svelte
+msgid "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
+msgstr ""
+
+#: src/lib/components/editable/editable-grade.svelte
+msgid "Delete grade"
+msgstr ""
+
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "None"
+msgstr ""
+
+#. 0: grade.v.scale || "None"
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "Change scale ({0})"
+msgstr ""
+
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "Grading Scale"
+msgstr ""
+
+#. 0: grade.v.scale || "Unknown"
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "Select Grade ({0})"
+msgstr ""
+
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "<0/> Delete Grade"
+msgstr ""
+
+#~ msgid "AT Protocol & Lexicons"
+#~ msgstr ""
+
+#~ msgid "Decentralized climbing logbook, ATProto spaces, and OpenStreetMap comments documentation."
+#~ msgstr ""
+
+#~ msgid "View AT Protocol documentation →"
+#~ msgstr ""
+
+#. 0: data.topic.title
+#: src/routes/docs/atproto/[slug]/+page.svelte
+msgid "{0} | AT Protocol Docs | Bloknote"
+msgstr ""
+
+#~ msgid "ATProto Docs"
+#~ msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "Overview"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "Ticks"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "OSM Comments"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "Stars"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "Core Defs"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "Profile"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "AT Protocol Documentation | Bloknote"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "Back to Bloknote"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "AT Protocol Documentation"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "Documentation main links"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "Topics"
+msgstr ""
+
+#: src/routes/docs/atproto/+page.svelte
+msgid "Read specification"
+msgstr ""
+
+#: src/routes/docs/atproto/+page.svelte
+msgid "Explore Lexicons & Models"
+msgstr ""
+
+#: src/routes/docs/atproto/+page.svelte
+msgid "Detailed specifications for records, shared definitions, and OpenStreetMap schemas."
+msgstr ""
+
+#: src/routes/docs/atproto/DocViewer.svelte
+msgid "Copied"
+msgstr ""
+
+#: src/routes/docs/atproto/DocViewer.svelte
+msgid "Copy Markdown"
+msgstr ""
+
+#: src/routes/docs/atproto/DocViewer.svelte
+msgid "View Rendered"
+msgstr ""
+
+#: src/routes/docs/atproto/DocViewer.svelte
+msgid "View Markdown"
+msgstr ""
+
+#: src/routes/+page.svelte
+#: src/routes/+page.svelte
+#: src/routes/settings/+page.svelte
+msgid "Bloknote"
+msgstr ""
+
+#~ msgid "Explore Bloknote"
+#~ msgstr "Esplora Bloknote"
+
+#: src/routes/+layout.svelte
+msgid "A new version of Bloknote is available"
+msgstr "È disponibile una nuova versione di Bloknote"
+
+#: src/lib/components/commons-topo.svelte
+msgid "Sign in with Wikimedia Commons to upload. Bloknote never asks for or stores your password."
+msgstr "Accedi a Wikimedia Commons per caricare. Bloknote non richiede né memorizza mai la tua password."
+
+#~ msgid "Wikimedia sign-in | Bloknote"
+#~ msgstr ""
+
+#: src/routes/settings/+page.svelte
+msgid "Settings | Bloknote"
+msgstr "Impostazioni | Bloknote"
+
+#: src/routes/settings/+page.svelte
+msgid "When enabled, Bloknote does not automatically download the full climbing dataset. Areas load as you visit them, so search may only include areas you have already opened. You can still download all data from the sidebar when you need complete search coverage."
+msgstr "Se attivata, Bloknote non scarica automaticamente l'intero dataset di arrampicata. Le zone vengono caricate quando le visiti, quindi la ricerca può includere solo le zone già aperte. Puoi comunque scaricare tutti i dati dalla barra laterale quando ti serve una ricerca completa."
+
+#~ msgid "Edit from Bloknote"
+#~ msgstr ""
+
+#. 0: isDev ? "[DEV] " \\: ""; 1: name ? ` - ${name}` \\: ""
+#: src/lib/components/shell/head.svelte
+msgid "{0}Bloknote{1}"
+msgstr ""
+
+#. 0: getStaticIdentifier(feature.type, feature.id)
+#: src/lib/components/shell/osm-missing-feature.svelte
+msgid "OSM could not find {0}. It may have been deleted or is not present on this server, so it cannot be edited from Bloknote."
+msgstr "OSM non ha trovato {0}. Potrebbe essere stato eliminato o non essere presente su questo server, quindi non può essere modificato da Bloknote."
+
+#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
+#: src/routes/grade-comparison/aid/+page.svelte
+msgid "{0}Bloknote - Aid Grade Comparison"
+msgstr "{0}Bloknote - Confronto dei gradi di artificiale"
+
+#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
+#: src/routes/grade-comparison/boulder/+page.svelte
+msgid "{0}Bloknote - Boulder Grade Comparison"
+msgstr "{0}Bloknote - Confronto dei gradi di boulder"
+
+#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
+#: src/routes/grade-comparison/ice/+page.svelte
+msgid "{0}Bloknote - Ice Grade Comparison"
+msgstr "{0}Bloknote - Confronto dei gradi di ghiaccio"
+
+#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
+#: src/routes/grade-comparison/danger/+page.svelte
+msgid "{0}Bloknote - Danger Grade Comparison"
+msgstr "{0}Bloknote - Confronto dei gradi di pericolo"
+
+#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
+#: src/routes/grade-comparison/route/+page.svelte
+msgid "{0}Bloknote - Route Grade Comparison"
+msgstr "{0}Bloknote - Confronto dei gradi delle vie"
+
+#~ msgid "{0}Bloknote - Boundary editor"
+#~ msgstr ""
+
+#~ msgid "Bloknote - Aid Grade Comparison"
+#~ msgstr ""
+
+#~ msgid "Bloknote - Boulder Grade Comparison"
+#~ msgstr ""
+
+#~ msgid "Bloknote - Ice Grade Comparison"
+#~ msgstr ""
+
+#~ msgid "Bloknote - Danger Grade Comparison"
+#~ msgstr ""
+
+#~ msgid "Bloknote - Route Grade Comparison"
+#~ msgstr ""
+
+#~ msgid "Bloknote entdecken"
+#~ msgstr ""
+
+#~ msgid "Eine neue Version von Bloknote ist verfügbar"
+#~ msgstr ""
+
+#~ msgid "Einstellungen | Bloknote"
+#~ msgstr ""
+
+#~ msgid "Explorer Bloknote"
+#~ msgstr ""
+
+#~ msgid "Une nouvelle version de Bloknote est disponible"
+#~ msgstr ""
+
+#~ msgid "Paramètres | Bloknote"
+#~ msgstr ""
+
+#~ msgid "Uploaded from Bloknote"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Boundaries exported by the boundary editor of Bloknote (/edit-map).\n"
+#~ "\n"
+#~ "Replace packages/reverse-geocoding-data/data with the data/ directory of this archive:\n"
+#~ "\n"
+#~ "  cd packages/reverse-geocoding-data\n"
+#~ "  rm -rf data && unzip -o <this archive> -x README.txt && bun run build\n"
+#~ ""
+#~ msgstr ""
+
+#~ msgid "Bloknote - Boundary editor"
+#~ msgstr ""
+
+#: src/routes/world/+error.svelte
+msgid "Page not found | Bloknote"
+msgstr ""
+
+#. 0: data.topic.title
+#: src/routes/docs/atproto/[slug]/+page.svelte
+msgid "{0} | AT Protocol Docs | Bloknote"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "AT Protocol Documentation | Bloknote"
+msgstr ""
+
+#: src/routes/docs/atproto/+layout.svelte
+msgid "Back to Bloknote"
 msgstr ""

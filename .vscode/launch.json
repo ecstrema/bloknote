@@ -5,8 +5,8 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "command": "npm run dev",
-      "name": "Launch climbhub",
+      "command": "bun run dev",
+      "name": "Launch bloknote",
       "request": "launch",
       "type": "node-terminal"
     },
@@ -14,7 +14,9 @@
       "type": "node",
       "request": "launch",
       "name": "Generate static climbing data",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "program": "src/main.ts",
       "cwd": "${workspaceFolder}/packages/climbing-data-gen/"
     },
@@ -22,7 +24,9 @@
       "type": "node",
       "request": "launch",
       "name": "Generate reverse geocoding data",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "program": "src/main.ts",
       "cwd": "${workspaceFolder}/packages/reverse-geocoding-data/"
     }

@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-  <title>Wikimedia sign-in | Climbhub</title>
+  <title>Wikimedia sign-in | Bloknote</title>
 </svelte:head>
 
 <main class="mx-auto max-w-xl px-5 py-16 text-center">

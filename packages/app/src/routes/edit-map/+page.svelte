@@ -9,11 +9,11 @@
   import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
   import LoaderIcon from "@lucide/svelte/icons/loader-circle";
   import CombineIcon from "@lucide/svelte/icons/combine";
-  import type { WorldClimbingPoints, WorldDownloadStatus } from "@climbhub/climbing-data-gen";
-  import { parseWorldClimbingPoints, WORLD_CLIMBING_QUERY } from "@climbhub/climbing-data-gen/world-points";
+  import type { WorldClimbingPoints, WorldDownloadStatus } from "@bloknote/climbing-data-gen";
+  import { parseWorldClimbingPoints, WORLD_CLIMBING_QUERY } from "@bloknote/climbing-data-gen/world-points";
 
   import type { Feature } from "geojson";
-  import { BOUNDARY_EXTENSION } from "@climbhub/reverse-geocoding-data/shared";
+  import { BOUNDARY_EXTENSION } from "@bloknote/reverse-geocoding-data/shared";
   import EditMap from "./EditMap.svelte";
   import LoadingMap from "./LoadingMap.svelte";
   import NodePanel from "./NodePanel.svelte";
@@ -257,7 +257,7 @@
   });
 </script>
 
-<svelte:head><title>{import.meta.env.DEV ? "[DEV] " : ""}Climbhub - Boundary editor</title></svelte:head>
+<svelte:head><title>{import.meta.env.DEV ? "[DEV] " : ""}Bloknote - Boundary editor</title></svelte:head>
 <svelte:window {onkeydown} />
 
 {#if !store && !loadError}

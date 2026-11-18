@@ -1,6 +1,6 @@
 import type { Position } from "geojson";
-import type { ClimbingPoint, ClimbingPointKind } from "@climbhub/climbing-data-gen";
-import { BOUNDARY_EXTENSION } from "@climbhub/reverse-geocoding-data/shared";
+import type { ClimbingPoint, ClimbingPointKind } from "@bloknote/climbing-data-gen";
+import { BOUNDARY_EXTENSION } from "@bloknote/reverse-geocoding-data/shared";
 
 import {
   addPolygon,
@@ -328,7 +328,7 @@ export class EditorStore {
   }
 
   // ---------------------------------------------------------------------------------------------
-  // Geolocation of the climbing places, mirroring ReverseGeolocator of @climbhub/climbing-data-gen
+  // Geolocation of the climbing places, mirroring ReverseGeolocator of @bloknote/climbing-data-gen
   // ---------------------------------------------------------------------------------------------
 
   setPoints(points: ClimbingPoint[]) {

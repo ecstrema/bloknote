@@ -3,7 +3,7 @@
   import { PersistentState } from "@friendofsvelte/state";
 
   import { setPreferredRouteGradingScale, setPreferredBoulderGradingScale } from "./settings.svelte";
-  import type { BoulderScaleId, RouteScaleId } from "@climbhub/holy-grade";
+  import type { BoulderScaleId, RouteScaleId } from "@bloknote/holy-grade";
 
   const preferredRouteGradingScale = new PersistentState<RouteScaleId | "local">("preferredRouteGradingScale", "local");
 

@@ -2,7 +2,7 @@ import type { Key, OsmFeature, OsmChange, UploadPhase, UploadResult, OsmFeatureT
 
 import { isLoggedIn, login, logout, uploadChangeset, getFeature as getFeatureOsm } from "osm-api";
 
-import { getStaticIdentifier, type OsmIdentifier } from "@climbhub/common";
+import { getStaticIdentifier, type OsmIdentifier } from "@bloknote/common";
 import { asset } from "$app/paths";
 import { online } from "svelte/reactivity/window";
 import type { DataTree } from "#lib/types.js";
@@ -259,7 +259,7 @@ export class OsmUser {
     try {
       console.log("Submitting changeset to OSM", changeset);
       const result = await uploadChangeset(
-        { comment: comment || "Edit from Climbhub", created_by: "Climbhub" },
+        { comment: comment || "Edit from Bloknote", created_by: "Bloknote" },
         changeset,
         {
           onProgress: (progress) => {

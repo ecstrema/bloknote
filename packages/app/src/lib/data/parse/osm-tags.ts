@@ -1,6 +1,6 @@
 import type { OsmFeature } from "osm-api";
-import type { Coordinates } from "@climbhub/climbing-data-gen";
-import { allScales, getReference, getScale, parseGrade, type Scale, type ScaleId } from "@climbhub/holy-grade";
+import type { Coordinates } from "@bloknote/climbing-data-gen";
+import { allScales, getReference, getScale, parseGrade, type Scale, type ScaleId } from "@bloknote/holy-grade";
 import type { Key, Tags } from "osm-api";
 import type { Grade } from "#lib/types.js";
 

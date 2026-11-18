@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { OUT_DIR } from "@climbhub/climbing-data-gen";
+import { OUT_DIR } from "@bloknote/climbing-data-gen";
 import type { ApiFile } from "./api-url";
 
 /** Reads a generated file directly, for server side rendering and prerendering. */

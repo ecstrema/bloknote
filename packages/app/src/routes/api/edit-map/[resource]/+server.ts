@@ -5,8 +5,8 @@ import { dirname, join, relative, resolve, sep } from "path";
 import { promisify } from "node:util";
 
 import { error, json } from "@sveltejs/kit";
-import { BOUNDARY_EXTENSION, DATA_DIR } from "@climbhub/reverse-geocoding-data";
-import { getWorldClimbingPoints, WORLD_CLIMBING_POINTS_FILE } from "@climbhub/climbing-data-gen";
+import { BOUNDARY_EXTENSION, DATA_DIR } from "@bloknote/reverse-geocoding-data";
+import { getWorldClimbingPoints, WORLD_CLIMBING_POINTS_FILE } from "@bloknote/climbing-data-gen";
 
 import type { RequestHandler } from "./$types";
 import { MAX_STAGE_AREAS, type BoundaryState, type BoundaryStates, type DataFiles } from "../../../edit-map/types";

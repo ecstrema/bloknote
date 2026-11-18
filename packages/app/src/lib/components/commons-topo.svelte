@@ -338,7 +338,7 @@
     <div class="flex flex-col gap-3 border-y py-3">
       {#if !commonsLoggedIn}
         <p class="text-sm text-muted-foreground">
-          Sign in with Wikimedia Commons to upload. Climbhub never asks for or stores your password.
+          Sign in with Wikimedia Commons to upload. Bloknote never asks for or stores your password.
         </p>
         <Button size="sm" variant="outline" onclick={loginCommons}>Log in with Wikimedia Commons</Button>
       {:else}

@@ -1,10 +1,10 @@
-import { DATA_DIR_IN_REPO } from "@climbhub/reverse-geocoding-data/shared";
+import { DATA_DIR_IN_REPO } from "@bloknote/reverse-geocoding-data/shared";
 import type { DataFiles } from "./types";
 
 // The deployed site is static: it reads data/ from GitHub, and the changes are proposed through
 // the upload page of GitHub, which forks the repository for the user. No token, no server of ours.
 
-export const REPOSITORY = { owner: "ecstrema", repo: "climbhub", branch: "main" };
+export const REPOSITORY = { owner: "ecstrema", repo: "bloknote", branch: "main" };
 const UPSTREAM = `${REPOSITORY.owner}/${REPOSITORY.repo}`;
 
 async function api<T>(path: string): Promise<T> {

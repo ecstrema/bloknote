@@ -1,6 +1,6 @@
 <script lang="ts">
   import EditableTags from "#components/editable/editable-tags.svelte";
-  import type { DataJSON } from "@climbhub/climbing-data-gen";
+  import type { DataJSON } from "@bloknote/climbing-data-gen";
 
   let {
     feature = $bindable(),

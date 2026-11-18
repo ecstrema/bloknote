@@ -2,13 +2,13 @@
   import { onMount } from "svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
-  import { osmIndexFile, parseOsmPathSegment } from "@climbhub/common";
+  import { osmIndexFile, parseOsmPathSegment } from "@bloknote/common";
   import { resolve } from "$app/paths";
   import { Button } from "#components/ui/button/index.js";
   import { dataClient } from "#lib/data/network/data-client.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
-  import type { DataJSON } from "@climbhub/climbing-data-gen";
+  import type { DataJSON } from "@bloknote/climbing-data-gen";
 
   const slug = $derived(page.params.slug ?? "");
   let nearest = $state<{ slug: string; feature: DataJSON } | undefined>();
@@ -47,7 +47,7 @@
 </script>
 
 <svelte:head>
-  <title>Page not found | Climbhub</title>
+  <title>Page not found | Bloknote</title>
 </svelte:head>
 
 <div class="mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-4 p-6">

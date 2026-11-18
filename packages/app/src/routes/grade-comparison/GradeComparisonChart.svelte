@@ -1,6 +1,6 @@
 <script lang="ts" generics="T extends ScaleId">
-  import type { Scale, ScaleId } from "@climbhub/holy-grade";
-  import { getGradeFromReference } from "@climbhub/holy-grade";
+  import type { Scale, ScaleId } from "@bloknote/holy-grade";
+  import { getGradeFromReference } from "@bloknote/holy-grade";
   import { Chart, Layer, Axis, Point, AnnotationLine } from "layerchart/svg";
   import { scaleLinear, scalePoint } from "d3-scale";
   import { mode } from "mode-watcher";

@@ -49,7 +49,7 @@ export interface OsmElementRef {
 export type OsmSubjectRef = OsmElementRef;
 
 /**
- * Record corresponding to app.climbhub.logbook.tick
+ * Record corresponding to org.bloknote.logbook.tick
  * Personal logbook tick recording an ascent or attempt on an OSM route.
  * Contains: subject (OSM element ref), core style, optional ascent qualifiers (ascentInfo),
  * climbedAt timestamp, creation timestamp, and comment.
@@ -100,7 +100,7 @@ export interface StarRecord {
 }
 
 /**
- * Record corresponding to app.climbhub.actor.profile.
+ * Record corresponding to org.bloknote.actor.profile.
  * User preferred grading scales. Unset/undefined to use the default notation for each place.
  */
 export interface ProfileRecord {

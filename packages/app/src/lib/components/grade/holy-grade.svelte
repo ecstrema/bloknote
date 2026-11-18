@@ -1,7 +1,7 @@
 <script lang="ts">
   import { mode } from "mode-watcher";
   import { getPreferredRouteGradingScale } from "#components/shell/providers/settings.svelte.js";
-  import { getScale, convertGrade } from "@climbhub/holy-grade";
+  import { getScale, convertGrade } from "@bloknote/holy-grade";
   import type { Grade } from "#lib/types.js";
   import { getColorFromGrade } from "#lib/data/network/grade.js";
 

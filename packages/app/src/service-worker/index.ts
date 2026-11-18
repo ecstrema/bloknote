@@ -58,7 +58,7 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
 
   // Climbing data is handled by the local SQLite database, or fetched directly in low data mode.
-  if (url.pathname.startsWith("/climbhub/api/world")) {
+  if (url.pathname.startsWith("/bloknote/api/world")) {
     return;
   }
 

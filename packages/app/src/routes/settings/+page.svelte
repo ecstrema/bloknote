@@ -6,7 +6,7 @@
   import { Select } from "#components/ui/select/index.js";
   import { loginOsm, logoutOsm } from "#lib/data/network/osm.svelte.js";
   import ArrowLeftIcon from "@lucide/svelte/icons/arrow-left";
-  import { allBoulderScales, allRouteScales, convertGrade, french } from "@climbhub/holy-grade";
+  import { allBoulderScales, allRouteScales, convertGrade, french } from "@bloknote/holy-grade";
   import { setMode, userPrefersMode } from "mode-watcher";
   import { settings } from "#lib/data/settings.svelte.js";
   import { i18n, locales, localeNames, setLocale } from "#lib/i18n.svelte.js";
@@ -47,13 +47,13 @@
 </script>
 
 <svelte:head>
-  <title>Settings | Climbhub</title>
+  <title>Settings | Bloknote</title>
 </svelte:head>
 
 <div class="min-h-screen bg-background text-foreground">
   <header class="border-b">
     <div class="mx-auto flex h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
-      <a href={resolve("/")} class="font-semibold tracking-tight">Climbhub</a>
+      <a href={resolve("/")} class="font-semibold tracking-tight">Bloknote</a>
       {#if hasPreviousPage}
         <Button variant="ghost" onclick={() => window.history.back()}>
           <ArrowLeftIcon />
@@ -149,7 +149,7 @@
       <div>
         <h2 class="font-medium">Data usage</h2>
         <p class="mt-1 text-sm text-muted-foreground">
-          When enabled, Climbhub does not automatically download the full climbing dataset. Areas load as you visit
+          When enabled, Bloknote does not automatically download the full climbing dataset. Areas load as you visit
           them, so search may only include areas you have already opened. You can still download all data from the
           sidebar when you need complete search coverage.
         </p>

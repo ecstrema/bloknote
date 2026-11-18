@@ -1,4 +1,4 @@
-import { allScales, getReference } from "@climbhub/holy-grade";
+import { allScales, getReference } from "@bloknote/holy-grade";
 
 /** Converts a grade typed in any scale, like "6a+" or "V4", to its reference number. */
 export function gradeTextToReference(text: string): number | undefined {

@@ -2,7 +2,7 @@ import { strToU8, zipSync, type Zippable } from "fflate";
 
 import type { DataChanges, EditorStore } from "./editor.svelte";
 
-const README = `Boundaries exported by the boundary editor of Climbhub (/edit-map).
+const README = `Boundaries exported by the boundary editor of Bloknote (/edit-map).
 
 Replace packages/reverse-geocoding-data/data with the data/ directory of this archive:
 

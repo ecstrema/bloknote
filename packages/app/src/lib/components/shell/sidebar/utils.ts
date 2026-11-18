@@ -2,7 +2,7 @@ import { featureToType, getName, type ItemType } from "#lib/data/parse/data.js";
 import { getGradeReference } from "#lib/data/parse/osm-tags.js";
 import type { DataTree } from "#lib/types.js";
 import type { OsmFeature } from "osm-api";
-import { getStaticIdentifier, type BasicOsmType } from "@climbhub/common";
+import { getStaticIdentifier, type BasicOsmType } from "@bloknote/common";
 import { resolve } from "$app/paths";
 import { createContext } from "svelte";
 import { SvelteMap } from "svelte/reactivity";
@@ -19,7 +19,7 @@ export function getItemUrl(parentSlug: string, feature: OsmFeature): string {
   return `${resolve("/world/[...slug]", { slug: pathSlug })}?id=${feature.type}-${feature.id}`;
 }
 
-const ORDER_STORAGE_KEY = "climbhub:sidebar-orders";
+const ORDER_STORAGE_KEY = "bloknote:sidebar-orders";
 const orderOverrides = new SvelteMap<string, Partial<Record<ReorderableType, string[]>>>();
 const dropTargets = new SvelteMap<string, "before" | "after">();
 let draggedChild: { parentSlug: string; type: ReorderableType; slug: string } | undefined;

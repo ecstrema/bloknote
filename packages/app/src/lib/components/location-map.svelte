@@ -273,7 +273,7 @@
 
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { GeographicFolderElement } from "@climbhub/climbing-data-gen";
+  import type { GeographicFolderElement } from "@bloknote/climbing-data-gen";
   import MapLegend from "./map-legend.svelte";
 
   let {

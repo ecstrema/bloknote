@@ -1,4 +1,4 @@
-import type { DataJSON } from "@climbhub/climbing-data-gen";
+import type { DataJSON } from "@bloknote/climbing-data-gen";
 import { getName } from "./data.js";
 import { regionNames } from "../region-names.svelte.js";
 import { i18n } from "#lib/i18n.svelte.js";

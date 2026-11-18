@@ -4,9 +4,9 @@ import { createHash } from "crypto";
 
 import { ReverseGeolocator } from "./reverse-geolocation.ts";
 import type { Coordinates, DataJSON, GeographicFolderElement, OverpassRequest } from "./types.ts";
-import { ensureDirExists, slugify } from "@climbhub/reverse-geocoding-data";
+import { ensureDirExists, slugify } from "@bloknote/reverse-geocoding-data";
 import type { OsmFeature } from "osm-api";
-import { getStaticIdentifier, osmIndexFile } from "@climbhub/common";
+import { getStaticIdentifier, osmIndexFile } from "@bloknote/common";
 
 export type StaticApiGeneratorOptions = {
   outApiDirectory: string;
@@ -190,7 +190,7 @@ function writeStaticApi(
     }
     const location = geolocator.geolocate(coordinates.lon, coordinates.lat);
 
-    // Outside of every region of @climbhub/reverse-geocoding-data: not in the API until a region
+    // Outside of every region of @bloknote/reverse-geocoding-data: not in the API until a region
     // is added there
     if (!location) {
       outsideRegions.push(`${rootNode.type}/${rootNode.id} (${coordinates.lon},${coordinates.lat})`);

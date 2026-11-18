@@ -10,7 +10,7 @@
   import LoaderIcon from "@lucide/svelte/icons/loader-circle";
   import CombineIcon from "@lucide/svelte/icons/combine";
 
-  import { LARGE_BOUNDARY_BYTES } from "@climbhub/reverse-geocoding-data/shared";
+  import { LARGE_BOUNDARY_BYTES } from "@bloknote/reverse-geocoding-data/shared";
 
   import {
     hasFile,

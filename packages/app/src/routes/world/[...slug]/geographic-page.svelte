@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { DataTree } from "#lib/types.js";
   import ChildrenTable from "./children-table.svelte";
-  import type { GeographicFolderElement } from "@climbhub/climbing-data-gen";
+  import type { GeographicFolderElement } from "@bloknote/climbing-data-gen";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
 
   let {

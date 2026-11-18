@@ -1,5 +1,5 @@
 {
-  "name": "climbing-logbook",
+  "name": "bloknote",
   "version": "0.0.1",
   "type": "module",
   "imports": {
@@ -18,7 +18,7 @@
     "region-names": "bun run scripts/region-names.ts"
   },
   "dependencies": {
-    "@climbhub/holy-grade": "workspace:*",
+    "@bloknote/holy-grade": "workspace:*",
     "@friendofsvelte/state": "^0.2.0",
     "@sqlite.org/sqlite-wasm": "^3.54.1-build1",
     "d3-scale": "^4.0.3",
@@ -28,9 +28,9 @@
     "polygon-clipping": "^0.15.7"
   },
   "devDependencies": {
-    "@climbhub/climbing-data-gen": "workspace:*",
-    "@climbhub/common": "workspace:*",
-    "@climbhub/reverse-geocoding-data": "workspace:*",
+    "@bloknote/climbing-data-gen": "workspace:*",
+    "@bloknote/common": "workspace:*",
+    "@bloknote/reverse-geocoding-data": "workspace:*",
     "@fontsource-variable/inter": "^5.3.0",
     "@internationalized/date": "^3.12.4",
     "@lucide/svelte": "^1.67.0",

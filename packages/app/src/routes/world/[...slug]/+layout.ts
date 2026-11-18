@@ -1,11 +1,11 @@
 import type { AreaStats, DataJSONRecord, DataTree } from "#lib/types.js";
-import type { DataJSON } from "@climbhub/climbing-data-gen";
+import type { DataJSON } from "@bloknote/climbing-data-gen";
 import type { LayoutLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import { dataClient } from "#lib/data/network/data-client.js";
 import { dataTreeFromJsonRecord } from "#lib/data/parse/data.js";
 import { getParentSlugs } from "#lib/helpers/slug.js";
-import { osmIndexFile, parseOsmPathSegment } from "@climbhub/common";
+import { osmIndexFile, parseOsmPathSegment } from "@bloknote/common";
 import { resolve } from "$app/paths";
 import { building } from "$app/env";
 

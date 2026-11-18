@@ -5,7 +5,7 @@
   import CircleDashedIcon from "@lucide/svelte/icons/circle-dashed";
   import clsx from "clsx";
   import { BOUNDARY_STATE_COLORS } from "./types";
-  import { LARGE_BOUNDARY_BYTES } from "@climbhub/reverse-geocoding-data/shared";
+  import { LARGE_BOUNDARY_BYTES } from "@bloknote/reverse-geocoding-data/shared";
 
   import TreeNode from "./TreeNode.svelte";
   import { isPreciseCoast, hasFile, nodeName, type EditorNode, type EditorStore } from "./editor.svelte";

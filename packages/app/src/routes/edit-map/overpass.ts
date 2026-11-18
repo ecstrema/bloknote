@@ -1,6 +1,6 @@
 import osmtogeojson from "osmtogeojson";
-import { tryOverpassInstances } from "@climbhub/common";
-import { slugify } from "@climbhub/reverse-geocoding-data/shared";
+import { tryOverpassInstances } from "@bloknote/common";
+import { slugify } from "@bloknote/reverse-geocoding-data/shared";
 import { toBoundary } from "./geometry";
 import type { Boundary } from "./types";
 

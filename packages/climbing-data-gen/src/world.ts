@@ -1,8 +1,8 @@
 import { existsSync } from "fs";
 import { readFile, writeFile } from "fs/promises";
 import { request } from "https";
-import { USER_AGENT } from "@climbhub/reverse-geocoding-data";
-import { tryOverpassInstances } from "@climbhub/common";
+import { USER_AGENT } from "@bloknote/reverse-geocoding-data";
+import { tryOverpassInstances } from "@bloknote/common";
 
 import { parseWorldClimbingPoints, WORLD_CLIMBING_QUERY, type WorldClimbingPoints } from "./world-points.ts";
 
@@ -26,7 +26,7 @@ interface SharedState {
   queue: Promise<unknown>;
   job?: DownloadJob;
 }
-const shared: SharedState = ((globalThis as any).__climbhubWorldClimbing ??= {
+const shared: SharedState = ((globalThis as any).__bloknoteWorldClimbing ??= {
   queue: Promise.resolve(),
 });
 

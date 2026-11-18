@@ -15,7 +15,7 @@ import {
 } from "./undo/actions";
 import { OsmUser } from "./network/osm.svelte";
 import type { Key, OsmFeature, OsmRelation } from "osm-api";
-import { getStaticIdentifier, type BasicOsmType } from "@climbhub/common";
+import { getStaticIdentifier, type BasicOsmType } from "@bloknote/common";
 import { featureToType } from "./parse/data.js";
 
 export interface Breadcrumbs {

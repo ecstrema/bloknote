@@ -1,6 +1,6 @@
 import type { DataJSONRecord } from "#lib/types.js";
 import { featureToTypeOSM, getNameOSM, type OSMClimbingFeatureType } from "./osm-tags";
-import type { DataJSON } from "@climbhub/climbing-data-gen";
+import type { DataJSON } from "@bloknote/climbing-data-gen";
 
 /** Folders use .name, OSM elements usually store their name in .tags.name */
 export function getName(element: DataJSON) {

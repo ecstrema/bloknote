@@ -1,6 +1,6 @@
 <script lang="ts">
   import { mode } from "mode-watcher";
-  import type { RouteScaleId } from "@climbhub/holy-grade";
+  import type { RouteScaleId } from "@bloknote/holy-grade";
   import { getPreferredRouteGradingScale } from "#components/shell/providers/settings.svelte.js";
   import { getColorFromGrade } from "#lib/data/network/grade.js";
 

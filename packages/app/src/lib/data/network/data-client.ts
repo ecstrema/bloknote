@@ -1,6 +1,6 @@
 import { browser } from "$app/env";
 import { apiUrl, type ApiFile } from "./api-url";
-import type { DataJSON } from "@climbhub/climbing-data-gen";
+import type { DataJSON } from "@bloknote/climbing-data-gen";
 import type { AreaStats, DataJSONRecord } from "#lib/types.js";
 import { localDb } from "../db/local-db.svelte";
 import type { MapElementFeatureCollection, TopLevelPoint } from "../db/types";

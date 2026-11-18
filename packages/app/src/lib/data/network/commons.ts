@@ -2,8 +2,8 @@ import { resolve } from "$app/paths";
 
 const API_URL = "https://commons.wikimedia.org/w/api.php";
 const REST_URL = "https://commons.wikimedia.org/w/rest.php";
-const TOKEN_STORAGE_KEY = "climbhub.commons.token";
-const FLOW_STORAGE_KEY = "climbhub.commons.oauth";
+const TOKEN_STORAGE_KEY = "bloknote.commons.token";
+const FLOW_STORAGE_KEY = "bloknote.commons.oauth";
 const CLIENT_ID = "e776566ba980892324adfc092f191dc0";
 
 type CommonsToken = { access_token: string; expires_at: number };
@@ -148,7 +148,7 @@ export async function uploadCommonsFile(
   form.set("action", "upload");
   form.set("format", "json");
   form.set("filename", metadata.filename);
-  form.set("comment", "Uploaded from Climbhub");
+  form.set("comment", "Uploaded from Bloknote");
   form.set(
     "text",
     [

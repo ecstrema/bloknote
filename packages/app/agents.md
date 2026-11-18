@@ -1,6 +1,6 @@
 # `packages/app` Agent Guidelines
 
-`packages/app` contains the Climbhub SvelteKit application. It compiles to a static single-page web app deployed to GitHub Pages, capable of full offline browsing and in-browser OpenStreetMap editing.
+`packages/app` contains the Bloknote SvelteKit application. It compiles to a static single-page web app deployed to GitHub Pages, capable of full offline browsing and in-browser OpenStreetMap editing.
 
 ---
 

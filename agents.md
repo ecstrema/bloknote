@@ -1,12 +1,12 @@
-# Climbhub Agent Guidelines
+# Bloknote Agent Guidelines
 
-Welcome to the Climbhub codebase. This document outlines the architecture, engineering principles, and operational rules for AI agents working across the repository.
+Welcome to the Bloknote codebase. This document outlines the architecture, engineering principles, and operational rules for AI agents working across the repository.
 
 ---
 
 ## 1. Monorepo Overview & Package Architecture
 
-Climbhub is a Bun workspace monorepo powering a static climbing directory organized by geographic region, an interactive map and boundary editor, and international grade comparison tools.
+Bloknote is a Bun workspace monorepo powering a static climbing directory organized by geographic region, an interactive map and boundary editor, and international grade comparison tools.
 
 ### Data Flow Architecture
 

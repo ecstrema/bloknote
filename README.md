@@ -1,6 +1,6 @@
-# Climbhub
+# Bloknote
 
-Climbhub is a static climbing directory organized by geographic region, with grade-comparison
+Bloknote is a static climbing directory organized by geographic region, with grade-comparison
 tools and an editor for the worldwide boundary data.
 
 ## Repository

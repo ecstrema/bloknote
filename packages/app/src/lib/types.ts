@@ -1,5 +1,5 @@
-import type { DataJSON } from "@climbhub/climbing-data-gen";
-import type { ScaleId } from "@climbhub/holy-grade";
+import type { DataJSON } from "@bloknote/climbing-data-gen";
+import type { ScaleId } from "@bloknote/holy-grade";
 import type { OsmFeature } from "osm-api";
 
 export interface BreadcrumbSegment {

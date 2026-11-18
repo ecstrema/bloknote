@@ -1,5 +1,5 @@
 {
-  "name": "@climbhub/reverse-geocoding-data",
+  "name": "@bloknote/reverse-geocoding-data",
   "version": "1.0.0",
   "private": true,
   "description": "Boundaries of the regions used to reverse geocode the climbing places",
@@ -22,7 +22,7 @@
     "region-names": "bun run tools/region-names.ts"
   },
   "devDependencies": {
-    "@climbhub/common": "workspace:*",
+    "@bloknote/common": "workspace:*",
     "@types/bun": "catalog:",
     "@types/node": "catalog:",
     "osmtogeojson": "catalog:",

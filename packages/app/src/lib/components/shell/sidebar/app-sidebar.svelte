@@ -24,7 +24,7 @@
 
   /** Above this many matches, the tree isn't opened automatically to reveal them */
   const EXPAND_LIMIT = 1000;
-  const STORAGE_KEY = "climbhub:search-filters";
+  const STORAGE_KEY = "bloknote:search-filters";
 
   let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> & {} = $props();
 

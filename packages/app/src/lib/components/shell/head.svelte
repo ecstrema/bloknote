@@ -10,5 +10,5 @@
 </script>
 
 <svelte:head>
-  <title>{isDev ? "[DEV] " : ""}Climbhub{name ? ` - ${name}` : ""}</title>
+  <title>{isDev ? "[DEV] " : ""}Bloknote{name ? ` - ${name}` : ""}</title>
 </svelte:head>

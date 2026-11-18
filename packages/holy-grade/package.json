@@ -1,5 +1,5 @@
 {
-  "name": "@climbhub/holy-grade",
+  "name": "@bloknote/holy-grade",
   "version": "0.0.1",
   "type": "module",
   "module": "./src/index.ts",
@@ -13,7 +13,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@climbhub/common": "workspace:*",
+    "@bloknote/common": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:",
     "vitest": "^5.1.0"

@@ -1,5 +1,5 @@
 {
-  "name": "@climbhub/climbing-data-gen",
+  "name": "@bloknote/climbing-data-gen",
   "version": "1.0.0",
   "private": true,
   "description": "Data pipeline for fetching OSM boundaries and compiling static geographic APIs",
@@ -20,13 +20,13 @@
     "update": "bun run ../reverse-geocoding-data/src/main.ts && bun run src/main.ts --refresh"
   },
   "dependencies": {
-    "@climbhub/reverse-geocoding-data": "workspace:*",
+    "@bloknote/reverse-geocoding-data": "workspace:*",
     "@turf/boolean-point-in-polygon": "catalog:",
     "geojson": "catalog:",
     "osmtogeojson": "catalog:"
   },
   "devDependencies": {
-    "@climbhub/common": "workspace:*",
+    "@bloknote/common": "workspace:*",
     "@types/bun": "catalog:",
     "@types/geojson": "catalog:",
     "@types/node": "^26.6.6",

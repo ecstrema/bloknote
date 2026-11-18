@@ -28,7 +28,7 @@ import {
   toBoundary,
 } from "../../app/src/routes/edit-map/geometry.ts";
 import { USER_AGENT } from "../src/config.ts";
-import { tryOverpassInstances } from "@climbhub/common";
+import { tryOverpassInstances } from "@bloknote/common";
 import { slugify } from "../src/shared.ts";
 import { REGIONS, type Region } from "./regions.ts";
 

@@ -1,6 +1,6 @@
 import { browser } from "$app/env";
 
-const STORAGE_KEY = "climbhub:low-data";
+const STORAGE_KEY = "bloknote:low-data";
 
 function initialValue(): boolean {
   if (!browser) return false;

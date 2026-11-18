@@ -4,13 +4,13 @@
   import AreaPage from "./area-page.svelte";
   import GymPage from "./gym-page.svelte";
   import RoutePage from "./route-page.svelte";
-  import type { GeographicFolderElement } from "@climbhub/climbing-data-gen";
+  import type { GeographicFolderElement } from "@bloknote/climbing-data-gen";
   import type { DataTree } from "#lib/types.js";
   import { featureToType } from "#lib/data/parse/data.js";
   import type { OsmFeature } from "osm-api";
   import type { PageProps } from "./$types";
   import OsmMissingFeature from "#components/shell/osm-missing-feature.svelte";
-  import { getStaticIdentifier } from "@climbhub/common";
+  import { getStaticIdentifier } from "@bloknote/common";
   import { getAppState } from "#lib/data/app-state.js";
   import { afterNavigate, replaceState } from "$app/navigation";
   import { page } from "$app/state";

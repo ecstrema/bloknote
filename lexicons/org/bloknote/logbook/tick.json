@@ -1,6 +1,6 @@
 {
   "lexicon": 1,
-  "id": "app.climbhub.logbook.tick",
+  "id": "org.bloknote.logbook.tick",
   "description": "A climber's personal logbook tick recording an ascent or attempt on a route",
   "defs": {
     "main": {

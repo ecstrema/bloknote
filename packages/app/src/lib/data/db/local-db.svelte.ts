@@ -1,6 +1,6 @@
 import { browser, version } from "$app/env";
 import { apiUrl } from "../network/api-url";
-import type { DataJSON } from "@climbhub/climbing-data-gen";
+import type { DataJSON } from "@bloknote/climbing-data-gen";
 import type { AreaStats } from "#lib/types.js";
 import type { DbRequest, DbResponse, MapElementFeatureCollection, SearchFilters, TopLevelPoint } from "./types";
 
@@ -14,7 +14,7 @@ export interface FilterSearch {
 }
 
 /** Marks that this browser has a local database and records its dataset version. */
-const MARKER_KEY = "climbhub:db-version";
+const MARKER_KEY = "bloknote:db-version";
 
 /** The whole dataset in SQLite (FTS5) in a worker, in the browser's private file storage when available. */
 class LocalDb {

@@ -11,14 +11,14 @@
 </script>
 
 <svelte:head>
-  <title>Climbhub</title>
+  <title>Bloknote</title>
   <meta name="description" content="Explore climbing routes and areas by region." />
 </svelte:head>
 
 <div class="min-h-screen bg-background text-foreground">
   <header class="border-b">
     <div class="mx-auto flex h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
-      <a href={resolve("/")} class="font-semibold tracking-tight">Climbhub</a>
+      <a href={resolve("/")} class="font-semibold tracking-tight">Bloknote</a>
       <nav aria-label="Main navigation" class="flex items-center gap-4">
         <a
           href={resolve("/world/[...slug]", { slug: "" })}

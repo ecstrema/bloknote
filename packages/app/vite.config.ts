@@ -9,7 +9,7 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import { wuchale } from "wuchale/vite";
 import { defineConfig, type Plugin } from "vitest/config";
 
-const BASE = "/climbhub";
+const BASE = "/bloknote";
 const API_PREFIX = `${BASE}/api/world/`;
 const WORLD_DIR = resolve(fileURLToPath(import.meta.url), "../../climbing-data-gen/build/world");
 const OSM_INDEX_DIR = resolve(WORLD_DIR, "../osm-index");
@@ -22,7 +22,7 @@ const API_FILES = new Set(["data.json", "children.json", "stats.json", "download
  */
 function climbingApi(): Plugin {
   return {
-    name: "climbhub-static-api",
+    name: "bloknote-static-api",
     buildStart() {
       if (existsSync(join(WORLD_DIR, "download.json")) && existsSync(join(WORLD_DIR, "data-version.json"))) return;
       execSync("bun run build:climbing-data-gen", { cwd: resolve(WORLD_DIR, "../../../.."), stdio: "inherit" });
@@ -73,7 +73,7 @@ export default defineConfig({
         },
       },
       paths: { base: BASE },
-      prerender: { concurrency: 8, handleUnseenRoutes: "warn" },
+      prerender: { concurrency: 8, handleUnseenRoutes: "warn", handleInvalidUrl: "warn" },
       version: {
         pollInterval: 15 * 60 * 1000 /* 15 minutes */,
         name: execSync("git rev-parse HEAD").toString().trim(),

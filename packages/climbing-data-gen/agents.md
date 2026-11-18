@@ -1,6 +1,6 @@
 # `packages/climbing-data-gen` Agent Guidelines
 
-`packages/climbing-data-gen` generates the static JSON world API consumed by the frontend. It pairs worldwide OpenStreetMap climbing data with the geographic boundary regions defined in `@climbhub/reverse-geocoding-data`.
+`packages/climbing-data-gen` generates the static JSON world API consumed by the frontend. It pairs worldwide OpenStreetMap climbing data with the geographic boundary regions defined in `@bloknote/reverse-geocoding-data`.
 
 ---
 
@@ -12,7 +12,7 @@ Overpass API (sport=climbing)
           v
   src/climbing.json (cached raw OSM response)
           |
-          +<-- @climbhub/reverse-geocoding-data (output/hierarchy-index.json)
+          +<-- @bloknote/reverse-geocoding-data (output/hierarchy-index.json)
           |
           v
   Point-in-Polygon Geolocation Walker

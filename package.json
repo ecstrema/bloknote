@@ -1,5 +1,5 @@
 {
-  "name": "climbhub-monorepo",
+  "name": "bloknote-monorepo",
   "private": true,
   "workspaces": {
     "catalog": {
@@ -32,7 +32,7 @@
     "sv": "cd packages/app && ./node_modules/.bin/sv"
   },
   "devDependencies": {
-    "@climbhub/common": "workspace:*",
+    "@bloknote/common": "workspace:*",
     "@types/node": "catalog:",
     "svelte-check": "^4.7.8"
   }

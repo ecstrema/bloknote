@@ -2,7 +2,7 @@ import { join } from "path";
 
 let dirname = import.meta.dirname;
 
-// When building with SvelteKit, the import.meta.dirname will point to the .svelte-kit directory, which is not where we want to store our output files. We need to adjust the path to point to the @climbhub/climbing-data-gen package instead.
+// When building with SvelteKit, the import.meta.dirname will point to the .svelte-kit directory, which is not where we want to store our output files. We need to adjust the path to point to the @bloknote/climbing-data-gen package instead.
 if (dirname.includes(".svelte-kit")) {
   const svelteKitIndex = dirname.indexOf(".svelte-kit");
   const appDir = dirname.slice(0, svelteKitIndex);

@@ -8,7 +8,13 @@ export function getWebsite(tags: Tags): string | undefined {
   if (!value) return;
   const url = /^[a-z][a-z0-9+.-]*:/i.test(value) ? value : `https://${value}`;
   // Only http(s): avoids javascript: links from user-edited tags
-  return /^https?:\/\//i.test(url) ? url : undefined;
+  if (!/^https?:\/\//i.test(url)) return;
+  try {
+    new URL(url);
+    return url;
+  } catch {
+    return undefined;
+  }
 }
 
 /** `true`/`false` from `fee=yes|no`, undefined when unknown */

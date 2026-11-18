@@ -5,7 +5,7 @@
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import Button from "#components/ui/button/button.svelte";
   import * as DropdownMenu from "#components/ui/dropdown-menu/index.ts";
-  import { allRouteScales, convertGrade, getGradeFromReference, getScale, type ScaleId } from "@climbhub/holy-grade";
+  import { allRouteScales, convertGrade, getGradeFromReference, getScale, type ScaleId } from "@bloknote/holy-grade";
   import type { OsmFeature } from "osm-api";
   import Trash2Icon from "@lucide/svelte/icons/trash-2";
 

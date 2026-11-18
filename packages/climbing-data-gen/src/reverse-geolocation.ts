@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "fs";
 import { dirname, join } from "path";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import type { Position, Feature, MultiPolygon, Polygon } from "geojson";
-import { BOUNDARY_EXTENSION, type IndexNode } from "@climbhub/reverse-geocoding-data";
+import { BOUNDARY_EXTENSION, type IndexNode } from "@bloknote/reverse-geocoding-data";
 
 export class ReverseGeolocator {
   /** The tree with the bounding boxes and the children. */
@@ -23,7 +23,7 @@ export class ReverseGeolocator {
   /**
    * Initializes the reverse geolocator, keeping the index loaded in memory.
    * @param indexPath Path to the hierarchy-index.json file
-   * @param dataDir data/ directory of @climbhub/reverse-geocoding-data
+   * @param dataDir data/ directory of @bloknote/reverse-geocoding-data
    * @param maxCacheSize Maximum number of boundary files to keep in memory (default: 100)
    */
   constructor(indexPath: string, dataDir: string, maxCacheSize: number = 100) {

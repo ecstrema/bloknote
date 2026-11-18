@@ -1,4 +1,4 @@
-import type { DataJSON } from "@climbhub/climbing-data-gen";
+import type { DataJSON } from "@bloknote/climbing-data-gen";
 import type { AreaStats } from "#lib/types.js";
 
 export interface TagFilter {

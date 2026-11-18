@@ -1,7 +1,7 @@
 # Climbing data
 
 Generate a static API for the climbing data of the whole world from Overpass queries, organized
-with the worldwide boundaries from `@climbhub/reverse-geocoding-data`.
+with the worldwide boundaries from `@bloknote/reverse-geocoding-data`.
 
 ## Usage
 
@@ -20,7 +20,7 @@ the cache and regenerate the API on demand.
 ## Structure
 
 It generates a file structure in the `build/` directory, under the regions of
-`@climbhub/reverse-geocoding-data`. Each directory includes a data.json which is simply the element
+`@bloknote/reverse-geocoding-data`. Each directory includes a data.json which is simply the element
 data as received from Overpass. The climbing places outside of every region are skipped. The root
 also includes `node-hashes.json`, mapping each unique OSM node identifier to a SHA-256 hash of its
 Overpass record for change detection. Each build regenerates the reverse-geocoding hierarchy index

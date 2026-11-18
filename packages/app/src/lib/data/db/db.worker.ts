@@ -1,5 +1,5 @@
 import sqlite3InitModule, { type Database } from "@sqlite.org/sqlite-wasm";
-import type { DataJSON } from "@climbhub/climbing-data-gen";
+import type { DataJSON } from "@bloknote/climbing-data-gen";
 import { featureToType, getName } from "#lib/data/parse/data.js";
 import { getParentSlug } from "#lib/helpers/slug.js";
 import { getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
@@ -23,8 +23,8 @@ function openDb() {
     let db: Database;
     let persistent = false;
     try {
-      const pool = await sqlite3.installOpfsSAHPoolVfs({ name: "climbhub" });
-      db = new pool.OpfsSAHPoolDb("/climbhub.sqlite3");
+      const pool = await sqlite3.installOpfsSAHPoolVfs({ name: "bloknote" });
+      db = new pool.OpfsSAHPoolDb("/bloknote.sqlite3");
       persistent = true;
     } catch {
       db = new sqlite3.oo1.DB(":memory:");
