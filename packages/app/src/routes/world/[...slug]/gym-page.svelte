@@ -1,13 +1,10 @@
 <script lang="ts">
-  import EditableName from "#components/editable/editable-name.svelte";
   import EditableDescription from "#lib/components/editable/editable-description.svelte";
-  import EditableTags from "#lib/components/editable/editable-tags.svelte";
   import CommonsTopo from "#lib/components/commons-topo.svelte";
   import ClimbingStyles from "#components/climbing-styles.svelte";
   import { getCoordinates, getPhone } from "#lib/data/parse/osm-tags.js";
   import type { DataTree } from "#lib/types.js";
   import type { OsmFeature } from "osm-api";
-  import BuildingIcon from "@lucide/svelte/icons/building";
   import PhoneIcon from "@lucide/svelte/icons/phone";
   import GlobeIcon from "@lucide/svelte/icons/globe";
   import CircleDollarSignIcon from "@lucide/svelte/icons/circle-dollar-sign";
@@ -30,11 +27,6 @@
   const fee = $derived(getFee(feature.tags ?? {}));
   const charge = $derived(getFeeCharge(feature.tags ?? {}));
 </script>
-
-<div class="flex gap-2 items-center">
-  <BuildingIcon />
-  <EditableName {feature} featureSlug={slug} />
-</div>
 
 <ClimbingStyles {feature} />
 
@@ -74,5 +66,3 @@
 <EditableDescription {feature} featureSlug={slug} />
 
 <CommonsTopo {feature} featureSlug={slug} />
-
-<EditableTags {feature} featureSlug={slug} />

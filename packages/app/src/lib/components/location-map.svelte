@@ -429,8 +429,16 @@
 
     map.on("zoom", updateDraggableMarker);
 
+    const ro = new ResizeObserver(() => {
+      if (attached && host.clientWidth > 0 && host.clientHeight > 0) {
+        map.resize();
+      }
+    });
+    ro.observe(host);
+
     return () => {
       attached = false;
+      ro.disconnect();
       map.off("zoom", updateDraggableMarker);
       if (element.parentElement === host) element.remove();
     };
@@ -501,7 +509,7 @@
 <div class={`relative ${className}`}>
   <div
     bind:this={host}
-    class="relative h-72 w-full md:h-[28rem] overflow-hidden rounded-t-md max-md:rounded-b-md border border-border"
+    class="relative h-80 w-full md:h-[34rem] overflow-hidden rounded-t-md max-md:rounded-b-md border border-border"
   >
     <MapLegend bind:colorMode />
   </div>

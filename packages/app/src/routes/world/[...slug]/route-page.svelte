@@ -1,7 +1,5 @@
 <script lang="ts">
-  import EditableName from "#components/editable/editable-name.svelte";
   import EditableDescription from "#lib/components/editable/editable-description.svelte";
-  import EditableTags from "#lib/components/editable/editable-tags.svelte";
   import EditableGrade from "#components/editable/editable-grade.svelte";
   import EditableLength from "#components/editable/editable-length.svelte";
   import ClimbingStyles from "#components/climbing-styles.svelte";
@@ -11,7 +9,6 @@
   import { getCoordinates, getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
   import { isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
-  import { getAppState } from "#lib/data/app-state.js";
   import * as Alert from "#components/ui/alert/index.js";
   import TriangleAlertIcon from "@lucide/svelte/icons/triangle-alert";
 
@@ -28,12 +25,9 @@
   let coordinates = $derived(getCoordinates(item.feature));
   let grade = $derived(feature.tags ? getGrade(feature.tags) : undefined);
   const isProject = $derived(isProjectRoute(feature.tags));
-  const appState = getAppState();
-  const editable = $derived(appState.osmUser.loggedIn && feature.type === "node");
 </script>
 
-<div class="flex gap-2 items-baseline">
-  <EditableName {feature} featureSlug={slug} />
+<div class="flex flex-wrap gap-3 items-baseline">
   <EditableGrade {feature} {grade} featureSlug={slug} />
   {#if isTradRoute(feature.tags)}
     <TradCamIcon class="self-center" />
@@ -56,13 +50,8 @@
 
 {#if coordinates}
   <p class="text-sm text-muted-foreground">{coordinates.lat}, {coordinates.lon}</p>
-  {#if editable}
-    <p class="text-xs text-muted-foreground">Drag the marker on the map to move the route.</p>
-  {/if}
 {/if}
 
 <EditableDescription {feature} featureSlug={slug} />
 
 <CommonsTopo {feature} featureSlug={slug} />
-
-<EditableTags {feature} featureSlug={slug} />

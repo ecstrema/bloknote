@@ -16,8 +16,22 @@
   import { page } from "$app/state";
   import { untrack } from "svelte";
   import LocationMap from "#lib/components/location-map.svelte";
+  import EditableName from "#components/editable/editable-name.svelte";
+  import EditableTags from "#components/editable/editable-tags.svelte";
+  import * as Tabs from "#components/ui/tabs/index.js";
+  import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getCoordinates } from "#lib/data/parse/osm-tags.js";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
+  import BuildingIcon from "@lucide/svelte/icons/building";
+  import DatabaseIcon from "@lucide/svelte/icons/database";
+  import ExternalLinkIcon from "@lucide/svelte/icons/external-link";
+  import FileTextIcon from "@lucide/svelte/icons/file-text";
+  import MapIcon from "@lucide/svelte/icons/map";
+
+  type PageTab = "overview" | "map" | "osm";
+  function parseTab(value: string | null): PageTab | undefined {
+    return value === "overview" || value === "map" || value === "osm" ? value : undefined;
+  }
 
   let { params }: PageProps = $props();
 
@@ -43,18 +57,66 @@
   let item = $derived(queriedItem?.item ?? appState.currentNode.current);
   const itemSlug = $derived(queriedItem?.slug ?? slug);
   const itemType = $derived(featureToType(item.feature));
+  const hasOsmData = $derived(item.feature.type !== "geographic");
+
+  let activeTab = $state<PageTab>(parseTab(page.url.searchParams.get("tab")) ?? "overview");
+  const effectiveTab = $derived<PageTab>(activeTab === "osm" && !hasOsmData ? "overview" : activeTab);
+
+  $effect(() => {
+    if (!hasOsmData && activeTab === "osm") {
+      activeTab = "overview";
+    }
+  });
+
+  function onTabChange(value: string) {
+    const next = parseTab(value) ?? "overview";
+    activeTab = next;
+    const url = new URL(page.url.href);
+    if (next === "overview") url.searchParams.delete("tab");
+    else url.searchParams.set("tab", next);
+    replaceState(url, page.state);
+  }
 
   // Shared links carry the OSM id so the item can be found if its path changes.
   // Not an effect: replaceState updates page.url, which would re-trigger it.
-  afterNavigate(() => {
+  afterNavigate((navigation) => {
     untrack(() => {
-      if (item.feature.type === "geographic") return;
-      const id = `${item.feature.type}-${item.feature.id}`;
-      if (page.url.searchParams.get("id") === id && !page.url.searchParams.has("osm")) return;
+      const urlTab = parseTab(page.url.searchParams.get("tab"));
+      if (navigation.type === "popstate") {
+        activeTab = urlTab ?? "overview";
+      } else if (urlTab) {
+        activeTab = urlTab;
+      } else if (activeTab === "osm" && item.feature.type === "geographic") {
+        activeTab = "overview";
+      }
+
+      const tabForUrl = activeTab === "osm" && item.feature.type === "geographic" ? "overview" : activeTab;
       const url = new URL(page.url.href);
-      url.searchParams.delete("osm");
-      url.searchParams.set("id", id);
-      replaceState(url, page.state);
+      let changed = false;
+
+      if (item.feature.type !== "geographic") {
+        const id = `${item.feature.type}-${item.feature.id}`;
+        if (url.searchParams.get("id") !== id) {
+          url.searchParams.set("id", id);
+          changed = true;
+        }
+        if (url.searchParams.has("osm")) {
+          url.searchParams.delete("osm");
+          changed = true;
+        }
+      }
+
+      if (tabForUrl === "overview") {
+        if (url.searchParams.has("tab")) {
+          url.searchParams.delete("tab");
+          changed = true;
+        }
+      } else if (url.searchParams.get("tab") !== tabForUrl) {
+        url.searchParams.set("tab", tabForUrl);
+        changed = true;
+      }
+
+      if (changed) replaceState(url, page.state);
     });
   });
 
@@ -100,25 +162,88 @@
   <OsmMissingFeature feature={item.feature} />
 {/if}
 
-<LocationMap
-  currentSlug={itemSlug}
-  currentFeature={item.feature}
-  {coordinates}
-  {bounds}
-  draggable={editable}
-  onmove={editable ? (pos) => appState.setCoordinates(itemSlug, pos) : undefined}
-/>
+<div class="flex items-center gap-2">
+  {#if item.feature.type === "geographic"}
+    <h1 class="text-2xl font-semibold">
+      {getLocalizedName(item.feature) || "No Name"}
+    </h1>
+  {:else if itemType === "gym"}
+    <BuildingIcon class="size-6 shrink-0" aria-hidden="true" />
+    <EditableName feature={item.feature} featureSlug={itemSlug} />
+  {:else}
+    <EditableName feature={item.feature} featureSlug={itemSlug} />
+  {/if}
+</div>
 
-{#if !itemType}
-  <ComponentParseFailed feature={item.feature} featureSlug={slug} />
-{:else if itemType === "geographic"}
-  <GeographicPage bind:item={item as DataTree<GeographicFolderElement>} />
-{:else if itemType === "area"}
-  <AreaPage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} />
-{:else if itemType === "route"}
-  <RoutePage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} />
-{:else if itemType === "gym"}
-  <GymPage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} />
-{:else}
-  <ComponentParseFailed feature={item.feature} featureSlug={itemSlug} />
-{/if}
+<Tabs.Root value={effectiveTab} onValueChange={onTabChange} class="gap-4">
+  <div class="border-b">
+    <Tabs.List variant="line">
+      <Tabs.Trigger value="overview">
+        <FileTextIcon />
+        Overview
+      </Tabs.Trigger>
+      <Tabs.Trigger value="map">
+        <MapIcon />
+        Map
+      </Tabs.Trigger>
+      {#if hasOsmData}
+        <Tabs.Trigger value="osm">
+          <DatabaseIcon />
+          OSM Data
+        </Tabs.Trigger>
+      {/if}
+    </Tabs.List>
+  </div>
+
+  <Tabs.Content value="overview" class="flex flex-col gap-4">
+    {#if !itemType}
+      <ComponentParseFailed />
+    {:else if itemType === "geographic"}
+      <GeographicPage bind:item={item as DataTree<GeographicFolderElement>} />
+    {:else if itemType === "area"}
+      <AreaPage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} />
+    {:else if itemType === "route"}
+      <RoutePage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} />
+    {:else if itemType === "gym"}
+      <GymPage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} />
+    {:else}
+      <ComponentParseFailed />
+    {/if}
+  </Tabs.Content>
+
+  <Tabs.Content value="map" class="flex flex-col gap-2">
+    {#if effectiveTab === "map"}
+      <LocationMap
+        currentSlug={itemSlug}
+        currentFeature={item.feature}
+        {coordinates}
+        {bounds}
+        draggable={editable}
+        onmove={editable ? (pos) => appState.setCoordinates(itemSlug, pos) : undefined}
+      />
+      {#if editable && coordinates}
+        <p class="text-xs text-muted-foreground">Drag the marker on the map to move the route.</p>
+      {/if}
+    {/if}
+  </Tabs.Content>
+
+  {#if item.feature.type !== "geographic"}
+    <Tabs.Content value="osm" class="flex flex-col gap-4">
+      <div class="flex items-center gap-3 text-sm text-muted-foreground">
+        <span>{item.feature.type}/{item.feature.id}</span>
+        {#if item.feature.id > 0}
+          <a
+            href={`https://www.openstreetmap.org/${item.feature.type}/${item.feature.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground"
+          >
+            View on OpenStreetMap
+            <ExternalLinkIcon class="size-3.5" aria-hidden="true" />
+          </a>
+        {/if}
+      </div>
+      <EditableTags feature={item.feature} featureSlug={itemSlug} />
+    </Tabs.Content>
+  {/if}
+</Tabs.Root>

@@ -15439,11 +15439,11 @@ msgstr "OSM could not find {0}. It may have been deleted or is not present on th
 msgid "{0} routes in total"
 msgstr "{0} routes in total"
 
+#: src/routes/world/[...slug]/+page.svelte
 #: src/routes/world/[...slug]/children-table.svelte
 #: src/routes/world/[...slug]/children-table.svelte
 #: src/routes/world/[...slug]/children-table.svelte
 #: src/routes/world/[...slug]/children-table.svelte
-#: src/routes/world/[...slug]/geographic-page.svelte
 msgid "No Name"
 msgstr "No Name"
 
@@ -15466,9 +15466,8 @@ msgstr "No children"
 msgid "Areas"
 msgstr "Areas"
 
-#: src/routes/world/[...slug]/component-parse-failed.svelte
-msgid "Failed to analyze this element. <0/>"
-msgstr "Failed to analyze this element. <0/>"
+#~ msgid "Failed to analyze this element. <0/>"
+#~ msgstr "Failed to analyze this element. <0/>"
 
 #: src/routes/world/[...slug]/gym-page.svelte
 msgid "Not listed"
@@ -16471,8 +16470,9 @@ msgstr "Compare route grades"
 #~ msgid "OSM could not find "
 #~ msgstr "OSM could not find "
 
-#~ msgid "Failed to analyze this element. "
-#~ msgstr "Failed to analyze this element. "
+#: src/routes/world/[...slug]/component-parse-failed.svelte
+msgid "Failed to analyze this element."
+msgstr "Failed to analyze this element."
 
 #~ msgid "Bloknote - Aid Grade Comparison"
 #~ msgstr "Bloknote - Aid Grade Comparison"
@@ -28169,7 +28169,7 @@ msgstr "Ungraded"
 #~ msgid "Places & Terrain"
 #~ msgstr "Places & Terrain"
 
-#: src/routes/world/[...slug]/route-page.svelte
+#: src/routes/world/[...slug]/+page.svelte
 msgid "Drag the marker on the map to move the route."
 msgstr "Drag the marker on the map to move the route."
 
@@ -28314,3 +28314,23 @@ msgstr "Trad / mixed route"
 #: src/lib/components/editable/editable-tags.svelte
 msgid "Deprecated tags"
 msgstr "Deprecated tags"
+
+#: src/lib/components/editable/editable-tags.svelte
+msgid "No OpenStreetMap tags."
+msgstr "No OpenStreetMap tags."
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "<0/> OSM Data"
+msgstr "<0/> OSM Data"
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "<0/> Overview"
+msgstr "<0/> Overview"
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "<0/> Map"
+msgstr "<0/> Map"
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "View on OpenStreetMap <0/>"
+msgstr "View on OpenStreetMap <0/>"

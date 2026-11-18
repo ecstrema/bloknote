@@ -15439,11 +15439,11 @@ msgstr "OSM non ha trovato {0}. Potrebbe essere stato eliminato o non essere pre
 msgid "{0} routes in total"
 msgstr "{0} vie in totale"
 
+#: src/routes/world/[...slug]/+page.svelte
 #: src/routes/world/[...slug]/children-table.svelte
 #: src/routes/world/[...slug]/children-table.svelte
 #: src/routes/world/[...slug]/children-table.svelte
 #: src/routes/world/[...slug]/children-table.svelte
-#: src/routes/world/[...slug]/geographic-page.svelte
 msgid "No Name"
 msgstr "Senza nome"
 
@@ -15466,9 +15466,8 @@ msgstr "Nessun elemento figlio"
 msgid "Areas"
 msgstr "Zone"
 
-#: src/routes/world/[...slug]/component-parse-failed.svelte
-msgid "Failed to analyze this element. <0/>"
-msgstr "Impossibile analizzare questo elemento. <0/>"
+#~ msgid "Failed to analyze this element. <0/>"
+#~ msgstr "Impossibile analizzare questo elemento. <0/>"
 
 #: src/routes/world/[...slug]/gym-page.svelte
 msgid "Not listed"
@@ -16462,8 +16461,9 @@ msgstr ""
 #~ msgid "OSM could not find "
 #~ msgstr ""
 
-#~ msgid "Failed to analyze this element. "
-#~ msgstr ""
+#: src/routes/world/[...slug]/component-parse-failed.svelte
+msgid "Failed to analyze this element."
+msgstr ""
 
 #~ msgid "Bloknote - Aid Grade Comparison"
 #~ msgstr ""
@@ -28138,7 +28138,7 @@ msgstr ""
 #~ msgid "Places & Terrain"
 #~ msgstr ""
 
-#: src/routes/world/[...slug]/route-page.svelte
+#: src/routes/world/[...slug]/+page.svelte
 msgid "Drag the marker on the map to move the route."
 msgstr ""
 
@@ -28282,4 +28282,24 @@ msgstr ""
 
 #: src/lib/components/editable/editable-tags.svelte
 msgid "Deprecated tags"
+msgstr ""
+
+#: src/lib/components/editable/editable-tags.svelte
+msgid "No OpenStreetMap tags."
+msgstr ""
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "<0/> OSM Data"
+msgstr ""
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "<0/> Overview"
+msgstr ""
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "<0/> Map"
+msgstr ""
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "View on OpenStreetMap <0/>"
 msgstr ""

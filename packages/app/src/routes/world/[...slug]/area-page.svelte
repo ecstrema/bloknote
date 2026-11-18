@@ -1,8 +1,6 @@
 <script lang="ts">
   import EditableDescription from "#components/editable/editable-description.svelte";
-  import EditableName from "#components/editable/editable-name.svelte";
   import ChildrenTable from "./children-table.svelte";
-  import EditableTags from "#components/editable/editable-tags.svelte";
   import ClimbingStyles from "#components/climbing-styles.svelte";
   import CommonsTopo from "#lib/components/commons-topo.svelte";
   import type { OsmFeature } from "osm-api";
@@ -19,7 +17,6 @@
   const feature = $derived(item.feature);
 </script>
 
-<EditableName {feature} featureSlug={slug} />
 <ClimbingStyles {feature} />
 <EditableDescription {feature} featureSlug={slug} />
 
@@ -29,4 +26,3 @@
 
 <ChildrenTable bind:item />
 <CommonsTopo {feature} featureSlug={slug} />
-<EditableTags {feature} featureSlug={slug} />

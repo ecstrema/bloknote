@@ -107,6 +107,8 @@
       New tag
     </Button>
   {/if}
+{:else}
+  <p class="text-sm text-muted-foreground">No OpenStreetMap tags.</p>
 {/if}
 
 {#snippet showTags(specialTags: TagEntry[], title: string, className: string)}
