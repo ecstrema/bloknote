@@ -3,7 +3,9 @@ if (!Map.prototype.getOrInsertComputed) {
     if (this.has(key)) {
       return this.get(key);
     }
-    this.set(key, callback(key));
+    const value = callback(key);
+    this.set(key, value);
+    return value;
   };
 }
 if (!Map.prototype.getOrInsert) {
@@ -12,6 +14,7 @@ if (!Map.prototype.getOrInsert) {
       return this.get(key);
     }
     this.set(key, value);
+    return value;
   };
 }
 

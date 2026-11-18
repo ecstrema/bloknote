@@ -9,6 +9,8 @@
   import type { DataTree } from "#lib/types.js";
   import type { OsmFeature } from "osm-api";
   import { getCoordinates, getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
+  import { isTradRoute } from "#lib/data/parse/route-styles.js";
+  import TradCamIcon from "#components/trad-cam-icon.svelte";
   import { getAppState } from "#lib/data/app-state.js";
   import * as Alert from "#components/ui/alert/index.js";
   import TriangleAlertIcon from "@lucide/svelte/icons/triangle-alert";
@@ -33,6 +35,9 @@
 <div class="flex gap-2 items-baseline">
   <EditableName {feature} featureSlug={slug} />
   <EditableGrade {feature} {grade} featureSlug={slug} />
+  {#if isTradRoute(feature.tags)}
+    <TradCamIcon class="self-center" />
+  {/if}
   <EditableLength {feature} featureSlug={slug} />
 </div>
 

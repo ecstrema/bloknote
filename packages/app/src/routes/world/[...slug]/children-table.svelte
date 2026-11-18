@@ -3,6 +3,8 @@
   import { featureToType } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getGrade } from "#lib/data/parse/osm-tags.js";
+  import { isTradRoute } from "#lib/data/parse/route-styles.js";
+  import TradCamIcon from "#components/trad-cam-icon.svelte";
   import type { DataTree } from "#lib/types.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import { sortChildren, type SortedChildren } from "#components/shell/sidebar/utils.ts";
@@ -57,7 +59,8 @@
       {/each}
       {#each allChildren?.route as slug (slug)}
         {const child = $derived(itemChildren[slug]!)}
-        {const grade = $derived(getGrade((child.feature as OsmFeature).tags || {}))}
+        {const routeTags = $derived((child.feature as OsmFeature).tags || {})}
+        {const grade = $derived(getGrade(routeTags))}
         <Table.Row>
           <Table.Cell>
             <a href={resolve("/world/[...slug]", { slug })} class="font-medium underline underline-offset-2">
@@ -65,11 +68,16 @@
             </a>
           </Table.Cell>
           <Table.Cell>
-            {#if grade}
-              <HolyGrade class="text-xs font-semibold" grade={grade.v} />
-            {:else}
-              <CircleQuestionMarkIcon class="size-5 text-destructive" />
-            {/if}
+            <span class="inline-flex items-center gap-1">
+              {#if grade}
+                <HolyGrade class="text-xs font-semibold" grade={grade.v} />
+              {:else}
+                <CircleQuestionMarkIcon class="size-5 text-destructive" />
+              {/if}
+              {#if isTradRoute(routeTags)}
+                <TradCamIcon />
+              {/if}
+            </span>
           </Table.Cell>
         </Table.Row>
       {/each}

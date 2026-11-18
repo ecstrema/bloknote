@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSectorContour, extractRouteStyle, FEATURE_COLORS, ROUTE_STYLE_COLORS } from "./route-styles";
+import { buildSectorContour, extractRouteStyle, FEATURE_COLORS, isTradRoute, ROUTE_STYLE_COLORS } from "./route-styles";
 import { featureToMapElement } from "../../components/location-map-helper";
 import type { OsmFeature } from "osm-api";
 
@@ -79,5 +79,16 @@ describe("route-styles", () => {
     expect(el?.properties.strokeColor).toBe(ROUTE_STYLE_COLORS.sport);
     expect(el?.properties.grade).toBe("6a");
     expect(el?.properties.fillColor).toContain("hsl(");
+  });
+
+  it("identifies trad and mixed routes for cam symbol display", () => {
+    expect(isTradRoute({ "climbing:trad": "yes" })).toBe(true);
+    expect(isTradRoute({ "climbing:mixed": "yes" })).toBe(true);
+    expect(isTradRoute({ "climbing:sport": "yes", "climbing:trad": "yes" })).toBe(true);
+    expect(isTradRoute({ "climbing:grade:mixed": "M7" })).toBe(true);
+    expect(isTradRoute({ "climbing:sport": "yes" })).toBe(false);
+    expect(isTradRoute({ "climbing:boulder": "yes" })).toBe(false);
+    expect(isTradRoute({})).toBe(false);
+    expect(isTradRoute(undefined)).toBe(false);
   });
 });

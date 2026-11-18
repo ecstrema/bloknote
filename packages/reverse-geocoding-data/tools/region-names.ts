@@ -1,14 +1,13 @@
 // Writes output/region-names.json: the name of every region of the hierarchy in each language, taken
-// from the OSM tags kept in data/ (leaves) and import/raw/ (groups). `bun run region-names`.
+// from the OSM tags kept in data/ (leaves) and Intl.DisplayNames (countries). `bun run region-names`.
 // The position in the array is the id of the region (`nameId` in the static API), keep the order.
-import { existsSync, readFileSync, writeFileSync } from "fs";
-import { DATA_DIR, HIERARCHY_INDEX, OUTPUT_DIR } from "../src/config.ts";
-import { REGIONS } from "../import/regions.ts";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { BOUNDARY_EXTENSION, DATA_DIR, HIERARCHY_INDEX, OUTPUT_DIR, slugify } from "../src/index.ts";
 
 export const LANGUAGES = ["en", "de", "fr", "es", "it", "pt"] as const;
 export type RegionName = { path: string } & Record<(typeof LANGUAGES)[number], string>;
 
-const RAW = `${import.meta.dirname}/../import/raw`;
 const CONTINENTS: Record<string, Record<string, string>> = {
   "americas/north": {
     en: "North America",
@@ -51,6 +50,15 @@ const CONTINENTS: Record<string, Record<string, string>> = {
 };
 const displayNames = Object.fromEntries(LANGUAGES.map((l) => [l, new Intl.DisplayNames(l, { type: "region" })]));
 
+const countryCodeBySlug = new Map<string, string>();
+for (let a = 65; a <= 90; a++) {
+  for (let b = 65; b <= 90; b++) {
+    const code = String.fromCharCode(a, b);
+    const name = displayNames.en!.of(code);
+    if (name && name !== code) countryCodeBySlug.set(slugify(name), code);
+  }
+}
+
 type Tags = Record<string, string>;
 /** Without the other languages of bilingual names ("Cymru / Wales") */
 const first = (name: string | undefined) => name?.split("/")[0]?.trim() || undefined;
@@ -64,38 +72,25 @@ function walk(node: Record<string, any>, path: string[], out: string[]) {
 }
 
 function leafTags(path: string): Tags | undefined {
-  const file = `${DATA_DIR}/${path}.geojson`;
+  const file = `${DATA_DIR}/${path}${BOUNDARY_EXTENSION}`;
   if (!existsSync(file)) return;
   const features: any[] = JSON.parse(readFileSync(file, "utf8")).features;
   return features.find((f) => f.properties?.name)?.properties;
 }
 
-const regionByPath = new Map(REGIONS.map((r) => [`world/${r.path}`, r]));
-const rawCache = new Map<string, any[]>();
-function groupTags(path: string): { tags?: Tags; code?: string } {
-  const region = regionByPath.get(path);
-  if (!region) {
-    // A country made of its subdivisions: its code is their prefix
-    const child = REGIONS.find(
-      (r) =>
-        r.code.includes("-") &&
-        !`world/${r.path}`.slice(path.length + 1).includes("/") &&
-        `world/${r.path}`.startsWith(`${path}/`),
-    );
-    return { code: child?.code.split("-")[0] };
+function findDescendantCountryCode(dir: string): string | undefined {
+  if (!existsSync(dir)) return;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isFile() && entry.name.endsWith(BOUNDARY_EXTENSION)) {
+      const props = JSON.parse(readFileSync(fullPath, "utf8")).features?.[0]?.properties as Tags | undefined;
+      const iso2 = props?.["ISO3166-2"]?.split("-")[0];
+      if (iso2 && /^[A-Z]{2}$/.test(iso2)) return iso2;
+    } else if (entry.isDirectory()) {
+      const code = findDescendantCountryCode(fullPath);
+      if (code) return code;
+    }
   }
-  const file = `${RAW}/${region.code}.json`;
-  if (!rawCache.has(file)) rawCache.set(file, existsSync(file) ? JSON.parse(readFileSync(file, "utf8")).elements : []);
-  const relation = rawCache
-    .get(file)!
-    .find(
-      (e) =>
-        e.type === "relation" &&
-        (region.osm
-          ? e.id === region.osm
-          : e.tags?.["ISO3166-2"] === region.code || e.tags?.["ISO3166-1"] === region.code),
-    );
-  return { tags: relation?.tags, code: region.code };
 }
 
 const title = (slug: string) => slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -105,9 +100,13 @@ function nameOf(path: string): RegionName {
   const continent = CONTINENTS[path.replace(/^world\//, "")];
   if (continent) return { path, ...continent } as RegionName;
 
-  const group = groupTags(path);
-  const tags = leafTags(path) ?? group.tags ?? {};
-  const country = group.code && /^[A-Z]{2}$/.test(group.code) ? group.code : undefined;
+  const tags = leafTags(path) ?? {};
+  const isCountryLevel =
+    path.startsWith("world/americas/") ? path.split("/").length === 4 : path.split("/").length === 3;
+  const country =
+    (tags["ISO3166-1"] && /^[A-Z]{2}$/.test(tags["ISO3166-1"]) ? tags["ISO3166-1"] : undefined) ||
+    (isCountryLevel ? countryCodeBySlug.get(slug) ?? findDescendantCountryCode(`${DATA_DIR}/${path}`) : undefined);
+
   const result: Record<string, string> = {};
   for (const lang of LANGUAGES) {
     result[lang] =

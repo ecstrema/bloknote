@@ -124,14 +124,14 @@ export class AppState {
    * Applies {@link UndoableRouteCreate} to create a new route in the parent feature.
    */
   createRoute(parent: DataTree, parentSlug: string) {
-    const action = new UndoableRouteCreate(this.osmUser, parent, parentSlug);
+    const action = new UndoableRouteCreate(this.osmUser, this.tree, parent, parentSlug);
     this.undoStack.do(action);
     return action.slug;
   }
 
   /** Applies {@link UndoableAreaCreate} to create a new area in the parent feature. */
   createArea(parent: DataTree, parentSlug: string) {
-    const action = new UndoableAreaCreate(this.osmUser, parent, parentSlug);
+    const action = new UndoableAreaCreate(this.osmUser, this.tree, parent, parentSlug);
     this.undoStack.do(action);
     return action.slug;
   }

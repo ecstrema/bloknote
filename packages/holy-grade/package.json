@@ -16,6 +16,6 @@
     "@bloknote/common": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:",
-    "vitest": "^5.1.0"
+    "vitest": "catalog:"
   }
 }

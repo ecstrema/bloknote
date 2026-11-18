@@ -422,7 +422,7 @@ export class OsmUser {
   }
 
   /** Gets the item as it currently is in OSM, and replace the current item in place, if it has no changes. This way, even if the data has changed since it was downloaded, it will be updated in place with this. */
-  async refreshItem(item: DataTree<OsmFeature>) {
+  async refreshItem(item: DataTree<OsmFeature>, slug?: string) {
     // do not refresh if the user is offline, since we cannot fetch the feature from OSM
     if (!browser || !online.current) return;
 
@@ -459,8 +459,9 @@ export class OsmUser {
 
     // If the feature has been modified locally, we don't want to overwrite it with the refreshed version from OSM.
     // Instead, we compute the diff between the refreshed version and the current version, and integrate whatever is not in conflict with the current version.
-    if (this.changes.has(identifier)) {
-      const { initial, final } = this.changes.get(identifier)!;
+    const changeKey = slug && this.changes.has(slug) ? slug : this.changes.has(identifier) ? identifier : undefined;
+    if (changeKey) {
+      const { initial, final } = this.changes.get(changeKey)!;
 
       this.#integrateUnconflictedChanges(initial, final, refreshedFeature);
       return;

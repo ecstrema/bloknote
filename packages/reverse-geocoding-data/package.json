@@ -8,7 +8,7 @@
   "exports": {
     ".": {
       "import": "./src/index.ts",
-      "types": "./src/index.d.ts"
+      "types": "./src/index.ts"
     },
     "./shared": {
       "import": "./src/shared.ts",
@@ -18,14 +18,13 @@
   "scripts": {
     "build": "bun run src/main.ts",
     "check-size": "bun run tools/check-boundary-size.ts",
-    "import": "bun run import/main.ts",
     "region-names": "bun run tools/region-names.ts"
   },
   "devDependencies": {
     "@bloknote/common": "workspace:*",
     "@types/bun": "catalog:",
+    "@types/geojson": "catalog:",
     "@types/node": "catalog:",
-    "osmtogeojson": "catalog:",
     "typescript": "catalog:"
   }
 }

@@ -6,6 +6,7 @@ import {
   getGrade,
   getLength,
   getPhone,
+  getTagRule,
   isProjectRoute,
   parseClimbingLength,
   scaleIdToTag,
@@ -125,5 +126,28 @@ describe("isProjectRoute", () => {
     expect(isProjectRoute(undefined)).toBe(false);
     expect(isProjectRoute({ name: "Action Directe" })).toBe(false);
     expect(isProjectRoute({ name: "Projection" })).toBe(false);
+  });
+});
+
+describe("deprecated tags in processedTags / getTagRule", () => {
+  it("marks ele and ele:* tags as deprecated with guidance on routes and areas", () => {
+    const routeEle = getTagRule("route", "ele");
+    expect(routeEle).toEqual({
+      deprecated: expect.stringContaining("climbing:length"),
+    });
+    expect(getTagRule("route", "ele:ft")).toEqual(routeEle);
+
+    const areaEle = getTagRule("area", "ele");
+    expect(areaEle).toEqual({
+      deprecated: expect.stringContaining("discouraged"),
+    });
+    expect(getTagRule("gym", "ele:source")).toEqual(areaEle);
+  });
+
+  it("keeps regular validators and unknown tags unaffected", () => {
+    expect(typeof getTagRule("route", "name")).toBe("function");
+    expect(typeof getTagRule("route", "climbing:length")).toBe("function");
+    expect(getTagRule("route", "element" as any)).toBeUndefined();
+    expect(getTagRule(undefined, "ele")).toBeUndefined();
   });
 });

@@ -1,10 +1,16 @@
-import { readFileSync, readdirSync, statSync, writeFileSync } from "fs";
-import { join } from "path";
-
-import type { BoundingBox, IndexNode } from "./types.ts";
-import { DATA_DIR, HIERARCHY_INDEX, OUTPUT_DIR } from "./config.ts";
-import { BOUNDARY_EXTENSION, LARGE_BOUNDARY_BYTES, slugify } from "./shared.ts";
-import { ensureDirExists } from "./utils.ts";
+import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import {
+  BOUNDARY_EXTENSION,
+  DATA_DIR,
+  ensureDirExists,
+  HIERARCHY_INDEX,
+  LARGE_BOUNDARY_BYTES,
+  OUTPUT_DIR,
+  slugify,
+  type BoundingBox,
+  type IndexNode,
+} from "./index.ts";
 
 let errors = 0;
 function error(message: string) {
@@ -12,35 +18,29 @@ function error(message: string) {
   errors++;
 }
 
-function mergeBbox(b1: BoundingBox, b2: BoundingBox): BoundingBox {
-  return {
-    x0: Math.min(b1.x0, b2.x0),
-    x1: Math.max(b1.x1, b2.x1),
-    y0: Math.min(b1.y0, b2.y0),
-    y1: Math.max(b1.y1, b2.y1),
-  };
-}
-
-function initBbox(): BoundingBox {
+function emptyBBox(): BoundingBox {
   return { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity };
 }
 
-function calculateGeoJsonBbox(geojson: any): BoundingBox {
-  let bbox = initBbox();
-  function processCoordinates(coords: any) {
-    if (typeof coords[0] === "number") {
-      const [lon, lat] = coords;
-      bbox = mergeBbox(bbox, { x0: lon, x1: lon, y0: lat, y1: lat });
-    } else {
-      for (const sub of coords) {
-        processCoordinates(sub);
-      }
-    }
+function mergeBBox(target: BoundingBox, source: BoundingBox): BoundingBox {
+  if (source.x0 < target.x0) target.x0 = source.x0;
+  if (source.x1 > target.x1) target.x1 = source.x1;
+  if (source.y0 < target.y0) target.y0 = source.y0;
+  if (source.y1 > target.y1) target.y1 = source.y1;
+  return target;
+}
+
+function visitCoords(coords: unknown, bbox: BoundingBox): void {
+  if (!Array.isArray(coords) || coords.length === 0) return;
+  if (typeof coords[0] === "number" && typeof coords[1] === "number") {
+    const [lon, lat] = coords as [number, number];
+    if (lon < bbox.x0) bbox.x0 = lon;
+    if (lon > bbox.x1) bbox.x1 = lon;
+    if (lat < bbox.y0) bbox.y0 = lat;
+    if (lat > bbox.y1) bbox.y1 = lat;
+    return;
   }
-  for (const feature of geojson.features) {
-    if (feature.geometry?.coordinates) processCoordinates(feature.geometry.coordinates);
-  }
-  return bbox;
+  for (const child of coords) visitCoords(child, bbox);
 }
 
 function readLeaf(file: string, relativePath: string): IndexNode {
@@ -56,17 +56,22 @@ function readLeaf(file: string, relativePath: string): IndexNode {
     geojson = JSON.parse(readFileSync(file, "utf8"));
   } catch (e) {
     error(`${relativePath} is not valid JSON: ${e}`);
-    return { _bbox: initBbox() };
+    return { _bbox: emptyBBox() };
   }
   if (geojson?.type !== "FeatureCollection" || !Array.isArray(geojson.features)) {
     error(`${relativePath} must be a FeatureCollection`);
-    return { _bbox: initBbox() };
+    return { _bbox: emptyBBox() };
   }
   const polygons = geojson.features.filter(
     (f: any) => f.geometry?.type === "Polygon" || f.geometry?.type === "MultiPolygon",
   );
   if (!polygons.length) error(`${relativePath} has no Polygon or MultiPolygon`);
-  return { _bbox: calculateGeoJsonBbox(geojson) };
+
+  const bbox = emptyBBox();
+  for (const feature of geojson.features) {
+    if (feature.geometry?.coordinates) visitCoords(feature.geometry.coordinates, bbox);
+  }
+  return { _bbox: bbox };
 }
 
 /**
@@ -74,15 +79,16 @@ function readLeaf(file: string, relativePath: string): IndexNode {
  * them in this order, so the first matching sibling wins.
  */
 function buildHierarchyTree(dir: string, relativePath: string): IndexNode {
-  const self: IndexNode = { _bbox: initBbox() };
-
-  const entries = readdirSync(dir, { withFileTypes: true }).filter((e) => !e.name.startsWith("."));
+  const self: IndexNode = { _bbox: emptyBBox() };
   const children = new Map<string, IndexNode>();
-  for (const entry of entries) {
+
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith(".")) continue;
     const path = join(dir, entry.name);
     const childRelativePath = `${relativePath}/${entry.name}`;
     let slug: string;
     let child: IndexNode;
+
     if (entry.isDirectory()) {
       slug = entry.name;
       child = buildHierarchyTree(path, childRelativePath);
@@ -107,23 +113,18 @@ function buildHierarchyTree(dir: string, relativePath: string): IndexNode {
 
   for (const slug of [...children.keys()].sort()) {
     const child = children.get(slug)!;
-    self._bbox = mergeBbox(self._bbox, child._bbox);
+    mergeBBox(self._bbox, child._bbox);
     self[slug] = child;
   }
   return self;
 }
 
-function main() {
-  ensureDirExists(OUTPUT_DIR);
-
-  const worldTree = buildHierarchyTree(join(DATA_DIR, "world"), "world");
-  if (errors) {
-    console.error(`\n${errors} error(s) in ${DATA_DIR}`);
-    process.exit(1);
-  }
-
-  writeFileSync(HIERARCHY_INDEX, JSON.stringify({ world: worldTree }));
-  console.log(`🎯 Spatial Index written successfully -> ${HIERARCHY_INDEX}`);
+ensureDirExists(OUTPUT_DIR);
+const worldTree = buildHierarchyTree(join(DATA_DIR, "world"), "world");
+if (errors) {
+  console.error(`\n${errors} error(s) in ${DATA_DIR}`);
+  process.exit(1);
 }
 
-main();
+writeFileSync(HIERARCHY_INDEX, JSON.stringify({ world: worldTree }));
+console.log(`🎯 Spatial Index written successfully -> ${HIERARCHY_INDEX}`);

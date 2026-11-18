@@ -55,6 +55,15 @@ export function extractRouteStyle(tags: Record<string, string>): string {
   return "sport";
 }
 
+export function isTradRoute(tags: Record<string, string> | undefined): boolean {
+  if (!tags) return false;
+  if (tags["climbing:trad"] === "yes" || tags["climbing:mixed"] === "yes") {
+    return true;
+  }
+  const style = extractRouteStyle(tags);
+  return style === "trad" || style === "mixed";
+}
+
 function cross2D(o: [number, number], a: [number, number], b: [number, number]): number {
   return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
 }

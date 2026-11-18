@@ -20,9 +20,9 @@
   const tags = $derived(feature.tags ?? {});
 </script>
 
+<!-- max length of osm tag is 255 -->
 <EditableTextarea
-  bind:value={() => tags[tagKey], (v) => appState.setTag(featureSlug, tagKey, v)}
+  bind:value={() => tags[tagKey], (v) => appState.setTag(featureSlug, tagKey, v === "" ? undefined : v)}
   maxlength={255}
-  // max length of osm tag is 255
   {...props}
 />

@@ -4,7 +4,13 @@ import { allScales, getReference, getScale, parseGrade, type Scale, type ScaleId
 import type { Key, Tags } from "osm-api";
 import type { Grade } from "#lib/types.js";
 
-export type ProcessedTags = Partial<Record<Key, (value: string) => boolean>>;
+export type DeprecatedTag = { deprecated: string };
+export type TagRule = ((value: string) => boolean) | DeprecatedTag;
+export type ProcessedTags = Partial<Record<Key, TagRule>>;
+
+export function deprecated(message: string): DeprecatedTag {
+  return { deprecated: message };
+}
 
 export function allowAll(_value: string): boolean {
   return true;
@@ -249,6 +255,7 @@ export const sharedProcessedTags: ProcessedTags = {
   name: allowAll,
   description: allowAll,
   sport: allowSingleValue("climbing"),
+  ele: deprecated("`ele` is discouraged on standalone climbing elements on OpenStreetMap; remove it unless this element represents a peak or landform."),
   ...Object.fromEntries(climbingStyleLabels.map(([key]) => [`climbing:${key}`, allowAll])),
 };
 
@@ -256,6 +263,7 @@ export const processedTags: Record<OSMClimbingFeatureType, ProcessedTags> = {
   route: {
     ...sharedProcessedTags,
     ...processedGrades,
+    ele: deprecated("Do not use `ele` on climbing routes; move route height to `climbing:length` (in meters) or remove `ele`."),
     "climbing:length": lengthValidator,
     climbing: allowMultipleValues(new Set(["route_bottom", "route_top"])),
   },
@@ -278,6 +286,16 @@ export const processedTags: Record<OSMClimbingFeatureType, ProcessedTags> = {
     charge: allowAll,
   },
 };
+
+const deprecatedTagPrefixes: [prefix: string, targetKey: Key][] = [["ele:", "ele"]];
+
+export function getTagRule(featureType: OSMClimbingFeatureType | undefined, key: Key): TagRule | undefined {
+  if (!featureType) return undefined;
+  const rules = processedTags[featureType];
+  if (rules[key]) return rules[key];
+  const alias = deprecatedTagPrefixes.find(([prefix]) => key.startsWith(prefix))?.[1];
+  return alias ? rules[alias] : undefined;
+}
 
 export function getGradeReference(tags: Tags): number | undefined {
   const grade = getGrade(tags)?.v;

@@ -5,6 +5,7 @@ import type { OsmUser } from "../network/osm.svelte";
 import { snapshot } from "#lib/helpers/svelte.svelte.js";
 import { reversed } from "#lib/helpers/iterators.js";
 import { dataClient } from "../network/data-client.js";
+import type { AppDataTree } from "../app-data-tree.svelte.js";
 
 /** An undoable action can be done and undone. */
 export class OsmUndoable {
@@ -157,12 +158,14 @@ export class UndoableGroup implements Undoable {
 
 /** Add a node to the parent DataTree. Extended by {@link UndoableRouteCreate} and {@link UndoableAreaCreate} */
 export class UndoableNodeCreate extends OsmUndoable implements Undoable {
+  tree: AppDataTree;
   parent: DataTree;
   slug: string;
   item: DataTree<OsmFeature>;
 
-  constructor(osmUser: OsmUser, feature: OsmFeature, parent: DataTree, parentSlug: string) {
+  constructor(osmUser: OsmUser, tree: AppDataTree, feature: OsmFeature, parent: DataTree, parentSlug: string) {
     super(osmUser);
+    this.tree = tree;
     this.item = {
       feature: feature,
       children: {},
@@ -175,13 +178,16 @@ export class UndoableNodeCreate extends OsmUndoable implements Undoable {
   do() {
     this.parent.children ??= {};
     this.parent.children[this.slug] = this.item;
-    dataClient.registerLocalNode(this.slug, this.parent.children[this.slug]!);
+    const reactiveNode = this.parent.children[this.slug]!;
+    this.tree.setReactiveNode(this.slug, reactiveNode);
+    dataClient.registerLocalNode(this.slug, reactiveNode);
 
     this.osmUser.markAsDirty(undefined, this.slug, this.item.feature);
   }
 
   undo() {
     dataClient.unregisterLocalNode(this.slug);
+    this.tree.deleteReactiveNode(this.slug);
     if (this.parent.children) {
       delete this.parent.children[this.slug];
       this.osmUser.markAsDirty(this.item.feature, this.slug, undefined);
@@ -191,7 +197,7 @@ export class UndoableNodeCreate extends OsmUndoable implements Undoable {
 
 /** Add a new route to the parent DataTree */
 export class UndoableRouteCreate extends UndoableNodeCreate {
-  constructor(osmUser: OsmUser, parent: DataTree, parentSlug: string) {
+  constructor(osmUser: OsmUser, tree: AppDataTree, parent: DataTree, parentSlug: string) {
     const newRoute: OsmNode = {
       type: "node",
       id: -Date.now(),
@@ -207,13 +213,13 @@ export class UndoableRouteCreate extends UndoableNodeCreate {
       uid: -1,
       user: "",
     };
-    super(osmUser, newRoute, parent, parentSlug);
+    super(osmUser, tree, newRoute, parent, parentSlug);
   }
 }
 
 /** Add a new area to the parent DataTree */
 export class UndoableAreaCreate extends UndoableNodeCreate {
-  constructor(osmUser: OsmUser, parent: DataTree, parentSlug: string) {
+  constructor(osmUser: OsmUser, tree: AppDataTree, parent: DataTree, parentSlug: string) {
     const newArea: OsmRelation = {
       type: "relation",
       id: -Date.now(),
@@ -228,7 +234,7 @@ export class UndoableAreaCreate extends UndoableNodeCreate {
       uid: -1,
       user: "",
     };
-    super(osmUser, newArea, parent, parentSlug);
+    super(osmUser, tree, newArea, parent, parentSlug);
   }
 }
 

@@ -1,3 +1,4 @@
+import { SvelteMap } from "svelte/reactivity";
 import type { DataJSONRecord, DataTree } from "#lib/types.js";
 import { getParentSlug } from "#lib/helpers/slug.js";
 import type { AppState } from "./app-state";
@@ -5,12 +6,12 @@ import type { AppState } from "./app-state";
 export class AppDataTree {
   root: DataTree = $state(undefined as unknown as DataTree);
 
-  /** Non-reactive map of slugs to their reactive DataTree */
-  #parentMap: Record<string, DataTree> = {};
+  /** Reactive map of slugs to their reactive DataTree nodes */
+  #parentMap = new SvelteMap<string, DataTree>();
 
   constructor(root: DataTree) {
     this.root = root;
-    this.#parentMap[""] = this.root;
+    this.#parentMap.set("", this.root);
   }
 
   /**
@@ -24,8 +25,8 @@ export class AppDataTree {
       parentNode.children ??= {};
 
       for (const [childSlug, childElement] of Object.entries(children)) {
-        parentNode.children[childSlug] = this.#parentMap[childSlug] || childElement;
-        this.#parentMap[childSlug] = parentNode.children[childSlug];
+        parentNode.children[childSlug] = this.#parentMap.get(childSlug) || childElement;
+        this.#parentMap.set(childSlug, parentNode.children[childSlug]);
       }
     };
 
@@ -34,27 +35,29 @@ export class AppDataTree {
       // This is root, it has no parent
       if (actualParentSlug === undefined) {
         console.log(`Parent slug not found for ${slug}. Parent slug: ${actualParentSlug}`);
-        return this.#parentMap[""]!;
+        return this.#parentMap.get("")!;
       }
 
-      const parent = this.#parentMap[actualParentSlug];
+      const parent = this.#parentMap.get(actualParentSlug);
       if (!parent) {
         console.log(`Parent not found for slug ${slug}. Parent slug: ${actualParentSlug}`);
-        return this.#parentMap[""]!;
+        return this.#parentMap.get("")!;
       }
 
       parent.children ??= {};
       parent.children[slug] = element;
       // Get back reactive proxy
       const reactiveSelf = parent.children[slug];
-      this.#parentMap[slug] = reactiveSelf;
+      this.#parentMap.set(slug, reactiveSelf);
 
       return reactiveSelf;
     };
 
-    if (Object.hasOwn(this.#parentMap, slug)) {
+    if (this.#parentMap.has(slug)) {
       // Fetch the existing proxy from the map
-      const existingNode = this.#parentMap[slug]!;
+      const existingNode = this.#parentMap.get(slug)!;
+      if (element.stats && !existingNode.stats) existingNode.stats = element.stats;
+      if (element.childrenFetched) existingNode.childrenFetched = true;
       integrateChildren(element.children || {}, existingNode);
       return;
     }
@@ -75,7 +78,7 @@ export class AppDataTree {
   integrateElementsIntoTree(elements: DataJSONRecord) {
     // We need to sort the slugs to ensure that parents are processed before children. This way, we can always find the parent in the parentMap when processing a child.
     const sortedEntries = Object.entries(elements)
-      .filter(([slug, _d]) => !this.#parentMap[slug]) // only process slugs that are not already in the parentMap: they have already been added
+      .filter(([slug, _d]) => !this.#parentMap.has(slug)) // only process slugs that are not already in the parentMap: they have already been added
       .map(([childSlug, data]) => {
         const splitted = childSlug.split("/");
         const depth = splitted.length;
@@ -85,24 +88,27 @@ export class AppDataTree {
       .sort(([_ka, _va, depthA], [_kb, _vb, depthB]) => depthA - depthB);
 
     for (const [childSlug, data, _depth, parentSlug] of sortedEntries) {
-      const parent = this.#parentMap[parentSlug];
+      const parent = this.#parentMap.get(parentSlug);
       if (!parent) continue;
 
       if (!parent.children) parent.children = {};
 
       parent.children[childSlug] = { feature: data };
       // We NEED to get it back from parent.children, because that gives us back the proxy, and not the raw object. This is important for reactivity.
-      this.#parentMap[childSlug] = parent.children[childSlug];
+      this.#parentMap.set(childSlug, parent.children[childSlug]);
     }
   }
 
   setReactiveNode(slug: string, node: DataTree) {
-    // TODO: check if node is indeed reactive. How do we do that? It doens't seem possible currently.
-    this.#parentMap[slug] = node;
+    this.#parentMap.set(slug, node);
+  }
+
+  deleteReactiveNode(slug: string) {
+    this.#parentMap.delete(slug);
   }
 
   getReactiveNode(slug: string): DataTree | undefined {
-    return this.#parentMap[slug];
+    return this.#parentMap.get(slug);
   }
 
   getParentReactiveNode(slug: string): DataTree | undefined {

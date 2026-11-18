@@ -8,7 +8,7 @@
   "exports": {
     ".": {
       "import": "./src/index.ts",
-      "types": "./src/index.d.ts"
+      "types": "./src/index.ts"
     },
     "./world-points": {
       "import": "./src/world-points.ts",
@@ -16,8 +16,8 @@
     }
   },
   "scripts": {
-    "build": "bun run ../reverse-geocoding-data/src/main.ts && bun run src/main.ts",
-    "update": "bun run ../reverse-geocoding-data/src/main.ts && bun run src/main.ts --refresh"
+    "build": "bun run src/main.ts",
+    "update": "bun run src/main.ts --refresh"
   },
   "dependencies": {
     "@bloknote/reverse-geocoding-data": "workspace:*",
@@ -29,7 +29,7 @@
     "@bloknote/common": "workspace:*",
     "@types/bun": "catalog:",
     "@types/geojson": "catalog:",
-    "@types/node": "^26.6.6",
+    "@types/node": "catalog:",
     "osm-api": "catalog:",
     "typescript": "catalog:"
   }

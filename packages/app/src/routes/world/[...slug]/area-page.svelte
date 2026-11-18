@@ -16,11 +16,11 @@
     slug: string;
   } = $props();
 
-  let feature = item.feature;
+  const feature = $derived(item.feature);
 </script>
 
 <EditableName {feature} featureSlug={slug} />
-<ClimbingStyles feature={item.feature} />
+<ClimbingStyles {feature} />
 <EditableDescription {feature} featureSlug={slug} />
 
 {#if item.stats?.totalRoutes}

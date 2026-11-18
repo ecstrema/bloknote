@@ -49,7 +49,10 @@
   // svelte-ignore state_referenced_locally
   // We need to integrate the data outside of the effect to ensure that the data is available for the initial render. This is important for SSR and hydration.
   appDataTree.integrateElementsIntoTree(additionalDataJSON);
-  $effect(() => appDataTree.integrateElementsIntoTree(additionalDataJSON));
+  $effect(() => {
+    const extra = additionalDataJSON;
+    untrack(() => appDataTree.integrateElementsIntoTree(extra));
+  });
 
   const integrateSelfIntoTree = () => {
     const c = currentItem;
@@ -71,7 +74,7 @@
       // Pass the correctly proxied item to the refresh function
       const reactiveItem = appDataTree.getReactiveNode(slug);
       if (reactiveItem) {
-        appState.osmUser.refreshItem(reactiveItem as DataTree<OsmFeature>);
+        appState.osmUser.refreshItem(reactiveItem as DataTree<OsmFeature>, slug);
       }
     });
   });

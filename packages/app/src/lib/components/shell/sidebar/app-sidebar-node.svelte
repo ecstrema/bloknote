@@ -16,6 +16,8 @@
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import { onMount, untrack } from "svelte";
   import { getGrade } from "#lib/data/parse/osm-tags.js";
+  import { isTradRoute } from "#lib/data/parse/route-styles.js";
+  import TradCamIcon from "#components/trad-cam-icon.svelte";
   import type { OsmFeature } from "osm-api";
   import { page } from "$app/state";
   import clsx from "clsx";
@@ -192,11 +194,15 @@
       <span class="pointer-events-none absolute inset-x-1 bottom-0 z-10 h-0.5 bg-primary" aria-hidden="true"></span>
     {/if}
     {#if itemType === "route"}
-      {@const grade = getGrade((item.feature as OsmFeature).tags || {})}
+      {@const routeTags = (item.feature as OsmFeature).tags || {}}
+      {@const grade = getGrade(routeTags)}
       {#if grade}
         <HolyGrade class="text-xs font-semibold" grade={grade.v} />
       {:else}
         <CircleQuestionMarkIcon class="text-destructive" />
+      {/if}
+      {#if isTradRoute(routeTags)}
+        <TradCamIcon />
       {/if}
     {:else if itemType === "gym"}
       <BuildingIcon />
