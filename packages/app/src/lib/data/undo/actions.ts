@@ -197,7 +197,13 @@ export class UndoableNodeCreate extends OsmUndoable implements Undoable {
 
 /** Add a new route to the parent DataTree */
 export class UndoableRouteCreate extends UndoableNodeCreate {
-  constructor(osmUser: OsmUser, tree: AppDataTree, parent: DataTree, parentSlug: string) {
+  constructor(
+    osmUser: OsmUser,
+    tree: AppDataTree,
+    parent: DataTree,
+    parentSlug: string,
+    coordinates: { lat: number; lon: number } = { lat: 0, lon: 0 },
+  ) {
     const newRoute: OsmNode = {
       type: "node",
       id: -Date.now(),
@@ -207,8 +213,8 @@ export class UndoableRouteCreate extends UndoableNodeCreate {
         climbing: "route_bottom",
       },
       changeset: 0,
-      lat: 0,
-      lon: 0,
+      lat: coordinates.lat,
+      lon: coordinates.lon,
       timestamp: "-1",
       uid: -1,
       user: "",

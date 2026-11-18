@@ -3,13 +3,12 @@
   import { Button } from "#components/ui/button/index.js";
 
   import AppSidebarNode from "./app-sidebar-node.svelte";
-  import { getSearchFilter, getSidebarChildren } from "./utils";
+  import { addRouteFromSidebar, getItemUrl, getSearchFilter, getSidebarChildren } from "./utils";
   import type { OsmRelation, OsmWay } from "osm-api";
   import { featureToType } from "#lib/data/parse/data.js";
   import { getAppState } from "#lib/data/app-state.js";
   import { replaceState } from "$app/navigation";
   import { page } from "$app/state";
-  import { getItemUrl } from "./utils";
 
   let {
     item = $bindable(),
@@ -27,12 +26,8 @@
 
   const appState = getAppState();
 
-  async function addRoute() {
-    const newSlug = appState.createRoute(item as DataTree<OsmWay | OsmRelation>, slug);
-    const feature = item.children?.[newSlug]?.feature;
-    if (feature && feature.type !== "geographic") {
-      replaceState(getItemUrl(slug, feature), page.state);
-    }
+  function addRoute() {
+    addRouteFromSidebar(appState, item as DataTree<OsmWay | OsmRelation>, slug);
   }
 
   async function addSector() {

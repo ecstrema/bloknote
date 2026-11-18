@@ -14,6 +14,7 @@ import {
   UndoableTagDelete,
 } from "./undo/actions";
 import { OsmUser } from "./network/osm.svelte";
+import type { Coordinates } from "@bloknote/climbing-data-gen";
 import type { Key, OsmFeature, OsmRelation } from "osm-api";
 import { getStaticIdentifier, type BasicOsmType } from "@bloknote/common";
 import { featureToType } from "./parse/data.js";
@@ -123,8 +124,8 @@ export class AppState {
   /**
    * Applies {@link UndoableRouteCreate} to create a new route in the parent feature.
    */
-  createRoute(parent: DataTree, parentSlug: string) {
-    const action = new UndoableRouteCreate(this.osmUser, this.tree, parent, parentSlug);
+  createRoute(parent: DataTree, parentSlug: string, coordinates?: Coordinates) {
+    const action = new UndoableRouteCreate(this.osmUser, this.tree, parent, parentSlug, coordinates);
     this.undoStack.do(action);
     return action.slug;
   }

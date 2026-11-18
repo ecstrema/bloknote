@@ -23,6 +23,7 @@
   import clsx from "clsx";
   import { getAppState } from "#lib/data/app-state.js";
   import {
+    addRouteFromSidebar,
     canDropSidebarChild,
     clearSidebarDropPosition,
     dropSidebarChild,
@@ -153,12 +154,8 @@
     endSidebarDrag();
   }
 
-  async function addRoute() {
-    const newSlug = appState.createRoute(item, slug);
-    const feature = item.children?.[newSlug]?.feature;
-    if (feature && feature.type !== "geographic") {
-      replaceState(getItemUrl(slug, feature), page.state);
-    }
+  function addRoute() {
+    addRouteFromSidebar(appState, item, slug);
   }
 
   async function addSector() {

@@ -25,6 +25,12 @@
   let height: number | undefined;
   /** False until the view was first set to a place */
   let positioned = false;
+
+  export function getMapCenter(): { lat: number; lon: number } | undefined {
+    if (!shared || !shared.element.isConnected || !positioned) return undefined;
+    const center = shared.map.getCenter();
+    return { lat: center.lat, lon: center.lng };
+  }
   let allElementsLoaded = false;
   let cachedCollection: MapElementFeatureCollection = { type: "FeatureCollection", features: [] };
   const loadedSlugs = new Set<string>();
@@ -262,6 +268,12 @@
 
         const href = feature.properties?.href;
         if (href) goto(href);
+      });
+
+      map.on("moveend", (e) => {
+        if ((e as { originalEvent?: unknown }).originalEvent) {
+          positioned = true;
+        }
       });
 
       void loadMapElements(map);

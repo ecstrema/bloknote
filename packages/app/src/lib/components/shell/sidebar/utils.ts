@@ -3,7 +3,12 @@ import { getGradeReference } from "#lib/data/parse/osm-tags.js";
 import type { DataTree } from "#lib/types.js";
 import type { OsmFeature } from "osm-api";
 import { getStaticIdentifier, type BasicOsmType } from "@bloknote/common";
+import { replaceState } from "$app/navigation";
 import { resolve } from "$app/paths";
+import { page } from "$app/state";
+import { getMapCenter } from "#components/location-map.svelte";
+import type { AppState } from "#lib/data/app-state.js";
+import { getDefaultRouteCoordinates } from "#lib/data/route-location.js";
 import { createContext } from "svelte";
 import { SvelteMap } from "svelte/reactivity";
 import type { FromCurrent } from "../providers/types";
@@ -17,6 +22,29 @@ export function getItemUrl(parentSlug: string, feature: OsmFeature): string {
     .map((segment) => segment.replace(/~relation--?\d+$/, ""))
     .join("/");
   return `${resolve("/world/[...slug]", { slug: pathSlug })}?id=${feature.type}-${feature.id}`;
+}
+
+export function addRouteFromSidebar(appState: AppState, parent: DataTree, parentSlug: string) {
+  const currentFeature = appState.currentNode.current.feature;
+  const currentSlug = appState.breadcrumbs.slugs.at(-1) ?? "";
+  const id = page.url.searchParams.get("id");
+  const queried =
+    id && (currentFeature.type === "geographic" || `${currentFeature.type}-${currentFeature.id}` !== id)
+      ? appState.findOsmItemById(id)
+      : undefined;
+
+  const coordinates = getDefaultRouteCoordinates({
+    mapCenter: getMapCenter(),
+    currentPage: queried ?? { item: appState.currentNode.current, slug: currentSlug },
+    fallbackParent: { item: parent, slug: parentSlug },
+    getNode: (s) => appState.tree.getReactiveNode(s),
+  });
+
+  const newSlug = appState.createRoute(parent, parentSlug, coordinates);
+  const feature = parent.children?.[newSlug]?.feature;
+  if (feature && feature.type !== "geographic") {
+    replaceState(getItemUrl(parentSlug, feature), page.state);
+  }
 }
 
 const ORDER_STORAGE_KEY = "bloknote:sidebar-orders";
