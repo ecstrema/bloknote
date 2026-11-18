@@ -4,6 +4,7 @@
   import type { OsmFeature } from "osm-api";
   import OpeningHours from "#components/opening-hours.svelte";
   import EditableTextarea from "./editable-textarea.svelte";
+  import EditableTooltip from "./editable-tooltip.svelte";
   import ClockIcon from "@lucide/svelte/icons/clock";
 
   const { feature, featureSlug }: { feature: OsmFeature; featureSlug: string } = $props();
@@ -19,7 +20,21 @@
       <ClockIcon class="size-4 text-muted-foreground" aria-hidden="true" />
       <span class="text-muted-foreground">Opening hours</span>
     </p>
-    {#if value}
+    {#if !unparsable}
+      <EditableTooltip>
+        {#snippet children(tooltipProps)}
+          <div {...tooltipProps} class="self-start w-full max-w-md">
+            <OpeningHours
+              {value}
+              editable={!!appState.osmUser.loggedIn}
+              onchangestart={() => appState.undoStack.beginGroup()}
+              onchange={(next) => appState.setTag(featureSlug, "opening_hours", next)}
+              onchangeend={() => appState.undoStack.endGroup()}
+            />
+          </div>
+        {/snippet}
+      </EditableTooltip>
+    {:else}
       <OpeningHours {value} />
     {/if}
     <EditableTextarea

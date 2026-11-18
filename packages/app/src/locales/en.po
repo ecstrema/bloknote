@@ -15014,7 +15014,7 @@ msgstr "Loading image…"
 msgid "Image unavailable: {0}"
 msgstr "Image unavailable: {0}"
 
-#. 0: value
+#. 0: value || 'None'
 #: src/lib/components/opening-hours.svelte
 msgid "Opening hours: {0}"
 msgstr "Opening hours: {0}"
@@ -15303,6 +15303,7 @@ msgstr "This tag already exists"
 
 #: src/lib/components/editable/editable-tags.svelte
 #: src/lib/components/editable/editable-textarea.svelte
+#: src/lib/components/opening-hours.svelte
 msgid "Enter"
 msgstr "Enter"
 
@@ -28217,6 +28218,7 @@ msgid "Delete grade"
 msgstr "Delete grade"
 
 #: src/lib/components/editable/editable-grade-value.svelte
+#: src/lib/components/opening-hours.svelte
 msgid "None"
 msgstr "None"
 
@@ -28334,3 +28336,15 @@ msgstr "<0/> Map"
 #: src/routes/world/[...slug]/+page.svelte
 msgid "View on OpenStreetMap <0/>"
 msgstr "View on OpenStreetMap <0/>"
+
+#. 0: DAYS[day]
+#: src/lib/components/opening-hours.svelte
+msgid "Drag vertically to copy {0} hours to other days"
+msgstr "Drag vertically to copy {0} hours to other days"
+
+#. 0: DAYS[day]
+#. 0: DAYS[day]
+#: src/lib/components/opening-hours.svelte
+#: src/lib/components/opening-hours.svelte
+msgid "Clear {0}"
+msgstr "Clear {0}"
