@@ -33,6 +33,12 @@ export function getNameOSM(tags: Tags): string | undefined {
   return tags.name;
 }
 
+export function isProjectRoute(tags: Tags | undefined): boolean {
+  if (!tags?.name) return false;
+  return /\b(project|projet|projekt|progetto)\b/i.test(tags.name);
+}
+
+
 const climbingStyleLabels = [
   ["sport", "Sport"],
   ["trad", "Trad"],

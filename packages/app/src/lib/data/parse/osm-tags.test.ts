@@ -6,6 +6,7 @@ import {
   getGrade,
   getLength,
   getPhone,
+  isProjectRoute,
   parseClimbingLength,
   scaleIdToTag,
 } from "./osm-tags";
@@ -108,5 +109,22 @@ describe("gym phone numbers", () => {
   it("prefers phone and falls back to contact:phone", () => {
     expect(getPhone({ phone: "+1 555 0100", "contact:phone": "+1 555 0200" })).toBe("+1 555 0100");
     expect(getPhone({ "contact:phone": "+1 555 0200" })).toBe("+1 555 0200");
+  });
+});
+
+
+describe("isProjectRoute", () => {
+  it("detects routes with 'project' or variations in name", () => {
+    expect(isProjectRoute({ name: "Project" })).toBe(true);
+    expect(isProjectRoute({ name: "The Big Project" })).toBe(true);
+    expect(isProjectRoute({ name: "Open Projet" })).toBe(true);
+    expect(isProjectRoute({ name: "Projekt 1" })).toBe(true);
+    expect(isProjectRoute({ name: "Progetto 5" })).toBe(true);
+  });
+
+  it("returns false for regular names or undefined", () => {
+    expect(isProjectRoute(undefined)).toBe(false);
+    expect(isProjectRoute({ name: "Action Directe" })).toBe(false);
+    expect(isProjectRoute({ name: "Projection" })).toBe(false);
   });
 });

@@ -8,8 +8,10 @@
   import CommonsTopo from "#lib/components/commons-topo.svelte";
   import type { DataTree } from "#lib/types.js";
   import type { OsmFeature } from "osm-api";
-  import { getCoordinates, getGrade } from "#lib/data/parse/osm-tags.js";
+  import { getCoordinates, getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
   import { getAppState } from "#lib/data/app-state.js";
+  import * as Alert from "#components/ui/alert/index.js";
+  import TriangleAlertIcon from "@lucide/svelte/icons/triangle-alert";
 
   let {
     item = $bindable(),
@@ -23,6 +25,7 @@
 
   let coordinates = $derived(getCoordinates(item.feature));
   let grade = $derived(feature.tags ? getGrade(feature.tags) : undefined);
+  const isProject = $derived(isProjectRoute(feature.tags));
   const appState = getAppState();
   const editable = $derived(appState.osmUser.loggedIn && feature.type === "node");
 </script>
@@ -32,6 +35,16 @@
   <EditableGrade {feature} {grade} featureSlug={slug} />
   <EditableLength {feature} featureSlug={slug} />
 </div>
+
+{#if isProject && grade}
+  <Alert.Root class="border-amber-500/50 bg-amber-500/10 text-amber-900 dark:text-amber-200">
+    <TriangleAlertIcon class="size-4 text-amber-600 dark:text-amber-400" />
+    <Alert.Title>Graded project warning</Alert.Title>
+    <Alert.Description>
+      This route is named "{feature.tags?.name}" but has a grade assigned ({grade.v.v}). Projects are typically unclimbed and ungraded.
+    </Alert.Description>
+  </Alert.Root>
+{/if}
 
 <ClimbingStyles {feature} />
 
