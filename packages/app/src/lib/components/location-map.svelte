@@ -206,43 +206,49 @@
       });
 
       const interactiveLayers = [
+        "route-labels",
         "routes",
+        "selected-ring",
         "cliffs",
         "areas",
         "gyms",
-        "sectors-contour",
-        "sectors-label",
-        "route-labels",
-        "selected-sector",
         "selected-sector-label",
+        "selected-sector",
+        "sectors-label",
+        "sectors-contour",
       ];
-      for (const layer of interactiveLayers) {
-        map.on("mousemove", layer, (e) => {
-          const feature = e.features?.[0];
-          if (!feature) return;
-          map.getCanvas().style.cursor = "pointer";
-          const props = feature.properties as MapElementFeature["properties"];
-          popup.setLngLat(e.lngLat).setHTML(formatPopupHtml(props)).addTo(map);
-        });
 
-        map.on("click", layer, (e) => {
-          const feature = e.features?.[0];
-          if (!feature) return;
-
-          if (feature.geometry.type === "Point") {
-            const [lon, lat] = feature.geometry.coordinates as [number, number];
-            setMarkerPosition({ lon, lat });
-          }
-
-          const href = feature.properties?.href;
-          if (href) goto(href);
-        });
-
-        map.on("mouseleave", layer, () => {
+      map.on("mousemove", (e) => {
+        const features = map.queryRenderedFeatures(e.point, { layers: interactiveLayers });
+        const feature = features[0];
+        if (!feature) {
           map.getCanvas().style.cursor = "";
           popup.remove();
-        });
-      }
+          return;
+        }
+        map.getCanvas().style.cursor = "pointer";
+        const props = feature.properties as MapElementFeature["properties"];
+        popup.setLngLat(e.lngLat).setHTML(formatPopupHtml(props)).addTo(map);
+      });
+
+      map.getCanvas().addEventListener("mouseleave", () => {
+        map.getCanvas().style.cursor = "";
+        popup.remove();
+      });
+
+      map.on("click", (e) => {
+        const features = map.queryRenderedFeatures(e.point, { layers: interactiveLayers });
+        const feature = features[0];
+        if (!feature) return;
+
+        if (feature.geometry.type === "Point") {
+          const [lon, lat] = feature.geometry.coordinates as [number, number];
+          setMarkerPosition({ lon, lat });
+        }
+
+        const href = feature.properties?.href;
+        if (href) goto(href);
+      });
 
       void loadMapElements(map);
     });

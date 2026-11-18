@@ -220,6 +220,35 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
     },
   },
   {
+    id: "selected-sector",
+    type: "line",
+    source: "climbing-elements",
+    filter: ["all", ["==", ["get", "elementType"], "sector"], ["==", ["get", "slug"], ""]],
+    paint: {
+      "line-color": "#2563eb",
+      "line-width": 3,
+    },
+  },
+  {
+    id: "selected-sector-label",
+    type: "symbol",
+    source: "climbing-elements",
+    filter: ["all", ["==", ["get", "elementType"], "sector"], ["==", ["get", "slug"], ""]],
+    layout: {
+      "symbol-placement": "line",
+      "text-field": ["get", "name"],
+      "text-size": 12,
+      "text-offset": [0, -0.6],
+      "text-allow-overlap": true,
+      "text-ignore-placement": true,
+    },
+    paint: {
+      "text-color": "#1d4ed8",
+      "text-halo-color": "#ffffff",
+      "text-halo-width": 2,
+    },
+  },
+  {
     id: "cliffs",
     type: "line",
     source: "climbing-elements",
@@ -276,35 +305,6 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "circle-color": "transparent",
       "circle-stroke-color": "#2563eb",
       "circle-stroke-width": 2.5,
-    },
-  },
-  {
-    id: "selected-sector",
-    type: "line",
-    source: "climbing-elements",
-    filter: ["all", ["==", ["get", "elementType"], "sector"], ["==", ["get", "slug"], ""]],
-    paint: {
-      "line-color": "#2563eb",
-      "line-width": 3,
-    },
-  },
-  {
-    id: "selected-sector-label",
-    type: "symbol",
-    source: "climbing-elements",
-    filter: ["all", ["==", ["get", "elementType"], "sector"], ["==", ["get", "slug"], ""]],
-    layout: {
-      "symbol-placement": "line",
-      "text-field": ["get", "name"],
-      "text-size": 12,
-      "text-offset": [0, -0.6],
-      "text-allow-overlap": true,
-      "text-ignore-placement": true,
-    },
-    paint: {
-      "text-color": "#1d4ed8",
-      "text-halo-color": "#ffffff",
-      "text-halo-width": 2,
     },
   },
   {
