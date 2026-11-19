@@ -2,10 +2,12 @@
   import * as Breadcrumb from "#components/ui/breadcrumb/index.js";
   import * as DropdownMenu from "#components/ui/dropdown-menu/index.js";
   import { Button } from "#components/ui/button/index.js";
-
+  import { getSidebarChildren } from "#components/shell/sidebar/utils.js";
+  import { featureToType } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { resolve } from "$app/paths";
   import type { BreadcrumbSegment } from "#lib/types.js";
+  import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
   import { onMount, settled } from "svelte";
   import { getAppState } from "#lib/data/app-state.js";
 
@@ -63,6 +65,27 @@
   const shownBreadcrumbSegments = $derived.by(() => {
     return breadcrumbs.slice(hidden);
   });
+
+  function getOrderedChildren(parentSlug: string) {
+    const node = appState.tree.getReactiveNode(parentSlug);
+    if (!node) return [];
+    const sorted = getSidebarChildren(node, parentSlug);
+    if (!sorted) return [];
+    const slugs = [...sorted.geographic, ...sorted.area, ...sorted.gym, ...sorted.route, ...sorted.other];
+    return slugs
+      .map((childSlug) => {
+        const child = node.children?.[childSlug];
+        return child ? { slug: childSlug, name: getLocalizedName(child.feature) || "No name" } : undefined;
+      })
+      .filter((entry): entry is { slug: string; name: string } => !!entry);
+  }
+
+  function isFolderSegment(segment: BreadcrumbSegment): boolean {
+    const feature = segment.data?.feature;
+    if (!feature) return false;
+    const type = featureToType(feature);
+    return type === "geographic" || type === "area";
+  }
 </script>
 
 {#if breadcrumbs.length > 0}
@@ -97,15 +120,24 @@
         <Breadcrumb.Separator />
       {/if}
 
-      {#each shownBreadcrumbSegments as breadcrumb (breadcrumb.slug)}
-        {@render breadcrumbFromDataJSON(breadcrumb, lastElement)}
+      {#each shownBreadcrumbSegments as breadcrumb, index (breadcrumb.slug)}
+        {@render breadcrumbFromDataJSON(
+          breadcrumb,
+          lastElement,
+          shownBreadcrumbSegments[index + 1]?.slug,
+        )}
       {/each}
     </Breadcrumb.List>
   </Breadcrumb.Root>
 {/if}
 
-{#snippet breadcrumbFromDataJSON(breadcrumb: BreadcrumbSegment, lastElement: BreadcrumbSegment)}
+{#snippet breadcrumbFromDataJSON(
+  breadcrumb: BreadcrumbSegment,
+  lastElement: BreadcrumbSegment,
+  nextSlug: string | undefined,
+)}
   {const name = $derived(breadcrumb.data ? getLocalizedName(breadcrumb.data.feature) : "")}
+  {const showArrow = $derived(breadcrumb !== lastElement || isFolderSegment(breadcrumb))}
 
   <Breadcrumb.Item>
     {#if breadcrumb === lastElement}
@@ -120,7 +152,38 @@
       </Breadcrumb.Link>
     {/if}
   </Breadcrumb.Item>
-  {#if breadcrumb !== lastElement}
-    <Breadcrumb.Separator />
+  {#if showArrow}
+    <Breadcrumb.Separator>
+      <DropdownMenu.Root
+        onOpenChange={(open) => {
+          if (open) void appState.fetchChildren(breadcrumb.slug);
+        }}
+      >
+        <DropdownMenu.Trigger>
+          {#snippet child({ props })}
+            <Button
+              {...props}
+              variant="ghost"
+              size="icon-xs"
+              class="focus-visible:ring-0 focus-visible:border-transparent"
+              aria-label="Select child of {name || 'folder'}"
+            >
+              <ChevronRightIcon />
+            </Button>
+          {/snippet}
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content align="start" class="max-h-72 overflow-y-auto">
+          {#each getOrderedChildren(breadcrumb.slug) as child (child.slug)}
+            <DropdownMenu.Item class={child.slug === nextSlug ? "bg-accent font-medium" : undefined}>
+              <a href={resolve("/world/[...slug]", { slug: child.slug })} class="size-full truncate">
+                {child.name}
+              </a>
+            </DropdownMenu.Item>
+          {:else}
+            <DropdownMenu.Item disabled>No items</DropdownMenu.Item>
+          {/each}
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    </Breadcrumb.Separator>
   {/if}
 {/snippet}
