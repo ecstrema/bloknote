@@ -13,6 +13,7 @@
   import Head from "#components/shell/head.svelte";
   import type { LayoutLoadType } from "./+layout";
   import OsmChanges from "#components/shell/osm-changes.svelte";
+  import UndoControls from "#components/shell/undo-controls.svelte";
 
   const { children, params, data }: WithChildren<LayoutProps> & { data: LayoutLoadType } = $props();
 </script>
@@ -29,6 +30,7 @@
 
         <AppTopNavigation />
         <div class="grow"></div>
+        <UndoControls />
         <ProfileButton />
       </header>
 

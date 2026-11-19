@@ -277,4 +277,27 @@ describe("AppState.createSectorWithItems", () => {
     expect(route.tags.ele).toBe("25 m");
     expect(route.tags.sport).toBeUndefined();
   });
+
+  it("tracks reactive canUndo/canRedo when clearing opening hours days", () => {
+    const { state, tree } = makeState();
+    const s1 = "europe/france/fontainebleau/crag-a/r1";
+    const node = tree.getReactiveNode(s1)!.feature as OsmNode;
+    node.tags = { name: "Gym", leisure: "sports_centre", sport: "climbing", opening_hours: "Mo 10:00-22:00" };
+
+    expect(state.undoStack.canUndo).toBe(false);
+    state.undoStack.beginGroup();
+    state.setTag(s1, "opening_hours", undefined);
+    state.undoStack.endGroup();
+
+    expect(node.tags.opening_hours).toBeUndefined();
+    expect(state.undoStack.canUndo).toBe(true);
+
+    state.undoStack.undo();
+    expect(node.tags.opening_hours).toBe("Mo 10:00-22:00");
+    expect(state.undoStack.canUndo).toBe(false);
+    expect(state.undoStack.canRedo).toBe(true);
+
+    state.undoStack.redo();
+    expect(node.tags.opening_hours).toBeUndefined();
+  });
 });

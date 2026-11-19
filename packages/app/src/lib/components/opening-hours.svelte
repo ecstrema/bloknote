@@ -97,8 +97,10 @@
     if (!editable || !week) return;
     const next = cloneWeekHours(week);
     mutate(next);
+    const formatted = formatOpeningHours(next);
+    lastEmitted = formatted;
     onchangestart?.();
-    onchange?.(formatOpeningHours(next));
+    onchange?.(formatted);
     onchangeend?.();
   }
 
