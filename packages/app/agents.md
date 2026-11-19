@@ -8,7 +8,7 @@
 
 - **Framework**: SvelteKit with `@sveltejs/adapter-static` and Svelte 5.
 - **Styling**: Tailwind CSS v4 (`@tailwindcss/vite`) with `tailwind-variants` and `clsx`/`tailwind-merge` (`cn` helper).
-- **Component Primitives**: Bits UI (`bits-ui`), Lucide icons (`@lucide/svelte`), custom UI atoms in `src/lib/components/ui/`.
+- **Component Primitives**: `shadcn-svelte` (configured in `components.json`), Bits UI (`bits-ui`), Lucide icons (`@lucide/svelte`), UI atoms in `src/lib/components/ui/`.
 - **Mapping & Charts**: MapLibre GL (`maplibre-gl`), LayerChart (`layerchart`), D3 scale (`d3-scale`).
 - **Data & Storage**: SQLite in WebAssembly (`@sqlite.org/sqlite-wasm`) via OPFS/IndexedDB, `osm-api` for Overpass and OSM changeset submissions.
 - **Localization**: Wuchale (`@wuchale/svelte`, `wuchale`), PO gettext files in `src/locales/`.
@@ -50,6 +50,7 @@ src/
 ### The Golden Rule: Encapsulate Tailwind Classes in Atomic Components
 
 - **NEVER** write repeated strings of visual utility classes (e.g. `border-input bg-background shadow-xs focus-visible:ring-2 ...`) across multiple pages or layout files.
+- **Use the `shadcn-svelte` CLI**: Components included in `shadcn-svelte` should be installed via the `shadcn-svelte` CLI from `packages/app` (e.g., `bunx shadcn-svelte@latest add <component>`) rather than written or copied manually, so they match `components.json` and stay consistent with `src/lib/components/ui/`.
 - **Standard Graphs & Charts**: Always use `layerchart` (`layerchart/svg`) with `d3-scale` for all charts and graphs (as in `src/routes/grade-comparison/GradeComparisonChart.svelte` and `src/lib/components/opening-hours.svelte`). Do not write custom hand-rolled `<svg>` charts.
 - Place all styling, variants, and interactive states in atomic components under `src/lib/components/ui/`:
   - `<Button>` (`src/lib/components/ui/button/`)

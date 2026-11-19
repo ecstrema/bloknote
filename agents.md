@@ -68,6 +68,7 @@ Bloknote is a Bun workspace monorepo powering a static climbing directory organi
 
 - **Isolate Large Tailwind Utility Strings in Base/Atomic Components**:
   - Base components (e.g. `packages/app/src/lib/components/ui/`) encapsulate design tokens, interaction states, focus rings, shadows, and borders (e.g. `<Button>`, `<Input>`, `<Select>`, `<Textarea>`, `<Dialog>`).
+  - **Install `shadcn-svelte` Components via CLI**: Any UI component available in `shadcn-svelte` should be installed using the `shadcn-svelte` CLI (`bunx shadcn-svelte@latest add <component>` inside `packages/app`) rather than written manually.
   - High-level composite/compound components and pages (`routes/**`, feature components) must **never** repeat long chains of Tailwind utility classes.
   - Compound components should only add layout and spacing classes on top (e.g., `flex gap-2 items-center`, `grid sm:grid-cols-2 gap-4`, margins/padding).
 - **Zero Duplicated Inline Class Chunks**:
