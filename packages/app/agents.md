@@ -114,7 +114,8 @@ src/
 
 - Runs SQLite WASM in the browser.
 - Background worker downloads `data-version.json` and updates local tables for offline browsing and instant search.
-- Honors `settings.lowData`: if low-data mode is on, it does not auto-download the worldwide dataset.
+- Data updates are never silent: a prompt banner in `+layout.svelte` asks to redownload when the published version differs from the local one (checked at startup and every 6 hours) or when a visited page shows newer OSM data. The banner shows the age of the local dataset, which comes from the date-based data version (YYYYMMDD).
+- Honors `settings.lowData`: if low-data mode is on, it never downloads the worldwide dataset automatically.
 
 ---
 

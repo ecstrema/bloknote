@@ -1,6 +1,5 @@
 import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
-import { createHash } from "crypto";
 
 import { ReverseGeolocator } from "./reverse-geolocation.ts";
 import type { Coordinates, DataJSON, GeographicFolderElement, OverpassRequest } from "./types.ts";
@@ -344,8 +343,13 @@ function writeStaticApiMetadata(worldDirectory: string) {
   visit(worldDirectory, "");
   const downloadJson = JSON.stringify(download);
   writeFileSync(join(worldDirectory, "download.json"), downloadJson);
+  // The version is the generation date, so clients can show how old their downloaded data is.
+  const generatedAt = new Date();
+  const version = Number(
+    `${generatedAt.getUTCFullYear()}${String(generatedAt.getUTCMonth() + 1).padStart(2, "0")}${String(generatedAt.getUTCDate()).padStart(2, "0")}`,
+  );
   writeFileSync(
     join(worldDirectory, "data-version.json"),
-    JSON.stringify({ version: createHash("sha256").update(downloadJson).digest("hex") }),
+    JSON.stringify({ version, date: generatedAt.toISOString() }),
   );
 }

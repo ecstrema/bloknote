@@ -10,6 +10,7 @@ import { browser } from "$app/env";
 import { SvelteMap } from "svelte/reactivity";
 import type { TypedMap } from "#lib/helpers/types.js";
 import { snapshot } from "#lib/helpers/svelte.svelte.js";
+import { localDb } from "#lib/data/db/local-db.svelte.js";
 
 /**
  * Maps slugs to a feature diff
@@ -478,8 +479,32 @@ export class OsmUser {
       this.#integrateUnconflictedChanges(initial, final, refreshedFeature);
       return;
     }
+
+    // A newer upstream version means the downloaded dataset is stale: suggest a full refresh.
+    if (upstreamIsNewer(item.feature, refreshedFeature)) localDb.markUpstreamChanged();
+
     item.feature = refreshedFeature;
   }
+}
+
+/**
+ * True when `upstream` comes from a newer OSM edit than the locally cached feature.
+ * Both carry the OSM object version, so a strict comparison detects any upstream modification,
+ * even when the tags happen to be identical.
+ */
+function upstreamIsNewer(cached: OsmFeature, upstream: OsmFeature): boolean {
+  if (Number.isFinite(cached.version) && Number.isFinite(upstream.version)) {
+    return upstream.version > cached.version;
+  }
+  // Fallback for features without version metadata: compare the content
+  const cachedTags = Object.entries(cached.tags ?? {}).sort(([a], [b]) => a.localeCompare(b));
+  const upstreamTags = Object.entries(upstream.tags ?? {}).sort(([a], [b]) => a.localeCompare(b));
+  if (JSON.stringify(cachedTags) !== JSON.stringify(upstreamTags)) return true;
+  if ("lat" in upstream && upstream.lat !== undefined) {
+    const cachedNode = cached as typeof upstream;
+    if (cachedNode.lat !== upstream.lat || cachedNode.lon !== upstream.lon) return true;
+  }
+  return false;
 }
 
 function sameRelationMembers(a: OsmRelation["members"], b: OsmRelation["members"]): boolean {

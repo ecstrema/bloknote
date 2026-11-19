@@ -6,6 +6,9 @@ import type { DbRequest, DbResponse, MapElementFeatureCollection, SearchFilters,
 
 export type LocalDbStatus = "unknown" | "empty" | "downloading" | "ready" | "error";
 
+/** Days after which the user is explicitly prompted to refresh an ageing dataset */
+export const DATA_STALE_AFTER_DAYS = 7;
+
 type DistributiveOmit<T, K extends keyof any> = T extends unknown ? Omit<T, K> : never;
 
 export interface FilterSearch {
@@ -21,6 +24,8 @@ class LocalDb {
   status = $state<LocalDbStatus>("unknown");
   /** False when the database lives in memory only, and would be lost on reload */
   persistent = $state(true);
+  /** True when a visited page showed that OSM has newer data than the downloaded dataset */
+  upstreamChanged = $state(false);
   /** Bytes downloaded so far, and the total when the server tells it */
   loaded = $state(0);
   total = $state<number>();
@@ -77,6 +82,21 @@ class LocalDb {
     return browser ? (localStorage.getItem(MARKER_KEY) ?? undefined) : undefined;
   }
 
+  /** Days since the downloaded dataset version, when the version marker encodes a date (YYYYMMDD) */
+  get dataAgeDays(): number | undefined {
+    const version = this.dataVersion;
+    if (!version || !/^\d{8}$/.test(version)) return undefined;
+    const date = new Date(
+      Date.UTC(Number(version.slice(0, 4)), Number(version.slice(4, 6)) - 1, Number(version.slice(6, 8))),
+    );
+    return Math.floor((Date.now() - date.getTime()) / 86_400_000);
+  }
+
+  /** Called when a visited page turned out to have newer data upstream than the local dataset */
+  markUpstreamChanged(): void {
+    this.upstreamChanged = true;
+  }
+
   /** Opens the database and checks whether it holds the current data. Safe to call repeatedly. */
   init(): Promise<void> {
     if (!browser) return Promise.resolve();
@@ -100,9 +120,18 @@ class LocalDb {
     this.status = "downloading";
     this.loaded = 0;
     this.total = undefined;
+    // Record the published dataset version rather than the app version, so the marker
+    // stays comparable with the version passed to refresh() later on.
+    let version = this.dataVersion;
     try {
-      await this.send({ type: "build", version, url: apiUrl("", "download.json") }, "status");
-      localStorage.setItem(MARKER_KEY, version);
+      const res = await fetch(apiUrl("", "data-version.json"), { cache: "no-store" });
+      if (res.ok) version = String(((await res.json()) as { version: number }).version);
+    } catch {
+      // Keep the previous marker when the published version cannot be fetched
+    }
+    try {
+      await this.send({ type: "build", version: version ?? "unknown", url: apiUrl("", "download.json") }, "status");
+      localStorage.setItem(MARKER_KEY, version ?? "unknown");
       this.status = "ready";
     } catch (err) {
       console.error("Failed to build the local database:", err);
@@ -127,6 +156,7 @@ class LocalDb {
     try {
       await this.send({ type: "build", version: dataVersion, url: apiUrl("", "download.json") }, "status");
       localStorage.setItem(MARKER_KEY, dataVersion);
+      this.upstreamChanged = false;
       this.status = "ready";
     } catch (err) {
       console.error("Failed to refresh the local database:", err);
