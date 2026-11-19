@@ -42,6 +42,7 @@
   import { goto } from "$app/navigation";
   import GripVerticalIcon from "@lucide/svelte/icons/grip-vertical";
   import { getSidebarSelection } from "./selection.svelte";
+  import { useSidebar } from "#components/ui/sidebar/index.js";
 
   let {
     slug,
@@ -54,6 +55,7 @@
   const appState = getAppState();
   const searchFilter = getSearchFilter();
   const selection = getSidebarSelection();
+  const sidebar = useSidebar();
 
   const breadcrumbSlugs = $derived(appState.breadcrumbs.slugs);
   const tree = $derived(appState.tree);
@@ -260,6 +262,9 @@
     } else {
       selection.clear();
       selection.setAnchor(slug);
+      if (sidebar.isMobile && (itemType === "route" || itemType === "gym")) {
+        sidebar.setOpenMobile(false);
+      }
     }
   }
 

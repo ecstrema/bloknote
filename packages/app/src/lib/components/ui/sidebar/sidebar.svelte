@@ -37,7 +37,10 @@
       data-sidebar="sidebar"
       data-slot="sidebar"
       data-mobile="true"
-      class={cn("bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden", className)}
+      class={cn(
+        "bg-sidebar text-sidebar-foreground w-(--sidebar-width) max-w-none sm:max-w-none p-0 [&>button]:hidden",
+        className,
+      )}
       style="--sidebar-width: {SIDEBAR_WIDTH_MOBILE};"
       {side}
     >
@@ -45,7 +48,7 @@
         <Sheet.Title>Sidebar</Sheet.Title>
         <Sheet.Description>Displays the mobile sidebar.</Sheet.Description>
       </Sheet.Header>
-      <div class="flex h-full w-full flex-col">
+      <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
         {@render children?.()}
       </div>
     </Sheet.Content>

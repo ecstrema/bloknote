@@ -99,7 +99,13 @@
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               {#snippet child({ props })}
-                <Button {...props} variant="ghost" size="icon-sm" aria-label="Settings">
+                <Button
+                  {...props}
+                  variant="ghost"
+                  size="icon-sm"
+                  class="focus-visible:ring-0 focus-visible:border-transparent"
+                  aria-label="Show hidden breadcrumbs"
+                >
                   <Breadcrumb.Ellipsis />
                 </Button>
               {/snippet}

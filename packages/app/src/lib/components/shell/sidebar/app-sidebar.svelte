@@ -41,6 +41,7 @@
   let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> & {} = $props();
 
   const appState = getAppState();
+  const sidebar = Sidebar.useSidebar();
 
   let filters = $state<SearchFilters>({ text: "", types: [], styles: [], tags: [] });
   let gradeText = $state({ min: "", max: "" });
@@ -247,6 +248,16 @@
       >
         <ListFilterIcon />
       </Button>
+      {#if sidebar.isMobile}
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Close sidebar"
+          onclick={() => sidebar.setOpenMobile(false)}
+        >
+          <XIcon />
+        </Button>
+      {/if}
     </div>
     {#if showFilters}
       <SearchFiltersPanel bind:filters bind:gradeText />
