@@ -19,6 +19,7 @@
   import LocationMap from "#lib/components/location-map.svelte";
   import MapAddDialog from "#lib/components/map-add-dialog.svelte";
   import DiagnosticsPanel from "#lib/components/diagnostics-panel.svelte";
+  import PulsePanel from "#lib/components/pulse-panel.svelte";
   import { collectSubtreeDiagnostics } from "#lib/data/parse/diagnostics.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import type { DataJSON } from "@bloknote/climbing-data-gen";
@@ -38,11 +39,14 @@
   import MapIcon from "@lucide/svelte/icons/map";
   import MapPinPlusIcon from "@lucide/svelte/icons/map-pin-plus";
   import StethoscopeIcon from "@lucide/svelte/icons/stethoscope";
+  import ActivityIcon from "@lucide/svelte/icons/activity";
   import CheckCircle2Icon from "@lucide/svelte/icons/check-circle-2";
 
-  type PageTab = "overview" | "map" | "osm" | "diagnostics";
+  type PageTab = "overview" | "map" | "osm" | "diagnostics" | "pulse";
   function parseTab(value: string | null): PageTab | undefined {
-    return value === "overview" || value === "map" || value === "osm" || value === "diagnostics" ? value : undefined;
+    return value === "overview" || value === "map" || value === "osm" || value === "diagnostics" || value === "pulse"
+      ? value
+      : undefined;
   }
 
   let { params }: PageProps = $props();
@@ -289,6 +293,10 @@
           <CheckCircle2Icon class="size-3.5 text-emerald-600 dark:text-emerald-400" aria-label="No issues" />
         {/if}
       </Tabs.Trigger>
+      <Tabs.Trigger value="pulse">
+        <ActivityIcon />
+        <span>Pulse</span>
+      </Tabs.Trigger>
     </Tabs.List>
   </div>
 
@@ -385,6 +393,12 @@
   <Tabs.Content value="diagnostics" class="flex flex-col gap-4">
     {#if effectiveTab === "diagnostics"}
       <DiagnosticsPanel {item} slug={itemSlug} />
+    {/if}
+  </Tabs.Content>
+
+  <Tabs.Content value="pulse" class="flex flex-col gap-4">
+    {#if effectiveTab === "pulse"}
+      <PulsePanel {item} slug={itemSlug} />
     {/if}
   </Tabs.Content>
 </Tabs.Root>
