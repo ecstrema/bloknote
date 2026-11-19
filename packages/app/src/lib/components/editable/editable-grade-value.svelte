@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
   import { getRelatedGradeScales, scaleIdToTag, type WithSourceTag } from "#lib/data/parse/osm-tags.js";
+  import { getDefaultGradingScales } from "#lib/data/parse/region-grading.js";
   import type { Grade } from "#lib/types.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import { Button } from "#components/ui/button/index.js";
@@ -35,16 +36,17 @@
 
   const tags = $derived(feature.tags || {});
   const relatedScales = $derived(getRelatedGradeScales(tags, grade?.v.scale));
+  const regionDefaults = $derived(getDefaultGradingScales(featureSlug));
 
   const defaultScaleId = $derived.by((): ScaleId => {
     const first = relatedScales[0];
-    if (first?.gradeType === "boulder" && preferredBoulderScale.current !== "local") {
-      return preferredBoulderScale.current;
+    if (first?.gradeType === "boulder") {
+      return preferredBoulderScale.current !== "local" ? preferredBoulderScale.current : regionDefaults.boulder;
     }
-    if (first?.gradeType === "route" && preferredRouteScale.current !== "local") {
-      return preferredRouteScale.current;
+    if (first?.gradeType === "route") {
+      return preferredRouteScale.current !== "local" ? preferredRouteScale.current : regionDefaults.route;
     }
-    return first?.id ?? "YDS";
+    return first?.id ?? regionDefaults.route;
   });
 
   const activeScaleId = $derived(
