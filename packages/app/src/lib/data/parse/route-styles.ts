@@ -64,6 +64,17 @@ export function extractRouteStyle(tags: Record<string, string>): string {
   return "sport";
 }
 
+export function isIceRoute(tags: Record<string, string> | undefined): boolean {
+  if (!tags) return false;
+  return (
+    tags["climbing:ice"] === "yes" ||
+    tags["climbing:dry"] === "yes" ||
+    tags.climbing === "drytooling" ||
+    !!tags["climbing:grade:ice"] ||
+    !!tags["climbing:grade:dry"]
+  );
+}
+
 export function isTradRoute(tags: Record<string, string> | undefined): boolean {
   if (!tags) return false;
   if (tags["climbing:trad"] === "yes" || tags["climbing:mixed"] === "yes") {

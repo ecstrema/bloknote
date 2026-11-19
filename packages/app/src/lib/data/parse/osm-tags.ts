@@ -127,12 +127,10 @@ export function getRelatedGradeScales(tags: Tags, currentScale?: ScaleId | "unkn
     tags["climbing:boulder"] === "yes" ||
     tags.climbing === "boulder" ||
     tags.climbing === "bouldering";
-  const isIce =
-    tags["climbing:ice"] === "yes" ||
-    tags["climbing:mixed"] === "yes" ||
-    tags["climbing:dry"] === "yes" ||
-    tags.climbing === "drytooling";
-  const isAid = tags["climbing:aid"] === "yes";
+  const isIce = tags["climbing:ice"] === "yes" || !!tags["climbing:grade:ice"];
+  const isMixed = tags["climbing:mixed"] === "yes" || !!tags["climbing:grade:mixed"];
+  const isDry = tags["climbing:dry"] === "yes" || tags.climbing === "drytooling" || !!tags["climbing:grade:dry"];
+  const isAid = tags["climbing:aid"] === "yes" || !!tags["climbing:grade:aid"];
   const isRockRoute =
     tags["climbing:sport"] === "yes" ||
     tags["climbing:trad"] === "yes" ||
@@ -142,7 +140,14 @@ export function getRelatedGradeScales(tags: Tags, currentScale?: ScaleId | "unkn
     tags["climbing:deepwater"] === "yes";
 
   if (isBoulder) addAll(allBoulderScales);
-  if (isIce) addAll(allIceScales);
+  if (isDry && !isIce && !isMixed) {
+    const dry = allIceScales.find((s) => s.id === "DryTooling");
+    if (dry) scales.set(dry.id, dry);
+  } else if (isMixed && !isIce) {
+    const mixed = allIceScales.find((s) => s.id === "Mixed");
+    if (mixed) scales.set(mixed.id, mixed);
+  }
+  if (isIce || isMixed || isDry) addAll(allIceScales);
   if (isAid) addAll(allAidScales);
   if (isRockRoute) addAll(allRouteScales);
 

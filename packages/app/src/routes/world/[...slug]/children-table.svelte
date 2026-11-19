@@ -4,8 +4,9 @@
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getGrade } from "#lib/data/parse/osm-tags.js";
   import { getAreaKindLabel } from "#lib/data/parse/diagnostics.js";
-  import { isTradRoute } from "#lib/data/parse/route-styles.js";
+  import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
+  import SnowflakeIcon from "@lucide/svelte/icons/snowflake";
   import type { DataTree } from "#lib/types.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import { sortChildren, type SortedChildren } from "#components/shell/sidebar/utils.ts";
@@ -82,6 +83,9 @@
               {/if}
               {#if isTradRoute(routeTags)}
                 <TradCamIcon />
+              {/if}
+              {#if isIceRoute(routeTags)}
+                <SnowflakeIcon class="size-3.5 shrink-0 text-cyan-500" aria-label="Ice / dry-tooling route" />
               {/if}
             </span>
           </Table.Cell>

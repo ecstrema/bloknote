@@ -16,8 +16,9 @@
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import { onMount, untrack } from "svelte";
   import { getGrade } from "#lib/data/parse/osm-tags.js";
-  import { isTradRoute } from "#lib/data/parse/route-styles.js";
+  import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
+  import SnowflakeIcon from "@lucide/svelte/icons/snowflake";
   import type { OsmFeature } from "osm-api";
   import { page } from "$app/state";
   import clsx from "clsx";
@@ -326,6 +327,9 @@
       {/if}
       {#if isTradRoute(routeTags)}
         <TradCamIcon />
+      {/if}
+      {#if isIceRoute(routeTags)}
+        <SnowflakeIcon class="size-3.5 shrink-0 text-cyan-500" aria-label="Ice / dry-tooling route" />
       {/if}
     {:else if itemType === "gym"}
       <BuildingIcon />

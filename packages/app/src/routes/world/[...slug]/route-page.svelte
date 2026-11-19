@@ -7,8 +7,9 @@
   import type { DataTree } from "#lib/types.js";
   import type { OsmFeature } from "osm-api";
   import { getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
-  import { isTradRoute } from "#lib/data/parse/route-styles.js";
+  import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
+  import SnowflakeIcon from "@lucide/svelte/icons/snowflake";
   import * as Alert from "#components/ui/alert/index.js";
   import TriangleAlertIcon from "@lucide/svelte/icons/triangle-alert";
 
@@ -30,6 +31,9 @@
   <EditableGrade {feature} {grade} featureSlug={slug} />
   {#if isTradRoute(feature.tags)}
     <TradCamIcon class="self-center" />
+  {/if}
+  {#if isIceRoute(feature.tags)}
+    <SnowflakeIcon class="size-3.5 shrink-0 self-center text-cyan-500" aria-label="Ice / dry-tooling route" />
   {/if}
   <EditableLength {feature} featureSlug={slug} />
 </div>
