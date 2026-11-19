@@ -12,8 +12,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "check": "wuchale && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "wuchale && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test": "vitest",
     "region-names": "bun run scripts/region-names.ts"
   },
