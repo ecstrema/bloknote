@@ -14881,6 +14881,7 @@ msgstr "Point"
 
 #: src/lib/components/diagnostics-panel.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/pulse-panel.svelte
 msgid "Unnamed"
 msgstr "Unnamed"
 
@@ -15590,9 +15591,8 @@ msgstr "Regions"
 msgid "Compare boulder grades"
 msgstr "Compare boulder grades"
 
-#: src/routes/+layout.svelte
-msgid "New climbing data is available. Download it in the background?"
-msgstr "New climbing data is available. Download it in the background?"
+#~ msgid "New climbing data is available. Download it in the background?"
+#~ msgstr "New climbing data is available. Download it in the background?"
 
 #: src/routes/world/+error.svelte
 msgid "Page not found | Bloknote"
@@ -16767,3 +16767,75 @@ msgstr[1] "# features modified"
 
 #~ msgid "'Amran Governorate"
 #~ msgstr "'Amran Governorate"
+
+#. 0: days
+#: src/routes/+layout.svelte
+msgid "{0} days ago"
+msgstr "{0} days ago"
+
+#. 0: days
+#: src/routes/+layout.svelte
+msgid "{0} days ago (over a week old)"
+msgstr "{0} days ago (over a week old)"
+
+#: src/routes/+layout.svelte
+msgid "New climbing data is available"
+msgstr "New climbing data is available"
+
+#. 0: dataAgeLabel()
+#: src/routes/+layout.svelte
+msgid "Your offline data is from {0}"
+msgstr "Your offline data is from {0}"
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Pulse"
+msgstr "Pulse"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap)."
+msgstr "This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap)."
+
+#: src/lib/components/pulse-panel.svelte
+msgid "No OSM edit timestamps available."
+msgstr "No OSM edit timestamps available."
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Edit statistics"
+msgstr "Edit statistics"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Last edit"
+msgstr "Last edit"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Median edit age"
+msgstr "Median edit age"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Oldest edit"
+msgstr "Oldest edit"
+
+#. 0: stats.total; 1: stats.total === 1 ? "" \\: "s"; 2: stats.untimed > 0 ? ` (+${stats.untimed} without timestamp)` \\: ""
+#: src/lib/components/pulse-panel.svelte
+msgid "{0} item{1}{2}"
+msgstr "{0} item{1}{2}"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Last edits per year"
+msgstr "Last edits per year"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "How stale is the mapping?"
+msgstr "How stale is the mapping?"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Recently edited items"
+msgstr "Recently edited items"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Recently edited"
+msgstr "Recently edited"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Loading edit history…"
+msgstr "Loading edit history…"

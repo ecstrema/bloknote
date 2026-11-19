@@ -14881,6 +14881,7 @@ msgstr ""
 
 #: src/lib/components/diagnostics-panel.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/pulse-panel.svelte
 msgid "Unnamed"
 msgstr "Sem nome"
 
@@ -15590,9 +15591,8 @@ msgstr ""
 msgid "Compare boulder grades"
 msgstr ""
 
-#: src/routes/+layout.svelte
-msgid "New climbing data is available. Download it in the background?"
-msgstr ""
+#~ msgid "New climbing data is available. Download it in the background?"
+#~ msgstr ""
 
 #: src/routes/world/+error.svelte
 msgid "Page not found | Bloknote"
@@ -16768,3 +16768,75 @@ msgstr[2] "# elementos modificados"
 
 #~ msgid "'Amran Governorate"
 #~ msgstr ""
+
+#. 0: days
+#: src/routes/+layout.svelte
+msgid "{0} days ago"
+msgstr ""
+
+#. 0: days
+#: src/routes/+layout.svelte
+msgid "{0} days ago (over a week old)"
+msgstr ""
+
+#: src/routes/+layout.svelte
+msgid "New climbing data is available"
+msgstr ""
+
+#. 0: dataAgeLabel()
+#: src/routes/+layout.svelte
+msgid "Your offline data is from {0}"
+msgstr ""
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Pulse"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap)."
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "No OSM edit timestamps available."
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Edit statistics"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Last edit"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Median edit age"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Oldest edit"
+msgstr ""
+
+#. 0: stats.total; 1: stats.total === 1 ? "" \\: "s"; 2: stats.untimed > 0 ? ` (+${stats.untimed} without timestamp)` \\: ""
+#: src/lib/components/pulse-panel.svelte
+msgid "{0} item{1}{2}"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Last edits per year"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "How stale is the mapping?"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Recently edited items"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Recently edited"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Loading edit history…"
+msgstr ""
