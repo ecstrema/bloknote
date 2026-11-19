@@ -3,6 +3,7 @@
   import ChildrenTable from "./children-table.svelte";
   import ClimbingStyles from "#components/climbing-styles.svelte";
   import CommonsTopo from "#lib/components/commons-topo.svelte";
+  import SectorStats from "#lib/components/sector-stats.svelte";
   import type { OsmFeature } from "osm-api";
   import type { DataTree } from "#lib/types.js";
 
@@ -17,12 +18,15 @@
   const feature = $derived(item.feature);
 </script>
 
+<CommonsTopo {feature} featureSlug={slug} />
+
 <ClimbingStyles {feature} />
 <EditableDescription {feature} featureSlug={slug} />
 
 {#if item.stats?.totalRoutes}
-  <p>{item.stats.totalRoutes} routes in total</p>
+  <p class="text-sm text-muted-foreground">{item.stats.totalRoutes} routes in total</p>
 {/if}
 
+<SectorStats {item} {slug} />
+
 <ChildrenTable bind:item />
-<CommonsTopo {feature} featureSlug={slug} />
