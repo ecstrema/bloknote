@@ -121,4 +121,31 @@ describe("AppState.createSectorWithItems", () => {
     expect(cragNode.children![s1]).toBeUndefined();
     expect(cragNode.children![s2]).toBeUndefined();
   });
+
+  it("supports bulk grading scale conversion, climbing type change, move, and delete with undo", () => {
+    const { state, tree, cragNode } = makeState();
+    const s1 = "europe/france/fontainebleau/crag-a/r1";
+    const s2 = "europe/france/fontainebleau/crag-a/r2";
+    state.setTag(s1, "climbing:grade:french", "6a");
+    state.setTag(s2, "climbing:grade:french", "7a");
+
+    expect(state.bulkChangeGradingScale([s1, s2], "YDS")).toBe(2);
+    expect((tree.getReactiveNode(s1)!.feature as OsmNode).tags).toMatchObject({ "climbing:grade:yds_class": "5.10a" });
+    expect((tree.getReactiveNode(s2)!.feature as OsmNode).tags).toMatchObject({ "climbing:grade:yds_class": "5.11d" });
+    expect((tree.getReactiveNode(s1)!.feature as OsmNode).tags?.["climbing:grade:french"]).toBeUndefined();
+
+    expect(state.bulkSetClimbingType([s1, s2], "trad")).toBe(2);
+    expect((tree.getReactiveNode(s1)!.feature as OsmNode).tags?.["climbing:trad"]).toBe("yes");
+
+    state.moveItemsToParent([s1], "europe/france/fontainebleau");
+    expect(tree.getReactiveNode("europe/france/fontainebleau/r1")).toBeDefined();
+    expect(cragNode.children![s1]).toBeUndefined();
+
+    state.deleteNodes([s2]);
+    expect(tree.getReactiveNode(s2)).toBeUndefined();
+    expect(state.osmUser.changes.get(s2)?.final).toBeUndefined();
+
+    state.undoStack.undo();
+    expect(tree.getReactiveNode(s2)).toBeDefined();
+  });
 });

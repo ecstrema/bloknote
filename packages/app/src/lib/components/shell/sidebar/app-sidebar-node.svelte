@@ -317,7 +317,7 @@
                 {/if}
                 <DropdownMenu.Item>Download images</DropdownMenu.Item>
                 <DropdownMenu.Separator />
-                <DropdownMenu.Item>Delete area</DropdownMenu.Item>
+                <DropdownMenu.Item onclick={() => appState.deleteNodes([slug])}>Delete area</DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Root>
           {/if}

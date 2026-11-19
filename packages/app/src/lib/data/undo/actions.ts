@@ -414,6 +414,86 @@ export class UndoableReparentNode extends OsmUndoable implements Undoable {
   }
 }
 
+/** Delete an existing or newly created node from the DataTree and mark it deleted in OSM. */
+export class UndoableNodeDelete extends OsmUndoable implements Undoable {
+  #featureBefore: OsmFeature;
+  #memberIndex = -1;
+  #removedMember: OsmRelation["members"][number] | undefined;
+
+  constructor(
+    osmUser: OsmUser,
+    private tree: AppDataTree,
+    private node: DataTree<OsmFeature>,
+    private slug: string,
+    private parent: DataTree,
+    private parentSlug: string,
+  ) {
+    super(osmUser);
+    this.#featureBefore = snapshot(node.feature);
+  }
+
+  #collectDescendants(root: DataTree): [string, DataTree][] {
+    const entries: [string, DataTree][] = [];
+    for (const [childSlug, child] of Object.entries(root.children ?? {})) {
+      entries.push([childSlug, child], ...this.#collectDescendants(child));
+    }
+    return entries;
+  }
+
+  do() {
+    if (this.parent.feature.type === "relation") {
+      const rel = this.parent.feature;
+      const before = snapshot(rel);
+      this.#memberIndex = rel.members.findIndex(
+        (m) => m.type === this.node.feature.type && m.ref === this.node.feature.id,
+      );
+      if (this.#memberIndex !== -1) {
+        this.#removedMember = rel.members[this.#memberIndex];
+        rel.members = rel.members.filter((_, idx) => idx !== this.#memberIndex);
+        this.osmUser.markAsDirty(before, this.parentSlug, rel);
+      }
+    }
+
+    for (const [descSlug] of this.#collectDescendants(this.node)) {
+      this.tree.deleteReactiveNode(descSlug);
+      dataClient.unregisterLocalNode(descSlug);
+    }
+    this.tree.deleteReactiveNode(this.slug);
+    dataClient.unregisterLocalNode(this.slug);
+
+    if (this.parent.children) {
+      delete this.parent.children[this.slug];
+      if (this.parent.childrenFetched) dataClient.registerLocalNode(this.parentSlug, this.parent);
+    }
+
+    this.osmUser.markAsDirty(this.#featureBefore, this.slug, undefined);
+  }
+
+  undo() {
+    this.parent.children ??= {};
+    this.parent.children[this.slug] = this.node;
+    const reactiveNode = this.parent.children[this.slug]!;
+    this.tree.setReactiveNode(this.slug, reactiveNode);
+    dataClient.registerLocalNode(this.slug, reactiveNode);
+    for (const [descSlug, descNode] of this.#collectDescendants(reactiveNode)) {
+      this.tree.setReactiveNode(descSlug, descNode);
+      dataClient.registerLocalNode(descSlug, descNode);
+    }
+    if (this.parent.childrenFetched) dataClient.registerLocalNode(this.parentSlug, this.parent);
+
+    if (this.parent.feature.type === "relation" && this.#removedMember) {
+      const rel = this.parent.feature;
+      const before = snapshot(rel);
+      const nextMembers = [...rel.members];
+      nextMembers.splice(Math.min(this.#memberIndex, nextMembers.length), 0, this.#removedMember);
+      rel.members = nextMembers;
+      this.osmUser.markAsDirty(before, this.parentSlug, rel);
+    }
+
+    this.osmUser.markAsDirty(undefined, this.slug, this.#featureBefore);
+  }
+}
+
 /** Completely replace a feature with another. Set the new feature to undefined to reset to initial. */
 export class UndoableFeatureSet extends OsmUndoable implements Undoable {
   item: DataTree<OsmFeature>;

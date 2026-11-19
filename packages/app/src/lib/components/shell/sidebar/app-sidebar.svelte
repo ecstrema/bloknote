@@ -11,21 +11,28 @@
 
   import Input from "#components/ui/input/input.svelte";
   import type { DataTree } from "#lib/types.js";
-  import { getItemUrl, restoreSidebarOrders, setSearchFilter, type SearchFilter } from "./utils";
+  import { restoreSidebarOrders, setSearchFilter, type SearchFilter } from "./utils";
   import { getAppState } from "#lib/data/app-state.js";
   import { localDb, type FilterSearch } from "#lib/data/db/local-db.svelte.js";
   import { settings } from "#lib/data/settings.svelte.js";
   import type { SearchFilters } from "#lib/data/db/types.js";
   import { getParentSlugs } from "#lib/helpers/slug.js";
   import { Button } from "#components/ui/button/index.js";
-  import * as Dialog from "#components/ui/dialog/index.js";
-  import { goto } from "$app/navigation";
-  import { commonParentSlug } from "#lib/data/app-state.js";
+  import * as ContextMenu from "#components/ui/context-menu/index.js";
+  import * as DropdownMenu from "#components/ui/dropdown-menu/index.js";
+  import { atproto } from "#lib/data/network/atproto.svelte.js";
+  import { scaleIdToTag } from "#lib/data/parse/osm-tags.js";
+  import { ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
+  import { allScales } from "@bloknote/holy-grade";
+  import SidebarBulkDialogs, { type BulkDialogKind } from "./sidebar-bulk-dialogs.svelte";
   import { SidebarSelection, setSidebarSelection } from "./selection.svelte";
   import XIcon from "@lucide/svelte/icons/x";
   import ListFilterIcon from "@lucide/svelte/icons/list-filter";
   import ChevronsDownUpIcon from "@lucide/svelte/icons/chevrons-down-up";
+  import FolderInputIcon from "@lucide/svelte/icons/folder-input";
   import FolderPlusIcon from "@lucide/svelte/icons/folder-plus";
+  import MoreHorizontalIcon from "@lucide/svelte/icons/more-horizontal";
+  import Trash2Icon from "@lucide/svelte/icons/trash-2";
 
   /** Above this many matches, the tree isn't opened automatically to reveal them */
   const EXPAND_LIMIT = 1000;
@@ -185,30 +192,20 @@
   });
   setSidebarSelection(selection);
 
-  let moveDialogOpen = $state(false);
-  let newSectorName = $state("");
+  let bulkDialog = $state<BulkDialogKind>(null);
+  const convertibleScales = allScales.filter((s) => !!scaleIdToTag(s.id));
+  const styleOptions = Object.entries(ROUTE_STYLE_LABELS).filter(([k]) => k !== "other");
 
-  const moveTargetParentSlug = $derived(commonParentSlug(selection.slugs));
-  const moveTargetParent = $derived(
-    moveTargetParentSlug !== undefined ? appState.tree.getReactiveNode(moveTargetParentSlug) : undefined,
-  );
-
-  function openMoveDialog() {
-    newSectorName = "";
-    moveDialogOpen = true;
-  }
-
-  function confirmMoveToNewSector(event: SubmitEvent) {
-    event.preventDefault();
-    const sectorSlug = appState.createSectorWithItems(selection.slugs, newSectorName, moveTargetParentSlug);
-    selection.clear();
-    moveDialogOpen = false;
-    if (sectorSlug) {
-      const sectorFeature = appState.tree.getReactiveNode(sectorSlug)?.feature;
-      if (sectorFeature && sectorFeature.type !== "geographic" && moveTargetParentSlug !== undefined) {
-        void goto(getItemUrl(moveTargetParentSlug, sectorFeature));
-      }
+  function handleTreeContextMenu(event: MouseEvent, triggerHandler?: (e: MouseEvent) => void) {
+    const target = (event.target as HTMLElement | null)?.closest<HTMLElement>("[data-sidebar-slug]");
+    const targetSlug = target?.dataset.sidebarSlug;
+    if (!targetSlug) {
+      if (selection.size === 0) return;
+    } else if (!selection.has(targetSlug)) {
+      selection.clear();
+      selection.toggle(targetSlug);
     }
+    triggerHandler?.(event);
   }
 </script>
 
@@ -282,10 +279,68 @@
         <Sidebar.GroupLabel
           ><a href={resolve("world")}>{getLocalizedName(appState.tree.root.feature)}</a></Sidebar.GroupLabel
         >
-        <Sidebar.GroupContent
-          ><Sidebar.Menu><AppSidebarChildren bind:item={appState.tree.root} slug={""} /></Sidebar.Menu
-          ></Sidebar.GroupContent
-        >
+        <Sidebar.GroupContent>
+          <ContextMenu.Root>
+            <ContextMenu.Trigger>
+              {#snippet child({ props })}
+                <div
+                  {...props}
+                  oncontextmenu={(e) => handleTreeContextMenu(e, props.oncontextmenu as ((ev: MouseEvent) => void) | undefined)}
+                >
+                  <Sidebar.Menu><AppSidebarChildren bind:item={appState.tree.root} slug={""} /></Sidebar.Menu>
+                </div>
+              {/snippet}
+            </ContextMenu.Trigger>
+            <ContextMenu.Content>
+              <ContextMenu.Label>{selection.size} selected</ContextMenu.Label>
+              <ContextMenu.Separator />
+              {#if appState.osmUser.loggedIn}
+                <ContextMenu.Item onclick={() => (bulkDialog = "move-folder")}>
+                  <FolderInputIcon />
+                  Move to folder...
+                </ContextMenu.Item>
+                <ContextMenu.Item onclick={() => (bulkDialog = "new-sector")}>
+                  <FolderPlusIcon />
+                  Move to new sector...
+                </ContextMenu.Item>
+                <ContextMenu.Separator />
+                <ContextMenu.Sub>
+                  <ContextMenu.SubTrigger>Change grading system</ContextMenu.SubTrigger>
+                  <ContextMenu.SubContent>
+                    {#each convertibleScales as scale (scale.id)}
+                      <ContextMenu.Item onclick={() => appState.bulkChangeGradingScale(selection.slugs, scale.id)}>
+                        {scale.name} ({scale.id})
+                      </ContextMenu.Item>
+                    {/each}
+                  </ContextMenu.SubContent>
+                </ContextMenu.Sub>
+                <ContextMenu.Sub>
+                  <ContextMenu.SubTrigger>Change climbing type</ContextMenu.SubTrigger>
+                  <ContextMenu.SubContent>
+                    {#each styleOptions as [key, label] (key)}
+                      <ContextMenu.Item onclick={() => appState.bulkSetClimbingType(selection.slugs, key)}>
+                        {label}
+                      </ContextMenu.Item>
+                    {/each}
+                  </ContextMenu.SubContent>
+                </ContextMenu.Sub>
+                <ContextMenu.Separator />
+                <ContextMenu.Item variant="destructive" onclick={() => (bulkDialog = "delete")}>
+                  <Trash2Icon />
+                  Delete selected...
+                </ContextMenu.Item>
+              {/if}
+              {#if atproto.configured}
+                <ContextMenu.Item onclick={() => (bulkDialog = "add-ticks")}>Add ticks...</ContextMenu.Item>
+              {/if}
+              {#if !appState.osmUser.loggedIn && !atproto.configured}
+                <ContextMenu.Item disabled>Log in to edit selected items</ContextMenu.Item>
+              {/if}
+              <ContextMenu.Separator />
+              <ContextMenu.Item onclick={() => selection.clear()}>Clear selection</ContextMenu.Item>
+            </ContextMenu.Content>
+          </ContextMenu.Root>
+        </Sidebar.GroupContent>
       </Sidebar.Group>
     {/if}
     {#if result?.status === "searching"}
@@ -307,37 +362,41 @@
         </Button>
       </div>
       {#if appState.osmUser.loggedIn}
-        <Button size="sm" class="w-full" onclick={openMoveDialog}>
-          <FolderPlusIcon />
-          Move to new sector
-        </Button>
+        <div class="flex gap-1">
+          <Button size="sm" class="flex-1" onclick={() => (bulkDialog = "new-sector")}>
+            <FolderPlusIcon />
+            Move to new sector
+          </Button>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              {#snippet child({ props })}
+                <Button {...props} size="sm" variant="outline" aria-label="Bulk actions">
+                  <MoreHorizontalIcon />
+                </Button>
+              {/snippet}
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content align="end">
+              <DropdownMenu.Item onclick={() => (bulkDialog = "move-folder")}>Move to folder...</DropdownMenu.Item>
+              <DropdownMenu.Item onclick={() => (bulkDialog = "change-scale")}>Change grading system...</DropdownMenu.Item>
+              <DropdownMenu.Item onclick={() => (bulkDialog = "change-type")}>Change climbing type...</DropdownMenu.Item>
+              {#if atproto.configured}
+                <DropdownMenu.Item onclick={() => (bulkDialog = "add-ticks")}>Add ticks...</DropdownMenu.Item>
+              {/if}
+              <DropdownMenu.Separator />
+              <DropdownMenu.Item variant="destructive" onclick={() => (bulkDialog = "delete")}>
+                Delete selected...
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        </div>
+      {:else if atproto.configured}
+        <Button size="sm" class="w-full" onclick={() => (bulkDialog = "add-ticks")}>Add ticks...</Button>
       {:else}
-        <p class="text-xs text-muted-foreground">Log in to OpenStreetMap to move into a new sector.</p>
+        <p class="text-xs text-muted-foreground">Log in to OpenStreetMap for bulk actions.</p>
       {/if}
     </Sidebar.Footer>
   {/if}
   <Sidebar.Rail class="translate-x-0" />
 </Sidebar.Root>
 
-<Dialog.Root bind:open={moveDialogOpen}>
-  <Dialog.Content class="max-w-sm">
-    <form onsubmit={confirmMoveToNewSector} class="flex flex-col gap-4">
-      <Dialog.Header>
-        <Dialog.Title>Move to new sector</Dialog.Title>
-        <Dialog.Description>
-          Create a new sector{moveTargetParent ? ` in ${getLocalizedName(moveTargetParent.feature)}` : ""} and move
-          {selection.size} selected item{selection.size === 1 ? "" : "s"} into it.
-        </Dialog.Description>
-      </Dialog.Header>
-      <Input bind:value={newSectorName} placeholder="Sector name (optional)" autofocus />
-      <Dialog.Footer>
-        <Dialog.Close>
-          {#snippet child({ props })}
-            <Button {...props} type="button" variant="outline">Cancel</Button>
-          {/snippet}
-        </Dialog.Close>
-        <Button type="submit">Create & move</Button>
-      </Dialog.Footer>
-    </form>
-  </Dialog.Content>
-</Dialog.Root>
+<SidebarBulkDialogs bind:dialog={bulkDialog} {selection} />

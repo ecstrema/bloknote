@@ -8,6 +8,7 @@ import {
   UndoableAreaCreate,
   UndoableFeatureSet,
   UndoableMove,
+  UndoableNodeDelete,
   UndoableRelationMembersSet,
   UndoableReparentNode,
   UndoableRouteCreate,
@@ -15,6 +16,8 @@ import {
   UndoableTagDelete,
 } from "./undo/actions";
 import { getParentSlug } from "#lib/helpers/slug.js";
+import { convertGrade, getScale, type ScaleId } from "@bloknote/holy-grade";
+import { getGrade, scaleIdToTag } from "./parse/osm-tags.js";
 import { OsmUser } from "./network/osm.svelte";
 import type { Coordinates } from "@bloknote/climbing-data-gen";
 import type { Key, OsmFeature, OsmRelation } from "osm-api";
@@ -208,6 +211,110 @@ export class AppState {
     }
     this.undoStack.endGroup();
     return sectorSlug;
+  }
+
+  #filterTopLevelOsmSlugs(itemSlugs: string[]): string[] {
+    return itemSlugs.filter((slug) => {
+      const node = this.tree.getReactiveNode(slug);
+      if (!node || node.feature.type === "geographic") return false;
+      return !itemSlugs.some((other) => other !== slug && slug.startsWith(`${other}/`));
+    });
+  }
+
+  /** Moves multiple selected OSM items into an existing target parent (geographic region or area). */
+  moveItemsToParent(itemSlugs: string[], targetParentSlug: string): string[] {
+    const topSlugs = this.#filterTopLevelOsmSlugs(itemSlugs);
+    if (topSlugs.length === 0) return [];
+
+    this.undoStack.beginGroup();
+    const moved: string[] = [];
+    for (const slug of topSlugs) {
+      const nextSlug = this.reparentNode(slug, targetParentSlug);
+      if (nextSlug) moved.push(nextSlug);
+    }
+    this.undoStack.endGroup();
+    return moved;
+  }
+
+  /** Deletes multiple selected OSM items as a single undoable step. */
+  deleteNodes(itemSlugs: string[]) {
+    const topSlugs = this.#filterTopLevelOsmSlugs(itemSlugs);
+    if (topSlugs.length === 0) return;
+
+    this.undoStack.beginGroup();
+    for (const slug of topSlugs) {
+      const parentSlug = getParentSlug(slug);
+      if (parentSlug === undefined) continue;
+      const node = this.tree.getReactiveNode(slug);
+      const parent = this.tree.getReactiveNode(parentSlug);
+      if (!node || !parent || node.feature.type === "geographic") continue;
+      this.undoStack.do(
+        new UndoableNodeDelete(this.osmUser, this.tree, node as DataTree<OsmFeature>, slug, parent, parentSlug),
+      );
+    }
+    this.undoStack.endGroup();
+  }
+
+  /** Converts grades of all selected graded routes to `targetScaleId` in one undoable step. */
+  bulkChangeGradingScale(itemSlugs: string[], targetScaleId: ScaleId): number {
+    const targetScale = getScale(targetScaleId);
+    const targetTagKey = scaleIdToTag(targetScaleId);
+    if (!targetScale || !targetTagKey) return 0;
+
+    let updated = 0;
+    this.undoStack.beginGroup();
+    for (const slug of itemSlugs) {
+      const node = this.tree.getReactiveNode(slug);
+      const feature = node?.feature;
+      if (!feature || feature.type === "geographic" || !feature.tags) continue;
+      const grade = getGrade(feature.tags);
+      if (!grade || grade.v.scale === "unknown") continue;
+      const converted = convertGrade(grade.v.v, grade.v.scale, targetScale);
+      if (!converted) continue;
+
+      if (grade.source !== targetTagKey) {
+        this.deleteTag(slug, grade.source);
+      }
+      this.setTag(slug, targetTagKey, converted);
+      updated++;
+    }
+    this.undoStack.endGroup();
+    return updated;
+  }
+
+  /** Sets `climbing:<styleKey>=yes` (optionally replacing other primary climbing styles) across selected items. */
+  bulkSetClimbingType(itemSlugs: string[], styleKey: string, replaceExisting = true): number {
+    const primaryStyleKeys: Key[] = [
+      "climbing:sport",
+      "climbing:boulder",
+      "climbing:trad",
+      "climbing:aid",
+      "climbing:ice",
+      "climbing:mixed",
+      "climbing:dry",
+      "climbing:toprope",
+      "climbing:deepwater",
+    ];
+    const targetKey = `climbing:${styleKey}` as Key;
+    let updated = 0;
+
+    this.undoStack.beginGroup();
+    for (const slug of itemSlugs) {
+      const node = this.tree.getReactiveNode(slug);
+      const feature = node?.feature;
+      if (!feature || feature.type === "geographic") continue;
+      if (replaceExisting) {
+        for (const k of primaryStyleKeys) {
+          if (k !== targetKey && feature.tags?.[k] !== undefined) {
+            this.deleteTag(slug, k);
+          }
+        }
+      }
+      this.setTag(slug, targetKey, "yes");
+      updated++;
+    }
+    this.undoStack.endGroup();
+    return updated;
   }
 
   findOsmItemById(id: string): { item: DataTree<OsmFeature>; slug: string } | undefined {
