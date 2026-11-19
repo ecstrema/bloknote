@@ -4,6 +4,7 @@
   import { resolve } from "$app/paths";
   import { Button } from "#components/ui/button/index.js";
   import { Select } from "#components/ui/select/index.js";
+  import MapProviderToggles from "#components/map-provider-toggles.svelte";
   import { loginOsm, logoutOsm } from "#lib/data/network/osm.svelte.js";
   import ArrowLeftIcon from "@lucide/svelte/icons/arrow-left";
   import { allBoulderScales, allRouteScales, convertGrade, french } from "@bloknote/holy-grade";
@@ -158,6 +159,17 @@
         <input type="checkbox" class="size-4 accent-primary" bind:checked={settings.lowData} />
         Low data usage
       </label>
+    </section>
+
+    <section class="grid gap-4 border-b py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-start">
+      <div>
+        <h2 class="font-medium">Open in maps</h2>
+        <p class="mt-1 text-sm text-muted-foreground">
+          Choose which map providers appear in the "Open in" drawer. Mobile-only apps cannot be detected automatically
+          from a web browser.
+        </p>
+      </div>
+      <MapProviderToggles />
     </section>
 
     <section class="grid gap-4 border-b py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
