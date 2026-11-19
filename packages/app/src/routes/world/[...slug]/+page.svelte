@@ -83,18 +83,23 @@
   function onTabChange(value: string) {
     const next = parseTab(value) ?? "overview";
     activeTab = next;
-    const url = new URL(page.url.href);
+    // Shallow gotos update the browser URL but not `page.url`, so build from `location.href`.
+    const url = new URL(location.href);
     if (next === "overview") url.searchParams.delete("tab");
     else url.searchParams.set("tab", next);
     void goto(url, { state: page.state, shallow: true, replace: true });
   }
 
   // Shared links carry the OSM id so the item can be found if its path changes.
-  // Not an effect: shallow goto updates page.url, which would re-trigger an effect.
+  // Not an effect: a shallow goto would re-trigger it. IMPORTANT: reconcile against the
+  // browser URL (`location.href`), not `page.url`: shallow gotos never update `page.url`,
+  // so every shallow goto looked unfinished here and re-triggered goto in an infinite
+  // loop (runaway memory + CPU).
   afterNavigate((navigation) => {
     untrack(() => {
-      const urlTab = parseTab(page.url.searchParams.get("tab"));
-      const existingId = page.url.searchParams.get("id");
+      const url = new URL(location.href);
+      const urlTab = parseTab(url.searchParams.get("tab"));
+      const existingId = url.searchParams.get("id");
       const targetFeature =
         (existingId ? appState.findOsmItemById(existingId)?.item.feature : undefined) ?? item.feature;
 
@@ -107,7 +112,6 @@
       }
 
       const tabForUrl = activeTab === "osm" && targetFeature.type === "geographic" ? "overview" : activeTab;
-      const url = new URL(page.url.href);
       let changed = false;
 
       if (targetFeature.type !== "geographic") {
