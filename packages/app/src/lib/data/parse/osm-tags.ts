@@ -84,7 +84,7 @@ export function getPhone(tags: Tags): string | undefined {
   return tags.phone?.trim() || tags["contact:phone"]?.trim() || undefined;
 }
 
-const gradeTags: [Key, ScaleId][] = [
+export const gradeTags: [Key, ScaleId][] = [
   ["climbing:grade:uiaa", "UIAA"],
   ["climbing:grade:yds_class", "YDS"],
   ["climbing:grade:yds", "YDS"],

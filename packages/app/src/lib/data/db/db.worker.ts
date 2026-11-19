@@ -243,6 +243,20 @@ async function handle(req: DbRequest): Promise<DbResponse> {
       const data = Object.fromEntries(rows.map(([slug, json]) => [slug as string, JSON.parse(json as string)]));
       return { id: req.id, type: "children", data };
     }
+    case "getSubtreeElements": {
+      const limit = req.limit ?? 2000;
+      const rows = req.slug
+        ? db.selectArrays(
+            "SELECT slug, data FROM elements WHERE type != 'geographic' AND (slug = ? OR substr(slug, 1, ?) = ?) LIMIT ?",
+            [req.slug, req.slug.length + 1, `${req.slug}/`, limit + 1],
+          )
+        : db.selectArrays("SELECT slug, data FROM elements WHERE type != 'geographic' LIMIT ?", [limit + 1]);
+      const truncated = rows.length > limit;
+      const data = Object.fromEntries(
+        (truncated ? rows.slice(0, limit) : rows).map(([slug, json]) => [slug as string, JSON.parse(json as string)]),
+      );
+      return { id: req.id, type: "subtreeElements", data, truncated };
+    }
     case "getTopLevel": {
       // Places directly under a geographic folder, with their coordinates (center for ways and relations)
       const rows = db.selectArrays(`

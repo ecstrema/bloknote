@@ -56,6 +56,7 @@ export type DbRequest =
   | { id: number; type: "build"; url: string; version: string }
   | { id: number; type: "getNode"; slug: string }
   | { id: number; type: "getChildren"; slug: string }
+  | { id: number; type: "getSubtreeElements"; slug: string; limit?: number }
   | { id: number; type: "getStats"; slug: string }
   | { id: number; type: "filterStart"; searchId: number; filters: SearchFilters; budgetMs: number }
   /** Continues a search that paused after using its time budget */
@@ -66,6 +67,7 @@ export type DbResponse =
   | { id: number; type: "status"; ready: boolean; persistent: boolean }
   | { id: number; type: "node"; data: DataJSON | undefined }
   | { id: number; type: "children"; data: Record<string, DataJSON> }
+  | { id: number; type: "subtreeElements"; data: Record<string, DataJSON>; truncated: boolean }
   | { id: number; type: "stats"; data: AreaStats | undefined }
   | { id: number; type: "topLevel"; data: TopLevelPoint[] }
   | { id: number; type: "allMapElements"; data: MapElementFeatureCollection }

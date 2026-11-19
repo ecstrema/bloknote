@@ -142,6 +142,14 @@ class LocalDb {
     return (await this.send({ type: "getChildren", slug }, "children")).data;
   }
 
+  async getSubtreeElements(
+    slug: string,
+    limit?: number,
+  ): Promise<{ data: Record<string, DataJSON>; truncated: boolean }> {
+    const res = await this.send({ type: "getSubtreeElements", slug, limit }, "subtreeElements");
+    return { data: res.data, truncated: res.truncated };
+  }
+
   async getTopLevelPoints(): Promise<TopLevelPoint[]> {
     return (await this.send({ type: "getTopLevel" }, "topLevel")).data;
   }

@@ -1,0 +1,200 @@
+import type { Key, OsmFeature, Tags } from "osm-api";
+import {
+  featureToTypeOSM,
+  getGrade,
+  getTagRule,
+  gradeTags,
+  isProjectRoute,
+  parseClimbingLength,
+  scaleIdToTag,
+} from "./osm-tags.js";
+
+export type DiagnosticSeverity = "error" | "warning";
+
+export interface DiagnosticPatch {
+  set?: Partial<Record<Key, string>>;
+  remove?: Key[];
+}
+
+export interface DiagnosticFix {
+  label: string;
+  patch: DiagnosticPatch;
+}
+
+export interface TagDiagnostic {
+  id: string;
+  severity: DiagnosticSeverity;
+  title: string;
+  description: string;
+  tags: Key[];
+  fixes?: DiagnosticFix[];
+}
+
+const GRADE_KEYS: Key[] = ["climbing:grade", ...gradeTags.map(([key]) => key)];
+const SECONDARY_GRADE_KEYS = new Set<Key>(["climbing:grade:british_adjectival", "climbing:grade:yds_danger"]);
+const nonEmpty = (value: string | undefined): value is string => value !== undefined && value.trim() !== "";
+
+export function getFeatureDiagnostics(feature: OsmFeature): TagDiagnostic[] {
+  const tags: Tags = feature.tags ?? {};
+  const featureType = featureToTypeOSM(feature);
+  const diagnostics: TagDiagnostic[] = [];
+
+  for (const rawKey of Object.keys(tags)) {
+    const key = rawKey as Key;
+    const value = tags[key];
+    if (value === undefined) continue;
+    const rule = getTagRule(featureType, key);
+    if (!rule) continue;
+
+    if (typeof rule === "object") {
+      const fixes: DiagnosticFix[] = [];
+      if (key === "ele" && featureType === "route" && !nonEmpty(tags["climbing:length"])) {
+        const parsedLength = parseClimbingLength(value);
+        if (parsedLength && parsedLength.meters > 0) {
+          const metersStr = Number(parsedLength.meters.toFixed(2)).toString();
+          fixes.push({
+            label: `Move to climbing:length=${metersStr}`,
+            patch: { set: { "climbing:length": metersStr }, remove: ["ele"] },
+          });
+        }
+      }
+      fixes.push({ label: `Remove ${key}`, patch: { remove: [key] } });
+      diagnostics.push({
+        id: `deprecated:${key}`,
+        severity: "warning",
+        title: `Deprecated tag "${key}"`,
+        description: rule.deprecated,
+        tags: [key],
+        fixes,
+      });
+    } else if (!rule(value)) {
+      const fixes: DiagnosticFix[] = [];
+      if (key === "climbing:length") {
+        const parsedLength = parseClimbingLength(value);
+        if (parsedLength && parsedLength.meters > 0) {
+          const metersStr = Number(parsedLength.meters.toFixed(2)).toString();
+          fixes.push({ label: `Normalize to ${metersStr} m`, patch: { set: { "climbing:length": metersStr } } });
+        }
+      }
+      diagnostics.push({
+        id: `invalid:${key}`,
+        severity: "error",
+        title: `Invalid value for "${key}"`,
+        description: `"${value}" is not a valid value for ${key}.`,
+        tags: [key],
+        fixes: fixes.length > 0 ? fixes : undefined,
+      });
+    }
+  }
+
+  if (featureType && tags.sport !== "climbing") {
+    diagnostics.push({
+      id: "missing:sport",
+      severity: "warning",
+      title: 'Missing "sport=climbing"',
+      description: "Climbing elements on OpenStreetMap should carry sport=climbing.",
+      tags: ["sport"],
+      fixes: [{ label: "Set sport=climbing", patch: { set: { sport: "climbing" } } }],
+    });
+  }
+
+  if (!nonEmpty(tags.name)) {
+    diagnostics.push({
+      id: "missing:name",
+      severity: "warning",
+      title: 'Missing "name" tag',
+      description: "This feature has no name tag.",
+      tags: ["name"],
+    });
+  }
+
+  const presentGradeKeys = GRADE_KEYS.filter((k) => nonEmpty(tags[k]));
+  const primaryGradeKeys = presentGradeKeys.filter((k) => !SECONDARY_GRADE_KEYS.has(k));
+
+  if (primaryGradeKeys.length > 1) {
+    diagnostics.push({
+      id: "duplicate:grades",
+      severity: "error",
+      title: "Multiple grades set",
+      description: `Found multiple grade tags: ${primaryGradeKeys.map((k) => `${k}=${tags[k]}`).join(", ")}.`,
+      tags: primaryGradeKeys,
+      fixes: primaryGradeKeys.map((keepKey) => ({
+        label: `Keep ${keepKey} (${tags[keepKey]})`,
+        patch: { remove: primaryGradeKeys.filter((k) => k !== keepKey) },
+      })),
+    });
+  }
+
+  if (nonEmpty(tags["climbing:grade"])) {
+    const parsed = getGrade({ "climbing:grade": tags["climbing:grade"] });
+    const fixes: DiagnosticFix[] = [];
+    if (parsed && parsed.v.scale !== "unknown") {
+      const targetKey = scaleIdToTag(parsed.v.scale);
+      if (targetKey) {
+        fixes.push({
+          label: `Use ${targetKey}=${parsed.v.v}`,
+          patch: { set: { [targetKey]: parsed.v.v }, remove: ["climbing:grade"] },
+        });
+      }
+    }
+    diagnostics.push({
+      id: "generic:climbing:grade",
+      severity: "warning",
+      title: 'Generic "climbing:grade" tag',
+      description: "Use a scale-specific tag (such as climbing:grade:french or climbing:grade:yds) instead of climbing:grade.",
+      tags: ["climbing:grade"],
+      fixes: fixes.length > 0 ? fixes : undefined,
+    });
+  }
+
+  const project = isProjectRoute(tags);
+  if (featureType === "route" && project && presentGradeKeys.length > 0) {
+    diagnostics.push({
+      id: "conflict:project-grade",
+      severity: "error",
+      title: "Project has a grade set",
+      description: `This route is named "${tags.name}" but has a grade assigned (${presentGradeKeys.map((k) => tags[k]).join(", ")}). Projects are typically unclimbed and ungraded.`,
+      tags: presentGradeKeys,
+      fixes: [{ label: "Remove grade", patch: { remove: presentGradeKeys } }],
+    });
+  } else if (featureType === "route" && !project && presentGradeKeys.length === 0) {
+    diagnostics.push({
+      id: "missing:grade",
+      severity: "warning",
+      title: "Missing grade",
+      description: "This route does not have a grade tag.",
+      tags: [],
+    });
+  }
+
+  if (nonEmpty(tags.phone) && nonEmpty(tags["contact:phone"])) {
+    diagnostics.push({
+      id: "duplicate:phone",
+      severity: "warning",
+      title: "Duplicate phone tags",
+      description: `Both phone (${tags.phone}) and contact:phone (${tags["contact:phone"]}) are set.`,
+      tags: ["phone", "contact:phone"],
+      fixes: [
+        { label: "Keep phone", patch: { remove: ["contact:phone"] } },
+        { label: "Keep contact:phone", patch: { remove: ["phone"] } },
+      ],
+    });
+  }
+
+  const websiteKeys = (["website", "contact:website", "url"] as Key[]).filter((k) => nonEmpty(tags[k]));
+  if (websiteKeys.length > 1) {
+    diagnostics.push({
+      id: "duplicate:website",
+      severity: "warning",
+      title: "Duplicate website tags",
+      description: `Multiple website tags set: ${websiteKeys.join(", ")}.`,
+      tags: websiteKeys,
+      fixes: websiteKeys.map((keepKey) => ({
+        label: `Keep ${keepKey}`,
+        patch: { remove: websiteKeys.filter((k) => k !== keepKey) },
+      })),
+    });
+  }
+
+  return diagnostics;
+}

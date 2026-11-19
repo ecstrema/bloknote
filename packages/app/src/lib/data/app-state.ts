@@ -123,6 +123,22 @@ export class AppState {
     this.undoStack.do(new UndoableTagDelete(this.osmUser, feature, targetSlug, tagKey));
   }
 
+  /** Applies a multi-tag set/remove patch as a single undoable step. */
+  applyTagPatch(targetSlug: string, patch: { set?: Partial<Record<Key, string>>; remove?: Key[] }) {
+    const node = this.tree.getReactiveNode(targetSlug);
+    const feature = node?.feature;
+    if (!feature || feature.type === "geographic") return;
+
+    this.undoStack.beginGroup();
+    for (const [k, v] of Object.entries(patch.set ?? {})) {
+      if (v !== undefined) this.setTag(targetSlug, k as Key, v);
+    }
+    for (const k of patch.remove ?? []) {
+      this.deleteTag(targetSlug, k);
+    }
+    this.undoStack.endGroup();
+  }
+
   /**
    * Applies {@link UndoableRouteCreate} to create a new route in the parent feature.
    */

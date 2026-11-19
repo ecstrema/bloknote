@@ -18,6 +18,8 @@
   import { untrack } from "svelte";
   import LocationMap from "#lib/components/location-map.svelte";
   import MapAddDialog from "#lib/components/map-add-dialog.svelte";
+  import DiagnosticsPanel from "#lib/components/diagnostics-panel.svelte";
+  import { getFeatureDiagnostics } from "#lib/data/parse/diagnostics.js";
   import { Button } from "#components/ui/button/index.js";
   import { getFallbackCoordinates } from "#lib/data/route-location.js";
   import EditableName from "#components/editable/editable-name.svelte";
@@ -33,10 +35,11 @@
   import FolderPlusIcon from "@lucide/svelte/icons/folder-plus";
   import MapIcon from "@lucide/svelte/icons/map";
   import MapPinPlusIcon from "@lucide/svelte/icons/map-pin-plus";
+  import StethoscopeIcon from "@lucide/svelte/icons/stethoscope";
 
-  type PageTab = "overview" | "map" | "osm";
+  type PageTab = "overview" | "map" | "osm" | "diagnostics";
   function parseTab(value: string | null): PageTab | undefined {
-    return value === "overview" || value === "map" || value === "osm" ? value : undefined;
+    return value === "overview" || value === "map" || value === "osm" || value === "diagnostics" ? value : undefined;
   }
 
   let { params }: PageProps = $props();
@@ -163,6 +166,9 @@
   const isRoute = $derived(itemType === "route");
   const editable = $derived(appState.osmUser.loggedIn && item.feature.type === "node" && isRoute);
   const fallbackCoordinates = $derived(coordinates ? undefined : getFallbackCoordinates(itemSlug));
+  const ownDiagnosticsCount = $derived(
+    item.feature.type !== "geographic" ? getFeatureDiagnostics(item.feature).length : 0,
+  );
 
   let placementMode = $state<"route" | "sector" | null>(null);
   let addDialogOpen = $state(false);
@@ -226,6 +232,15 @@
           OSM Data
         </Tabs.Trigger>
       {/if}
+      <Tabs.Trigger value="diagnostics">
+        <StethoscopeIcon />
+        Diagnostics
+        {#if ownDiagnosticsCount > 0}
+          <span class="rounded-full bg-amber-500/20 px-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
+            {ownDiagnosticsCount}
+          </span>
+        {/if}
+      </Tabs.Trigger>
     </Tabs.List>
   </div>
 
@@ -318,4 +333,10 @@
       <EditableTags feature={item.feature} featureSlug={itemSlug} />
     </Tabs.Content>
   {/if}
+
+  <Tabs.Content value="diagnostics" class="flex flex-col gap-4">
+    {#if effectiveTab === "diagnostics"}
+      <DiagnosticsPanel {item} slug={itemSlug} />
+    {/if}
+  </Tabs.Content>
 </Tabs.Root>
