@@ -12,6 +12,8 @@
   import type { LayoutProps } from "./$types";
   import Head from "#components/shell/head.svelte";
   import type { LayoutLoadType } from "./+layout";
+  import { resolve } from "$app/paths";
+  import BloknoteLogo from "#components/bloknote-logo.svelte";
   import OsmChanges from "#components/shell/osm-changes.svelte";
   import UndoControls from "#components/shell/undo-controls.svelte";
 
@@ -26,6 +28,9 @@
     <Sidebar.Inset>
       <header class="flex h-12 shrink-0 items-center gap-2 border-b px-3 max-w-screen overflow-auto no-scrollbar">
         <Sidebar.Trigger class="-ms-1" />
+        <a href={resolve("/")} aria-label="Bloknote home" class="shrink-0">
+          <BloknoteLogo class="size-5" />
+        </a>
         <Separator orientation="vertical" class="me-1 data-[orientation=vertical]:h-4" />
 
         <AppTopNavigation />

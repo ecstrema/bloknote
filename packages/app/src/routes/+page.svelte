@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import BloknoteLogo from "#components/bloknote-logo.svelte";
 
   const regions = [
     { name: "Africa", slug: "africa" },
@@ -18,7 +19,10 @@
 <div class="min-h-screen bg-background text-foreground">
   <header class="border-b">
     <div class="mx-auto flex h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
-      <a href={resolve("/")} class="font-semibold tracking-tight">Bloknote</a>
+      <a href={resolve("/")} class="inline-flex items-center gap-2 font-semibold tracking-tight">
+        <BloknoteLogo />
+        <span>Bloknote</span>
+      </a>
       <nav aria-label="Main navigation" class="flex items-center gap-4">
         <a
           href={resolve("/world/[...slug]", { slug: "" })}
