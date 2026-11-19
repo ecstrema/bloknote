@@ -50,6 +50,7 @@ src/
 ### The Golden Rule: Encapsulate Tailwind Classes in Atomic Components
 
 - **NEVER** write repeated strings of visual utility classes (e.g. `border-input bg-background shadow-xs focus-visible:ring-2 ...`) across multiple pages or layout files.
+- **Standard Graphs & Charts**: Always use `layerchart` (`layerchart/svg`) with `d3-scale` for all charts and graphs (as in `src/routes/grade-comparison/GradeComparisonChart.svelte` and `src/lib/components/opening-hours.svelte`). Do not write custom hand-rolled `<svg>` charts.
 - Place all styling, variants, and interactive states in atomic components under `src/lib/components/ui/`:
   - `<Button>` (`src/lib/components/ui/button/`)
   - `<Input>` (`src/lib/components/ui/input/`)

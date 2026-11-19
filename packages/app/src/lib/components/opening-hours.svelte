@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Chart, Layer, Axis, Rect, Text } from "layerchart/svg";
+  import { scaleBand, scaleLinear } from "d3-scale";
   import {
     applyOpeningHoursDrag,
     cloneWeekHours,
@@ -29,15 +31,10 @@
     onchangeend?: () => void;
   } = $props();
 
-  const width = 240;
-  const rowHeight = 15;
-  const labelWidth = 20;
-  const rightPad = 12;
-  const chartWidth = width - labelWidth - rightPad;
-  const svgHeight = rowHeight * 7 + 12;
-  const x = (minutes: number) => labelWidth + (minutes / 1440) * chartWidth;
+  const height = 190;
+  const padding = $derived({ top: 4, right: editable ? 22 : 8, bottom: 22, left: 26 });
 
-  let svgEl = $state<SVGSVGElement | null>(null);
+  let svgEl = $state<SVGSVGElement | undefined>(undefined);
   let drag = $state<OpeningHoursDrag | null>(null);
   let draftWeek = $state<WeekHours | null>(null);
   let lastEmitted: string | undefined;
@@ -65,15 +62,9 @@
     });
   });
 
-  function pointerToCoords(event: PointerEvent) {
-    const rect = svgEl!.getBoundingClientRect();
-    const svgX = ((event.clientX - rect.left) / rect.width) * width;
-    const svgY = ((event.clientY - rect.top) / rect.height) * svgHeight;
-    return {
-      minutes: ((svgX - labelWidth) / chartWidth) * 1440,
-      day: Math.max(0, Math.min(6, Math.floor(svgY / rowHeight))),
-    };
-  }
+  const flatData = $derived(
+    rows.flatMap((segments, day) => segments.map((seg) => ({ ...seg, dayLabel: DAYS[day]! }))),
+  );
 
   function emitWeek(next: WeekHours) {
     draftWeek = next;
@@ -95,59 +86,6 @@
     onchangestart?.();
   }
 
-  function onTrackPointerDown(event: PointerEvent, day: number) {
-    if (!editable || !week) return;
-    const snapped = snapMinutes(pointerToCoords(event).minutes);
-    const ranges = week[day]!;
-    const prev = ranges.filter((r) => r.end <= snapped).at(-1);
-    const next = ranges.find((r) => r.start >= snapped);
-    const minStart = prev ? Math.min(prev.end, 1440) : 0;
-    const maxEnd = next ? next.start : 1440;
-    if (maxEnd - minStart < MIN_OPENING_DURATION) return;
-
-    beginInteraction(event, {
-      mode: "create",
-      day,
-      initialWeek: cloneWeekHours(week),
-      anchorMinutes: Math.max(minStart, Math.min(maxEnd, snapped)),
-      minStart,
-      maxEnd,
-    });
-  }
-
-  function onBarPointerDown(event: PointerEvent, day: number, index: number, mode: "move" | "resize-start" | "resize-end") {
-    if (!editable || !week) return;
-    const ranges = week[day]!;
-    const target = ranges[index];
-    if (!target) return;
-    const minStart = index > 0 ? Math.min(ranges[index - 1]!.end, 1440) : 0;
-    const maxEnd = index < ranges.length - 1 ? ranges[index + 1]!.start : 1440;
-    const initialWeek = cloneWeekHours(week);
-
-    if (mode === "move") {
-      beginInteraction(event, {
-        mode: "move",
-        day,
-        index,
-        initialWeek,
-        originMinutes: pointerToCoords(event).minutes,
-        initialStart: target.start,
-        initialEnd: Math.min(target.end, 1440),
-        minStart,
-        maxEnd,
-      });
-    } else {
-      beginInteraction(event, { mode, day, index, initialWeek, minStart, maxEnd });
-    }
-  }
-
-  function onSvgPointerMove(event: PointerEvent) {
-    if (!drag || !svgEl) return;
-    const { minutes, day } = pointerToCoords(event);
-    if (drag.mode === "copy-day") drag.targetDay = day;
-    emitWeek(applyOpeningHoursDrag(drag, minutes, day));
-  }
-
   function endDrag() {
     if (!drag) return;
     drag = null;
@@ -164,22 +102,22 @@
     onchangeend?.();
   }
 
-  function getLabelLayout(segments: DisplayedSegment[], idx: number) {
+  function getLabelLayout(segments: DisplayedSegment[], idx: number, xPx: (minutes: number) => number) {
     const seg = segments[idx]!;
-    const x1 = x(seg.start);
-    const x2 = x(seg.end);
+    const x1 = xPx(seg.start);
+    const x2 = xPx(seg.end);
     const barW = x2 - x1;
     const fullLabel = `${formatTime(seg.start)}-${formatTime(seg.end)}`;
-    const estW = fullLabel.length * 3.15;
+    const estW = fullLabel.length * 5.6;
 
-    if (barW >= estW + 3) return { text: fullLabel, xPos: (x1 + x2) / 2, anchor: "middle" as const, inside: true };
-    const nextX = idx < segments.length - 1 ? x(segments[idx + 1]!.start) : x(1440);
-    if (nextX - x2 >= estW + 4) return { text: fullLabel, xPos: x2 + 2, anchor: "start" as const, inside: false };
-    const prevX = idx > 0 ? x(segments[idx - 1]!.end) : x(0);
-    if (x1 - prevX >= estW + 4) return { text: fullLabel, xPos: x1 - 2, anchor: "end" as const, inside: false };
+    if (barW >= estW + 6) return { text: fullLabel, xPos: (x1 + x2) / 2, anchor: "middle" as const, inside: true };
+    const nextX = idx < segments.length - 1 ? xPx(segments[idx + 1]!.start) : xPx(1440);
+    if (nextX - x2 >= estW + 8) return { text: fullLabel, xPos: x2 + 4, anchor: "start" as const, inside: false };
+    const prevX = idx > 0 ? xPx(segments[idx - 1]!.end) : xPx(0);
+    if (x1 - prevX >= estW + 8) return { text: fullLabel, xPos: x1 - 4, anchor: "end" as const, inside: false };
     if (seg.start % 60 === 0 && seg.end % 60 === 0) {
       const compact = `${seg.start / 60}-${seg.end / 60}`;
-      if (barW >= compact.length * 3.2 + 2) {
+      if (barW >= compact.length * 5.6 + 4) {
         return { text: compact, xPos: (x1 + x2) / 2, anchor: "middle" as const, inside: true };
       }
     }
@@ -191,144 +129,246 @@
 </script>
 
 {#if week}
-  <svg
-    bind:this={svgEl}
-    viewBox="0 0 {width} {svgHeight}"
-    class="w-full max-w-md text-xs select-none {editable ? 'touch-none' : ''}"
-    role="img"
-    aria-label="Opening hours: {value || 'None'}"
-    onpointermove={onSvgPointerMove}
-    onpointerup={endDrag}
-    onpointercancel={endDrag}
-  >
-    {#each rows as segments, day (day)}
-      {@const yRow = day * rowHeight + 1.5}
-      {@const barH = rowHeight - 3}
-      {@const copyHighlighted = isCopyTarget(day)}
-
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <g
-        class={editable ? "cursor-ns-resize" : undefined}
-        onpointerdown={(e) =>
-          week && beginInteraction(e, { mode: "copy-day", sourceDay: day, targetDay: day, initialWeek: cloneWeekHours(week) })}
-      >
-        <rect x="0" y={yRow} width={labelWidth} height={barH} fill="transparent">
-          {#if editable}
-            <title>Drag vertically to copy {DAYS[day]} hours to other days</title>
-          {/if}
-        </rect>
-        <text
-          x="1"
-          y={day * rowHeight + 9.5}
-          class={copyHighlighted ? "fill-primary font-semibold pointer-events-none" : "fill-muted-foreground pointer-events-none"}
-          font-size="6.5"
+  <div class="w-full max-w-md select-none {editable ? 'touch-none' : ''}">
+    <Chart
+      data={flatData}
+      x="start"
+      y="dayLabel"
+      xDomain={[0, 1440]}
+      xScale={scaleLinear()}
+      yDomain={[...DAYS]}
+      yScale={scaleBand().paddingInner(0.2)}
+      {padding}
+      {height}
+      aria-label="Opening hours: {value || 'None'}"
+    >
+      {#snippet children({ context })}
+        {@const xPx = (minutes: number) => context.xScale(minutes)}
+        {@const yBand = (day: number) => context.yScale(DAYS[day]!) ?? 0}
+        {@const bandH = context.yScale.bandwidth?.() ?? 16}
+        {@const pointerToCoords = (event: PointerEvent) => {
+          const rect = svgEl!.getBoundingClientRect();
+          const pxX = event.clientX - rect.left - padding.left;
+          const pxY = event.clientY - rect.top - padding.top;
+          const minutes = context.xScale.invert?.(pxX) ?? (pxX / Math.max(1, context.width)) * 1440;
+          const day = Math.max(0, Math.min(6, Math.floor((pxY / Math.max(1, context.height)) * 7)));
+          return { minutes, day };
+        }}
+        <Layer
+          bind:ref={svgEl}
+          role="img"
+          aria-label="Opening hours: {value || 'None'}"
+          onpointermove={(e) => {
+            if (!drag || !svgEl) return;
+            const { minutes, day } = pointerToCoords(e);
+            if (drag.mode === "copy-day") drag.targetDay = day;
+            emitWeek(applyOpeningHoursDrag(drag, minutes, day));
+          }}
+          onpointerup={endDrag}
+          onpointercancel={endDrag}
         >
-          {DAYS[day]}
-        </text>
-      </g>
+          <Axis
+            placement="bottom"
+            ticks={[0, 360, 720, 1080, 1440]}
+            format={(v) => String(Number(v) / 60)}
+            grid
+            rule
+            tickLength={3}
+          />
+          <Axis
+            placement="left"
+            rule={false}
+            tickLength={0}
+            classes={{ tickLabel: "text-[11px] fill-muted-foreground" }}
+          />
 
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <rect
-        x={labelWidth}
-        y={yRow}
-        width={chartWidth}
-        height={barH}
-        rx="2"
-        class="{copyHighlighted ? 'fill-primary/15' : 'fill-muted/50'} {editable ? 'cursor-crosshair' : ''}"
-        onpointerdown={(e) => onTrackPointerDown(e, day)}
-      />
+          {#each rows as segments, day (day)}
+            {@const yRow = yBand(day)}
+            {@const copyHighlighted = isCopyTarget(day)}
 
-      {#each segments as r, i (i)}
-        {@const x1 = x(r.start)}
-        {@const x2 = x(r.end)}
-        {@const barW = Math.max(x2 - x1, 1)}
-        {@const labelLayout = getLabelLayout(segments, i)}
-        {@const canEditBar = editable && r.source === "own"}
-
-        <g>
-          <!-- svelte-ignore a11y_no_static_element_interactions -->
-          <rect
-            x={x1}
-            y={yRow}
-            width={barW}
-            height={barH}
-            rx="2"
-            class="{r.source === 'previous' ? 'fill-primary/80' : 'fill-primary'} {canEditBar
-              ? 'cursor-grab active:cursor-grabbing'
-              : ''}"
-            onpointerdown={canEditBar ? (e) => onBarPointerDown(e, day, r.index, "move") : undefined}
-            ondblclick={canEditBar ? () => commitSingleEdit((w) => w[day]!.splice(r.index, 1)) : undefined}
-          >
-            <title>{DAYS[day]} {formatTime(r.start)}-{formatTime(r.end)}</title>
-          </rect>
-
-          {#if labelLayout}
-            <text
-              x={labelLayout.xPos}
-              y={day * rowHeight + 9.4}
-              text-anchor={labelLayout.anchor}
-              font-size="5.5"
-              class="pointer-events-none {labelLayout.inside
-                ? 'fill-primary-foreground font-medium'
-                : 'fill-muted-foreground'}"
-            >
-              {labelLayout.text}
-            </text>
-          {/if}
-
-          {#if canEditBar}
-            {#if barW >= 10}
-              <line x1={x1 + 1.5} x2={x1 + 1.5} y1={yRow + 3} y2={yRow + barH - 3} stroke-width="0.7" class="stroke-primary-foreground/60 pointer-events-none" />
-              <line x1={x2 - 1.5} x2={x2 - 1.5} y1={yRow + 3} y2={yRow + barH - 3} stroke-width="0.7" class="stroke-primary-foreground/60 pointer-events-none" />
+            {#if editable}
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <g
+                class="cursor-ns-resize"
+                onpointerdown={(e) =>
+                  week && beginInteraction(e, { mode: "copy-day", sourceDay: day, targetDay: day, initialWeek: cloneWeekHours(week) })}
+              >
+                <title>Drag vertically to copy {DAYS[day]} hours to other days</title>
+                <rect x={-padding.left} y={yRow} width={padding.left} height={bandH} fill="transparent" />
+              </g>
             {/if}
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <rect x={x1 - 2} y={yRow} width="4" height={barH} fill="transparent" class="cursor-ew-resize" onpointerdown={(e) => onBarPointerDown(e, day, r.index, "resize-start")} />
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <rect x={x2 - 2} y={yRow} width="4" height={barH} fill="transparent" class="cursor-ew-resize" onpointerdown={(e) => onBarPointerDown(e, day, r.index, "resize-end")} />
-          {/if}
-        </g>
-      {/each}
 
-      {#if editable && week[day]!.length > 0}
-        <g
-          role="button"
-          tabindex="0"
-          aria-label="Clear {DAYS[day]}"
-          class="cursor-pointer opacity-60 hover:opacity-100"
-          onpointerdown={(e) => e.stopPropagation()}
-          onclick={(e) => {
-            e.stopPropagation();
-            commitSingleEdit((w) => (w[day] = []));
-          }}
-          onkeydown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              commitSingleEdit((w) => (w[day] = []));
-            }
-          }}
-        >
-          <title>Clear {DAYS[day]}</title>
-          <rect x={labelWidth + chartWidth + 1} y={yRow} width={rightPad - 1} height={barH} fill="transparent" />
-          <text
-            x={labelWidth + chartWidth + rightPad / 2 + 0.5}
-            y={day * rowHeight + 9.5}
-            text-anchor="middle"
-            font-size="7"
-            class="fill-muted-foreground hover:fill-destructive"
-          >
-            ×
-          </text>
-        </g>
-      {/if}
-    {/each}
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <Rect
+              x={0}
+              y={yRow}
+              width={context.width}
+              height={bandH}
+              rx={3}
+              class="{copyHighlighted ? 'fill-primary/15' : 'fill-muted/50'} {editable ? 'cursor-crosshair' : ''}"
+              onpointerdown={(e) => {
+                if (!editable || !week) return;
+                const snapped = snapMinutes(pointerToCoords(e).minutes);
+                const ranges = week[day]!;
+                const prev = ranges.filter((r) => r.end <= snapped).at(-1);
+                const next = ranges.find((r) => r.start >= snapped);
+                const minStart = prev ? Math.min(prev.end, 1440) : 0;
+                const maxEnd = next ? next.start : 1440;
+                if (maxEnd - minStart < MIN_OPENING_DURATION) return;
 
-    {#each [0, 6, 12, 18, 24] as h (h)}
-      <line x1={x(h * 60)} x2={x(h * 60)} y1="0" y2={rowHeight * 7} class="stroke-border pointer-events-none" stroke-width="0.5" />
-      <text x={x(h * 60)} y={rowHeight * 7 + 9} text-anchor="middle" class="fill-muted-foreground pointer-events-none" font-size="6">
-        {h}
-      </text>
-    {/each}
-  </svg>
+                beginInteraction(e, {
+                  mode: "create",
+                  day,
+                  initialWeek: cloneWeekHours(week),
+                  anchorMinutes: Math.max(minStart, Math.min(maxEnd, snapped)),
+                  minStart,
+                  maxEnd,
+                });
+              }}
+            />
+
+            {#each segments as r, i (i)}
+              {@const x1 = xPx(r.start)}
+              {@const x2 = xPx(r.end)}
+              {@const barW = Math.max(x2 - x1, 2)}
+              {@const labelLayout = getLabelLayout(segments, i, xPx)}
+              {@const canEditBar = editable && r.source === "own"}
+              {@const startBarDrag = (e: PointerEvent, mode: "move" | "resize-start" | "resize-end") => {
+                if (!editable || !week) return;
+                const ranges = week[day]!;
+                const target = ranges[r.index];
+                if (!target) return;
+                const minStart = r.index > 0 ? Math.min(ranges[r.index - 1]!.end, 1440) : 0;
+                const maxEnd = r.index < ranges.length - 1 ? ranges[r.index + 1]!.start : 1440;
+                const initialWeek = cloneWeekHours(week);
+
+                if (mode === "move") {
+                  beginInteraction(e, {
+                    mode: "move",
+                    day,
+                    index: r.index,
+                    initialWeek,
+                    originMinutes: pointerToCoords(e).minutes,
+                    initialStart: target.start,
+                    initialEnd: Math.min(target.end, 1440),
+                    minStart,
+                    maxEnd,
+                  });
+                } else {
+                  beginInteraction(e, { mode, day, index: r.index, initialWeek, minStart, maxEnd });
+                }
+              }}
+
+              <g>
+                <title>{DAYS[day]} {formatTime(r.start)}-{formatTime(r.end)}</title>
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <Rect
+                  x={x1}
+                  y={yRow}
+                  width={barW}
+                  height={bandH}
+                  rx={3}
+                  class="{r.source === 'previous' ? 'fill-primary/80' : 'fill-primary'} {canEditBar
+                    ? 'cursor-grab active:cursor-grabbing'
+                    : ''}"
+                  onpointerdown={canEditBar ? (e) => startBarDrag(e, "move") : undefined}
+                  ondblclick={canEditBar ? () => commitSingleEdit((w) => w[day]!.splice(r.index, 1)) : undefined}
+                />
+
+                {#if labelLayout}
+                  <Text
+                    x={labelLayout.xPos}
+                    y={yRow + bandH / 2}
+                    verticalAnchor="middle"
+                    textAnchor={labelLayout.anchor}
+                    fontSize={10}
+                    value={labelLayout.text}
+                    class="pointer-events-none {labelLayout.inside
+                      ? 'fill-primary-foreground font-medium'
+                      : 'fill-muted-foreground'}"
+                  />
+                {/if}
+
+                {#if canEditBar}
+                  {#if barW >= 18}
+                    <line
+                      x1={x1 + 3}
+                      x2={x1 + 3}
+                      y1={yRow + 4}
+                      y2={yRow + bandH - 4}
+                      stroke-width="1.2"
+                      class="stroke-primary-foreground/60 pointer-events-none"
+                    />
+                    <line
+                      x1={x2 - 3}
+                      x2={x2 - 3}
+                      y1={yRow + 4}
+                      y2={yRow + bandH - 4}
+                      stroke-width="1.2"
+                      class="stroke-primary-foreground/60 pointer-events-none"
+                    />
+                  {/if}
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
+                  <rect
+                    x={x1 - 3}
+                    y={yRow}
+                    width={6}
+                    height={bandH}
+                    fill="transparent"
+                    class="cursor-ew-resize"
+                    onpointerdown={(e) => startBarDrag(e, "resize-start")}
+                  />
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
+                  <rect
+                    x={x2 - 3}
+                    y={yRow}
+                    width={6}
+                    height={bandH}
+                    fill="transparent"
+                    class="cursor-ew-resize"
+                    onpointerdown={(e) => startBarDrag(e, "resize-end")}
+                  />
+                {/if}
+              </g>
+            {/each}
+
+            {#if editable && week[day]!.length > 0}
+              <g
+                role="button"
+                tabindex="0"
+                aria-label="Clear {DAYS[day]}"
+                class="cursor-pointer opacity-60 hover:opacity-100"
+                onpointerdown={(e) => e.stopPropagation()}
+                onclick={(e) => {
+                  e.stopPropagation();
+                  commitSingleEdit((w) => (w[day] = []));
+                }}
+                onkeydown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    commitSingleEdit((w) => (w[day] = []));
+                  }
+                }}
+              >
+                <title>Clear {DAYS[day]}</title>
+                <rect x={context.width + 2} y={yRow} width={padding.right - 2} height={bandH} fill="transparent" />
+                <text
+                  x={context.width + padding.right / 2 + 1}
+                  y={yRow + bandH / 2}
+                  dominant-baseline="central"
+                  text-anchor="middle"
+                  font-size="13"
+                  class="fill-muted-foreground hover:fill-destructive"
+                >
+                  ×
+                </text>
+              </g>
+            {/if}
+          {/each}
+        </Layer>
+      {/snippet}
+    </Chart>
+  </div>
 {:else}
   <p class="text-sm">{value}</p>
 {/if}

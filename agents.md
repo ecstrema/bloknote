@@ -73,6 +73,8 @@ Bloknote is a Bun workspace monorepo powering a static climbing directory organi
 - **Zero Duplicated Inline Class Chunks**:
   - If a specific HTML element or styled container repeats across two or more places with identical or near-identical Tailwind styling, extract it into a small atomic component or a reusable Svelte snippet (`{#snippet ...}`).
   - Domain-specific editable components follow this exact model: `editable-tag.svelte` handles the input mechanics, tooltip, and undo stack, while `editable-name.svelte`, `editable-description.svelte`, and `editable-length.svelte` are simple, focused 10-line wrappers.
+- **Standard Graph & Chart Components**:
+  - Always build graphs and charts using `layerchart` (`layerchart/svg` components such as `Chart`, `Layer`, `Axis`, `Point`, `Rect`, `Text`, `AnnotationLine`) together with `d3-scale`, following `packages/app/src/routes/grade-comparison/GradeComparisonChart.svelte` and `packages/app/src/lib/components/opening-hours.svelte`. Never write custom standalone `<svg>` charts when `layerchart` can be used.
 
 ### Svelte 5 Runes Standard
 
