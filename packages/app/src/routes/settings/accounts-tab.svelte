@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { isLoggedIn } from "osm-api";
   import { Button } from "#components/ui/button/index.js";
+  import { Input } from "#components/ui/input/index.js";
   import { loginOsm, logoutOsm } from "#lib/data/network/osm.svelte.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
   import {
@@ -15,6 +16,10 @@
   let commonsLoggedIn = $state<boolean | undefined>(undefined);
   let commonsUsername = $state<string>();
   let commonsError = $state<string>();
+  let atHandle = $state("");
+  let atAppPassword = $state("");
+  let atConnecting = $state(false);
+  let atError = $state<string>();
 
   onMount(() => {
     osmLoggedIn = isLoggedIn();
@@ -63,6 +68,21 @@
       commonsError = error instanceof Error ? error.message : String(error);
     }
   }
+
+  async function connectAtProto(event: SubmitEvent) {
+    event.preventDefault();
+    atError = undefined;
+    atConnecting = true;
+    try {
+      await atproto.connect(atHandle, atAppPassword || undefined);
+      atHandle = "";
+      atAppPassword = "";
+    } catch (error) {
+      atError = error instanceof Error ? error.message : String(error);
+    } finally {
+      atConnecting = false;
+    }
+  }
 </script>
 
 <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
@@ -84,7 +104,7 @@
   </Button>
 </section>
 
-<section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
+<section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-start">
   <div>
     <h2 class="font-medium">Atmosphere</h2>
     <p class="mt-1 text-sm text-muted-foreground">
@@ -94,14 +114,23 @@
     {#if atproto.session}
       <p class="mt-2 text-xs text-muted-foreground">
         Connected as <span class="font-medium text-foreground">{atproto.session.handle ?? atproto.session.did}</span>
-        ({atproto.session.pdsUrl})
+        ({atproto.session.pdsUrl}{atproto.session.accessJwt ? " · authenticated" : " · local logbook"})
       </p>
+    {/if}
+    {#if atError}
+      <p class="mt-2 text-xs text-destructive">{atError}</p>
     {/if}
   </div>
   {#if atproto.session}
     <Button variant="outline" onclick={() => atproto.setSession(undefined)}>Disconnect Atmosphere</Button>
   {:else}
-    <Button variant="outline" disabled>Atmosphere sign-in coming soon</Button>
+    <form class="flex flex-col gap-2" onsubmit={connectAtProto}>
+      <Input bind:value={atHandle} placeholder="Handle (e.g. alice.bsky.social)" required />
+      <Input bind:value={atAppPassword} type="password" placeholder="App password (optional for PDS sync)" />
+      <Button type="submit" variant="outline" disabled={atConnecting || !atHandle.trim()}>
+        {atConnecting ? "Connecting..." : "Connect Atmosphere"}
+      </Button>
+    </form>
   {/if}
 </section>
 
