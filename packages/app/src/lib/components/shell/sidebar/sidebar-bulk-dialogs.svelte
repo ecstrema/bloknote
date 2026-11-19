@@ -36,9 +36,12 @@
   let folderFilter = $state("");
   let folderOptions = $state<ParentOption[]>([]);
   let loadingFolders = $state(false);
+  // @wc-ignore
   let targetScaleId = $state<ScaleId>("French");
+  // @wc-ignore
   let targetStyleKey = $state("sport");
   let replaceStyles = $state(true);
+  // @wc-ignore
   let tickStyle = $state<AscentStyle>("redpoint");
   let tickComment = $state("");
 

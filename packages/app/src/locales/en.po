@@ -15192,11 +15192,6 @@ msgstr "Review pending OpenStreetMap changes to submit them"
 msgid "OpenStreetMap changes"
 msgstr "OpenStreetMap changes"
 
-#. 0: appState.osmUser.changes.size; 1: appState.osmUser.changes.size === 1 ? "" \\: "s"
-#: src/lib/components/shell/osm-changes.svelte
-msgid "{0} feature{1} modified"
-msgstr "{0} feature{1} modified"
-
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Unnamed feature"
 msgstr "Unnamed feature"
@@ -15451,7 +15446,6 @@ msgid "Clear filters"
 msgstr "Clear filters"
 
 #: src/lib/components/map-legend.svelte
-#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "French"
 msgstr "French"
 
@@ -16078,10 +16072,6 @@ msgstr "Choose which map providers appear in the \"Open in\" drawer. Mobile-only
 msgid "<0/> Fewer providers"
 msgstr "<0/> Fewer providers"
 
-#: src/routes/world/[...slug]/+page.svelte
-msgid "<0/> Diagnostics <1/>"
-msgstr "<0/> Diagnostics <1/>"
-
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Scanning area..."
 msgstr "Scanning area..."
@@ -16569,6 +16559,10 @@ msgstr "Climber"
 msgid "Comments ({0})"
 msgstr "Comments ({0})"
 
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Diagnostics"
+msgstr "Diagnostics"
+
 #: src/routes/+page.svelte
 #: src/routes/settings/+page.svelte
 msgid "Docs"
@@ -16718,6 +16712,23 @@ msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusabl
 msgid "Core schemas"
 msgstr "Core schemas"
 
+#: src/routes/settings/user-stats-panel.svelte
+msgid "Your climbing stats"
+msgstr "Your climbing stats"
+
+#. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
+#: src/routes/settings/user-stats-panel.svelte
+msgid "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
+msgstr "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
+
+#: src/routes/settings/user-stats-panel.svelte
+msgid "Starred climbs"
+msgstr "Starred climbs"
+
+#: src/routes/settings/user-stats-panel.svelte
+msgid "Recent ticks"
+msgstr "Recent ticks"
+
 #. 0: atproto.session.pdsUrl; 1: atproto.session.accessJwt ? " · authenticated" \\: " · local logbook"
 #: src/routes/settings/accounts-tab.svelte
 msgid "Connected as <0/> ({0}{1})"
@@ -16739,19 +16750,20 @@ msgstr "Connecting..."
 msgid "Connect Atmosphere"
 msgstr "Connect Atmosphere"
 
-#: src/routes/settings/user-stats-panel.svelte
-msgid "Your climbing stats"
-msgstr "Your climbing stats"
+#: src/lib/components/shell/osm-changes.svelte
+msgid "# feature modified"
+msgid_plural "# features modified"
+msgstr[0] "# feature modified"
+msgstr[1] "# features modified"
 
-#. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
-#: src/routes/settings/user-stats-panel.svelte
-msgid "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
-msgstr "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
+#~ msgid "qathet"
+#~ msgstr "qathet"
 
-#: src/routes/settings/user-stats-panel.svelte
-msgid "Starred climbs"
-msgstr "Starred climbs"
+#~ msgid "victoria island"
+#~ msgstr "victoria island"
 
-#: src/routes/settings/user-stats-panel.svelte
-msgid "Recent ticks"
-msgstr "Recent ticks"
+#~ msgid "'Asir Province"
+#~ msgstr "'Asir Province"
+
+#~ msgid "'Amran Governorate"
+#~ msgstr "'Amran Governorate"

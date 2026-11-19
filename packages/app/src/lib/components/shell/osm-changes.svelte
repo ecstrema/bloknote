@@ -5,6 +5,7 @@
   import * as Dialog from "#components/ui/dialog/index.js";
   import { Textarea } from "#components/ui/textarea/index.js";
   import { getNameOSM } from "#lib/data/parse/osm-tags.js";
+  import plural from "../../../locales/plural.js";
 
   import { Progress } from "#components/ui/progress/index.js";
   import { getAppState } from "#lib/data/app-state.js";
@@ -66,8 +67,7 @@
       <Dialog.Header>
         <Dialog.Title>OpenStreetMap changes</Dialog.Title>
         <Dialog.Description>
-          <!-- TODO: use an actual translation library for handling plurals: wuchale -->
-          {appState.osmUser.changes.size} feature{appState.osmUser.changes.size === 1 ? "" : "s"} modified
+          {plural(appState.osmUser.changes.size, ["# feature modified", "# features modified"])}
         </Dialog.Description>
       </Dialog.Header>
       <ul class="my-3 max-h-[45vh] space-y-2.5 overflow-y-auto pr-1 text-sm">

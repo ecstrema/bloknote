@@ -276,7 +276,7 @@
       {/if}
       <Tabs.Trigger value="diagnostics">
         <StethoscopeIcon />
-        Diagnostics
+        <span>Diagnostics</span>
         {#if diagnosticsCount > 0}
           <span class="rounded-full bg-amber-500/20 px-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
             {diagnosticsCount}{diagDbTruncated ? "+" : ""}

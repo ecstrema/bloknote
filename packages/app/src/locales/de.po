@@ -15192,11 +15192,6 @@ msgstr "Ausstehende OpenStreetMap-Änderungen prüfen, um sie zu senden"
 msgid "OpenStreetMap changes"
 msgstr "OpenStreetMap-Änderungen"
 
-#. 0: appState.osmUser.changes.size; 1: appState.osmUser.changes.size === 1 ? "" \\: "s"
-#: src/lib/components/shell/osm-changes.svelte
-msgid "{0} feature{1} modified"
-msgstr "{0} Objekt{1} geändert"
-
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Unnamed feature"
 msgstr "Unbenanntes Objekt"
@@ -15451,7 +15446,6 @@ msgid "Clear filters"
 msgstr "Filter zurücksetzen"
 
 #: src/lib/components/map-legend.svelte
-#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "French"
 msgstr ""
 
@@ -16078,10 +16072,6 @@ msgstr ""
 msgid "<0/> Fewer providers"
 msgstr ""
 
-#: src/routes/world/[...slug]/+page.svelte
-msgid "<0/> Diagnostics <1/>"
-msgstr ""
-
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Scanning area..."
 msgstr ""
@@ -16569,6 +16559,10 @@ msgstr ""
 msgid "Comments ({0})"
 msgstr ""
 
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Diagnostics"
+msgstr ""
+
 #: src/routes/+page.svelte
 #: src/routes/settings/+page.svelte
 msgid "Docs"
@@ -16718,6 +16712,23 @@ msgstr ""
 msgid "Core schemas"
 msgstr ""
 
+#: src/routes/settings/user-stats-panel.svelte
+msgid "Your climbing stats"
+msgstr ""
+
+#. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
+#: src/routes/settings/user-stats-panel.svelte
+msgid "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
+msgstr ""
+
+#: src/routes/settings/user-stats-panel.svelte
+msgid "Starred climbs"
+msgstr ""
+
+#: src/routes/settings/user-stats-panel.svelte
+msgid "Recent ticks"
+msgstr ""
+
 #. 0: atproto.session.pdsUrl; 1: atproto.session.accessJwt ? " · authenticated" \\: " · local logbook"
 #: src/routes/settings/accounts-tab.svelte
 msgid "Connected as <0/> ({0}{1})"
@@ -16739,19 +16750,20 @@ msgstr ""
 msgid "Connect Atmosphere"
 msgstr ""
 
-#: src/routes/settings/user-stats-panel.svelte
-msgid "Your climbing stats"
-msgstr ""
+#: src/lib/components/shell/osm-changes.svelte
+msgid "# feature modified"
+msgid_plural "# features modified"
+msgstr[0] "# Objekt geändert"
+msgstr[1] "# Objekte geändert"
 
-#. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
-#: src/routes/settings/user-stats-panel.svelte
-msgid "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
-msgstr ""
+#~ msgid "qathet"
+#~ msgstr ""
 
-#: src/routes/settings/user-stats-panel.svelte
-msgid "Starred climbs"
-msgstr ""
+#~ msgid "victoria island"
+#~ msgstr ""
 
-#: src/routes/settings/user-stats-panel.svelte
-msgid "Recent ticks"
-msgstr ""
+#~ msgid "'Asir Province"
+#~ msgstr ""
+
+#~ msgid "'Amran Governorate"
+#~ msgstr ""
