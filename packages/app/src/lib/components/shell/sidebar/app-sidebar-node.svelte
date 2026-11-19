@@ -41,7 +41,6 @@
   } from "./utils";
   import { getParentSlug } from "#lib/helpers/slug.js";
   import { goto } from "$app/navigation";
-  import GripVerticalIcon from "@lucide/svelte/icons/grip-vertical";
   import { getSidebarSelection } from "./selection.svelte";
   import { useSidebar } from "#components/ui/sidebar/index.js";
 
@@ -111,6 +110,10 @@
   const name = $derived(getLocalizedName(item.feature));
 
   const itemType = $derived(featureToType(item.feature));
+  const isLeafRegion = $derived(
+    itemType === "geographic" &&
+      !Object.values(item.children ?? {}).some((child) => child.feature.type === "geographic"),
+  );
   const reorderType = $derived<ReorderableType | undefined>(
     itemType === "route" ? "route" : itemType === "area" ? "area" : undefined,
   );
@@ -235,8 +238,8 @@
     addRouteFromSidebar(appState, item, slug);
   }
 
-  async function addSector() {
-    const newSlug = appState.createArea(item, slug);
+  async function addArea(climbing: "area" | "crag" = "area") {
+    const newSlug = appState.createArea(item, slug, undefined, climbing);
     const feature = item.children?.[newSlug]?.feature;
     if (feature && feature.type !== "geographic") {
       void goto(getItemUrl(slug, feature), { state: page.state, shallow: true, replace: true });
@@ -334,12 +337,7 @@
     {:else if itemType === "gym"}
       <BuildingIcon />
     {/if}
-    <span>{name || "No name"}</span>
-    {#if canDrag}
-      <span class="ml-auto flex shrink-0 cursor-grab active:cursor-grabbing" title="Drag to reorder or move">
-        <GripVerticalIcon class="size-3.5 text-muted-foreground" aria-hidden="true" />
-      </span>
-    {/if}
+    <span class="truncate">{name || "No name"}</span>
   </Sidebar.MenuButton>
 {:else}
   <Collapsible.Root
@@ -387,11 +385,6 @@
             {/if}
 
             <span class="truncate grow">{name || "No name"}</span>
-            {#if canDrag}
-              <span class="flex shrink-0 cursor-grab active:cursor-grabbing" title="Drag to reorder or move">
-                <GripVerticalIcon class="size-3.5 text-muted-foreground" aria-hidden="true" />
-              </span>
-            {/if}
           </Sidebar.MenuButton>
 
           {#if item.stats}
@@ -410,11 +403,16 @@
                 {/snippet}
               </DropdownMenu.Trigger>
               <DropdownMenu.Content side="right" align="start">
-                {#if appState.osmUser.loggedIn && itemType === "area"}
+                {#if appState.osmUser.loggedIn && (itemType === "area" || isLeafRegion)}
                   {#if item.feature.type !== "geographic" && item.feature.tags?.climbing !== "crag"}
-                    <DropdownMenu.Item onclick={addSector}>Add sector</DropdownMenu.Item>
+                    <DropdownMenu.Item onclick={() => addArea()}>Add sector</DropdownMenu.Item>
                   {/if}
-                  <DropdownMenu.Item onclick={addRoute}>Add route</DropdownMenu.Item>
+                  {#if isLeafRegion}
+                    <DropdownMenu.Item onclick={() => addArea("crag")}>Add crag</DropdownMenu.Item>
+                  {/if}
+                  {#if itemType === "area"}
+                    <DropdownMenu.Item onclick={addRoute}>Add route</DropdownMenu.Item>
+                  {/if}
                   <DropdownMenu.Separator />
                 {/if}
                 <DropdownMenu.Item>Download images</DropdownMenu.Item>

@@ -23,8 +23,6 @@
   let currentOnmove: ((position: { lat: number; lon: number }) => void) | undefined;
   let currentOnmapclick: ((position: { lat: number; lon: number }) => void) | undefined;
   let activePlacementMode: "route" | "sector" | null = null;
-  /** Kept across pages, as the user can resize the map */
-  let height: number | undefined;
   /** False until the view was first set to a place */
   let positioned = false;
 
@@ -441,7 +439,6 @@
   onMount(() => {
     const { map, element } = getSharedMap();
     if (typeof window !== "undefined") (window as any).__maplibre = map;
-    if (height) host.style.height = `${height}px`;
     host.appendChild(element);
     map.resize();
     attached = true;
@@ -528,51 +525,14 @@
       applyColorMode(shared.map, colorMode);
     }
   });
-
-  function startResize(event: PointerEvent) {
-    const handle = event.currentTarget as HTMLElement;
-    const startY = event.clientY;
-    const startHeight = host.clientHeight;
-    handle.setPointerCapture(event.pointerId);
-    const move = (e: PointerEvent) => {
-      height = Math.max(160, startHeight + e.clientY - startY);
-      host.style.height = `${height}px`;
-      shared?.map.resize();
-    };
-    const end = () => {
-      handle.removeEventListener("pointermove", move);
-      handle.removeEventListener("pointerup", end);
-      handle.removeEventListener("pointercancel", end);
-    };
-    handle.addEventListener("pointermove", move);
-    handle.addEventListener("pointerup", end);
-    handle.addEventListener("pointercancel", end);
-  }
 </script>
 
 <div class={`relative ${className}`}>
   <div
     bind:this={host}
-    class="relative h-80 w-full md:h-[34rem] overflow-hidden rounded-t-md max-md:rounded-b-md border border-border"
+    class="relative h-full w-full overflow-hidden rounded-md border border-border"
   >
     <MapLegend bind:colorMode />
-  </div>
-  <div
-    role="separator"
-    aria-orientation="horizontal"
-    aria-label="Resize the map"
-    title="Drag to resize the map"
-    class="group relative hidden h-4 cursor-row-resize touch-none items-center justify-center rounded-b-md border border-t-0 border-border bg-muted hover:bg-blue-500/20 md:flex"
-    onpointerdown={startResize}
-  >
-    <span class="h-1 w-10 rounded-full bg-muted-foreground/50 group-hover:bg-blue-500"></span>
-    <svg
-      class="absolute right-1 bottom-1 size-2.5 text-muted-foreground/60 group-hover:text-blue-500"
-      viewBox="0 0 10 10"
-      aria-hidden="true"
-    >
-      <path d="M9 1 1 9M9 5 5 9" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" />
-    </svg>
   </div>
 </div>
 

@@ -106,6 +106,7 @@ export class AppState {
     const node = this.tree.getReactiveNode(targetSlug);
     const feature = node?.feature;
     if (!feature || feature.type === "geographic") return;
+    if (feature.tags?.[tagKey] === newValue) return;
 
     this.undoStack.do(new UndoableTagChange(this.osmUser, feature, targetSlug, tagKey, newValue));
   }
@@ -154,8 +155,8 @@ export class AppState {
   }
 
   /** Applies {@link UndoableAreaCreate} to create a new area in the parent feature. */
-  createArea(parent: DataTree, parentSlug: string, name?: string) {
-    const action = new UndoableAreaCreate(this.osmUser, this.tree, parent, parentSlug, name);
+  createArea(parent: DataTree, parentSlug: string, name?: string, climbing: "area" | "crag" = "area") {
+    const action = new UndoableAreaCreate(this.osmUser, this.tree, parent, parentSlug, name, climbing);
     this.undoStack.do(action);
     return action.slug;
   }

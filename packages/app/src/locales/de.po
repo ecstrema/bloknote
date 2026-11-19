@@ -14885,13 +14885,11 @@ msgstr ""
 msgid "Unnamed"
 msgstr "Unbenannt"
 
-#: src/lib/components/location-map.svelte
-msgid "Resize the map"
-msgstr "Kartengröße ändern"
+#~ msgid "Resize the map"
+#~ msgstr "Kartengröße ändern"
 
-#: src/lib/components/location-map.svelte
-msgid "Drag to resize the map"
-msgstr "Ziehen, um die Kartengröße zu ändern"
+#~ msgid "Drag to resize the map"
+#~ msgstr "Ziehen, um die Kartengröße zu ändern"
 
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Route"
@@ -15676,14 +15674,11 @@ msgstr ""
 msgid "Gym"
 msgstr ""
 
-#: src/routes/world/[...slug]/route-page.svelte
-msgid "Graded project warning"
-msgstr ""
+#~ msgid "Graded project warning"
+#~ msgstr ""
 
-#. 0: feature.tags?.name; 1: grade.v.v
-#: src/routes/world/[...slug]/route-page.svelte
-msgid "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
-msgstr ""
+#~ msgid "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
+#~ msgstr ""
 
 #: src/lib/components/opening-hours.svelte
 #: src/lib/components/opening-hours.svelte
@@ -16296,10 +16291,8 @@ msgstr ""
 msgid "Could not apply fix."
 msgstr ""
 
-#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
-#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
-msgid "Drag to reorder or move"
-msgstr ""
+#~ msgid "Drag to reorder or move"
+#~ msgstr ""
 
 #: src/lib/components/shell/app-settings-menu.svelte
 msgid "Profile & settings"
@@ -16838,4 +16831,25 @@ msgstr ""
 
 #: src/lib/components/pulse-panel.svelte
 msgid "Loading edit history…"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
+msgid "Add crag"
+msgstr ""
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Copy coordinates"
+msgstr ""
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Copied!"
+msgstr ""
+
+#. 0: grade.v.v
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "This route is named as a project but has a grade assigned ({0}). Projects are typically unclimbed and ungraded."
+msgstr ""
+
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "Remove grade"
 msgstr ""

@@ -247,6 +247,9 @@ export class OsmUser {
           console.warn("diffing osmfeatures which are both undefined");
           continue;
         }
+        // Features created locally (placeholder id) that were deleted again never existed
+        // upstream. Uploading a delete for a placeholder id makes the whole diff fail.
+        if (initial.id < 0) continue;
         changeset.delete.push(initial);
       } else if (final.id < 0) {
         changeset.create.push(final);
@@ -255,6 +258,22 @@ export class OsmUser {
         changeset.modify.push(final);
       }
     }
+
+    // A created relation may reference placeholder members that are not part of this diff
+    // (e.g. they were created and deleted again before upload). The OSM API rejects the
+    // whole changeset in that case ("Placeholder relation not found for reference ..."),
+    // so drop these stale member references before uploading.
+    const createdRefs = new Set(changeset.create.map((f) => getStaticIdentifier(f.type, f.id)));
+    const dropStaleMembers = (feature: OsmFeature): OsmFeature => {
+      if (feature.type !== "relation") return feature;
+      const members = feature.members.filter(
+        (m) => m.ref > 0 || createdRefs.has(getStaticIdentifier(m.type, m.ref)),
+      );
+      return members.length === feature.members.length ? feature : { ...feature, members };
+    };
+    changeset.create = changeset.create.map(dropStaleMembers);
+    changeset.modify = changeset.modify.map(dropStaleMembers);
+
     return {
       changeset,
       mapIdToCreatedFeature,

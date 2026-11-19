@@ -20,10 +20,12 @@
     grade,
     feature,
     featureSlug,
+    gradedProject = false,
   }: {
     grade: WithSourceTag<Grade> | undefined;
     feature: OsmFeature;
     featureSlug: string;
+    gradedProject?: boolean;
   } = $props();
 
   const appState = getAppState();
@@ -107,9 +109,20 @@
   <Popover.Trigger disabled={!appState.osmUser.loggedIn}>
     {#snippet child({ props })}
       {#if grade}
-        <Button {...props} variant="ghost">
-          <HolyGrade class="font-semibold text-sm" grade={grade.v} />
-        </Button>
+        <div class="group/gradewarning relative inline-flex">
+          <Button {...props} variant="ghost" class={gradedProject ? "opacity-70 grayscale" : undefined}>
+            <HolyGrade class="font-semibold text-sm" grade={grade.v} />
+          </Button>
+          {#if gradedProject}
+            <div class="pointer-events-none absolute top-full left-0 z-50 mt-1 hidden w-72 rounded-md border bg-popover p-3 text-popover-foreground shadow-md group-hover/gradewarning:pointer-events-auto group-hover/gradewarning:block">
+              <p class="text-sm">
+                This route is named as a project but has a grade assigned ({grade.v.v}). Projects are typically
+                unclimbed and ungraded.
+              </p>
+              <Button size="sm" variant="outline" class="mt-2" onclick={deleteGrade}>Remove grade</Button>
+            </div>
+          {/if}
+        </div>
       {:else}
         <Button {...props} class="text-muted-foreground" variant="outline">Add Grade</Button>
       {/if}

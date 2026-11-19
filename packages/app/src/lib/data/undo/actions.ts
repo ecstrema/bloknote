@@ -44,10 +44,7 @@ export class UndoableTagChange extends OsmUndoable implements Undoable {
   }
 
   do() {
-    if (this.previousValue === this.newValue) {
-      console.log("Do not create undoable for tag change that does not change the value");
-      return;
-    }
+    if (this.previousValue === this.newValue) return;
 
     const featureBefore = snapshot(this.targetFeature);
 
@@ -258,14 +255,21 @@ export class UndoableRouteCreate extends UndoableNodeCreate {
 
 /** Add a new area to the parent DataTree */
 export class UndoableAreaCreate extends UndoableNodeCreate {
-  constructor(osmUser: OsmUser, tree: AppDataTree, parent: DataTree, parentSlug: string, name?: string) {
+  constructor(
+    osmUser: OsmUser,
+    tree: AppDataTree,
+    parent: DataTree,
+    parentSlug: string,
+    name?: string,
+    climbing: "area" | "crag" = "area",
+  ) {
     const newArea: OsmRelation = {
       type: "relation",
       id: createTempOsmId(),
       version: 0,
       tags: {
         sport: "climbing",
-        climbing: "area",
+        climbing,
         ...(name ? { name } : {}),
       },
       changeset: 0,

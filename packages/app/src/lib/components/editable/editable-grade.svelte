@@ -9,17 +9,19 @@
     grade,
     feature,
     featureSlug,
+    gradedProject = false,
   }: {
     grade: WithSourceTag<Grade> | undefined;
     feature: OsmFeature;
     featureSlug: string;
+    gradedProject?: boolean;
   } = $props();
 </script>
 
 <EditableTooltip>
   {#snippet children(props)}
     <div class="inline-flex items-center" {...props}>
-      <EditableGradeValue {feature} {grade} {featureSlug} />
+      <EditableGradeValue {feature} {grade} {featureSlug} {gradedProject} />
     </div>
   {/snippet}
 </EditableTooltip>

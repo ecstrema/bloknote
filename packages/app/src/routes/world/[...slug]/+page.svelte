@@ -224,6 +224,14 @@
   let addDialogOpen = $state(false);
   let addDialogKind = $state<"route" | "sector">("route");
   let clickedCoordinates = $state<{ lat: number; lon: number } | undefined>(undefined);
+  let coordinatesCopied = $state(false);
+
+  function copyCoordinates() {
+    if (!coordinates) return;
+    void navigator.clipboard.writeText(`${coordinates.lat}, ${coordinates.lon}`);
+    coordinatesCopied = true;
+    setTimeout(() => (coordinatesCopied = false), 1500);
+  }
 
   $effect(() => {
     if (effectiveTab !== "map") placementMode = null;
@@ -345,6 +353,7 @@
         </div>
       {/if}
       <LocationMap
+        class="h-[calc(100dvh-13rem)] min-h-80 shrink-0"
         currentSlug={itemSlug}
         currentFeature={item.feature}
         {coordinates}
@@ -372,7 +381,14 @@
       <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
         <span>{item.feature.type}/{item.feature.id}</span>
         {#if coordinates}
-          <span>{coordinates.lat}, {coordinates.lon}</span>
+          <button
+            type="button"
+            class="inline-flex cursor-pointer items-center gap-1 underline underline-offset-2 hover:text-foreground"
+            title="Copy coordinates"
+            onclick={copyCoordinates}
+          >
+            {#if coordinatesCopied}Copied!{:else}{coordinates.lat}, {coordinates.lon}{/if}
+          </button>
         {/if}
         {#if item.feature.id > 0}
           <a

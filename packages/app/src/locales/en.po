@@ -14885,13 +14885,11 @@ msgstr "Point"
 msgid "Unnamed"
 msgstr "Unnamed"
 
-#: src/lib/components/location-map.svelte
-msgid "Resize the map"
-msgstr "Resize the map"
+#~ msgid "Resize the map"
+#~ msgstr "Resize the map"
 
-#: src/lib/components/location-map.svelte
-msgid "Drag to resize the map"
-msgstr "Drag to resize the map"
+#~ msgid "Drag to resize the map"
+#~ msgstr "Drag to resize the map"
 
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Route"
@@ -15676,14 +15674,11 @@ msgstr "Type (stroke)"
 msgid "Gym"
 msgstr "Gym"
 
-#: src/routes/world/[...slug]/route-page.svelte
-msgid "Graded project warning"
-msgstr "Graded project warning"
+#~ msgid "Graded project warning"
+#~ msgstr "Graded project warning"
 
-#. 0: feature.tags?.name; 1: grade.v.v
-#: src/routes/world/[...slug]/route-page.svelte
-msgid "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
-msgstr "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
+#~ msgid "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
+#~ msgstr "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
 
 #: src/lib/components/opening-hours.svelte
 #: src/lib/components/opening-hours.svelte
@@ -16296,10 +16291,8 @@ msgstr "Could not load \"{0}\" to apply this fix."
 msgid "Could not apply fix."
 msgstr "Could not apply fix."
 
-#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
-#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
-msgid "Drag to reorder or move"
-msgstr "Drag to reorder or move"
+#~ msgid "Drag to reorder or move"
+#~ msgstr "Drag to reorder or move"
 
 #: src/lib/components/shell/app-settings-menu.svelte
 msgid "Profile & settings"
@@ -16839,3 +16832,24 @@ msgstr "Recently edited"
 #: src/lib/components/pulse-panel.svelte
 msgid "Loading edit history…"
 msgstr "Loading edit history…"
+
+#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
+msgid "Add crag"
+msgstr "Add crag"
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Copy coordinates"
+msgstr "Copy coordinates"
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Copied!"
+msgstr "Copied!"
+
+#. 0: grade.v.v
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "This route is named as a project but has a grade assigned ({0}). Projects are typically unclimbed and ungraded."
+msgstr "This route is named as a project but has a grade assigned ({0}). Projects are typically unclimbed and ungraded."
+
+#: src/lib/components/editable/editable-grade-value.svelte
+msgid "Remove grade"
+msgstr "Remove grade"
