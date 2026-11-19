@@ -5,6 +5,7 @@
   import EditablePitches from "#components/editable/editable-pitches.svelte";
   import ClimbingStyles from "#components/climbing-styles.svelte";
   import CommonsTopo from "#lib/components/commons-topo.svelte";
+  import RouteLogbook from "#lib/components/route-logbook.svelte";
   import type { DataTree } from "#lib/types.js";
   import type { OsmFeature } from "osm-api";
   import { getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
@@ -56,3 +57,5 @@
 <EditableDescription {feature} featureSlug={slug} />
 
 <CommonsTopo {feature} featureSlug={slug} />
+
+<RouteLogbook {feature} allowTicks />
