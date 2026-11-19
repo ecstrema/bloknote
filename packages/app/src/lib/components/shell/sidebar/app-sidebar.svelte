@@ -243,6 +243,71 @@
     };
   });
 
+  function handleTreeKeydown(event: KeyboardEvent) {
+    if (!contentRef) return;
+    const current = (event.target as HTMLElement | null)?.closest<HTMLElement>("[data-tree-depth]");
+    if (!current) return;
+
+    const items = Array.from(contentRef.querySelectorAll<HTMLElement>("[data-tree-depth]")).filter(
+      (el) => el.offsetParent !== null,
+    );
+    const index = items.indexOf(current);
+    if (index === -1) return;
+
+    const currentDepth = Number(current.dataset.treeDepth ?? 0);
+    const focusItem = (el: HTMLElement | undefined) => {
+      if (!el) return;
+      el.focus();
+      el.scrollIntoView({ block: "nearest" });
+    };
+
+    switch (event.key) {
+      case "ArrowDown":
+        event.preventDefault();
+        focusItem(items[Math.min(index + 1, items.length - 1)]);
+        break;
+      case "ArrowUp":
+        event.preventDefault();
+        focusItem(items[Math.max(index - 1, 0)]);
+        break;
+      case "Home":
+        event.preventDefault();
+        focusItem(items[0]);
+        break;
+      case "End":
+        event.preventDefault();
+        focusItem(items.at(-1));
+        break;
+      case "ArrowRight":
+        if (current.dataset.treeOpen === "false") {
+          event.preventDefault();
+          current.dispatchEvent(new CustomEvent("bloknote:tree-toggle", { detail: { open: true } }));
+        } else if (current.dataset.treeOpen === "true") {
+          const next = items[index + 1];
+          if (next && Number(next.dataset.treeDepth ?? 0) > currentDepth) {
+            event.preventDefault();
+            focusItem(next);
+          }
+        }
+        break;
+      case "ArrowLeft":
+        if (current.dataset.treeOpen === "true") {
+          event.preventDefault();
+          current.dispatchEvent(new CustomEvent("bloknote:tree-toggle", { detail: { open: false } }));
+        } else {
+          for (let i = index - 1; i >= 0; i--) {
+            const candidate = items[i]!;
+            if (Number(candidate.dataset.treeDepth ?? 0) < currentDepth) {
+              event.preventDefault();
+              focusItem(candidate);
+              break;
+            }
+          }
+        }
+        break;
+    }
+  }
+
   function handleTreeContextMenu(event: MouseEvent, triggerHandler?: (e: MouseEvent) => void) {
     const target = (event.target as HTMLElement | null)?.closest<HTMLElement>("[data-sidebar-slug]");
     const targetSlug = target?.dataset.sidebarSlug;
@@ -342,8 +407,11 @@
               {#snippet child({ props })}
                 <div
                   {...props}
+                  role="tree"
+                  tabindex="-1"
                   style:margin-left="-{unindentPx}px"
                   class="transition-[margin-left] duration-200 ease-out"
+                  onkeydown={handleTreeKeydown}
                   oncontextmenu={(e) => handleTreeContextMenu(e, props.oncontextmenu as ((ev: MouseEvent) => void) | undefined)}
                 >
                   <Sidebar.Menu><AppSidebarChildren bind:item={appState.tree.root} slug={""} /></Sidebar.Menu>

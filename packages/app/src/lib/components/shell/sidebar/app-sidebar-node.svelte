@@ -271,6 +271,18 @@
 
   const isSelected = $derived(itemType !== "geographic" && (selection?.has(slug) ?? false));
 
+  function onTreeToggle(event: Event) {
+    const detail = (event as CustomEvent<{ open?: boolean }>).detail;
+    open = detail?.open ?? !open;
+  }
+
+  $effect(() => {
+    if (!ref || (itemType !== "geographic" && itemType !== "area")) return;
+    const el = ref;
+    el.addEventListener("bloknote:tree-toggle", onTreeToggle);
+    return () => el.removeEventListener("bloknote:tree-toggle", onTreeToggle);
+  });
+
   $effect(() => {
     if (isCurrentPage && ref) {
       ref.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
