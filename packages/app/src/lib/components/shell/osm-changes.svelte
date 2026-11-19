@@ -70,21 +70,97 @@
           {appState.osmUser.changes.size} feature{appState.osmUser.changes.size === 1 ? "" : "s"} modified
         </Dialog.Description>
       </Dialog.Header>
-      <ul class="my-4 space-y-3 text-sm">
+      <ul class="my-3 max-h-[45vh] space-y-2.5 overflow-y-auto pr-1 text-sm">
         {#each appState.osmUser.changes as [slug, changedFeature] (slug)}
-          {#if changedFeature}
-            <li>
-              <strong>{slug}</strong>
-              <span>
-                - {getNameOSM(changedFeature.final?.tags ?? changedFeature.initial?.tags ?? {}) || "Unnamed feature"}
-              </span>
-              <Button variant="ghost" size="icon" class="ml-2 p-1" onclick={() => appState.resetFeature(slug)}>
-                <DeleteIcon />
-              </Button>
-            </li>
-          {:else}
-            <span>Feature {slug} was deleted</span>
-          {/if}
+          {@const diff = detailedChanges.get(slug)}
+          {@const displayName =
+            getNameOSM(changedFeature.final?.tags ?? changedFeature.initial?.tags ?? {}) || "Unnamed feature"}
+          {@const featureMeta = changedFeature.final ?? changedFeature.initial}
+          <li class="rounded-md border p-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span
+                    class={diff === "created"
+                      ? "rounded bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300"
+                      : diff === "deleted"
+                        ? "rounded bg-destructive/15 px-1.5 py-0.5 text-[11px] font-medium text-destructive"
+                        : "rounded bg-amber-500/15 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-300"}
+                  >
+                    {diff === "created" ? "Created" : diff === "deleted" ? "Deleted" : "Modified"}
+                  </span>
+                  <strong class="truncate">{displayName}</strong>
+                  {#if featureMeta}
+                    <span class="text-xs text-muted-foreground">{featureMeta.type}/{featureMeta.id}</span>
+                  {/if}
+                </div>
+                <p class="truncate text-xs text-muted-foreground">{slug}</p>
+              </div>
+              {#if appState.tree.getReactiveNode(slug)}
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  title="Revert changes to {displayName}"
+                  aria-label="Revert changes to {displayName}"
+                  onclick={() => appState.resetFeature(slug)}
+                >
+                  <DeleteIcon />
+                </Button>
+              {/if}
+            </div>
+
+            {#if diff === "created" && changedFeature.final}
+              <div class="mt-2 space-y-0.5 border-t pt-1.5 font-mono text-xs">
+                {#each Object.entries(changedFeature.final.tags ?? {}) as [k, v] (k)}
+                  <div class="text-emerald-700 dark:text-emerald-300">+ {k} = {v}</div>
+                {/each}
+                {#if changedFeature.final.type === "relation"}
+                  <div class="text-muted-foreground">{changedFeature.final.members.length} members</div>
+                {/if}
+              </div>
+            {:else if diff === "deleted" && changedFeature.initial}
+              <div class="mt-2 space-y-0.5 border-t pt-1.5 font-mono text-xs">
+                {#each Object.entries(changedFeature.initial.tags ?? {}) as [k, v] (k)}
+                  <div class="text-destructive line-through">- {k} = {v}</div>
+                {/each}
+              </div>
+            {:else if diff && typeof diff === "object"}
+              {@const tagDiffs = Object.entries(diff.get("tags") ?? {})}
+              {@const latDiff = diff.get("lat")}
+              {@const lonDiff = diff.get("lon")}
+              {@const membersDiff = diff.get("members")}
+              <div class="mt-2 space-y-0.5 border-t pt-1.5 font-mono text-xs">
+                {#each tagDiffs as [key, change] (key)}
+                  {#if change}
+                    <div class="flex flex-wrap items-baseline gap-1">
+                      <span class="font-semibold">{key}:</span>
+                      {#if change.initial !== undefined}
+                        <span class="text-destructive line-through">{change.initial}</span>
+                      {/if}
+                      {#if change.initial !== undefined && change.final !== undefined}
+                        <span class="text-muted-foreground">→</span>
+                      {/if}
+                      {#if change.final !== undefined}
+                        <span class="text-emerald-700 dark:text-emerald-300">{change.final}</span>
+                      {/if}
+                    </div>
+                  {/if}
+                {/each}
+                {#if latDiff || lonDiff}
+                  {@const nextLat = latDiff?.final ?? (changedFeature.final?.type === "node" ? changedFeature.final.lat : undefined)}
+                  {@const nextLon = lonDiff?.final ?? (changedFeature.final?.type === "node" ? changedFeature.final.lon : undefined)}
+                  <div class="text-muted-foreground">
+                    Coordinates moved ({nextLat?.toFixed(5) ?? ""}, {nextLon?.toFixed(5) ?? ""})
+                  </div>
+                {/if}
+                {#if membersDiff}
+                  <div class="text-muted-foreground">
+                    Members: {membersDiff.initial.length} → {membersDiff.final.length}
+                  </div>
+                {/if}
+              </div>
+            {/if}
+          </li>
         {/each}
       </ul>
       <label class="block text-sm font-medium" for="osm-comment">Comment (optional)</label>
