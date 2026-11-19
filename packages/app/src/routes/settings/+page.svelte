@@ -69,16 +69,21 @@
         <BloknoteLogo />
         <span>Bloknote</span>
       </a>
-      {#if hasPreviousPage}
-        <Button variant="ghost" onclick={() => window.history.back()}>
-          <ArrowLeftIcon />
-          Back
-        </Button>
-      {:else}
-        <a href={resolve("world")} class="text-sm text-muted-foreground transition-colors hover:text-foreground">
-          Browse climbs
+      <div class="flex items-center gap-3">
+        <a href={resolve("/docs")} class="text-sm text-muted-foreground transition-colors hover:text-foreground">
+          Docs
         </a>
-      {/if}
+        {#if hasPreviousPage}
+          <Button variant="ghost" onclick={() => window.history.back()}>
+            <ArrowLeftIcon />
+            Back
+          </Button>
+        {:else}
+          <a href={resolve("world")} class="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            Browse climbs
+          </a>
+        {/if}
+      </div>
     </div>
   </header>
 

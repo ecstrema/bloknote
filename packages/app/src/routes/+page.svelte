@@ -30,6 +30,9 @@
         >
           All routes
         </a>
+        <a href={resolve("/docs")} class="text-sm text-muted-foreground transition-colors hover:text-foreground">
+          Docs
+        </a>
         <a href={resolve("/settings")} class="text-sm text-muted-foreground transition-colors hover:text-foreground">
           Settings
         </a>
