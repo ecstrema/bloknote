@@ -30,12 +30,21 @@ export interface WorldClimbingPoints {
 // retry later.
 export const WORLD_CLIMBING_QUERY = `
 [out:json][timeout:600];
-// Every climbing place, except individual routes
 (
-  nwr["sport"="climbing"]["climbing"!~"^route"];
-  nwr["climbing"~"^(area|crag|boulder)(;.*)?$"];
+  nwr["sport"="climbing"];
+  nwr["climbing"~"^(area|crag|boulder|route_bottom|bolt|route_top|route|abseil_route)(;.*)?$"];
 );
-out tags center qt;`;
+out center meta;`;
+
+const PLACE_CLIMBING_RE = /^(area|crag|boulder)(;.*)?$/;
+const ROUTE_CLIMBING_RE = /^(route|bolt|abseil|toprope|drytooling)/;
+
+function isPlaceFeature(tags: Record<string, string>): boolean {
+  if (!tags.climbing) return true;
+  if (PLACE_CLIMBING_RE.test(tags.climbing)) return true;
+  return !ROUTE_CLIMBING_RE.test(tags.climbing);
+}
+
 function getKind(tags: Record<string, string>): ClimbingPointKind {
   switch (tags.climbing) {
     case "crag":
@@ -62,6 +71,8 @@ export function toClimbingPoint(el: OsmFeature): ClimbingPoint | undefined {
   if (!coordinates) return;
 
   const tags = (el.tags ?? {}) as Record<string, string>;
+  if (!isPlaceFeature(tags)) return;
+
   return {
     id: `${el.type[0]}${el.id}`,
     lon: coordinates.lon,

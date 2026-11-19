@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 
 import { error, json } from "@sveltejs/kit";
 import { BOUNDARY_EXTENSION, DATA_DIR } from "@bloknote/reverse-geocoding-data";
-import { getWorldClimbingPoints, WORLD_CLIMBING_POINTS_FILE } from "@bloknote/climbing-data-gen";
+import { CLIMBING_DATA_FILE, getWorldClimbingPoints } from "@bloknote/climbing-data-gen";
 
 import type { RequestHandler } from "./$types";
 import { MAX_STAGE_AREAS, type BoundaryState, type BoundaryStates, type DataFiles } from "../../../edit-map/types";
@@ -97,7 +97,7 @@ export const GET: RequestHandler = async ({ params }) => {
     case "climbing.json":
     case "climbing-refresh.json": {
       const force = params.resource === "climbing-refresh.json";
-      const result = await getWorldClimbingPoints(WORLD_CLIMBING_POINTS_FILE, { force });
+      const result = await getWorldClimbingPoints(CLIMBING_DATA_FILE, { force });
       return "data" in result ? json(result.data) : json(result.status, { status: 202 });
     }
   }
