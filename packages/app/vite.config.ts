@@ -75,7 +75,7 @@ export default defineConfig({
   plugins: [
     climbingApi(),
     tailwindcss(),
-    wuchale(),
+    wuchale({ hmrDelayThreshold: 5000 }),
     sveltekit({
       // Consult https://kit.svelte.dev/docs/integrations#preprocessors
       // for more information about preprocessors
@@ -110,6 +110,9 @@ export default defineConfig({
   test: { include: ["src/**/*.{test,spec}.{js,ts}"] },
   server: {
     host: "127.0.0.1",
+    watch: {
+      ignored: ["**/src/locales/*.po"],
+    },
   },
   optimizeDeps: {
     // MapLibre loads its worker from next to its own module: pre-bundling would move the module
