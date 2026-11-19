@@ -25,7 +25,7 @@
   <Sidebar.Provider>
     <AppSidebar />
 
-    <Sidebar.Inset>
+    <Sidebar.Inset class="min-w-0">
       <header class="flex h-12 shrink-0 items-center gap-2 border-b px-3 max-w-screen overflow-auto no-scrollbar">
         <Sidebar.Trigger class="-ms-1" />
         <a href={resolve("/")} aria-label="Bloknote home" class="shrink-0">
