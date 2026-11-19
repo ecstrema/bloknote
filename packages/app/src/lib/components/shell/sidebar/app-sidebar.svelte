@@ -11,16 +11,21 @@
 
   import Input from "#components/ui/input/input.svelte";
   import type { DataTree } from "#lib/types.js";
-  import { restoreSidebarOrders, setSearchFilter, type SearchFilter } from "./utils";
+  import { getItemUrl, restoreSidebarOrders, setSearchFilter, type SearchFilter } from "./utils";
   import { getAppState } from "#lib/data/app-state.js";
   import { localDb, type FilterSearch } from "#lib/data/db/local-db.svelte.js";
   import { settings } from "#lib/data/settings.svelte.js";
   import type { SearchFilters } from "#lib/data/db/types.js";
   import { getParentSlugs } from "#lib/helpers/slug.js";
   import { Button } from "#components/ui/button/index.js";
+  import * as Dialog from "#components/ui/dialog/index.js";
+  import { goto } from "$app/navigation";
+  import { commonParentSlug } from "#lib/data/app-state.js";
+  import { SidebarSelection, setSidebarSelection } from "./selection.svelte";
   import XIcon from "@lucide/svelte/icons/x";
   import ListFilterIcon from "@lucide/svelte/icons/list-filter";
   import ChevronsDownUpIcon from "@lucide/svelte/icons/chevrons-down-up";
+  import FolderPlusIcon from "@lucide/svelte/icons/folder-plus";
 
   /** Above this many matches, the tree isn't opened automatically to reveal them */
   const EXPAND_LIMIT = 1000;
@@ -171,6 +176,40 @@
       return searchFilter;
     },
   });
+
+  const selection = new SidebarSelection(() => {
+    if (!ref) return [];
+    return Array.from(ref.querySelectorAll<HTMLElement>("[data-sidebar-slug]"))
+      .map((el) => el.dataset.sidebarSlug)
+      .filter((s): s is string => !!s);
+  });
+  setSidebarSelection(selection);
+
+  let moveDialogOpen = $state(false);
+  let newSectorName = $state("");
+
+  const moveTargetParentSlug = $derived(commonParentSlug(selection.slugs));
+  const moveTargetParent = $derived(
+    moveTargetParentSlug !== undefined ? appState.tree.getReactiveNode(moveTargetParentSlug) : undefined,
+  );
+
+  function openMoveDialog() {
+    newSectorName = "";
+    moveDialogOpen = true;
+  }
+
+  function confirmMoveToNewSector(event: SubmitEvent) {
+    event.preventDefault();
+    const sectorSlug = appState.createSectorWithItems(selection.slugs, newSectorName, moveTargetParentSlug);
+    selection.clear();
+    moveDialogOpen = false;
+    if (sectorSlug) {
+      const sectorFeature = appState.tree.getReactiveNode(sectorSlug)?.feature;
+      if (sectorFeature && sectorFeature.type !== "geographic" && moveTargetParentSlug !== undefined) {
+        void goto(getItemUrl(moveTargetParentSlug, sectorFeature));
+      }
+    }
+  }
 </script>
 
 <Sidebar.Root bind:ref {...restProps}>
@@ -258,5 +297,47 @@
       </div>
     {/if}
   </Sidebar.Content>
+  {#if selection.size > 0}
+    <Sidebar.Footer class="border-t bg-sidebar p-2">
+      <div class="flex items-center justify-between gap-2 text-xs">
+        <span class="font-medium">{selection.size} selected</span>
+        <Button size="xs" variant="ghost" onclick={() => selection.clear()}>
+          <XIcon />
+          Clear
+        </Button>
+      </div>
+      {#if appState.osmUser.loggedIn}
+        <Button size="sm" class="w-full" onclick={openMoveDialog}>
+          <FolderPlusIcon />
+          Move to new sector
+        </Button>
+      {:else}
+        <p class="text-xs text-muted-foreground">Log in to OpenStreetMap to move into a new sector.</p>
+      {/if}
+    </Sidebar.Footer>
+  {/if}
   <Sidebar.Rail class="translate-x-0" />
 </Sidebar.Root>
+
+<Dialog.Root bind:open={moveDialogOpen}>
+  <Dialog.Content class="max-w-sm">
+    <form onsubmit={confirmMoveToNewSector} class="flex flex-col gap-4">
+      <Dialog.Header>
+        <Dialog.Title>Move to new sector</Dialog.Title>
+        <Dialog.Description>
+          Create a new sector{moveTargetParent ? ` in ${getLocalizedName(moveTargetParent.feature)}` : ""} and move
+          {selection.size} selected item{selection.size === 1 ? "" : "s"} into it.
+        </Dialog.Description>
+      </Dialog.Header>
+      <Input bind:value={newSectorName} placeholder="Sector name (optional)" autofocus />
+      <Dialog.Footer>
+        <Dialog.Close>
+          {#snippet child({ props })}
+            <Button {...props} type="button" variant="outline">Cancel</Button>
+          {/snippet}
+        </Dialog.Close>
+        <Button type="submit">Create & move</Button>
+      </Dialog.Footer>
+    </form>
+  </Dialog.Content>
+</Dialog.Root>

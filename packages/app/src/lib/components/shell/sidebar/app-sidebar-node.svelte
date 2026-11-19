@@ -38,6 +38,7 @@
   import { getParentSlug } from "#lib/helpers/slug.js";
   import { replaceState } from "$app/navigation";
   import GripVerticalIcon from "@lucide/svelte/icons/grip-vertical";
+  import { getSidebarSelection } from "./selection.svelte";
 
   let {
     slug,
@@ -49,6 +50,7 @@
 
   const appState = getAppState();
   const searchFilter = getSearchFilter();
+  const selection = getSidebarSelection();
 
   const breadcrumbSlugs = $derived(appState.breadcrumbs.slugs);
   const tree = $derived(appState.tree);
@@ -166,6 +168,32 @@
     }
   }
 
+  function handleItemClick(event: MouseEvent) {
+    if (!selection) return;
+    if (itemType === "geographic") {
+      if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
+        selection.clear();
+        selection.setAnchor(undefined);
+      }
+      return;
+    }
+
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      event.stopPropagation();
+      selection.toggle(slug);
+    } else if (event.shiftKey) {
+      event.preventDefault();
+      event.stopPropagation();
+      selection.selectRange(slug);
+    } else {
+      selection.clear();
+      selection.setAnchor(slug);
+    }
+  }
+
+  const isSelected = $derived(itemType !== "geographic" && (selection?.has(slug) ?? false));
+
   $effect(() => {
     if (isCurrentPage && ref) {
       ref.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
@@ -177,13 +205,20 @@
   <Sidebar.MenuButton
     bind:ref={ref as HTMLButtonElement}
     isActive={isCurrentPage}
+    data-sidebar-slug={slug}
+    data-selected={isSelected || undefined}
     href={link}
+    onclick={handleItemClick}
     ondragstart={onDragStart}
     ondragover={onDragOver}
     ondragleave={onDragLeave}
     ondrop={onDrop}
     ondragend={onDragEnd}
-    class={clsx("data-[active=true]:bg-accent truncate w-full", dropPosition && "relative")}
+    class={clsx(
+      "data-[active=true]:bg-accent truncate w-full",
+      isSelected && "bg-primary/15 text-primary ring-1 ring-inset ring-primary/40",
+      dropPosition && "relative",
+    )}
   >
     {#if dropPosition === "before"}
       <span class="pointer-events-none absolute inset-x-1 top-0 z-10 h-0.5 bg-primary" aria-hidden="true"></span>
@@ -225,13 +260,19 @@
       {#snippet child({ props })}
         <Sidebar.MenuItem bind:ref={ref as HTMLLIElement} {...props} class="group/button">
           <Sidebar.MenuButton
+            data-sidebar-slug={itemType !== "geographic" ? slug : undefined}
+            data-selected={isSelected || undefined}
             href={link}
+            onclick={handleItemClick}
             ondragstart={onDragStart}
             ondragover={onDragOver}
             ondragleave={onDragLeave}
             ondrop={onDrop}
             ondragend={onDragEnd}
-            class={clsx(dropPosition && "relative")}
+            class={clsx(
+              isSelected && "bg-primary/15 text-primary ring-1 ring-inset ring-primary/40",
+              dropPosition && "relative",
+            )}
           >
             {#if dropPosition === "before"}
               <span class="pointer-events-none absolute inset-x-1 top-0 z-10 h-0.5 bg-primary" aria-hidden="true"

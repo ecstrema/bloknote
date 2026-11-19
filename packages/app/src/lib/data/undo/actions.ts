@@ -156,12 +156,19 @@ export class UndoableGroup implements Undoable {
   }
 }
 
+let nextTempOsmId = -Math.floor(Date.now() / 1000);
+function createTempOsmId(): number {
+  return --nextTempOsmId;
+}
+
 /** Add a node to the parent DataTree. Extended by {@link UndoableRouteCreate} and {@link UndoableAreaCreate} */
 export class UndoableNodeCreate extends OsmUndoable implements Undoable {
   tree: AppDataTree;
   parent: DataTree;
+  parentSlug: string;
   slug: string;
   item: DataTree<OsmFeature>;
+  #hadParentMember = false;
 
   constructor(osmUser: OsmUser, tree: AppDataTree, feature: OsmFeature, parent: DataTree, parentSlug: string) {
     super(osmUser);
@@ -172,7 +179,8 @@ export class UndoableNodeCreate extends OsmUndoable implements Undoable {
       childrenFetched: true,
     };
     this.parent = parent;
-    this.slug = `${parentSlug}/${crypto.randomUUID()}`;
+    this.parentSlug = parentSlug;
+    this.slug = parentSlug ? `${parentSlug}/${crypto.randomUUID()}` : crypto.randomUUID();
   }
 
   do() {
@@ -181,11 +189,32 @@ export class UndoableNodeCreate extends OsmUndoable implements Undoable {
     const reactiveNode = this.parent.children[this.slug]!;
     this.tree.setReactiveNode(this.slug, reactiveNode);
     dataClient.registerLocalNode(this.slug, reactiveNode);
+    if (this.parent.childrenFetched) dataClient.registerLocalNode(this.parentSlug, this.parent);
 
     this.osmUser.markAsDirty(undefined, this.slug, this.item.feature);
+
+    if (this.parent.feature.type === "relation") {
+      const feature = this.parent.feature;
+      const member = { type: this.item.feature.type, ref: this.item.feature.id, role: "" };
+      this.#hadParentMember = feature.members.some((m) => m.type === member.type && m.ref === member.ref);
+      if (!this.#hadParentMember) {
+        const before = snapshot(feature);
+        feature.members = [...feature.members, member];
+        this.osmUser.markAsDirty(before, this.parentSlug, feature);
+      }
+    }
   }
 
   undo() {
+    if (this.parent.feature.type === "relation" && !this.#hadParentMember) {
+      const feature = this.parent.feature;
+      const before = snapshot(feature);
+      feature.members = feature.members.filter(
+        (m) => !(m.type === this.item.feature.type && m.ref === this.item.feature.id),
+      );
+      this.osmUser.markAsDirty(before, this.parentSlug, feature);
+    }
+
     dataClient.unregisterLocalNode(this.slug);
     this.tree.deleteReactiveNode(this.slug);
     if (this.parent.children) {
@@ -203,14 +232,16 @@ export class UndoableRouteCreate extends UndoableNodeCreate {
     parent: DataTree,
     parentSlug: string,
     coordinates: { lat: number; lon: number } = { lat: 0, lon: 0 },
+    name?: string,
   ) {
     const newRoute: OsmNode = {
       type: "node",
-      id: -Date.now(),
+      id: createTempOsmId(),
       version: 0,
       tags: {
         sport: "climbing",
         climbing: "route_bottom",
+        ...(name ? { name } : {}),
       },
       changeset: 0,
       lat: coordinates.lat,
@@ -225,14 +256,15 @@ export class UndoableRouteCreate extends UndoableNodeCreate {
 
 /** Add a new area to the parent DataTree */
 export class UndoableAreaCreate extends UndoableNodeCreate {
-  constructor(osmUser: OsmUser, tree: AppDataTree, parent: DataTree, parentSlug: string) {
+  constructor(osmUser: OsmUser, tree: AppDataTree, parent: DataTree, parentSlug: string, name?: string) {
     const newArea: OsmRelation = {
       type: "relation",
-      id: -Date.now(),
+      id: createTempOsmId(),
       version: 0,
       tags: {
         sport: "climbing",
         climbing: "area",
+        ...(name ? { name } : {}),
       },
       changeset: 0,
       members: [],
@@ -241,6 +273,144 @@ export class UndoableAreaCreate extends UndoableNodeCreate {
       user: "",
     };
     super(osmUser, tree, newArea, parent, parentSlug);
+  }
+}
+
+/** Move an OSM node/area/gym from its current parent to a new parent (geographic region or relation). */
+export class UndoableReparentNode extends OsmUndoable implements Undoable {
+  readonly newSlug: string;
+  #oldMemberIndex = -1;
+  #removedMember: OsmRelation["members"][number] | undefined;
+  #addedToNewParent = false;
+
+  constructor(
+    osmUser: OsmUser,
+    private tree: AppDataTree,
+    private node: DataTree<OsmFeature>,
+    private oldSlug: string,
+    private oldParent: DataTree,
+    private oldParentSlug: string,
+    private newParent: DataTree,
+    private newParentSlug: string,
+  ) {
+    super(osmUser);
+    const segment = oldSlug.slice(oldSlug.lastIndexOf("/") + 1);
+    const candidate = newParentSlug ? `${newParentSlug}/${segment}` : segment;
+    this.newSlug =
+      newParent.children?.[candidate] && candidate !== oldSlug
+        ? `${newParentSlug ? `${newParentSlug}/` : ""}${segment}-${crypto.randomUUID().slice(0, 6)}`
+        : candidate;
+  }
+
+  #rekeySubtree(root: DataTree, fromPrefix: string, toPrefix: string) {
+    if (!root.children) return;
+    const updated: Record<string, DataTree> = {};
+    for (const [oldChildSlug, child] of Object.entries(root.children)) {
+      const nextChildSlug = oldChildSlug.startsWith(`${fromPrefix}/`)
+        ? `${toPrefix}${oldChildSlug.slice(fromPrefix.length)}`
+        : oldChildSlug;
+      this.tree.deleteReactiveNode(oldChildSlug);
+      dataClient.unregisterLocalNode(oldChildSlug);
+      this.osmUser.renameChangeSlug(oldChildSlug, nextChildSlug);
+      this.#rekeySubtree(child, fromPrefix, toPrefix);
+      updated[nextChildSlug] = child;
+    }
+    root.children = updated;
+    for (const [nextChildSlug, child] of Object.entries(root.children)) {
+      this.tree.setReactiveNode(nextChildSlug, child);
+      dataClient.registerLocalNode(nextChildSlug, child);
+    }
+  }
+
+  #move(
+    fromSlug: string,
+    toSlug: string,
+    fromParent: DataTree,
+    fromParentSlug: string,
+    toParent: DataTree,
+    toParentSlug: string,
+    isUndo: boolean,
+  ) {
+    if (fromParent === toParent && fromSlug === toSlug) return;
+
+    if (fromParent.children) delete fromParent.children[fromSlug];
+    this.tree.deleteReactiveNode(fromSlug);
+    dataClient.unregisterLocalNode(fromSlug);
+
+    this.#rekeySubtree(this.node, fromSlug, toSlug);
+
+    toParent.children ??= {};
+    toParent.children[toSlug] = this.node;
+    const reactiveNode = toParent.children[toSlug]!;
+    this.tree.setReactiveNode(toSlug, reactiveNode);
+    dataClient.registerLocalNode(toSlug, reactiveNode);
+    if (fromParent.childrenFetched) dataClient.registerLocalNode(fromParentSlug, fromParent);
+    if (toParent.childrenFetched) dataClient.registerLocalNode(toParentSlug, toParent);
+    this.osmUser.renameChangeSlug(fromSlug, toSlug);
+
+    if (fromParent.feature.type === "relation") {
+      const rel = fromParent.feature;
+      const before = snapshot(rel);
+      if (!isUndo) {
+        this.#oldMemberIndex = rel.members.findIndex(
+          (m) => m.type === this.node.feature.type && m.ref === this.node.feature.id,
+        );
+        if (this.#oldMemberIndex !== -1) {
+          this.#removedMember = rel.members[this.#oldMemberIndex];
+          rel.members = rel.members.filter((_, idx) => idx !== this.#oldMemberIndex);
+          this.osmUser.markAsDirty(before, fromParentSlug, rel);
+        }
+      } else if (this.#addedToNewParent) {
+        rel.members = rel.members.filter(
+          (m) => !(m.type === this.node.feature.type && m.ref === this.node.feature.id),
+        );
+        this.osmUser.markAsDirty(before, fromParentSlug, rel);
+      }
+    }
+
+    if (toParent.feature.type === "relation") {
+      const rel = toParent.feature;
+      const before = snapshot(rel);
+      if (!isUndo) {
+        const exists = rel.members.some(
+          (m) => m.type === this.node.feature.type && m.ref === this.node.feature.id,
+        );
+        this.#addedToNewParent = !exists;
+        if (!exists) {
+          rel.members = [...rel.members, { type: this.node.feature.type, ref: this.node.feature.id, role: "" }];
+          this.osmUser.markAsDirty(before, toParentSlug, rel);
+        }
+      } else if (this.#removedMember) {
+        const nextMembers = [...rel.members];
+        nextMembers.splice(Math.min(this.#oldMemberIndex, nextMembers.length), 0, this.#removedMember);
+        rel.members = nextMembers;
+        this.osmUser.markAsDirty(before, toParentSlug, rel);
+      }
+    }
+  }
+
+  do() {
+    this.#move(
+      this.oldSlug,
+      this.newSlug,
+      this.oldParent,
+      this.oldParentSlug,
+      this.newParent,
+      this.newParentSlug,
+      false,
+    );
+  }
+
+  undo() {
+    this.#move(
+      this.newSlug,
+      this.oldSlug,
+      this.newParent,
+      this.newParentSlug,
+      this.oldParent,
+      this.oldParentSlug,
+      true,
+    );
   }
 }
 

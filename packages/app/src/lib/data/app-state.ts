@@ -9,10 +9,12 @@ import {
   UndoableFeatureSet,
   UndoableMove,
   UndoableRelationMembersSet,
+  UndoableReparentNode,
   UndoableRouteCreate,
   UndoableTagChange,
   UndoableTagDelete,
 } from "./undo/actions";
+import { getParentSlug } from "#lib/helpers/slug.js";
 import { OsmUser } from "./network/osm.svelte";
 import type { Coordinates } from "@bloknote/climbing-data-gen";
 import type { Key, OsmFeature, OsmRelation } from "osm-api";
@@ -124,17 +126,72 @@ export class AppState {
   /**
    * Applies {@link UndoableRouteCreate} to create a new route in the parent feature.
    */
-  createRoute(parent: DataTree, parentSlug: string, coordinates?: Coordinates) {
-    const action = new UndoableRouteCreate(this.osmUser, this.tree, parent, parentSlug, coordinates);
+  createRoute(parent: DataTree, parentSlug: string, coordinates?: Coordinates, name?: string) {
+    const action = new UndoableRouteCreate(this.osmUser, this.tree, parent, parentSlug, coordinates, name);
     this.undoStack.do(action);
     return action.slug;
   }
 
   /** Applies {@link UndoableAreaCreate} to create a new area in the parent feature. */
-  createArea(parent: DataTree, parentSlug: string) {
-    const action = new UndoableAreaCreate(this.osmUser, this.tree, parent, parentSlug);
+  createArea(parent: DataTree, parentSlug: string, name?: string) {
+    const action = new UndoableAreaCreate(this.osmUser, this.tree, parent, parentSlug, name);
     this.undoStack.do(action);
     return action.slug;
+  }
+
+  /** Moves an OSM node/area/gym to a different parent (geographic region or area relation). */
+  reparentNode(itemSlug: string, newParentSlug: string): string | undefined {
+    const oldParentSlug = getParentSlug(itemSlug);
+    if (oldParentSlug === undefined || oldParentSlug === newParentSlug) return itemSlug;
+    if (newParentSlug === itemSlug || newParentSlug.startsWith(`${itemSlug}/`)) return undefined;
+
+    const node = this.tree.getReactiveNode(itemSlug);
+    const oldParent = this.tree.getReactiveNode(oldParentSlug);
+    const newParent = this.tree.getReactiveNode(newParentSlug);
+    if (!node || !oldParent || !newParent || node.feature.type === "geographic") return undefined;
+
+    const action = new UndoableReparentNode(
+      this.osmUser,
+      this.tree,
+      node as DataTree<OsmFeature>,
+      itemSlug,
+      oldParent,
+      oldParentSlug,
+      newParent,
+      newParentSlug,
+    );
+    this.undoStack.do(action);
+    return action.newSlug;
+  }
+
+  /**
+   * Creates a new sector under the common parent (or `targetParentSlug`) and moves all selected
+   * OSM items into it as a single undoable operation.
+   */
+  createSectorWithItems(itemSlugs: string[], name?: string, targetParentSlug?: string): string | undefined {
+    const topSlugs = itemSlugs
+      .filter((slug) => {
+        const node = this.tree.getReactiveNode(slug);
+        if (!node || node.feature.type === "geographic") return false;
+        return !itemSlugs.some((other) => other !== slug && slug.startsWith(`${other}/`));
+      });
+    if (topSlugs.length === 0) return undefined;
+
+    const parentSlug = targetParentSlug ?? commonParentSlug(topSlugs);
+    if (parentSlug === undefined) return undefined;
+    const parent = this.tree.getReactiveNode(parentSlug);
+    if (!parent) return undefined;
+
+    this.undoStack.beginGroup();
+    const sectorSlug = this.createArea(parent, parentSlug, name?.trim() || undefined);
+    const sectorNode = this.tree.getReactiveNode(sectorSlug);
+    if (sectorNode) {
+      for (const slug of topSlugs) {
+        this.reparentNode(slug, sectorSlug);
+      }
+    }
+    this.undoStack.endGroup();
+    return sectorSlug;
   }
 
   findOsmItemById(id: string): { item: DataTree<OsmFeature>; slug: string } | undefined {
@@ -207,6 +264,26 @@ export class AppState {
 
 function sameRelationMember(a: OsmRelation["members"][number], b: OsmRelation["members"][number]): boolean {
   return a.type === b.type && a.ref === b.ref && a.role === b.role;
+}
+
+export function commonParentSlug(slugs: string[]): string | undefined {
+  const parentParts = slugs
+    .map((slug) => getParentSlug(slug))
+    .filter((p): p is string => p !== undefined)
+    .map((p) => (p === "" ? [] : p.split("/")));
+  if (parentParts.length === 0) return undefined;
+  const first = parentParts[0]!;
+  let shared = first.length;
+  for (const parts of parentParts.slice(1)) {
+    shared = Math.min(shared, parts.length);
+    for (let i = 0; i < shared; i++) {
+      if (parts[i] !== first[i]) {
+        shared = i;
+        break;
+      }
+    }
+  }
+  return first.slice(0, shared).join("/");
 }
 
 export const [getAppState, setAppState] = createContext<AppState>();

@@ -134,6 +134,10 @@ export class OsmUser {
     const slug = beforeSlug;
     if (this.changes.has(slug)) {
       const original = this.changes.get(slug)!.initial;
+      if (original === undefined && featureAfterChange === undefined) {
+        this.changes.delete(slug);
+        return;
+      }
       // Compute diff with original and new, to see if there are still changes. Else, remove the dirtyFlag
       const diff = this.#diff(original, featureAfterChange);
       if (typeof diff === "object" && diff.size === 0) {
@@ -151,6 +155,14 @@ export class OsmUser {
     }
 
     this.changes.set(slug, { initial: featureBeforeChange, final: featureAfterChange });
+  }
+
+  renameChangeSlug(oldSlug: string, newSlug: string) {
+    if (oldSlug === newSlug) return;
+    const existing = this.changes.get(oldSlug);
+    if (!existing) return;
+    this.changes.delete(oldSlug);
+    this.changes.set(newSlug, existing);
   }
 
   getDetailedChanges(): Map<string, FeatureDiff> {
