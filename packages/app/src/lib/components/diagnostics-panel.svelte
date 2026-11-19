@@ -10,10 +10,9 @@
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { featureToType } from "#lib/data/parse/data.js";
   import {
-    getFeatureDiagnostics,
+    collectSubtreeDiagnostics,
     type DiagnosticPatch,
     type DiagnosticSeverity,
-    type TagDiagnostic,
   } from "#lib/data/parse/diagnostics.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getParentSlug, getParentSlugs } from "#lib/helpers/slug.js";
@@ -64,33 +63,9 @@
     };
   });
 
-  function collectLoadedNodes(root: DataTree, rootSlug: string): Map<string, OsmFeature> {
-    const map = new Map<string, OsmFeature>();
-    const visit = (node: DataTree, nodeSlug: string) => {
-      if (node.feature.type !== "geographic") map.set(nodeSlug, node.feature);
-      for (const [childSlug, child] of Object.entries(node.children ?? {})) visit(child, childSlug);
-    };
-    visit(root, rootSlug);
-    return map;
-  }
-
-  const allEntries = $derived.by(() => {
-    const merged = new Map<string, OsmFeature>();
-    for (const [entrySlug, data] of Object.entries(dbElements)) {
-      if (data.type !== "geographic") merged.set(entrySlug, data);
-    }
-    for (const [entrySlug, feature] of collectLoadedNodes(item, slug)) merged.set(entrySlug, feature);
-
-    const list: { slug: string; feature: OsmFeature; diagnostics: TagDiagnostic[] }[] = [];
-    for (const [entrySlug, feature] of merged) {
-      const reactiveFeature = appState.tree.getReactiveNode(entrySlug)?.feature;
-      const effective = reactiveFeature && reactiveFeature.type !== "geographic" ? reactiveFeature : feature;
-      const diagnostics = getFeatureDiagnostics(effective);
-      if (diagnostics.length > 0) list.push({ slug: entrySlug, feature: effective, diagnostics });
-    }
-    list.sort((a, b) => a.slug.localeCompare(b.slug));
-    return list;
-  });
+  const allEntries = $derived(
+    collectSubtreeDiagnostics(item, slug, dbElements, (entrySlug) => appState.tree.getReactiveNode(entrySlug)),
+  );
 
   const categories = $derived.by(() => {
     const titles = new Map<string, string>();

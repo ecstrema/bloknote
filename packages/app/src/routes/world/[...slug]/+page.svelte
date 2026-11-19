@@ -19,7 +19,9 @@
   import LocationMap from "#lib/components/location-map.svelte";
   import MapAddDialog from "#lib/components/map-add-dialog.svelte";
   import DiagnosticsPanel from "#lib/components/diagnostics-panel.svelte";
-  import { getFeatureDiagnostics } from "#lib/data/parse/diagnostics.js";
+  import { collectSubtreeDiagnostics } from "#lib/data/parse/diagnostics.js";
+  import { localDb } from "#lib/data/db/local-db.svelte.js";
+  import type { DataJSON } from "@bloknote/climbing-data-gen";
   import { Button } from "#components/ui/button/index.js";
   import { getFallbackCoordinates } from "#lib/data/route-location.js";
   import EditableName from "#components/editable/editable-name.svelte";
@@ -36,6 +38,7 @@
   import MapIcon from "@lucide/svelte/icons/map";
   import MapPinPlusIcon from "@lucide/svelte/icons/map-pin-plus";
   import StethoscopeIcon from "@lucide/svelte/icons/stethoscope";
+  import CheckCircle2Icon from "@lucide/svelte/icons/check-circle-2";
 
   type PageTab = "overview" | "map" | "osm" | "diagnostics";
   function parseTab(value: string | null): PageTab | undefined {
@@ -170,8 +173,43 @@
   const isRoute = $derived(itemType === "route");
   const editable = $derived(appState.osmUser.loggedIn && item.feature.type === "node" && isRoute);
   const fallbackCoordinates = $derived(coordinates ? undefined : getFallbackCoordinates(itemSlug));
-  const ownDiagnosticsCount = $derived(
-    item.feature.type !== "geographic" ? getFeatureDiagnostics(item.feature).length : 0,
+  const isAreaLike = $derived(item.feature.type === "geographic" || itemType === "area");
+  let diagDbElements = $state.raw<Record<string, DataJSON>>({});
+  let diagDbTruncated = $state(false);
+  let loadingDiagnostics = $state(false);
+
+  $effect(() => {
+    const targetSlug = itemSlug;
+    if (building || !isAreaLike || !localDb.ready) {
+      diagDbElements = {};
+      diagDbTruncated = false;
+      loadingDiagnostics = false;
+      return;
+    }
+
+    let cancelled = false;
+    loadingDiagnostics = true;
+    localDb
+      .getSubtreeElements(targetSlug, 2000)
+      .then((res) => {
+        if (cancelled) return;
+        diagDbElements = res.data;
+        diagDbTruncated = res.truncated;
+      })
+      .finally(() => {
+        if (!cancelled) loadingDiagnostics = false;
+      });
+    return () => {
+      cancelled = true;
+    };
+  });
+
+  const diagnosticsCount = $derived.by(() => {
+    const entries = collectSubtreeDiagnostics(item, itemSlug, diagDbElements, (s) => appState.tree.getReactiveNode(s));
+    return entries.reduce((sum, entry) => sum + entry.diagnostics.length, 0);
+  });
+  const diagnosticsKnownClean = $derived(
+    !loadingDiagnostics && diagnosticsCount === 0 && (!isAreaLike || localDb.ready),
   );
 
   let placementMode = $state<"route" | "sector" | null>(null);
@@ -239,10 +277,12 @@
       <Tabs.Trigger value="diagnostics">
         <StethoscopeIcon />
         Diagnostics
-        {#if ownDiagnosticsCount > 0}
+        {#if diagnosticsCount > 0}
           <span class="rounded-full bg-amber-500/20 px-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
-            {ownDiagnosticsCount}
+            {diagnosticsCount}{diagDbTruncated ? "+" : ""}
           </span>
+        {:else if diagnosticsKnownClean}
+          <CheckCircle2Icon class="size-3.5 text-emerald-600 dark:text-emerald-400" aria-label="No issues" />
         {/if}
       </Tabs.Trigger>
     </Tabs.List>

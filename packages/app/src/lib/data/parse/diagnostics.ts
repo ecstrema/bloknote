@@ -1,4 +1,6 @@
+import type { DataJSON } from "@bloknote/climbing-data-gen";
 import type { Key, OsmFeature, Tags } from "osm-api";
+import type { DataTree } from "#lib/types.js";
 import {
   featureToTypeOSM,
   getGrade,
@@ -197,4 +199,43 @@ export function getFeatureDiagnostics(feature: OsmFeature): TagDiagnostic[] {
   }
 
   return diagnostics;
+}
+
+export interface DiagnosticEntry {
+  slug: string;
+  feature: OsmFeature;
+  diagnostics: TagDiagnostic[];
+}
+
+export function collectLoadedOsmNodes(root: DataTree, rootSlug: string): Map<string, OsmFeature> {
+  const map = new Map<string, OsmFeature>();
+  const visit = (node: DataTree, nodeSlug: string) => {
+    if (node.feature.type !== "geographic") map.set(nodeSlug, node.feature);
+    for (const [childSlug, child] of Object.entries(node.children ?? {})) visit(child, childSlug);
+  };
+  visit(root, rootSlug);
+  return map;
+}
+
+export function collectSubtreeDiagnostics(
+  root: DataTree,
+  rootSlug: string,
+  dbElements: Record<string, DataJSON>,
+  getReactiveNode: (slug: string) => DataTree | undefined,
+): DiagnosticEntry[] {
+  const merged = new Map<string, OsmFeature>();
+  for (const [entrySlug, data] of Object.entries(dbElements)) {
+    if (data.type !== "geographic") merged.set(entrySlug, data);
+  }
+  for (const [entrySlug, feature] of collectLoadedOsmNodes(root, rootSlug)) merged.set(entrySlug, feature);
+
+  const list: DiagnosticEntry[] = [];
+  for (const [entrySlug, feature] of merged) {
+    const reactiveFeature = getReactiveNode(entrySlug)?.feature;
+    const effective = reactiveFeature && reactiveFeature.type !== "geographic" ? reactiveFeature : feature;
+    const diagnostics = getFeatureDiagnostics(effective);
+    if (diagnostics.length > 0) list.push({ slug: entrySlug, feature: effective, diagnostics });
+  }
+  list.sort((a, b) => a.slug.localeCompare(b.slug));
+  return list;
 }
