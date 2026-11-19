@@ -113,6 +113,7 @@
   const reorderType = $derived<ReorderableType | undefined>(
     itemType === "route" ? "route" : itemType === "area" ? "area" : undefined,
   );
+  const treeDepth = $derived(slug ? slug.split("/").length - 1 : 0);
   const canDrag = $derived(itemType !== "geographic" && (!!reorderType || !!appState.osmUser.loggedIn));
   const parentSlug = $derived(getParentSlug(slug) ?? "");
   const dropPosition = $derived(getSidebarDropPosition(slug));
@@ -282,6 +283,7 @@
     bind:ref={ref as HTMLButtonElement}
     isActive={isCurrentPage}
     data-sidebar-slug={slug}
+    data-tree-depth={treeDepth}
     data-selected={isSelected || undefined}
     href={link}
     draggable={canDrag}
@@ -337,7 +339,10 @@
       {#snippet child({ props })}
         <Sidebar.MenuItem bind:ref={ref as HTMLLIElement} {...props} class="group/button">
           <Sidebar.MenuButton
+            bind:ref={ref as HTMLButtonElement}
             data-sidebar-slug={itemType !== "geographic" ? slug : undefined}
+            data-tree-depth={treeDepth}
+            data-tree-open={open}
             data-selected={isSelected || undefined}
             href={link}
             draggable={canDrag}

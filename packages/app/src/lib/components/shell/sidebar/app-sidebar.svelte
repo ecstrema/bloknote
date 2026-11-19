@@ -197,6 +197,52 @@
   const convertibleScales = allScales.filter((s) => !!scaleIdToTag(s.id));
   const styleOptions = Object.entries(ROUTE_STYLE_LABELS).filter(([k]) => k !== "other");
 
+  const INDENT_STEP_PX = 15;
+  let contentRef = $state<HTMLElement | null>(null);
+  let unindentPx = $state(0);
+  let unindentRaf: number | undefined;
+
+  function computeUnindent() {
+    unindentRaf = undefined;
+    if (!contentRef) return;
+    const containerRect = contentRef.getBoundingClientRect();
+    if (containerRect.height <= 0) return;
+
+    let minDepth = Infinity;
+    for (const el of contentRef.querySelectorAll<HTMLElement>("[data-tree-depth]")) {
+      const rect = el.getBoundingClientRect();
+      if (rect.height <= 0) continue;
+      if (rect.bottom > containerRect.top && rect.top < containerRect.bottom) {
+        const depth = Number(el.dataset.treeDepth);
+        if (Number.isFinite(depth) && depth < minDepth) minDepth = depth;
+      }
+    }
+    unindentPx = Number.isFinite(minDepth) && minDepth > 0 ? minDepth * INDENT_STEP_PX : 0;
+  }
+
+  function scheduleUnindent() {
+    if (unindentRaf !== undefined) return;
+    unindentRaf = requestAnimationFrame(computeUnindent);
+  }
+
+  $effect(() => {
+    const el = contentRef;
+    if (!el) return;
+    scheduleUnindent();
+    const ro = new ResizeObserver(scheduleUnindent);
+    ro.observe(el);
+    const mo = new MutationObserver(scheduleUnindent);
+    mo.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-tree-open"] });
+    return () => {
+      ro.disconnect();
+      mo.disconnect();
+      if (unindentRaf !== undefined) {
+        cancelAnimationFrame(unindentRaf);
+        unindentRaf = undefined;
+      }
+    };
+  });
+
   function handleTreeContextMenu(event: MouseEvent, triggerHandler?: (e: MouseEvent) => void) {
     const target = (event.target as HTMLElement | null)?.closest<HTMLElement>("[data-sidebar-slug]");
     const targetSlug = target?.dataset.sidebarSlug;
@@ -263,7 +309,7 @@
       <SearchFiltersPanel bind:filters bind:gradeText />
     {/if}
   </Sidebar.Header>
-  <Sidebar.Content>
+  <Sidebar.Content bind:ref={contentRef} onscroll={scheduleUnindent} class="overflow-x-hidden">
     {#if active && !localDb.ready && localDb.status !== "error"}
       <div class="flex flex-col gap-2 px-4 py-2 text-sm text-muted-foreground">
         <span>
@@ -296,6 +342,8 @@
               {#snippet child({ props })}
                 <div
                   {...props}
+                  style:margin-left="-{unindentPx}px"
+                  class="transition-[margin-left] duration-200 ease-out"
                   oncontextmenu={(e) => handleTreeContextMenu(e, props.oncontextmenu as ((ev: MouseEvent) => void) | undefined)}
                 >
                   <Sidebar.Menu><AppSidebarChildren bind:item={appState.tree.root} slug={""} /></Sidebar.Menu>
