@@ -11,6 +11,7 @@
   import { featureToType } from "#lib/data/parse/data.js";
   import {
     collectSubtreeDiagnostics,
+    getAreaKindLabel,
     type DiagnosticPatch,
     type DiagnosticSeverity,
   } from "#lib/data/parse/diagnostics.js";
@@ -233,7 +234,10 @@
     <div class="flex flex-col gap-3">
       {#each filteredEntries as entry (entry.slug)}
         {@const featureName = getLocalizedName(entry.feature) || "Unnamed"}
-        {@const typeLabel = featureToType(entry.feature) ?? entry.feature.type}
+        {@const typeLabel =
+          featureToType(entry.feature) === "area"
+            ? getAreaKindLabel(entry.feature)
+            : (featureToType(entry.feature) ?? entry.feature.type)}
         <div class="rounded-md border p-3 flex flex-col gap-2">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-wrap items-center gap-2 text-sm">

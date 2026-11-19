@@ -390,13 +390,17 @@
               </DropdownMenu.Trigger>
               <DropdownMenu.Content side="right" align="start">
                 {#if appState.osmUser.loggedIn && itemType === "area"}
-                  <DropdownMenu.Item onclick={addSector}>Add sector</DropdownMenu.Item>
+                  {#if item.feature.type !== "geographic" && item.feature.tags?.climbing !== "crag"}
+                    <DropdownMenu.Item onclick={addSector}>Add sector</DropdownMenu.Item>
+                  {/if}
                   <DropdownMenu.Item onclick={addRoute}>Add route</DropdownMenu.Item>
                   <DropdownMenu.Separator />
                 {/if}
                 <DropdownMenu.Item>Download images</DropdownMenu.Item>
                 <DropdownMenu.Separator />
-                <DropdownMenu.Item onclick={() => appState.deleteNodes([slug])}>Delete area</DropdownMenu.Item>
+                <DropdownMenu.Item onclick={() => appState.deleteNodes([slug])}>
+                  Delete {item.feature.type !== "geographic" && item.feature.tags?.climbing === "crag" ? "crag" : "area"}
+                </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Root>
           {/if}

@@ -3,6 +3,7 @@
   import { featureToType } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getGrade } from "#lib/data/parse/osm-tags.js";
+  import { getAreaKindLabel } from "#lib/data/parse/diagnostics.js";
   import { isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
   import type { DataTree } from "#lib/types.js";
@@ -36,6 +37,11 @@
             <a href={resolve("/world/[...slug]", { slug })}>
               {getLocalizedName(child.feature) || "No Name"}
             </a>
+            {#if child.feature.type !== "geographic"}
+              <span class="ml-1.5 inline-block rounded bg-muted px-1.5 py-0.5 text-[11px] font-normal text-muted-foreground no-underline">
+                {getAreaKindLabel(child.feature)}
+              </span>
+            {/if}
           </Table.Cell>
           <Table.Cell>
             {#if child.stats && child.stats.totalRoutes > 0}

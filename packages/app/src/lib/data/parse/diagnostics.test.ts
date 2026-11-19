@@ -73,4 +73,24 @@ describe("getFeatureDiagnostics", () => {
       expect.arrayContaining(["invalid:climbing:length", "missing:sport", "missing:name", "missing:grade"]),
     );
   });
+
+  it("flags climbing=crag containing sub-areas and suggests changing to climbing=area", () => {
+    const crag = {
+      type: "relation",
+      id: 10,
+      members: [],
+      tags: { sport: "climbing", climbing: "crag", name: "Big" },
+    } as unknown as OsmFeature;
+    const subArea = {
+      type: "node",
+      id: 11,
+      lat: 0,
+      lon: 0,
+      tags: { sport: "climbing", climbing: "crag", name: "Sub" },
+    } as unknown as OsmFeature;
+    const diags = getFeatureDiagnostics(crag, [subArea]);
+    const diag = diags.find((d) => d.id === "crag:has-subareas");
+    expect(diag).toBeDefined();
+    expect(diag!.fixes?.[0]?.patch).toEqual({ set: { climbing: "area" } });
+  });
 });

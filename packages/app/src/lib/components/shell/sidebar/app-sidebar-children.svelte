@@ -21,6 +21,7 @@
   const orderedChildren = $derived.by(() => getSidebarChildren(item, slug));
 
   const itemType = $derived(featureToType(item.feature));
+  const isCrag = $derived(item.feature.type !== "geographic" && item.feature.tags?.climbing === "crag");
 
   const searchFilter = getSearchFilter();
 
@@ -65,7 +66,9 @@
   {#if appState.osmUser.loggedIn && itemType === "area"}
     <div class="flex gap-2 self-end">
       <Button variant="outline" size="xs" class="font-normal" onclick={addRoute}>Add Route</Button>
-      <Button variant="outline" size="xs" class="font-normal" onclick={addSector}>Add Sector</Button>
+      {#if !isCrag}
+        <Button variant="outline" size="xs" class="font-normal" onclick={addSector}>Add Sector</Button>
+      {/if}
     </div>
   {/if}
 {/if}

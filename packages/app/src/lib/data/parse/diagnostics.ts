@@ -36,7 +36,14 @@ const GRADE_KEYS: Key[] = ["climbing:grade", ...gradeTags.map(([key]) => key)];
 const SECONDARY_GRADE_KEYS = new Set<Key>(["climbing:grade:british_adjectival", "climbing:grade:yds_danger"]);
 const nonEmpty = (value: string | undefined): value is string => value !== undefined && value.trim() !== "";
 
-export function getFeatureDiagnostics(feature: OsmFeature): TagDiagnostic[] {
+export function getAreaKindLabel(feature: OsmFeature): string {
+  const climbing = feature.tags?.climbing?.split(";").map((s) => s.trim()) ?? [];
+  if (climbing.includes("crag")) return "Crag";
+  if (climbing.includes("boulder") || climbing.includes("bouldering")) return "Boulder";
+  return "Area";
+}
+
+export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature[]): TagDiagnostic[] {
   const tags: Tags = feature.tags ?? {};
   const featureType = featureToTypeOSM(feature);
   const diagnostics: TagDiagnostic[] = [];
@@ -198,6 +205,21 @@ export function getFeatureDiagnostics(feature: OsmFeature): TagDiagnostic[] {
     });
   }
 
+  if (
+    featureType === "area" &&
+    tags.climbing === "crag" &&
+    children?.some((child) => featureToTypeOSM(child) === "area")
+  ) {
+    diagnostics.push({
+      id: "crag:has-subareas",
+      severity: "warning",
+      title: "Crag contains sub-areas",
+      description: 'A climbing=crag should only contain routes; use climbing=area when a node contains other areas or crags.',
+      tags: ["climbing"],
+      fixes: [{ label: "Change to climbing=area", patch: { set: { climbing: "area" } } }],
+    });
+  }
+
   return diagnostics;
 }
 
@@ -229,11 +251,22 @@ export function collectSubtreeDiagnostics(
   }
   for (const [entrySlug, feature] of collectLoadedOsmNodes(root, rootSlug)) merged.set(entrySlug, feature);
 
+  const childrenByParent = new Map<string, OsmFeature[]>();
+  for (const [entrySlug, feature] of merged) {
+    const slash = entrySlug.lastIndexOf("/");
+    const parentSlug = slash === -1 ? "" : entrySlug.slice(0, slash);
+    const reactiveFeature = getReactiveNode(entrySlug)?.feature;
+    const effective = reactiveFeature && reactiveFeature.type !== "geographic" ? reactiveFeature : feature;
+    const arr = childrenByParent.get(parentSlug) ?? [];
+    arr.push(effective);
+    childrenByParent.set(parentSlug, arr);
+  }
+
   const list: DiagnosticEntry[] = [];
   for (const [entrySlug, feature] of merged) {
     const reactiveFeature = getReactiveNode(entrySlug)?.feature;
     const effective = reactiveFeature && reactiveFeature.type !== "geographic" ? reactiveFeature : feature;
-    const diagnostics = getFeatureDiagnostics(effective);
+    const diagnostics = getFeatureDiagnostics(effective, childrenByParent.get(entrySlug));
     if (diagnostics.length > 0) list.push({ slug: entrySlug, feature: effective, diagnostics });
   }
   list.sort((a, b) => a.slug.localeCompare(b.slug));
