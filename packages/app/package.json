@@ -18,6 +18,7 @@
     "region-names": "bun run scripts/region-names.ts"
   },
   "dependencies": {
+    "@atproto/oauth-client-browser": "catalog:",
     "@bloknote/holy-grade": "workspace:*",
     "@friendofsvelte/state": "catalog:",
     "@sqlite.org/sqlite-wasm": "catalog:",

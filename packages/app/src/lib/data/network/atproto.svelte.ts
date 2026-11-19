@@ -1,18 +1,36 @@
 import { browser } from "$app/env";
 import type { AscentStyle, OsmElementRef, ReviewRecord, StarRecord, TickRecord } from "@bloknote/common";
+import {
+  BrowserOAuthClient,
+  TokenInvalidError,
+  TokenRefreshError,
+  TokenRevokedError,
+  type OAuthSession,
+} from "@atproto/oauth-client-browser";
 import type { OsmFeature } from "osm-api";
 
-const STORAGE_KEY = "bloknote:atproto-session";
+const BASE = "/bloknote";
+const SESSION_STORAGE_KEY = "bloknote:atproto-session";
 const TICKS_STORAGE_KEY = "bloknote:atproto-ticks";
 const STARS_STORAGE_KEY = "bloknote:atproto-stars";
 const REVIEWS_STORAGE_KEY = "bloknote:atproto-reviews";
 
+const TICK_COLLECTION = "org.bloknote.logbook.tick";
+const STAR_COLLECTION = "org.openstreetmap.star";
+const REVIEW_COLLECTION = "org.openstreetmap.review";
+
+/**
+ * The `client_id` of the deployed app: it points to the client metadata hosted
+ * at static/client-metadata.json, which the OAuth server fetches to validate
+ * the client. It must stay in sync with that file.
+ */
+const PRODUCTION_CLIENT_ID = "https://ecstrema.github.io/bloknote/client-metadata.json";
+/** Full repository access on the user's PDS (ticks, stars, reviews, profile) */
+const OAUTH_SCOPE = "atproto transition:generic";
+
 export interface AtProtoSession {
   did: string;
-  pdsUrl: string;
   handle?: string;
-  accessJwt?: string;
-  refreshJwt?: string;
 }
 
 export interface LocalStarEntry extends StarRecord {
@@ -42,8 +60,8 @@ function readJson<T>(key: string, fallback: T): T {
 }
 
 function loadSession(): AtProtoSession | undefined {
-  const raw = readJson<AtProtoSession | null>(STORAGE_KEY, null);
-  if (raw && typeof raw.did === "string" && typeof raw.pdsUrl === "string") return raw;
+  const raw = readJson<AtProtoSession | null>(SESSION_STORAGE_KEY, null);
+  if (raw && typeof raw.did === "string") return raw;
   return undefined;
 }
 
@@ -51,35 +69,19 @@ export function sameElementRef(a: OsmElementRef, b: OsmElementRef): boolean {
   return a.type === b.type && a.id === b.id;
 }
 
-async function resolveDidFromHandle(handle: string): Promise<string> {
-  const cleaned = handle.trim().replace(/^@/, "");
-  if (cleaned.startsWith("did:")) return cleaned;
-  const res = await fetch(
-    `https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(cleaned)}`,
-  );
-  if (!res.ok) throw new Error(`Could not resolve ATProto handle "${cleaned}"`);
-  const data = (await res.json()) as { did?: string };
-  if (!data.did) throw new Error(`No DID returned for "${cleaned}"`);
-  return data.did;
+function createOAuthClient(): Promise<BrowserOAuthClient> {
+  const redirectUri = `${location.origin}${BASE}/settings`;
+  // Loopback clients (localhost dev) use the special hardcoded client_id, while
+  // the deployed app points to its hosted client-metadata.json
+  const clientId = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname)
+    ? `http://localhost?redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(OAUTH_SCOPE)}`
+    : PRODUCTION_CLIENT_ID;
+  return BrowserOAuthClient.load({ clientId, handleResolver: "https://bsky.social" });
 }
 
-async function resolvePdsFromDid(did: string): Promise<string> {
-  if (did.startsWith("did:plc:")) {
-    const res = await fetch(`https://plc.directory/${encodeURIComponent(did)}`);
-    if (!res.ok) throw new Error(`Could not resolve PDS for ${did}`);
-    const doc = (await res.json()) as { service?: { id?: string; type?: string; serviceEndpoint?: string }[] };
-    const svc = doc.service?.find((s) => s.type === "AtprotoPersonalDataServer" || s.id === "#atproto_pds");
-    if (svc?.serviceEndpoint) return svc.serviceEndpoint.replace(/\/$/, "");
-  } else if (did.startsWith("did:web:")) {
-    const domain = did.slice("did:web:".length).replaceAll(":", "/");
-    const res = await fetch(`https://${domain}/.well-known/did.json`);
-    if (res.ok) {
-      const doc = (await res.json()) as { service?: { id?: string; type?: string; serviceEndpoint?: string }[] };
-      const svc = doc.service?.find((s) => s.type === "AtprotoPersonalDataServer" || s.id === "#atproto_pds");
-      if (svc?.serviceEndpoint) return svc.serviceEndpoint.replace(/\/$/, "");
-    }
-  }
-  throw new Error(`Could not locate ATProto PDS for ${did}`);
+interface ListRecordsResponse<T> {
+  records?: { uri: string; value: T }[];
+  cursor?: string;
 }
 
 class AtProtoClient {
@@ -88,98 +90,175 @@ class AtProtoClient {
   stars = $state<LocalStarEntry[]>(readJson<LocalStarEntry[]>(STARS_STORAGE_KEY, []));
   reviews = $state<LocalReviewEntry[]>(readJson<LocalReviewEntry[]>(REVIEWS_STORAGE_KEY, []));
 
+  #client?: BrowserOAuthClient;
+  #oauthSession?: OAuthSession;
+  #ready?: Promise<void>;
+
+  constructor() {
+    if (browser) {
+      // Drop legacy app-password sessions: logging in now requires the full
+      // OAuth flow and no longer uses credentials stored in localStorage
+      const legacy = localStorage.getItem(SESSION_STORAGE_KEY);
+      if (legacy && legacy.includes("accessJwt")) localStorage.removeItem(SESSION_STORAGE_KEY);
+      this.#start();
+    }
+  }
+
   get configured(): boolean {
     return !!this.session;
   }
 
-  setSession(session: AtProtoSession | undefined) {
-    this.session = session;
-    if (!browser) return;
-    if (session) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }
-
-  async connect(identifier: string, appPassword?: string): Promise<AtProtoSession> {
-    const trimmed = identifier.trim().replace(/^@/, "");
-    if (!trimmed) throw new Error("Enter your ATProto handle or DID");
-    const did = await resolveDidFromHandle(trimmed);
-    const pdsUrl = await resolvePdsFromDid(did);
-    let session: AtProtoSession = {
-      did,
-      pdsUrl,
-      handle: trimmed.startsWith("did:") ? undefined : trimmed,
-    };
-
-    if (appPassword?.trim()) {
-      const res = await fetch(`${pdsUrl}/xrpc/com.atproto.server.createSession`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: did, password: appPassword.trim() }),
-      });
-      const data = (await res.json()) as {
-        accessJwt?: string;
-        refreshJwt?: string;
-        handle?: string;
-        message?: string;
-      };
-      if (!res.ok || !data.accessJwt) {
-        throw new Error(data.message ?? "Could not sign in to PDS");
-      }
-      session = {
-        did,
-        pdsUrl,
-        handle: data.handle ?? session.handle,
-        accessJwt: data.accessJwt,
-        refreshJwt: data.refreshJwt,
-      };
-    }
-
-    this.setSession(session);
-    return session;
-  }
-
-  async #createRemoteRecord(collection: string, record: object): Promise<string | undefined> {
-    if (!this.session?.accessJwt) return undefined;
+  /** Completes the OAuth callback / restores the last session, then hydrates records from the PDS */
+  async #start(): Promise<void> {
+    this.#ready ??= (async () => {
+      this.#client ??= await createOAuthClient();
+      const result = await this.#client.init();
+      if (result) await this.#activate(result.session);
+    })();
     try {
-      const res = await fetch(`${this.session.pdsUrl}/xrpc/com.atproto.repo.createRecord`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.session.accessJwt}`,
-        },
-        body: JSON.stringify({
-          repo: this.session.did,
-          collection,
-          record: { $type: collection, ...record },
-        }),
-      });
+      await this.#ready;
+    } catch (error) {
+      console.error("ATProto session initialization failed", error);
+      this.#oauthSession = undefined;
+      this.session = undefined;
+    }
+  }
+
+  async #activate(oauthSession: OAuthSession) {
+    this.#oauthSession = oauthSession;
+    const stored = loadSession();
+    const handle =
+      stored?.did === oauthSession.did ? stored.handle : await this.#fetchHandle(oauthSession.did);
+    this.session = { did: oauthSession.did, handle };
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(this.session));
+    await this.#hydrate();
+  }
+
+  async #fetchHandle(did: string): Promise<string | undefined> {
+    try {
+      const res = await this.#xrpc(`/xrpc/com.atproto.repo.describeRepo?repo=${encodeURIComponent(did)}`);
       if (!res.ok) return undefined;
-      const data = (await res.json()) as { uri?: string };
-      return data.uri;
+      const data = (await res.json()) as { handle?: string };
+      return data.handle || undefined;
     } catch {
       return undefined;
     }
   }
 
-  async #deleteRemoteRecord(collection: string, uri?: string) {
-    if (!this.session?.accessJwt || !uri) return;
-    const rkey = uri.split("/").at(-1);
-    if (!rkey) return;
+  #clearSession() {
+    this.#oauthSession = undefined;
+    this.session = undefined;
+    if (browser) localStorage.removeItem(SESSION_STORAGE_KEY);
+  }
+
+  /** XRPC call against the user's PDS via the DPoP-bound OAuth session */
+  async #xrpc(path: string, init?: RequestInit): Promise<Response> {
+    const session = this.#oauthSession;
+    if (!session) throw new Error("ATProto is not configured");
     try {
-      await fetch(`${this.session.pdsUrl}/xrpc/com.atproto.repo.deleteRecord`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.session.accessJwt}`,
-        },
-        body: JSON.stringify({ repo: this.session.did, collection, rkey }),
-      });
-    } catch {
-      // Best-effort remote delete
+      return await session.fetchHandler(path, init);
+    } catch (error) {
+      if (error instanceof TokenRevokedError || error instanceof TokenInvalidError || error instanceof TokenRefreshError) {
+        this.#clearSession();
+        throw new Error("Your ATProto session has expired, please log in again");
+      }
+      throw error;
     }
+  }
+
+  /** Pulls the records stored in the user's ATProto repository (PDS): it is the source of truth */
+  async #hydrate() {
+    const session = this.#oauthSession;
+    if (!session) return;
+    try {
+      const [remoteTicks, remoteStars, remoteReviews] = await Promise.all([
+        this.#listRemote<TickRecord>(TICK_COLLECTION),
+        this.#listRemote<StarRecord>(STAR_COLLECTION),
+        this.#listRemote<ReviewRecord>(REVIEW_COLLECTION),
+      ]);
+      // Keep the cached labels and the local-only entries (never uploaded), then let the PDS win
+      const merge = <T extends { uri?: string; label?: string }>(local: T[], remote: T[]): T[] => {
+        const labels = new Map(local.filter((e) => e.uri).map((e) => [e.uri!, e.label]));
+        const localOnly = local.filter((e) => !e.uri);
+        return [...remote, ...localOnly].map((e) => ({ ...e, label: e.label ?? (e.uri ? labels.get(e.uri) : undefined) }));
+      };
+      this.ticks = merge(this.ticks, remoteTicks as LocalTickEntry[]);
+      this.stars = merge(this.stars, remoteStars as LocalStarEntry[]);
+      this.reviews = merge(this.reviews, remoteReviews as LocalReviewEntry[]);
+      this.#persistTicks();
+      this.#persistStars();
+      this.#persistReviews();
+    } catch (error) {
+      console.error("Could not load ATProto records from the PDS", error);
+    }
+  }
+
+  async #listRemote<T>(collection: string): Promise<T[]> {
+    const session = this.#oauthSession;
+    if (!session) throw new Error("ATProto is not configured");
+    const out: T[] = [];
+    let cursor: string | undefined;
+    do {
+      const query = new URLSearchParams({ repo: session.did, collection, limit: "100" });
+      if (cursor) query.set("cursor", cursor);
+      const res = await this.#xrpc(`/xrpc/com.atproto.repo.listRecords?${query}`);
+      if (!res.ok) throw new Error(`Could not list ${collection} (HTTP ${res.status})`);
+      const data = (await res.json()) as ListRecordsResponse<T>;
+      for (const record of data.records ?? []) out.push(record.value);
+      cursor = data.cursor;
+    } while (cursor);
+    return out;
+  }
+
+  /** Starts the ATProto OAuth flow: the user is redirected to their data server to authorize the app */
+  async signIn(handle: string): Promise<void> {
+    await this.#start();
+    const cleaned = handle.trim().replace(/^@/, "");
+    if (!cleaned) throw new Error("Enter your ATProto handle or DID");
+    if (!this.#client) throw new Error("ATProto is only available in the browser");
+    // Never resolves on success: the browser navigates away, and the session is
+    // activated by #start() once the OAuth server redirects back to /settings
+    await this.#client.signIn(cleaned);
+  }
+
+  async disconnect(): Promise<void> {
+    await this.#start();
+    const session = this.#oauthSession;
+    this.#oauthSession = undefined;
+    this.session = undefined;
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    if (session) await session.signOut().catch(() => {});
+  }
+
+  async #createRemoteRecord(collection: string, record: object): Promise<string> {
+    const session = this.#oauthSession;
+    if (!session) throw new Error("ATProto is not configured");
+    const res = await this.#xrpc("/xrpc/com.atproto.repo.createRecord", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        repo: session.did,
+        collection,
+        record: { $type: collection, ...record },
+      }),
+    });
+    if (!res.ok) throw new Error(`Could not save the record to your ATProto repository (HTTP ${res.status})`);
+    const data = (await res.json()) as { uri?: string };
+    if (!data.uri) throw new Error("Your ATProto repository did not return a record URI");
+    return data.uri;
+  }
+
+  async #deleteRemoteRecord(collection: string, uri: string) {
+    const session = this.#oauthSession;
+    if (!session) throw new Error("ATProto is not configured");
+    const rkey = uri.split("/").at(-1);
+    if (!rkey) throw new Error(`Invalid record URI: ${uri}`);
+    const res = await this.#xrpc("/xrpc/com.atproto.repo.deleteRecord", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ repo: session.did, collection, rkey }),
+    });
+    if (!res.ok) throw new Error(`Could not delete the record from your ATProto repository (HTTP ${res.status})`);
   }
 
   #persistTicks() {
@@ -206,7 +285,7 @@ class AtProtoClient {
       ...(comment?.trim() ? { comment: comment.trim() } : {}),
     };
     if (feature.id > 0) {
-      record.uri = await this.#createRemoteRecord("org.bloknote.logbook.tick", {
+      record.uri = await this.#createRemoteRecord(TICK_COLLECTION, {
         subject: record.subject,
         style: record.style,
         climbedAt: record.climbedAt,
@@ -237,7 +316,7 @@ class AtProtoClient {
     const ref: OsmElementRef = { type: feature.type, id: feature.id };
     const existing = this.stars.find((s) => sameElementRef(s.subject, ref));
     if (existing) {
-      await this.#deleteRemoteRecord("org.openstreetmap.star", existing.uri);
+      if (existing.uri) await this.#deleteRemoteRecord(STAR_COLLECTION, existing.uri);
       this.stars = this.stars.filter((s) => !sameElementRef(s.subject, ref));
       this.#persistStars();
       return false;
@@ -249,7 +328,7 @@ class AtProtoClient {
       label: feature.tags?.name,
     };
     if (feature.id > 0) {
-      entry.uri = await this.#createRemoteRecord("org.openstreetmap.star", {
+      entry.uri = await this.#createRemoteRecord(STAR_COLLECTION, {
         subject: entry.subject,
         createdAt: entry.createdAt,
       });
@@ -272,7 +351,7 @@ class AtProtoClient {
       label: feature.tags?.name,
     };
     if (feature.id > 0) {
-      entry.uri = await this.#createRemoteRecord("org.openstreetmap.review", {
+      entry.uri = await this.#createRemoteRecord(REVIEW_COLLECTION, {
         subject: entry.subject,
         ...(entry.text ? { text: entry.text } : {}),
         ...(entry.rating !== undefined ? { rating: entry.rating } : {}),

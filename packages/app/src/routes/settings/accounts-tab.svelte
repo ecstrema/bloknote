@@ -18,7 +18,6 @@
   let commonsUsername = $state<string>();
   let commonsError = $state<string>();
   let atHandle = $state("");
-  let atAppPassword = $state("");
   let atConnecting = $state(false);
   let atError = $state<string>();
 
@@ -75,13 +74,28 @@
     atError = undefined;
     atConnecting = true;
     try {
-      await atproto.connect(atHandle, atAppPassword || undefined);
+      // Redirects to the user's ATProto provider; the session is activated when
+      // the OAuth server redirects back to this page
+      await atproto.signIn(atHandle);
       atHandle = "";
-      atAppPassword = "";
     } catch (error) {
-      atError = error instanceof Error ? error.message : String(error);
+      atError =
+        error instanceof Error && error.message === "User navigated back"
+          ? "Login cancelled"
+          : error instanceof Error
+            ? error.message
+            : String(error);
     } finally {
       atConnecting = false;
+    }
+  }
+
+  async function disconnectAtProto() {
+    atError = undefined;
+    try {
+      await atproto.disconnect();
+    } catch (error) {
+      atError = error instanceof Error ? error.message : String(error);
     }
   }
 </script>
@@ -115,7 +129,7 @@
     {#if atproto.session}
       <p class="mt-2 text-xs text-muted-foreground">
         Connected as <span class="font-medium text-foreground">{atproto.session.handle ?? atproto.session.did}</span>
-        ({atproto.session.pdsUrl}{atproto.session.accessJwt ? " · authenticated" : " · local logbook"})
+        · records are stored in your ATProto repository (PDS)
       </p>
     {/if}
     {#if atError}
@@ -123,14 +137,16 @@
     {/if}
   </div>
   {#if atproto.session}
-    <Button variant="outline" onclick={() => atproto.setSession(undefined)}>Disconnect Atmosphere</Button>
+    <Button variant="outline" onclick={disconnectAtProto}>Disconnect Atmosphere</Button>
   {:else}
     <form class="flex flex-col gap-2" onsubmit={connectAtProto}>
       <Input bind:value={atHandle} placeholder="Handle (e.g. alice.bsky.social)" required />
-      <Input bind:value={atAppPassword} type="password" placeholder="App password (optional for PDS sync)" />
       <Button type="submit" variant="outline" disabled={atConnecting || !atHandle.trim()}>
-        {atConnecting ? "Connecting..." : "Connect Atmosphere"}
+        {atConnecting ? "Redirecting..." : "Continue"}
       </Button>
+      <p class="text-xs text-muted-foreground">
+        You will be redirected to your ATProto provider to log in and authorize Bloknote. No app password needed.
+      </p>
     </form>
   {/if}
 </section>
