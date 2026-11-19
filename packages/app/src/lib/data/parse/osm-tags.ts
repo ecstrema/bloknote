@@ -52,6 +52,13 @@ export function getNameOSM(tags: Tags): string | undefined {
   return tags.name;
 }
 
+export function isMultipitchRoute(tags: Tags | undefined): boolean {
+  if (!tags) return false;
+  if (tags["climbing:multipitch"] === "yes") return true;
+  const pitches = Number(tags["climbing:pitches"]?.trim());
+  return Number.isInteger(pitches) && pitches > 1;
+}
+
 export function isProjectRoute(tags: Tags | undefined): boolean {
   if (!tags?.name) return false;
   return /\b(project|projet|projekt|progetto)\b/i.test(tags.name);
@@ -326,6 +333,7 @@ export const processedTags: Record<OSMClimbingFeatureType, ProcessedTags> = {
     ...processedGrades,
     ele: deprecated("Do not use `ele` on climbing routes; move route height to `climbing:length` (in meters) or remove `ele`."),
     "climbing:length": lengthValidator,
+    "climbing:pitches": (v: string) => /^[1-9]\d*$/.test(v.trim()),
     climbing: allowMultipleValues(new Set(["route_bottom", "route_top"])),
   },
   area: {

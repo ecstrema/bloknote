@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
-  import { parseClimbingLength } from "#lib/data/parse/osm-tags.js";
+  import { isMultipitchRoute, parseClimbingLength } from "#lib/data/parse/osm-tags.js";
   import { extractRouteStyle } from "#lib/data/parse/route-styles.js";
   import { cn } from "#lib/utils.js";
   import type { OsmFeature } from "osm-api";
@@ -23,6 +23,7 @@
   const length = $derived(parsedLength?.meters);
   const formatted = $derived(length === undefined ? "" : `${length}`);
   const isBoulder = $derived(extractRouteStyle(feature.tags ?? {}) === "boulder");
+  const isMultipitch = $derived(isMultipitchRoute(feature.tags));
 
   let draft = $state("");
   let focused = $state(false);
@@ -72,7 +73,7 @@
       {#if hasValidNumber}
         <span>m</span>
       {/if}
-      {#if length !== undefined && length > 30}
+      {#if length !== undefined && length > 30 && !isMultipitch}
         <TriangleAlertIcon
           class="size-3 text-amber-600"
           aria-label="Route length exceeds 30 meters"

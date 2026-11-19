@@ -2,6 +2,7 @@
   import EditableDescription from "#lib/components/editable/editable-description.svelte";
   import EditableGrade from "#components/editable/editable-grade.svelte";
   import EditableLength from "#components/editable/editable-length.svelte";
+  import EditablePitches from "#components/editable/editable-pitches.svelte";
   import ClimbingStyles from "#components/climbing-styles.svelte";
   import CommonsTopo from "#lib/components/commons-topo.svelte";
   import type { DataTree } from "#lib/types.js";
@@ -36,6 +37,7 @@
     <SnowflakeIcon class="size-3.5 shrink-0 self-center text-cyan-500" aria-label="Ice / dry-tooling route" />
   {/if}
   <EditableLength {feature} featureSlug={slug} />
+  <EditablePitches {feature} featureSlug={slug} />
 </div>
 
 {#if isProject && grade}

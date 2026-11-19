@@ -205,6 +205,18 @@ export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature
     });
   }
 
+  const pitches = Number(tags["climbing:pitches"]?.trim());
+  if (featureType === "route" && Number.isInteger(pitches) && pitches > 1 && tags["climbing:multipitch"] !== "yes") {
+    diagnostics.push({
+      id: "missing:multipitch-tag",
+      severity: "warning",
+      title: 'Missing "climbing:multipitch=yes"',
+      description: `This route has ${pitches} pitches but is not tagged with climbing:multipitch=yes.`,
+      tags: ["climbing:pitches", "climbing:multipitch"],
+      fixes: [{ label: "Set climbing:multipitch=yes", patch: { set: { "climbing:multipitch": "yes" } } }],
+    });
+  }
+
   if (
     featureType === "area" &&
     tags.climbing === "crag" &&
