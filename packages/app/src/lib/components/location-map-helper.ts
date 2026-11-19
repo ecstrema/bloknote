@@ -11,10 +11,16 @@ import { getCoordinates, getGrade } from "#lib/data/parse/osm-tags.js";
 import { getColorFromGrade } from "#lib/data/network/grade.js";
 import type { LayerSpecification } from "#lib/maplibre.js";
 
+import { getParentSlug } from "#lib/helpers/slug.js";
+
 export const VECTOR_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 
-export function featureToMapElement(slug: string, feature: OsmFeature): MapElementFeature | undefined {
-  const coords = getCoordinates(feature);
+export function featureToMapElement(
+  slug: string,
+  feature: OsmFeature,
+  fallbackCoords?: { lat: number; lon: number },
+): MapElementFeature | undefined {
+  const coords = getCoordinates(feature) ?? fallbackCoords;
   if (!coords) return undefined;
   const { lat, lon } = coords;
 
@@ -85,6 +91,12 @@ export function featureToMapElement(slug: string, feature: OsmFeature): MapEleme
     strokeColor = FEATURE_COLORS.gym.stroke;
   }
 
+  const parentSlug = getParentSlug(slug) ?? "";
+  const href =
+    feature.id < 0
+      ? `${resolve("/world/[...slug]", { slug: parentSlug })}?id=${feature.type}-${feature.id}`
+      : resolve("/world/[...slug]", { slug });
+
   return {
     type: "Feature",
     geometry: { type: "Point", coordinates: [lon, lat] },
@@ -96,7 +108,7 @@ export function featureToMapElement(slug: string, feature: OsmFeature): MapEleme
       grade: gradeStr,
       fillColor,
       strokeColor,
-      href: resolve("/world/[...slug]", { slug }),
+      href,
     },
   };
 }

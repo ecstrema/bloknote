@@ -13,9 +13,13 @@
   import { getStaticIdentifier } from "@bloknote/common";
   import { getAppState } from "#lib/data/app-state.js";
   import { afterNavigate, replaceState } from "$app/navigation";
+  import { building } from "$app/env";
   import { page } from "$app/state";
   import { untrack } from "svelte";
   import LocationMap from "#lib/components/location-map.svelte";
+  import MapAddDialog from "#lib/components/map-add-dialog.svelte";
+  import { Button } from "#components/ui/button/index.js";
+  import { getFallbackCoordinates } from "#lib/data/route-location.js";
   import EditableName from "#components/editable/editable-name.svelte";
   import EditableTags from "#components/editable/editable-tags.svelte";
   import * as Tabs from "#components/ui/tabs/index.js";
@@ -26,7 +30,9 @@
   import DatabaseIcon from "@lucide/svelte/icons/database";
   import ExternalLinkIcon from "@lucide/svelte/icons/external-link";
   import FileTextIcon from "@lucide/svelte/icons/file-text";
+  import FolderPlusIcon from "@lucide/svelte/icons/folder-plus";
   import MapIcon from "@lucide/svelte/icons/map";
+  import MapPinPlusIcon from "@lucide/svelte/icons/map-pin-plus";
 
   type PageTab = "overview" | "map" | "osm";
   function parseTab(value: string | null): PageTab | undefined {
@@ -59,7 +65,7 @@
   const itemType = $derived(featureToType(item.feature));
   const hasOsmData = $derived(item.feature.type !== "geographic");
 
-  let activeTab = $state<PageTab>(parseTab(page.url.searchParams.get("tab")) ?? "overview");
+  let activeTab = $state<PageTab>(building ? "overview" : (parseTab(page.url.searchParams.get("tab")) ?? "overview"));
   const effectiveTab = $derived<PageTab>(activeTab === "osm" && !hasOsmData ? "overview" : activeTab);
 
   $effect(() => {
@@ -156,7 +162,35 @@
 
   const isRoute = $derived(itemType === "route");
   const editable = $derived(appState.osmUser.loggedIn && item.feature.type === "node" && isRoute);
+  const fallbackCoordinates = $derived(coordinates ? undefined : getFallbackCoordinates(itemSlug));
+
+  let placementMode = $state<"route" | "sector" | null>(null);
+  let addDialogOpen = $state(false);
+  let addDialogKind = $state<"route" | "sector">("route");
+  let clickedCoordinates = $state<{ lat: number; lon: number } | undefined>(undefined);
+
+  $effect(() => {
+    if (effectiveTab !== "map") placementMode = null;
+  });
+
+  function togglePlacement(mode: "route" | "sector") {
+    placementMode = placementMode === mode ? null : mode;
+  }
+
+  function onMapPlacementClick(coords: { lat: number; lon: number }) {
+    if (!placementMode) return;
+    addDialogKind = placementMode;
+    clickedCoordinates = coords;
+    placementMode = null;
+    addDialogOpen = true;
+  }
 </script>
+
+<svelte:window
+  onkeydown={(e) => {
+    if (e.key === "Escape" && placementMode) placementMode = null;
+  }}
+/>
 
 {#if item.feature.type !== "geographic" && isFeatureDeletedUpstream}
   <OsmMissingFeature feature={item.feature} />
@@ -213,17 +247,52 @@
 
   <Tabs.Content value="map" class="flex flex-col gap-2">
     {#if effectiveTab === "map"}
+      {#if appState.osmUser.loggedIn}
+        <div class="flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            variant={placementMode === "route" ? "default" : "outline"}
+            onclick={() => togglePlacement("route")}
+          >
+            <MapPinPlusIcon />
+            Add route
+          </Button>
+          <Button
+            size="sm"
+            variant={placementMode === "sector" ? "default" : "outline"}
+            onclick={() => togglePlacement("sector")}
+          >
+            <FolderPlusIcon />
+            Add sector
+          </Button>
+          {#if placementMode}
+            <span class="text-xs text-muted-foreground">
+              Click on the map to place the new {placementMode}.
+            </span>
+            <Button size="xs" variant="ghost" onclick={() => (placementMode = null)}>Cancel</Button>
+          {/if}
+        </div>
+      {/if}
       <LocationMap
         currentSlug={itemSlug}
         currentFeature={item.feature}
         {coordinates}
+        {fallbackCoordinates}
         {bounds}
+        {placementMode}
+        onmapclick={onMapPlacementClick}
         draggable={editable}
         onmove={editable ? (pos) => appState.setCoordinates(itemSlug, pos) : undefined}
       />
       {#if editable && coordinates}
         <p class="text-xs text-muted-foreground">Drag the marker on the map to move the route.</p>
       {/if}
+      <MapAddDialog
+        bind:open={addDialogOpen}
+        kind={addDialogKind}
+        coordinates={clickedCoordinates}
+        currentSlug={itemSlug}
+      />
     {/if}
   </Tabs.Content>
 

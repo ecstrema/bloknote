@@ -14,6 +14,11 @@ const API_PREFIX = `${BASE}/api/world/`;
 const WORLD_DIR = resolve(fileURLToPath(import.meta.url), "../../climbing-data-gen/build/world");
 const OSM_INDEX_DIR = resolve(WORLD_DIR, "../osm-index");
 const OSM_INDEX_PREFIX = `${BASE}/api/osm-index/`;
+const HIERARCHY_INDEX_FILE = resolve(
+  fileURLToPath(import.meta.url),
+  "../../reverse-geocoding-data/output/hierarchy-index.json",
+);
+const HIERARCHY_INDEX_PATH = `${BASE}/api/hierarchy-index.json`;
 const API_FILES = new Set(["data.json", "children.json", "stats.json", "download.json", "data-version.json"]);
 
 function getAppVersion(): string {
@@ -38,6 +43,12 @@ function climbingApi(): Plugin {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const pathname = decodeURIComponent((req.url ?? "").split("?")[0]!);
+        if (pathname === HIERARCHY_INDEX_PATH) {
+          if (!existsSync(HIERARCHY_INDEX_FILE)) return next();
+          res.setHeader("content-type", "application/json");
+          createReadStream(HIERARCHY_INDEX_FILE).pipe(res);
+          return;
+        }
         if (pathname.startsWith(OSM_INDEX_PREFIX)) {
           const indexFile = normalize(join(OSM_INDEX_DIR, pathname.slice(OSM_INDEX_PREFIX.length)));
           if (!indexFile.startsWith(OSM_INDEX_DIR) || !existsSync(indexFile)) return next();
@@ -73,6 +84,9 @@ export default defineConfig({
         ...staticAdapter,
         async adapt(builder) {
           await staticAdapter.adapt(builder);
+          if (existsSync(HIERARCHY_INDEX_FILE)) {
+            cpSync(HIERARCHY_INDEX_FILE, join("build", "api", "hierarchy-index.json"));
+          }
           if (existsSync(OSM_INDEX_DIR)) {
             cpSync(OSM_INDEX_DIR, join("build", "api", "osm-index"), { recursive: true });
           }

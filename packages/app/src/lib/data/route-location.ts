@@ -3,6 +3,17 @@ import type { DataTree } from "#lib/types.js";
 import { getCoordinates } from "./parse/osm-tags.js";
 import { getParentSlug } from "#lib/helpers/slug.js";
 
+/** Temporary in-memory coordinates for newly created empty sectors placed from the map */
+const fallbackCoordinates = new Map<string, Coordinates>();
+
+export function setFallbackCoordinates(slug: string, coords: Coordinates) {
+  fallbackCoordinates.set(slug, coords);
+}
+
+export function getFallbackCoordinates(slug: string): Coordinates | undefined {
+  return fallbackCoordinates.get(slug);
+}
+
 /** ~2 meters in degrees longitude at the equator, used to place a new route right next to a node */
 export const NEXT_TO_NODE_OFFSET = 0.00002;
 

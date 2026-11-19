@@ -21,6 +21,8 @@
   let shared: { map: MapLibreMap; element: HTMLDivElement } | undefined;
   let dragMarker: Marker | undefined;
   let currentOnmove: ((position: { lat: number; lon: number }) => void) | undefined;
+  let currentOnmapclick: ((position: { lat: number; lon: number }) => void) | undefined;
+  let activePlacementMode: "route" | "sector" | null = null;
   /** Kept across pages, as the user can resize the map */
   let height: number | undefined;
   /** False until the view was first set to a place */
@@ -128,7 +130,12 @@
     }
   }
 
-  function updateOrAddElement(map: MapLibreMap, slug: string, feature: OsmFeature) {
+  function updateOrAddElement(
+    map: MapLibreMap,
+    slug: string,
+    feature: OsmFeature,
+    fallbackCoords?: { lat: number; lon: number },
+  ) {
     const existingIndex = cachedCollection.features.findIndex((f) => f.properties.slug === slug);
     const existingFeature = existingIndex >= 0 ? cachedCollection.features[existingIndex] : undefined;
     if (existingFeature && existingFeature.properties.elementType === "sector") {
@@ -139,7 +146,7 @@
       }
       return;
     }
-    const element = featureToMapElement(slug, feature);
+    const element = featureToMapElement(slug, feature, fallbackCoords);
     if (!element) return;
     if (existingIndex >= 0) {
       cachedCollection.features[existingIndex] = element;
@@ -239,6 +246,11 @@
       ];
 
       map.on("mousemove", (e) => {
+        if (activePlacementMode) {
+          map.getCanvas().style.cursor = "crosshair";
+          popup.remove();
+          return;
+        }
         const features = map.queryRenderedFeatures(e.point, { layers: interactiveLayers });
         const feature = features[0];
         if (!feature) {
@@ -257,6 +269,10 @@
       });
 
       map.on("click", (e) => {
+        if (activePlacementMode && currentOnmapclick) {
+          currentOnmapclick({ lat: e.lngLat.lat, lon: e.lngLat.lng });
+          return;
+        }
         const features = map.queryRenderedFeatures(e.point, { layers: interactiveLayers });
         const feature = features[0];
         if (!feature) return;
@@ -292,20 +308,26 @@
     currentSlug = "",
     currentFeature,
     coordinates,
+    fallbackCoordinates,
     bounds,
     draggable = false,
+    placementMode = null,
     zoom = 15,
     class: className = "",
     onmove,
+    onmapclick,
   }: {
     currentSlug?: string;
     currentFeature?: OsmFeature | GeographicFolderElement | undefined;
     coordinates?: { lat: number; lon: number } | undefined;
+    fallbackCoordinates?: { lat: number; lon: number } | undefined;
     bounds?: { x0: number; x1: number; y0: number; y1: number } | undefined;
     draggable?: boolean;
+    placementMode?: "route" | "sector" | null;
     zoom?: number;
     class?: string;
     onmove?: (position: { lat: number; lon: number }) => void;
+    onmapclick?: (position: { lat: number; lon: number }) => void;
   } = $props();
 
   let host: HTMLDivElement;
@@ -384,6 +406,7 @@
     }
 
     if (coordinates) return coordinates;
+    if (fallbackCoordinates) return fallbackCoordinates;
     if (!currentSlug) return undefined;
     if (!feat) return undefined;
     if (feat.geometry.type === "Point") {
@@ -466,7 +489,16 @@
   // Add or update current feature if downloaded or updated upstream
   $effect(() => {
     if (currentSlug && currentFeature && currentFeature.type !== "geographic" && shared?.map) {
-      updateOrAddElement(shared.map, currentSlug, currentFeature as OsmFeature);
+      updateOrAddElement(shared.map, currentSlug, currentFeature as OsmFeature, fallbackCoordinates);
+    }
+  });
+
+  // Sync placement mode cursor and click handler
+  $effect(() => {
+    activePlacementMode = placementMode;
+    currentOnmapclick = onmapclick;
+    if (attached && shared?.map) {
+      shared.map.getCanvas().style.cursor = placementMode ? "crosshair" : "";
     }
   });
 
