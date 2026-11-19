@@ -3,9 +3,10 @@ import { getGradeReference } from "#lib/data/parse/osm-tags.js";
 import type { DataTree } from "#lib/types.js";
 import type { OsmFeature } from "osm-api";
 import { getStaticIdentifier, type BasicOsmType } from "@bloknote/common";
-import { replaceState } from "$app/navigation";
+import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
+import { getParentSlug } from "#lib/helpers/slug.js";
 import { getMapCenter } from "#components/location-map.svelte";
 import type { AppState } from "#lib/data/app-state.js";
 import { getDefaultRouteCoordinates } from "#lib/data/route-location.js";
@@ -43,14 +44,22 @@ export function addRouteFromSidebar(appState: AppState, parent: DataTree, parent
   const newSlug = appState.createRoute(parent, parentSlug, coordinates);
   const feature = parent.children?.[newSlug]?.feature;
   if (feature && feature.type !== "geographic") {
-    replaceState(getItemUrl(parentSlug, feature), page.state);
+    void goto(getItemUrl(parentSlug, feature), { state: page.state, shallow: true, replace: true });
   }
+}
+
+export type SidebarDropPosition = "before" | "after" | "into";
+
+interface SidebarDragState {
+  parentSlug: string;
+  reorderType: ReorderableType | undefined;
+  slugs: string[];
 }
 
 const ORDER_STORAGE_KEY = "bloknote:sidebar-orders";
 const orderOverrides = new SvelteMap<string, Partial<Record<ReorderableType, string[]>>>();
-const dropTargets = new SvelteMap<string, "before" | "after">();
-let draggedChild: { parentSlug: string; type: ReorderableType; slug: string } | undefined;
+const dropTargets = new SvelteMap<string, SidebarDropPosition>();
+let draggedState: SidebarDragState | undefined;
 
 export function restoreSidebarOrders() {
   try {
@@ -83,22 +92,41 @@ export function getSidebarChildren(item: DataTree, parentSlug: string): SortedCh
   };
 }
 
-export function startSidebarDrag(parentSlug: string, type: ReorderableType, slug: string) {
-  draggedChild = { parentSlug, type, slug };
+export function startSidebarDrag(parentSlug: string, reorderType: ReorderableType | undefined, slugs: string[]) {
+  draggedState = { parentSlug, reorderType, slugs };
   dropTargets.clear();
 }
 
-export function canDropSidebarChild(parentSlug: string, type: ReorderableType, slug: string): boolean {
+export function getSidebarDraggedSlugs(): string[] {
+  return draggedState?.slugs ?? [];
+}
+
+export function canDropSidebarOrder(parentSlug: string, type: ReorderableType, slug: string): boolean {
   return (
-    !!draggedChild && draggedChild.parentSlug === parentSlug && draggedChild.type === type && draggedChild.slug !== slug
+    !!draggedState &&
+    draggedState.slugs.length === 1 &&
+    draggedState.parentSlug === parentSlug &&
+    draggedState.reorderType === type &&
+    draggedState.slugs[0] !== slug
   );
 }
 
-export function getSidebarDropPosition(slug: string): "before" | "after" | undefined {
+export function canDropSidebarInto(
+  targetSlug: string,
+  targetType: ItemType | "other" | undefined,
+  loggedIn: boolean,
+): boolean {
+  if (!loggedIn || !draggedState || draggedState.slugs.length === 0) return false;
+  if (targetType !== "area" && targetType !== "geographic") return false;
+  if (draggedState.slugs.some((s) => s === targetSlug || targetSlug.startsWith(`${s}/`))) return false;
+  return draggedState.slugs.some((s) => getParentSlug(s) !== targetSlug);
+}
+
+export function getSidebarDropPosition(slug: string): SidebarDropPosition | undefined {
   return dropTargets.get(slug);
 }
 
-export function setSidebarDropPosition(slug: string, position: "before" | "after") {
+export function setSidebarDropPosition(slug: string, position: SidebarDropPosition) {
   if (dropTargets.size === 1 && dropTargets.get(slug) === position) return;
   dropTargets.clear();
   dropTargets.set(slug, position);
@@ -115,12 +143,12 @@ export function dropSidebarChild(
   targetSlug: string,
   insertAfter: boolean,
 ): string[] | undefined {
-  if (!canDropSidebarChild(parentSlug, type, targetSlug)) return;
+  if (!canDropSidebarOrder(parentSlug, type, targetSlug)) return;
   const ordered = getSidebarChildren(parent, parentSlug)?.[type];
   if (!ordered) return;
 
   const next = [...ordered];
-  const sourceIndex = next.indexOf(draggedChild!.slug);
+  const sourceIndex = next.indexOf(draggedState!.slugs[0]!);
   const targetIndex = next.indexOf(targetSlug);
   if (sourceIndex === -1 || targetIndex === -1) return;
   const [moved] = next.splice(sourceIndex, 1);
@@ -143,7 +171,7 @@ export function dropSidebarChild(
 }
 
 export function endSidebarDrag() {
-  draggedChild = undefined;
+  draggedState = undefined;
   dropTargets.clear();
 }
 

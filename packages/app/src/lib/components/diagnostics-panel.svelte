@@ -2,6 +2,7 @@
   import type { DataJSON } from "@bloknote/climbing-data-gen";
   import type { OsmFeature } from "osm-api";
   import { untrack } from "svelte";
+  import { SvelteSet } from "svelte/reactivity";
   import { getItemUrl } from "#components/shell/sidebar/utils.js";
   import { Button } from "#components/ui/button/index.js";
   import { Select } from "#components/ui/select/index.js";
@@ -33,6 +34,8 @@
   let scanningLoaded = $state(false);
   let severityFilter = $state<"all" | DiagnosticSeverity>("all");
   let categoryFilter = $state("all");
+  const fixingSlugs = new SvelteSet<string>();
+  let fixError = $state<string>();
 
   const isAreaLike = $derived(item.feature.type === "geographic" || featureToType(item.feature) === "area");
 
@@ -145,10 +148,42 @@
   }
 
   async function applyFix(targetSlug: string, patch: DiagnosticPatch) {
-    if (!appState.tree.getReactiveNode(targetSlug)) {
-      for (const parentSlug of getParentSlugs(targetSlug)) await appState.fetchChildren(parentSlug);
+    fixError = undefined;
+    fixingSlugs.add(targetSlug);
+    try {
+      if (!appState.tree.getReactiveNode(targetSlug)) {
+        const ancestors = getParentSlugs(targetSlug);
+        let startIdx = 0;
+        for (let i = ancestors.length - 1; i >= 0; i--) {
+          if (appState.tree.getReactiveNode(ancestors[i]!)) {
+            startIdx = i;
+            break;
+          }
+        }
+        for (const parentSlug of ancestors.slice(startIdx)) {
+          await appState.fetchChildren(parentSlug);
+        }
+      }
+
+      if (!appState.tree.getReactiveNode(targetSlug)) {
+        const fallback = dbElements[targetSlug];
+        const parentSlug = getParentSlug(targetSlug);
+        if (fallback && parentSlug !== undefined && appState.tree.getReactiveNode(parentSlug)) {
+          appState.tree.integrateNodeIntoTree({ feature: fallback }, targetSlug, parentSlug);
+        }
+      }
+
+      if (!appState.tree.getReactiveNode(targetSlug)) {
+        fixError = `Could not load "${targetSlug}" to apply this fix.`;
+        return;
+      }
+
+      appState.applyTagPatch(targetSlug, patch);
+    } catch (error) {
+      fixError = error instanceof Error ? error.message : "Could not apply fix.";
+    } finally {
+      fixingSlugs.delete(targetSlug);
     }
-    appState.applyTagPatch(targetSlug, patch);
   }
 
   function featureHref(entrySlug: string, feature: OsmFeature, tab: "diagnostics" | "osm") {
@@ -210,6 +245,9 @@
   {#if !appState.osmUser.loggedIn && counts.total > 0}
     <p class="text-xs text-muted-foreground">Log in with OpenStreetMap to apply quick fixes and publish a changeset.</p>
   {/if}
+  {#if fixError}
+    <p class="text-xs text-destructive">{fixError}</p>
+  {/if}
 
   {#if counts.total === 0 && !loadingSubtree}
     <div class="flex items-center gap-2 rounded-md border p-4 text-sm text-muted-foreground">
@@ -255,7 +293,12 @@
                 {#if appState.osmUser.loggedIn && diag.fixes && diag.fixes.length > 0}
                   <div class="flex flex-wrap gap-1.5 pt-1">
                     {#each diag.fixes as fix (fix.label)}
-                      <Button size="xs" variant="outline" onclick={() => applyFix(entry.slug, fix.patch)}>
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        disabled={fixingSlugs.has(entry.slug)}
+                        onclick={() => applyFix(entry.slug, fix.patch)}
+                      >
                         <WrenchIcon />
                         {fix.label}
                       </Button>

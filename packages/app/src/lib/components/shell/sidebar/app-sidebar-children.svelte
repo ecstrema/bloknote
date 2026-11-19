@@ -7,7 +7,7 @@
   import type { OsmRelation, OsmWay } from "osm-api";
   import { featureToType } from "#lib/data/parse/data.js";
   import { getAppState } from "#lib/data/app-state.js";
-  import { replaceState } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import { page } from "$app/state";
 
   let {
@@ -34,7 +34,7 @@
     const newSlug = appState.createArea(item as DataTree<OsmWay | OsmRelation>, slug);
     const feature = item.children?.[newSlug]?.feature;
     if (feature && feature.type !== "geographic") {
-      replaceState(getItemUrl(slug, feature), page.state);
+      void goto(getItemUrl(slug, feature), { state: page.state, shallow: true, replace: true });
     }
   }
 </script>

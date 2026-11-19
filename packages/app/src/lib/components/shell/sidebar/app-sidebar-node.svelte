@@ -24,19 +24,22 @@
   import { getAppState } from "#lib/data/app-state.js";
   import {
     addRouteFromSidebar,
-    canDropSidebarChild,
+    canDropSidebarInto,
+    canDropSidebarOrder,
     clearSidebarDropPosition,
     dropSidebarChild,
     endSidebarDrag,
     getItemUrl,
+    getSidebarDraggedSlugs,
     getSidebarDropPosition,
     getSearchFilter,
     setSidebarDropPosition,
     startSidebarDrag,
     type ReorderableType,
+    type SidebarDropPosition,
   } from "./utils";
   import { getParentSlug } from "#lib/helpers/slug.js";
-  import { replaceState } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import GripVerticalIcon from "@lucide/svelte/icons/grip-vertical";
   import { getSidebarSelection } from "./selection.svelte";
 
@@ -108,6 +111,7 @@
   const reorderType = $derived<ReorderableType | undefined>(
     itemType === "route" ? "route" : itemType === "area" ? "area" : undefined,
   );
+  const canDrag = $derived(itemType !== "geographic" && (!!reorderType || !!appState.osmUser.loggedIn));
   const parentSlug = $derived(getParentSlug(slug) ?? "");
   const dropPosition = $derived(getSidebarDropPosition(slug));
 
@@ -115,44 +119,111 @@
 
   // The action menu is costly to mount for every node, so it only exists once the node is hovered or focused.
   let interacted = $state(false);
+  let expandTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function clearExpandTimer() {
+    if (expandTimer) {
+      clearTimeout(expandTimer);
+      expandTimer = undefined;
+    }
+  }
 
   function onDragStart(event: DragEvent) {
-    if (!reorderType) return;
-    startSidebarDrag(parentSlug, reorderType, slug);
-    event.dataTransfer?.setData("text/plain", slug);
+    if (!canDrag) {
+      event.preventDefault();
+      return;
+    }
+    const draggedSlugs = selection?.has(slug) && selection.size > 1 ? selection.slugs : [slug];
+    startSidebarDrag(parentSlug, reorderType, draggedSlugs);
+    event.dataTransfer?.setData("text/plain", draggedSlugs.join("\n"));
     if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
   }
 
   function onDragOver(event: DragEvent) {
-    if (!reorderType || !canDropSidebarChild(parentSlug, reorderType, slug)) return;
+    const canOrder = !!reorderType && canDropSidebarOrder(parentSlug, reorderType, slug);
+    const canInto = canDropSidebarInto(slug, itemType, !!appState.osmUser.loggedIn);
+    if (!canOrder && !canInto) return;
+
     event.preventDefault();
     if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+
     const target = event.currentTarget as HTMLElement;
     const bounds = target.getBoundingClientRect();
-    setSidebarDropPosition(slug, event.clientY >= bounds.top + bounds.height / 2 ? "after" : "before");
+    const ratio = bounds.height > 0 ? (event.clientY - bounds.top) / bounds.height : 0.5;
+
+    let position: SidebarDropPosition;
+    if (canOrder && canInto) {
+      position = ratio < 0.25 ? "before" : ratio > 0.75 ? "after" : "into";
+    } else if (canInto) {
+      position = "into";
+    } else {
+      position = ratio >= 0.5 ? "after" : "before";
+    }
+    setSidebarDropPosition(slug, position);
+
+    if (position === "into" && (itemType === "area" || itemType === "geographic") && !open && !expandTimer) {
+      expandTimer = setTimeout(() => {
+        expandTimer = undefined;
+        open = true;
+      }, 500);
+    } else if (position !== "into") {
+      clearExpandTimer();
+    }
   }
 
   function onDragLeave(event: DragEvent) {
     const target = event.currentTarget as HTMLElement;
     const relatedTarget = event.relatedTarget as Node | null;
     if (relatedTarget && target.contains(relatedTarget)) return;
+    clearExpandTimer();
     clearSidebarDropPosition(slug);
   }
 
-  function onDrop(event: DragEvent) {
-    if (!reorderType || !canDropSidebarChild(parentSlug, reorderType, slug)) return;
-    event.preventDefault();
-    const parent = appState.tree.getReactiveNode(parentSlug);
-    if (parent) {
-      const orderedSlugs = dropSidebarChild(parent, parentSlug, reorderType, slug, dropPosition === "after");
-      if (orderedSlugs && parent.feature.type === "relation") {
-        appState.reorderRelationChildren(parentSlug, reorderType, orderedSlugs);
+  async function onDrop(event: DragEvent) {
+    clearExpandTimer();
+    const position = getSidebarDropPosition(slug);
+    const draggedSlugs = getSidebarDraggedSlugs();
+    if (!position || draggedSlugs.length === 0) {
+      endSidebarDrag();
+      return;
+    }
+
+    if (position === "into" && canDropSidebarInto(slug, itemType, !!appState.osmUser.loggedIn)) {
+      event.preventDefault();
+      endSidebarDrag();
+      const wasCurrentMoved = draggedSlugs.includes(page.params.slug ?? "");
+      await appState.fetchChildren(slug);
+      const movedSlugs = appState.moveItemsToParent(draggedSlugs, slug);
+      if (movedSlugs.length > 0) {
+        open = true;
+        if (draggedSlugs.some((s) => selection?.has(s))) {
+          selection?.clear();
+        }
+        if (wasCurrentMoved) {
+          const movedNode = appState.tree.getReactiveNode(movedSlugs[0]!);
+          if (movedNode && movedNode.feature.type !== "geographic") {
+            void goto(getItemUrl(slug, movedNode.feature), { state: page.state, shallow: true, replace: true });
+          }
+        }
+      }
+      return;
+    }
+
+    if (reorderType && (position === "before" || position === "after") && canDropSidebarOrder(parentSlug, reorderType, slug)) {
+      event.preventDefault();
+      const parent = appState.tree.getReactiveNode(parentSlug);
+      if (parent) {
+        const orderedSlugs = dropSidebarChild(parent, parentSlug, reorderType, slug, position === "after");
+        if (orderedSlugs && parent.feature.type === "relation") {
+          appState.reorderRelationChildren(parentSlug, reorderType, orderedSlugs);
+        }
       }
     }
     endSidebarDrag();
   }
 
   function onDragEnd() {
+    clearExpandTimer();
     endSidebarDrag();
   }
 
@@ -164,7 +235,7 @@
     const newSlug = appState.createArea(item, slug);
     const feature = item.children?.[newSlug]?.feature;
     if (feature && feature.type !== "geographic") {
-      replaceState(getItemUrl(slug, feature), page.state);
+      void goto(getItemUrl(slug, feature), { state: page.state, shallow: true, replace: true });
     }
   }
 
@@ -208,6 +279,7 @@
     data-sidebar-slug={slug}
     data-selected={isSelected || undefined}
     href={link}
+    draggable={canDrag}
     onclick={handleItemClick}
     ondragstart={onDragStart}
     ondragover={onDragOver}
@@ -240,8 +312,8 @@
       <BuildingIcon />
     {/if}
     <span>{name || "No name"}</span>
-    {#if reorderType}
-      <span class="ml-auto flex shrink-0 cursor-grab active:cursor-grabbing" draggable title="Drag to reorder">
+    {#if canDrag}
+      <span class="ml-auto flex shrink-0 cursor-grab active:cursor-grabbing" title="Drag to reorder or move">
         <GripVerticalIcon class="size-3.5 text-muted-foreground" aria-hidden="true" />
       </span>
     {/if}
@@ -263,6 +335,7 @@
             data-sidebar-slug={itemType !== "geographic" ? slug : undefined}
             data-selected={isSelected || undefined}
             href={link}
+            draggable={canDrag}
             onclick={handleItemClick}
             ondragstart={onDragStart}
             ondragover={onDragOver}
@@ -271,6 +344,7 @@
             ondragend={onDragEnd}
             class={clsx(
               isSelected && "bg-primary/15 text-primary ring-1 ring-inset ring-primary/40",
+              dropPosition === "into" && "bg-primary/15 ring-2 ring-inset ring-primary",
               dropPosition && "relative",
             )}
           >
@@ -287,8 +361,8 @@
             {/if}
 
             <span class="truncate grow">{name || "No name"}</span>
-            {#if reorderType}
-              <span class="flex shrink-0 cursor-grab active:cursor-grabbing" draggable title="Drag to reorder">
+            {#if canDrag}
+              <span class="flex shrink-0 cursor-grab active:cursor-grabbing" title="Drag to reorder or move">
                 <GripVerticalIcon class="size-3.5 text-muted-foreground" aria-hidden="true" />
               </span>
             {/if}

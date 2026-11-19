@@ -1,3 +1,4 @@
+import { getStaticIdentifier } from "@bloknote/common";
 import type { DataTree } from "#lib/types.js";
 import type { Key, OsmFeature, OsmNode, OsmRelation } from "osm-api";
 import type { Undoable } from "./types";
@@ -6,6 +7,7 @@ import { snapshot } from "#lib/helpers/svelte.svelte.js";
 import { reversed } from "#lib/helpers/iterators.js";
 import { dataClient } from "../network/data-client.js";
 import type { AppDataTree } from "../app-data-tree.svelte.js";
+import { getCoordinates } from "../parse/osm-tags.js";
 
 /** An undoable action can be done and undone. */
 export class OsmUndoable {
@@ -273,6 +275,157 @@ export class UndoableAreaCreate extends UndoableNodeCreate {
       user: "",
     };
     super(osmUser, tree, newArea, parent, parentSlug);
+  }
+}
+
+const PRESERVE_NON_CLIMBING_KEYS = new Set([
+  "natural",
+  "tourism",
+  "leisure",
+  "amenity",
+  "historic",
+  "man_made",
+  "highway",
+  "landuse",
+  "boundary",
+  "waterway",
+  "place",
+  "building",
+]);
+
+/**
+ * Converts a node/way climbing area into an OSM site relation so it can hold member routes/sectors.
+ * Non-climbing landmarks or ways are preserved (with climbing tags stripped) as members of the new relation;
+ * standalone climbing crag nodes are deleted and replaced by the relation.
+ */
+export class UndoablePromoteAreaToRelation extends OsmUndoable implements Undoable {
+  #oldFeature: OsmFeature;
+  #newRelation: OsmRelation & { center?: { lat: number; lon: number } };
+  #keptFeature: OsmFeature | undefined;
+  #replacedChangeKey: string | undefined;
+  #prevNodeChange: { initial: OsmFeature | undefined; final: OsmFeature | undefined } | undefined;
+  #prevChildrenFetched: true | undefined;
+  #grandParentMemberIndex = -1;
+  #oldGrandParentMember: OsmRelation["members"][number] | undefined;
+
+  constructor(
+    osmUser: OsmUser,
+    private node: DataTree<OsmFeature>,
+    private slug: string,
+    private grandParent?: DataTree,
+    private grandParentSlug?: string,
+  ) {
+    super(osmUser);
+    this.#oldFeature = snapshot(node.feature);
+    const shouldKeepOriginal =
+      this.#oldFeature.type === "way" ||
+      Object.keys(this.#oldFeature.tags ?? {}).some((k) => PRESERVE_NON_CLIMBING_KEYS.has(k));
+
+    const tags = { ...(this.#oldFeature.tags ?? {}) } as Record<string, string>;
+    tags.type = "site";
+    tags.site ??= "climbing";
+
+    const coords = getCoordinates(this.#oldFeature);
+    this.#newRelation = {
+      type: "relation",
+      id: createTempOsmId(),
+      version: 0,
+      changeset: 0,
+      timestamp: "-1",
+      uid: -1,
+      user: "",
+      members: shouldKeepOriginal ? [{ type: this.#oldFeature.type, ref: this.#oldFeature.id, role: "" }] : [],
+      tags,
+      ...(coords ? { center: coords } : {}),
+    };
+
+    if (shouldKeepOriginal) {
+      const kept = snapshot(this.#oldFeature);
+      if (kept.tags) {
+        delete kept.tags.climbing;
+        delete kept.tags.sport;
+        delete kept.tags.type;
+        delete kept.tags.site;
+      }
+      this.#keptFeature = kept;
+      this.#replacedChangeKey = `${slug}#kept-${getStaticIdentifier(this.#oldFeature.type, this.#oldFeature.id)}`;
+    } else if (this.#oldFeature.id > 0) {
+      this.#replacedChangeKey = `${slug}#replaced-${getStaticIdentifier(this.#oldFeature.type, this.#oldFeature.id)}`;
+    }
+  }
+
+  do() {
+    this.#prevChildrenFetched = this.node.childrenFetched;
+    const existingChange = this.osmUser.changes.get(this.slug);
+    this.#prevNodeChange = existingChange
+      ? { initial: snapshot(existingChange.initial), final: snapshot(existingChange.final) }
+      : undefined;
+
+    if (this.grandParent?.feature.type === "relation") {
+      const rel = this.grandParent.feature;
+      this.#grandParentMemberIndex = rel.members.findIndex(
+        (m) => m.type === this.#oldFeature.type && m.ref === this.#oldFeature.id,
+      );
+      if (this.#grandParentMemberIndex !== -1) {
+        const before = snapshot(rel);
+        this.#oldGrandParentMember = rel.members[this.#grandParentMemberIndex];
+        const nextMembers = [...rel.members];
+        nextMembers[this.#grandParentMemberIndex] = {
+          type: "relation",
+          ref: this.#newRelation.id,
+          role: this.#oldGrandParentMember!.role,
+        };
+        rel.members = nextMembers;
+        this.osmUser.markAsDirty(before, this.grandParentSlug!, rel);
+      }
+    }
+
+    this.node.feature = snapshot(this.#newRelation);
+    this.node.children ??= {};
+    this.node.childrenFetched = true;
+    dataClient.registerLocalNode(this.slug, this.node);
+
+    this.osmUser.changes.delete(this.slug);
+    this.osmUser.markAsDirty(undefined, this.slug, this.node.feature);
+
+    if (this.#replacedChangeKey) {
+      const initialForReplaced = this.#prevNodeChange?.initial ?? this.#oldFeature;
+      if (this.#keptFeature) {
+        this.osmUser.markAsDirty(
+          initialForReplaced?.id && initialForReplaced.id > 0 ? snapshot(initialForReplaced) : undefined,
+          this.#replacedChangeKey,
+          this.#keptFeature,
+        );
+      } else if (initialForReplaced && initialForReplaced.id > 0) {
+        this.osmUser.markAsDirty(snapshot(initialForReplaced), this.#replacedChangeKey, undefined);
+      }
+    }
+  }
+
+  undo() {
+    if (this.grandParent?.feature.type === "relation" && this.#oldGrandParentMember && this.#grandParentMemberIndex !== -1) {
+      const rel = this.grandParent.feature;
+      const before = snapshot(rel);
+      const nextMembers = [...rel.members];
+      nextMembers[this.#grandParentMemberIndex] = this.#oldGrandParentMember;
+      rel.members = nextMembers;
+      this.osmUser.markAsDirty(before, this.grandParentSlug!, rel);
+    }
+
+    this.node.feature = snapshot(this.#oldFeature);
+    this.node.childrenFetched = this.#prevChildrenFetched;
+    dataClient.registerLocalNode(this.slug, this.node);
+
+    if (this.#replacedChangeKey) {
+      this.osmUser.changes.delete(this.#replacedChangeKey);
+    }
+    this.osmUser.changes.delete(this.slug);
+    if (this.#prevNodeChange) {
+      this.osmUser.changes.set(this.slug, {
+        initial: snapshot(this.#prevNodeChange.initial),
+        final: snapshot(this.#prevNodeChange.final),
+      });
+    }
   }
 }
 

@@ -7,8 +7,10 @@ import { UndoManager } from "./undo/undo-stack";
 import {
   UndoableAreaCreate,
   UndoableFeatureSet,
+  UndoableGroup,
   UndoableMove,
   UndoableNodeDelete,
+  UndoablePromoteAreaToRelation,
   UndoableRelationMembersSet,
   UndoableReparentNode,
   UndoableRouteCreate,
@@ -158,6 +160,19 @@ export class AppState {
     return action.slug;
   }
 
+  #buildPromoteAreaAction(parent: DataTree, parentSlug: string): UndoablePromoteAreaToRelation | undefined {
+    if (parent.feature.type === "geographic" || parent.feature.type === "relation") return undefined;
+    const grandParentSlug = getParentSlug(parentSlug);
+    const grandParent = grandParentSlug !== undefined ? this.tree.getReactiveNode(grandParentSlug) : undefined;
+    return new UndoablePromoteAreaToRelation(
+      this.osmUser,
+      parent as DataTree<OsmFeature>,
+      parentSlug,
+      grandParent,
+      grandParentSlug,
+    );
+  }
+
   /** Moves an OSM node/area/gym to a different parent (geographic region or area relation). */
   reparentNode(itemSlug: string, newParentSlug: string): string | undefined {
     const oldParentSlug = getParentSlug(itemSlug);
@@ -169,7 +184,8 @@ export class AppState {
     const newParent = this.tree.getReactiveNode(newParentSlug);
     if (!node || !oldParent || !newParent || node.feature.type === "geographic") return undefined;
 
-    const action = new UndoableReparentNode(
+    const promote = this.#buildPromoteAreaAction(newParent, newParentSlug);
+    const reparent = new UndoableReparentNode(
       this.osmUser,
       this.tree,
       node as DataTree<OsmFeature>,
@@ -179,8 +195,8 @@ export class AppState {
       newParent,
       newParentSlug,
     );
-    this.undoStack.do(action);
-    return action.newSlug;
+    this.undoStack.do(promote ? new UndoableGroup([promote, reparent]) : reparent);
+    return reparent.newSlug;
   }
 
   /**
@@ -225,8 +241,12 @@ export class AppState {
   moveItemsToParent(itemSlugs: string[], targetParentSlug: string): string[] {
     const topSlugs = this.#filterTopLevelOsmSlugs(itemSlugs);
     if (topSlugs.length === 0) return [];
+    const targetParent = this.tree.getReactiveNode(targetParentSlug);
+    if (!targetParent) return [];
 
     this.undoStack.beginGroup();
+    const promote = this.#buildPromoteAreaAction(targetParent, targetParentSlug);
+    if (promote) this.undoStack.do(promote);
     const moved: string[] = [];
     for (const slug of topSlugs) {
       const nextSlug = this.reparentNode(slug, targetParentSlug);

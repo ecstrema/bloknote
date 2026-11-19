@@ -29,7 +29,7 @@
     const id = page.url.searchParams.get("id");
     const movedTo = id ? await findByOsmId(id) : undefined;
     if (movedTo !== undefined && (await dataClient.getNode(movedTo))) {
-      await goto(resolve("/world/[...slug]", { slug: movedTo }), { replaceState: true });
+      await goto(resolve("/world/[...slug]", { slug: movedTo }), { replace: true });
       return;
     }
 

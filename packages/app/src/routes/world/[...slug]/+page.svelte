@@ -12,7 +12,7 @@
   import OsmMissingFeature from "#components/shell/osm-missing-feature.svelte";
   import { getStaticIdentifier } from "@bloknote/common";
   import { getAppState } from "#lib/data/app-state.js";
-  import { afterNavigate, replaceState } from "$app/navigation";
+  import { afterNavigate, goto } from "$app/navigation";
   import { building } from "$app/env";
   import { page } from "$app/state";
   import { untrack } from "svelte";
@@ -83,28 +83,32 @@
     const url = new URL(page.url.href);
     if (next === "overview") url.searchParams.delete("tab");
     else url.searchParams.set("tab", next);
-    replaceState(url, page.state);
+    void goto(url, { state: page.state, shallow: true, replace: true });
   }
 
   // Shared links carry the OSM id so the item can be found if its path changes.
-  // Not an effect: replaceState updates page.url, which would re-trigger it.
+  // Not an effect: shallow goto updates page.url, which would re-trigger an effect.
   afterNavigate((navigation) => {
     untrack(() => {
       const urlTab = parseTab(page.url.searchParams.get("tab"));
+      const existingId = page.url.searchParams.get("id");
+      const targetFeature =
+        (existingId ? appState.findOsmItemById(existingId)?.item.feature : undefined) ?? item.feature;
+
       if (navigation.type === "popstate") {
         activeTab = urlTab ?? "overview";
       } else if (urlTab) {
         activeTab = urlTab;
-      } else if (activeTab === "osm" && item.feature.type === "geographic") {
+      } else if (activeTab === "osm" && targetFeature.type === "geographic") {
         activeTab = "overview";
       }
 
-      const tabForUrl = activeTab === "osm" && item.feature.type === "geographic" ? "overview" : activeTab;
+      const tabForUrl = activeTab === "osm" && targetFeature.type === "geographic" ? "overview" : activeTab;
       const url = new URL(page.url.href);
       let changed = false;
 
-      if (item.feature.type !== "geographic") {
-        const id = `${item.feature.type}-${item.feature.id}`;
+      if (targetFeature.type !== "geographic") {
+        const id = `${targetFeature.type}-${targetFeature.id}`;
         if (url.searchParams.get("id") !== id) {
           url.searchParams.set("id", id);
           changed = true;
@@ -125,7 +129,7 @@
         changed = true;
       }
 
-      if (changed) replaceState(url, page.state);
+      if (changed) void goto(url, { state: page.state, shallow: true, replace: true });
     });
   });
 
