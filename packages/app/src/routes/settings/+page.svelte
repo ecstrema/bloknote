@@ -1,12 +1,17 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { isLoggedIn } from "osm-api";
+  import { goto } from "$app/navigation";
+  import { building } from "$app/env";
   import { resolve } from "$app/paths";
+  import { page } from "$app/state";
   import { Button } from "#components/ui/button/index.js";
   import { Select } from "#components/ui/select/index.js";
+  import * as Tabs from "#components/ui/tabs/index.js";
   import MapProviderToggles from "#components/map-provider-toggles.svelte";
-  import { loginOsm, logoutOsm } from "#lib/data/network/osm.svelte.js";
+  import AccountsTab from "./accounts-tab.svelte";
   import ArrowLeftIcon from "@lucide/svelte/icons/arrow-left";
+  import SettingsIcon from "@lucide/svelte/icons/settings";
+  import UserRoundIcon from "@lucide/svelte/icons/user-round";
   import { allBoulderScales, allRouteScales, convertGrade, french } from "@bloknote/holy-grade";
   import { setMode, userPrefersMode } from "mode-watcher";
   import { settings } from "#lib/data/settings.svelte.js";
@@ -15,6 +20,12 @@
     getPreferredBoulderGradingScale,
     getPreferredRouteGradingScale,
   } from "#lib/components/shell/providers/settings.svelte.js";
+
+  type SettingsTab = "settings" | "account";
+
+  function parseTab(value: string | null): SettingsTab {
+    return value === "account" || value === "accounts" ? "account" : "settings";
+  }
 
   const preferredRouteScale = getPreferredRouteGradingScale();
   const preferredBoulderScale = getPreferredBoulderGradingScale();
@@ -27,28 +38,27 @@
     boulderScale ? ["5A", "6A", "7A"].map((grade) => convertGrade(grade, french, boulderScale)).join(", ") : "",
   );
 
-  let osmLoggedIn = $state<boolean | undefined>(undefined);
+  let activeTab = $state<SettingsTab>(building ? "settings" : parseTab(page.url.searchParams.get("tab")));
   let hasPreviousPage = $state(false);
 
   onMount(() => {
-    osmLoggedIn = isLoggedIn();
     hasPreviousPage = window.history.length > 1;
+    activeTab = parseTab(page.url.searchParams.get("tab"));
   });
 
-  function toggleOsmLogin() {
-    if (osmLoggedIn) {
-      logoutOsm();
-      osmLoggedIn = isLoggedIn();
-    } else {
-      loginOsm(() => {
-        osmLoggedIn = isLoggedIn();
-      });
-    }
+  function onTabChange(value: string) {
+    const next = parseTab(value);
+    activeTab = next;
+    if (building) return;
+    const url = new URL(page.url.href);
+    if (next === "settings") url.searchParams.delete("tab");
+    else url.searchParams.set("tab", next);
+    void goto(url, { state: page.state, shallow: true, replace: true });
   }
 </script>
 
 <svelte:head>
-  <title>Settings | Bloknote</title>
+  <title>{activeTab === "account" ? "Account" : "Settings"} | Bloknote</title>
 </svelte:head>
 
 <div class="min-h-screen bg-background text-foreground">
@@ -69,10 +79,26 @@
   </header>
 
   <main class="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
-    <div class="mb-8 border-l-4 border-primary pl-5">
-      <p class="text-xs font-semibold uppercase text-muted-foreground">Preferences</p>
-      <h1 class="mt-1 text-3xl font-semibold tracking-tight">Settings</h1>
+    <div class="mb-6 border-l-4 border-primary pl-5">
+      <p class="text-xs font-semibold uppercase text-muted-foreground">Profile</p>
+      <h1 class="mt-1 text-3xl font-semibold tracking-tight">
+        {activeTab === "account" ? "Account" : "Settings"}
+      </h1>
     </div>
+
+    <Tabs.Root value={activeTab} onValueChange={onTabChange} class="gap-6">
+      <Tabs.List>
+        <Tabs.Trigger value="settings">
+          <SettingsIcon />
+          Settings
+        </Tabs.Trigger>
+        <Tabs.Trigger value="account">
+          <UserRoundIcon />
+          Account
+        </Tabs.Trigger>
+      </Tabs.List>
+
+      <Tabs.Content value="settings">
 
     <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
       <div>
@@ -171,23 +197,11 @@
       </div>
       <MapProviderToggles />
     </section>
+      </Tabs.Content>
 
-    <section class="grid gap-4 border-b py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
-      <div>
-        <h2 class="font-medium">OpenStreetMap account</h2>
-        <p class="mt-1 text-sm text-muted-foreground">
-          Sign in to edit climbing data and submit your changes to OpenStreetMap.
-        </p>
-      </div>
-      <Button onclick={toggleOsmLogin} disabled={osmLoggedIn === undefined} variant="outline">
-        {#if osmLoggedIn === undefined}
-          Checking login status...
-        {:else if osmLoggedIn}
-          Log out of OpenStreetMap
-        {:else}
-          Log in with OpenStreetMap
-        {/if}
-      </Button>
-    </section>
+      <Tabs.Content value="account">
+        <AccountsTab />
+      </Tabs.Content>
+    </Tabs.Root>
   </main>
 </div>

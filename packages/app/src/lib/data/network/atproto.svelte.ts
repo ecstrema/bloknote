@@ -29,6 +29,16 @@ class AtProtoClient {
     return !!this.session;
   }
 
+  setSession(session: AtProtoSession | undefined) {
+    this.session = session;
+    if (!browser) return;
+    if (session) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
   async addBulkTicks(features: OsmFeature[], style: AscentStyle, comment?: string): Promise<TickRecord[]> {
     if (!this.session) throw new Error("ATProto is not configured");
     const now = new Date().toISOString();

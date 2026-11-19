@@ -4,6 +4,6 @@
   import { Button } from "#components/ui/button/index.js";
 </script>
 
-<Button href={resolve("/settings")} variant="outline" size="icon-lg" aria-label="Settings">
+<Button href={resolve("/settings")} variant="outline" size="icon-lg" aria-label="Profile & settings">
   <UserRoundIcon />
 </Button>
