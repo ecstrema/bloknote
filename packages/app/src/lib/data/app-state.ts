@@ -205,12 +205,11 @@ export class AppState {
    * OSM items into it as a single undoable operation.
    */
   createSectorWithItems(itemSlugs: string[], name?: string, targetParentSlug?: string): string | undefined {
-    const topSlugs = itemSlugs
-      .filter((slug) => {
-        const node = this.tree.getReactiveNode(slug);
-        if (!node || node.feature.type === "geographic") return false;
-        return !itemSlugs.some((other) => other !== slug && slug.startsWith(`${other}/`));
-      });
+    const topSlugs = itemSlugs.filter((slug) => {
+      const node = this.tree.getReactiveNode(slug);
+      if (!node || node.feature.type === "geographic") return false;
+      return !itemSlugs.some((other) => other !== slug && slug.startsWith(`${other}/`));
+    });
     if (topSlugs.length === 0) return undefined;
 
     const parentSlug = targetParentSlug ?? commonParentSlug(topSlugs);

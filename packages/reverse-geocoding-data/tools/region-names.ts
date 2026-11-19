@@ -101,11 +101,12 @@ function nameOf(path: string): RegionName {
   if (continent) return { path, ...continent } as RegionName;
 
   const tags = leafTags(path) ?? {};
-  const isCountryLevel =
-    path.startsWith("world/americas/") ? path.split("/").length === 4 : path.split("/").length === 3;
+  const isCountryLevel = path.startsWith("world/americas/")
+    ? path.split("/").length === 4
+    : path.split("/").length === 3;
   const country =
     (tags["ISO3166-1"] && /^[A-Z]{2}$/.test(tags["ISO3166-1"]) ? tags["ISO3166-1"] : undefined) ||
-    (isCountryLevel ? countryCodeBySlug.get(slug) ?? findDescendantCountryCode(`${DATA_DIR}/${path}`) : undefined);
+    (isCountryLevel ? (countryCodeBySlug.get(slug) ?? findDescendantCountryCode(`${DATA_DIR}/${path}`)) : undefined);
 
   const result: Record<string, string> = {};
   for (const lang of LANGUAGES) {

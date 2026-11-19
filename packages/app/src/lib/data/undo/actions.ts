@@ -407,7 +407,11 @@ export class UndoablePromoteAreaToRelation extends OsmUndoable implements Undoab
   }
 
   undo() {
-    if (this.grandParent?.feature.type === "relation" && this.#oldGrandParentMember && this.#grandParentMemberIndex !== -1) {
+    if (
+      this.grandParent?.feature.type === "relation" &&
+      this.#oldGrandParentMember &&
+      this.#grandParentMemberIndex !== -1
+    ) {
       const rel = this.grandParent.feature;
       const before = snapshot(rel);
       const nextMembers = [...rel.members];
@@ -518,9 +522,7 @@ export class UndoableReparentNode extends OsmUndoable implements Undoable {
           this.osmUser.markAsDirty(before, fromParentSlug, rel);
         }
       } else if (this.#addedToNewParent) {
-        rel.members = rel.members.filter(
-          (m) => !(m.type === this.node.feature.type && m.ref === this.node.feature.id),
-        );
+        rel.members = rel.members.filter((m) => !(m.type === this.node.feature.type && m.ref === this.node.feature.id));
         this.osmUser.markAsDirty(before, fromParentSlug, rel);
       }
     }
@@ -529,9 +531,7 @@ export class UndoableReparentNode extends OsmUndoable implements Undoable {
       const rel = toParent.feature;
       const before = snapshot(rel);
       if (!isUndo) {
-        const exists = rel.members.some(
-          (m) => m.type === this.node.feature.type && m.ref === this.node.feature.id,
-        );
+        const exists = rel.members.some((m) => m.type === this.node.feature.type && m.ref === this.node.feature.id);
         this.#addedToNewParent = !exists;
         if (!exists) {
           rel.members = [...rel.members, { type: this.node.feature.type, ref: this.node.feature.id, role: "" }];

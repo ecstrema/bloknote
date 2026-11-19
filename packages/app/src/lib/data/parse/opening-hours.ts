@@ -111,10 +111,7 @@ export function isValidOpeningHours(value: string | undefined, coordinates?: Ope
   return !!value && createOpeningHours(value, coordinates) !== undefined;
 }
 
-export function prettifyOpeningHours(
-  value: string,
-  coordinates?: OpeningHoursCoordinates,
-): string | undefined {
+export function prettifyOpeningHours(value: string, coordinates?: OpeningHoursCoordinates): string | undefined {
   return createOpeningHours(value, coordinates)?.prettifyValue();
 }
 
@@ -122,10 +119,7 @@ export function prettifyOpeningHours(
  * Returns true when `value` can be losslessly edited via the weekly bar graph
  * (empty, or a week-stable schedule whose canonical `formatOpeningHours` round-trip matches).
  */
-export function canEditOpeningHoursGraph(
-  value: string | undefined,
-  coordinates?: OpeningHoursCoordinates,
-): boolean {
+export function canEditOpeningHoursGraph(value: string | undefined, coordinates?: OpeningHoursCoordinates): boolean {
   const text = value?.trim();
   if (!text) return true;
   const oh = createOpeningHours(text, coordinates);

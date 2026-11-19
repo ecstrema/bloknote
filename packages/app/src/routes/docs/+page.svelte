@@ -74,9 +74,9 @@
         </p>
         <h2>Static builds &amp; offline SQLite cache</h2>
         <p>
-          A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static JSON
-          endpoints. In your browser, Bloknote downloads this snapshot into a local WebAssembly SQLite database so tree
-          browsing, filtering, and diagnostics work instantaneously—even offline.
+          A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static
+          JSON endpoints. In your browser, Bloknote downloads this snapshot into a local WebAssembly SQLite database so
+          tree browsing, filtering, and diagnostics work instantaneously—even offline.
         </p>
         <h2>What contributing means</h2>
         <ul>
@@ -85,8 +85,8 @@
             every open climbing app and mapper, not just Bloknote.
           </li>
           <li>
-            <strong>Topo photos go to Wikimedia Commons</strong> under a free Creative Commons license (CC BY-SA 4.0, CC
-            BY 4.0, or CC0), so anyone can reuse and attribute them.
+            <strong>Topo photos go to Wikimedia Commons</strong> under a free Creative Commons license (CC BY-SA 4.0, CC BY
+            4.0, or CC0), so anyone can reuse and attribute them.
           </li>
           <li>
             <strong>Personal activity stays yours</strong>: ascents, stars, and comments are modeled as AT Protocol
@@ -96,13 +96,19 @@
       {:else if active === "osm"}
         <h1>OpenStreetMap Integration</h1>
         <p>
-          Bloknote queries and edits climbing features using standard OpenStreetMap tagging conventions (<code>sport=climbing</code>).
+          Bloknote queries and edits climbing features using standard OpenStreetMap tagging conventions (<code
+            >sport=climbing</code
+          >).
         </p>
         <h2>Feature hierarchy</h2>
         <ul>
           <li><code>climbing=area</code> — Multi-sector climbing areas or regions containing crags or sub-areas.</li>
-          <li><code>climbing=crag</code> — Individual crags or cliffs containing routes (via <code>type=site</code> relations).</li>
-          <li><code>climbing=route_bottom</code> / <code>route_top</code> / <code>route</code> — Individual pitches or boulders.</li>
+          <li>
+            <code>climbing=crag</code> — Individual crags or cliffs containing routes (via <code>type=site</code> relations).
+          </li>
+          <li>
+            <code>climbing=route_bottom</code> / <code>route_top</code> / <code>route</code> — Individual pitches or boulders.
+          </li>
           <li><code>leisure=sports_centre</code> + <code>sport=climbing</code> — Indoor climbing gyms.</li>
         </ul>
         <h2>Editing &amp; changesets</h2>
@@ -128,8 +134,8 @@
         <h2>Uploading photos</h2>
         <p>
           Bloknote uses Wikimedia Commons OAuth2 PKCE directly from your browser to upload photos with structured
-          <code>&#123;&#123;Information&#125;&#125;</code> templates and free-license declarations, then links the
-          resulting filename to the selected OSM climbing feature.
+          <code>&#123;&#123;Information&#125;&#125;</code> templates and free-license declarations, then links the resulting
+          filename to the selected OSM climbing feature.
         </p>
       {:else if active === "lexicons"}
         <h1>Atmosphere (ATProto) Lexicons</h1>
@@ -140,8 +146,10 @@
         <h2>Core schemas</h2>
         <ul>
           <li>
-            <code>org.openstreetmap.core.defs#elementRef</code> — Canonical reference to an OSM element
-            (<code>type</code> + numeric <code>id</code>), resilient to OSM name/slug changes.
+            <code>org.openstreetmap.core.defs#elementRef</code> — Canonical reference to an OSM element (<code
+              >type</code
+            >
+            + numeric <code>id</code>), resilient to OSM name/slug changes.
           </li>
           <li>
             <code>org.bloknote.logbook.tick</code> — Personal ascent or attempt record (<code>onsight</code>,

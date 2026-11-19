@@ -16,7 +16,13 @@ describe("getFeatureDiagnostics", () => {
 
   it("flags deprecated ele tag on routes and suggests moving to climbing:length", () => {
     const diags = getFeatureDiagnostics(
-      route({ sport: "climbing", climbing: "route_bottom", name: "Tall Route", "climbing:grade:french": "6a", ele: "25 m" }),
+      route({
+        sport: "climbing",
+        climbing: "route_bottom",
+        name: "Tall Route",
+        "climbing:grade:french": "6a",
+        ele: "25 m",
+      }),
     );
     const eleDiag = diags.find((d) => d.id === "deprecated:ele");
     expect(eleDiag).toBeDefined();
@@ -66,9 +72,7 @@ describe("getFeatureDiagnostics", () => {
   });
 
   it("flags missing sport=climbing, missing name, missing grade, and invalid values", () => {
-    const diags = getFeatureDiagnostics(
-      route({ climbing: "route_bottom", "climbing:length": "not-a-number" }),
-    );
+    const diags = getFeatureDiagnostics(route({ climbing: "route_bottom", "climbing:length": "not-a-number" }));
     expect(diags.map((d) => d.id)).toEqual(
       expect.arrayContaining(["invalid:climbing:length", "missing:sport", "missing:name", "missing:grade"]),
     );

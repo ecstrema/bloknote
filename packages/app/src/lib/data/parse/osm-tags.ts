@@ -130,10 +130,7 @@ export function getRelatedGradeScales(tags: Tags, currentScale?: ScaleId | "unkn
     for (const s of list) scales.set(s.id, s);
   };
 
-  const isBoulder =
-    tags["climbing:boulder"] === "yes" ||
-    tags.climbing === "boulder" ||
-    tags.climbing === "bouldering";
+  const isBoulder = tags["climbing:boulder"] === "yes" || tags.climbing === "boulder" || tags.climbing === "bouldering";
   const isIce = tags["climbing:ice"] === "yes" || !!tags["climbing:grade:ice"];
   const isMixed = tags["climbing:mixed"] === "yes" || !!tags["climbing:grade:mixed"];
   const isDry = tags["climbing:dry"] === "yes" || tags.climbing === "drytooling" || !!tags["climbing:grade:dry"];
@@ -323,7 +320,9 @@ export const sharedProcessedTags: ProcessedTags = {
   name: allowAll,
   description: allowAll,
   sport: allowSingleValue("climbing"),
-  ele: deprecated("`ele` is discouraged on standalone climbing elements on OpenStreetMap; remove it unless this element represents a peak or landform."),
+  ele: deprecated(
+    "`ele` is discouraged on standalone climbing elements on OpenStreetMap; remove it unless this element represents a peak or landform.",
+  ),
   ...Object.fromEntries(climbingStyleLabels.map(([key]) => [`climbing:${key}`, allowAll])),
 };
 
@@ -331,7 +330,9 @@ export const processedTags: Record<OSMClimbingFeatureType, ProcessedTags> = {
   route: {
     ...sharedProcessedTags,
     ...processedGrades,
-    ele: deprecated("Do not use `ele` on climbing routes; move route height to `climbing:length` (in meters) or remove `ele`."),
+    ele: deprecated(
+      "Do not use `ele` on climbing routes; move route height to `climbing:length` (in meters) or remove `ele`.",
+    ),
     "climbing:length": lengthValidator,
     "climbing:pitches": (v: string) => /^[1-9]\d*$/.test(v.trim()),
     climbing: allowMultipleValues(new Set(["route_bottom", "route_top"])),

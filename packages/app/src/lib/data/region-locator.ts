@@ -78,7 +78,9 @@ export function pickBestRegionSlug(
     const preferred = candidates.find((c) => preferredSlug === c || preferredSlug.startsWith(`${c}/`));
     if (preferred) return preferred;
   }
-  return [...candidates].sort((a, b) => bboxArea(getIndexNode(indexRoot, a)?._bbox) - bboxArea(getIndexNode(indexRoot, b)?._bbox))[0];
+  return [...candidates].sort(
+    (a, b) => bboxArea(getIndexNode(indexRoot, a)?._bbox) - bboxArea(getIndexNode(indexRoot, b)?._bbox),
+  )[0];
 }
 
 /**

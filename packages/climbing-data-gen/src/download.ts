@@ -98,5 +98,3 @@ export async function downloadClimbingData(
   console.log(`Saved ${data.elements.length} elements to ${outputFilePath}`);
   return outputFilePath;
 }
-
-

@@ -127,11 +127,7 @@
       {/if}
 
       {#each shownBreadcrumbSegments as breadcrumb, index (breadcrumb.slug)}
-        {@render breadcrumbFromDataJSON(
-          breadcrumb,
-          lastElement,
-          shownBreadcrumbSegments[index + 1]?.slug,
-        )}
+        {@render breadcrumbFromDataJSON(breadcrumb, lastElement, shownBreadcrumbSegments[index + 1]?.slug)}
       {/each}
     </Breadcrumb.List>
   </Breadcrumb.Root>

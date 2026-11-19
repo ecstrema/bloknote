@@ -528,10 +528,7 @@
 </script>
 
 <div class={`relative ${className}`}>
-  <div
-    bind:this={host}
-    class="relative h-full w-full overflow-hidden rounded-md border border-border"
-  >
+  <div bind:this={host} class="relative h-full w-full overflow-hidden rounded-md border border-border">
     <MapLegend bind:colorMode />
   </div>
 </div>

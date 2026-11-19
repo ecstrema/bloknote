@@ -147,8 +147,10 @@
                   {/if}
                 {/each}
                 {#if latDiff || lonDiff}
-                  {@const nextLat = latDiff?.final ?? (changedFeature.final?.type === "node" ? changedFeature.final.lat : undefined)}
-                  {@const nextLon = lonDiff?.final ?? (changedFeature.final?.type === "node" ? changedFeature.final.lon : undefined)}
+                  {@const nextLat =
+                    latDiff?.final ?? (changedFeature.final?.type === "node" ? changedFeature.final.lat : undefined)}
+                  {@const nextLon =
+                    lonDiff?.final ?? (changedFeature.final?.type === "node" ? changedFeature.final.lon : undefined)}
                   <div class="text-muted-foreground">
                     Coordinates moved ({nextLat?.toFixed(5) ?? ""}, {nextLon?.toFixed(5) ?? ""})
                   </div>

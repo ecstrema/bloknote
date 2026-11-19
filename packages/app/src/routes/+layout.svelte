@@ -125,7 +125,12 @@
 {/if}
 
 {#if updated.current && !dismissed}
-  {@render updateBanner("A new version of Bloknote is available", undefined, () => window.location.reload(), () => (dismissed = true))}
+  {@render updateBanner(
+    "A new version of Bloknote is available",
+    undefined,
+    () => window.location.reload(),
+    () => (dismissed = true),
+  )}
 {/if}
 
 <style>

@@ -56,7 +56,7 @@
   );
   const activeScale = $derived(getScale(activeScaleId) ?? relatedScales[0]!);
   const gradeTagKey = $derived(grade?.source || scaleIdToTag(activeScale.id) || "climbing:grade:yds_class");
-  const currentGradeValue = $derived(grade ? tags[gradeTagKey] ?? grade.v.v : undefined);
+  const currentGradeValue = $derived(grade ? (tags[gradeTagKey] ?? grade.v.v) : undefined);
 
   function selectGrade(value: string) {
     appState.setTag(featureSlug, gradeTagKey, value);
@@ -114,7 +114,9 @@
             <HolyGrade class="font-semibold text-sm" grade={grade.v} />
           </Button>
           {#if gradedProject}
-            <div class="pointer-events-none absolute top-full left-0 z-50 mt-1 hidden w-72 rounded-md border bg-popover p-3 text-popover-foreground shadow-md group-hover/gradewarning:pointer-events-auto group-hover/gradewarning:block">
+            <div
+              class="pointer-events-none absolute top-full left-0 z-50 mt-1 hidden w-72 rounded-md border bg-popover p-3 text-popover-foreground shadow-md group-hover/gradewarning:pointer-events-auto group-hover/gradewarning:block"
+            >
               <p class="text-sm">
                 This route is named as a project but has a grade assigned ({grade.v.v}). Projects are typically
                 unclimbed and ungraded.
@@ -165,7 +167,11 @@
         </Button>
 
         {#if choosingScale}
-          <div class="flex max-h-40 flex-col gap-0.5 overflow-y-auto rounded-md border p-1" role="listbox" aria-label="Grading systems">
+          <div
+            class="flex max-h-40 flex-col gap-0.5 overflow-y-auto rounded-md border p-1"
+            role="listbox"
+            aria-label="Grading systems"
+          >
             {#each relatedScales as s (s.id)}
               <Button
                 variant={s.id === activeScale.id ? "secondary" : "ghost"}

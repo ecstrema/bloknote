@@ -216,7 +216,11 @@
       return;
     }
 
-    if (reorderType && (position === "before" || position === "after") && canDropSidebarOrder(parentSlug, reorderType, slug)) {
+    if (
+      reorderType &&
+      (position === "before" || position === "after") &&
+      canDropSidebarOrder(parentSlug, reorderType, slug)
+    ) {
       event.preventDefault();
       const parent = appState.tree.getReactiveNode(parentSlug);
       if (parent) {
@@ -418,7 +422,9 @@
                 <DropdownMenu.Item>Download images</DropdownMenu.Item>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Item onclick={() => appState.deleteNodes([slug])}>
-                  Delete {item.feature.type !== "geographic" && item.feature.tags?.climbing === "crag" ? "crag" : "area"}
+                  Delete {item.feature.type !== "geographic" && item.feature.tags?.climbing === "crag"
+                    ? "crag"
+                    : "area"}
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Root>

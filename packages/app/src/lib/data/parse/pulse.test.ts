@@ -38,11 +38,7 @@ describe("computePulseStats", () => {
 
   it("computes last, oldest and median edit ages", () => {
     const stats = computePulseStats(
-      [
-        feature("2020-01-01T00:00:00Z"),
-        feature("2024-01-01T00:00:00Z"),
-        feature("2026-05-25T00:00:00Z"),
-      ],
+      [feature("2020-01-01T00:00:00Z"), feature("2024-01-01T00:00:00Z"), feature("2026-05-25T00:00:00Z")],
       NOW,
     );
     expect(stats.total).toBe(3);

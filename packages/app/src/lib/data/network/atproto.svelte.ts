@@ -127,8 +127,7 @@ class AtProtoClient {
   async #activate(oauthSession: OAuthSession) {
     this.#oauthSession = oauthSession;
     const stored = loadSession();
-    const handle =
-      stored?.did === oauthSession.did ? stored.handle : await this.#fetchHandle(oauthSession.did);
+    const handle = stored?.did === oauthSession.did ? stored.handle : await this.#fetchHandle(oauthSession.did);
     this.session = { did: oauthSession.did, handle };
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(this.session));
     await this.#hydrate();
@@ -158,7 +157,11 @@ class AtProtoClient {
     try {
       return await session.fetchHandler(path, init);
     } catch (error) {
-      if (error instanceof TokenRevokedError || error instanceof TokenInvalidError || error instanceof TokenRefreshError) {
+      if (
+        error instanceof TokenRevokedError ||
+        error instanceof TokenInvalidError ||
+        error instanceof TokenRefreshError
+      ) {
         this.#clearSession();
         throw new Error("Your ATProto session has expired, please log in again");
       }
@@ -180,7 +183,10 @@ class AtProtoClient {
       const merge = <T extends { uri?: string; label?: string }>(local: T[], remote: T[]): T[] => {
         const labels = new Map(local.filter((e) => e.uri).map((e) => [e.uri!, e.label]));
         const localOnly = local.filter((e) => !e.uri);
-        return [...remote, ...localOnly].map((e) => ({ ...e, label: e.label ?? (e.uri ? labels.get(e.uri) : undefined) }));
+        return [...remote, ...localOnly].map((e) => ({
+          ...e,
+          label: e.label ?? (e.uri ? labels.get(e.uri) : undefined),
+        }));
       };
       this.ticks = merge(this.ticks, remoteTicks as LocalTickEntry[]);
       this.stars = merge(this.stars, remoteStars as LocalStarEntry[]);

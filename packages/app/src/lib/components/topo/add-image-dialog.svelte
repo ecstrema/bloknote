@@ -15,11 +15,7 @@
   import InfoIcon from "@lucide/svelte/icons/info";
   import UploadIcon from "@lucide/svelte/icons/upload";
   import { onMount } from "svelte";
-  import {
-    directCommonsImage,
-    type CommonsImage,
-    type ResolvedImage,
-  } from "./topo-helpers.js";
+  import { directCommonsImage, type CommonsImage, type ResolvedImage } from "./topo-helpers.js";
 
   let {
     open = $bindable(false),
@@ -116,7 +112,8 @@
     <div class="flex items-start gap-2 rounded-md bg-muted/60 p-2.5 text-xs text-muted-foreground">
       <InfoIcon class="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
       <span>
-        Images are hosted on Wikimedia Commons under a free license and linked to this climbing feature on OpenStreetMap.
+        Images are hosted on Wikimedia Commons under a free license and linked to this climbing feature on
+        OpenStreetMap.
       </span>
     </div>
 

@@ -139,11 +139,7 @@
         <div class="flex flex-col gap-3">
           <label class="flex flex-col gap-1 text-sm">
             <span class="font-medium">Name (optional)</span>
-            <Input
-              bind:value={name}
-              placeholder={kind === "route" ? "Route name" : "Sector name"}
-              autofocus
-            />
+            <Input bind:value={name} placeholder={kind === "route" ? "Route name" : "Sector name"} autofocus />
           </label>
 
           <label class="flex flex-col gap-1 text-sm">

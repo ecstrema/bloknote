@@ -64,7 +64,12 @@
     });
   });
 
-  const stats = $derived(computePulseStats(entries.map((e) => e.feature), now));
+  const stats = $derived(
+    computePulseStats(
+      entries.map((e) => e.feature),
+      now,
+    ),
+  );
 
   const recentEntries = $derived.by(() =>
     entries
@@ -241,4 +246,3 @@
     {/if}
   {/if}
 </div>
-

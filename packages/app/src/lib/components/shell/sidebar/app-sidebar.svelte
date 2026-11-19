@@ -360,12 +360,7 @@
         <ListFilterIcon />
       </Button>
       {#if sidebar.isMobile}
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Close sidebar"
-          onclick={() => sidebar.setOpenMobile(false)}
-        >
+        <Button variant="ghost" size="icon" aria-label="Close sidebar" onclick={() => sidebar.setOpenMobile(false)}>
           <XIcon />
         </Button>
       {/if}
@@ -412,7 +407,8 @@
                   style:margin-left="-{unindentPx}px"
                   class="transition-[margin-left] duration-200 ease-out"
                   onkeydown={handleTreeKeydown}
-                  oncontextmenu={(e) => handleTreeContextMenu(e, props.oncontextmenu as ((ev: MouseEvent) => void) | undefined)}
+                  oncontextmenu={(e) =>
+                    handleTreeContextMenu(e, props.oncontextmenu as ((ev: MouseEvent) => void) | undefined)}
                 >
                   <Sidebar.Menu><AppSidebarChildren bind:item={appState.tree.root} slug={""} /></Sidebar.Menu>
                 </div>
@@ -504,8 +500,11 @@
             </DropdownMenu.Trigger>
             <DropdownMenu.Content align="end">
               <DropdownMenu.Item onclick={() => (bulkDialog = "move-folder")}>Move to folder...</DropdownMenu.Item>
-              <DropdownMenu.Item onclick={() => (bulkDialog = "change-scale")}>Change grading system...</DropdownMenu.Item>
-              <DropdownMenu.Item onclick={() => (bulkDialog = "change-type")}>Change climbing type...</DropdownMenu.Item>
+              <DropdownMenu.Item onclick={() => (bulkDialog = "change-scale")}
+                >Change grading system...</DropdownMenu.Item
+              >
+              <DropdownMenu.Item onclick={() => (bulkDialog = "change-type")}>Change climbing type...</DropdownMenu.Item
+              >
               {#if atproto.configured}
                 <DropdownMenu.Item onclick={() => (bulkDialog = "add-ticks")}>Add ticks...</DropdownMenu.Item>
               {/if}

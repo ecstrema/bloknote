@@ -55,16 +55,17 @@
         source: "own",
         index,
       }));
-      const previous: DisplayedSegment[] = week[(day + 6) % 7]!
-        .filter((r) => r.end > 1440)
-        .map((r) => ({ start: 0, end: r.end - 1440, source: "previous", index: -1 }));
+      const previous: DisplayedSegment[] = week[(day + 6) % 7]!.filter((r) => r.end > 1440).map((r) => ({
+        start: 0,
+        end: r.end - 1440,
+        source: "previous",
+        index: -1,
+      }));
       return [...own, ...previous].sort((a, b) => a.start - b.start);
     });
   });
 
-  const flatData = $derived(
-    rows.flatMap((segments, day) => segments.map((seg) => ({ ...seg, dayLabel: DAYS[day]! }))),
-  );
+  const flatData = $derived(rows.flatMap((segments, day) => segments.map((seg) => ({ ...seg, dayLabel: DAYS[day]! }))));
 
   function emitWeek(next: WeekHours) {
     draftWeek = next;
@@ -127,7 +128,9 @@
   }
 
   const isCopyTarget = (day: number) =>
-    drag?.mode === "copy-day" && day >= Math.min(drag.sourceDay, drag.targetDay) && day <= Math.max(drag.sourceDay, drag.targetDay);
+    drag?.mode === "copy-day" &&
+    day >= Math.min(drag.sourceDay, drag.targetDay) &&
+    day <= Math.max(drag.sourceDay, drag.targetDay);
 </script>
 
 {#if week}
@@ -193,7 +196,13 @@
               <g
                 class="cursor-ns-resize"
                 onpointerdown={(e) =>
-                  week && beginInteraction(e, { mode: "copy-day", sourceDay: day, targetDay: day, initialWeek: cloneWeekHours(week) })}
+                  week &&
+                  beginInteraction(e, {
+                    mode: "copy-day",
+                    sourceDay: day,
+                    targetDay: day,
+                    initialWeek: cloneWeekHours(week),
+                  })}
               >
                 <title>Drag vertically to copy {DAYS[day]} hours to other days</title>
                 <rect x={-padding.left} y={yRow} width={padding.left} height={bandH} fill="transparent" />

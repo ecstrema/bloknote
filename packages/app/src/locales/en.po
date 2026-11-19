@@ -16722,26 +16722,21 @@ msgstr "Starred climbs"
 msgid "Recent ticks"
 msgstr "Recent ticks"
 
-#. 0: atproto.session.pdsUrl; 1: atproto.session.accessJwt ? " · authenticated" \\: " · local logbook"
-#: src/routes/settings/accounts-tab.svelte
-msgid "Connected as <0/> ({0}{1})"
-msgstr "Connected as <0/> ({0}{1})"
+#~ msgid "Connected as <0/> ({0}{1})"
+#~ msgstr "Connected as <0/> ({0}{1})"
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Handle (e.g. alice.bsky.social)"
 msgstr "Handle (e.g. alice.bsky.social)"
 
-#: src/routes/settings/accounts-tab.svelte
-msgid "App password (optional for PDS sync)"
-msgstr "App password (optional for PDS sync)"
+#~ msgid "App password (optional for PDS sync)"
+#~ msgstr "App password (optional for PDS sync)"
 
-#: src/routes/settings/accounts-tab.svelte
-msgid "Connecting..."
-msgstr "Connecting..."
+#~ msgid "Connecting..."
+#~ msgstr "Connecting..."
 
-#: src/routes/settings/accounts-tab.svelte
-msgid "Connect Atmosphere"
-msgstr "Connect Atmosphere"
+#~ msgid "Connect Atmosphere"
+#~ msgstr "Connect Atmosphere"
 
 #: src/lib/components/shell/osm-changes.svelte
 msgid "# feature modified"
@@ -16853,3 +16848,35 @@ msgstr "This route is named as a project but has a grade assigned ({0}). Project
 #: src/lib/components/editable/editable-grade-value.svelte
 msgid "Remove grade"
 msgstr "Remove grade"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "User navigated back"
+msgstr "User navigated back"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "Login cancelled"
+msgstr "Login cancelled"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "Connected as <0/> · records are stored in your ATProto repository (PDS)"
+msgstr "Connected as <0/> · records are stored in your ATProto repository (PDS)"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "Redirecting..."
+msgstr "Redirecting..."
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "Continue"
+msgstr "Continue"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "You will be redirected to your ATProto provider to log in and authorize Bloknote. No app password needed."
+msgstr "You will be redirected to your ATProto provider to log in and authorize Bloknote. No app password needed."
+
+#: src/routes/settings/+page.svelte
+msgid "Report a translation issue"
+msgstr "Report a translation issue"
+
+#: src/routes/settings/+page.svelte
+msgid "Request another language"
+msgstr "Request another language"

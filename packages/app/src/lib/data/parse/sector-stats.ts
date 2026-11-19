@@ -1,24 +1,9 @@
-import {
-  convertGrade,
-  getReference,
-  getScale,
-  type BoulderScaleId,
-  type RouteScaleId,
-} from "@bloknote/holy-grade";
+import { convertGrade, getReference, getScale, type BoulderScaleId, type RouteScaleId } from "@bloknote/holy-grade";
 import type { OsmFeature } from "osm-api";
 import { featureToTypeOSM, getGrade } from "./osm-tags.js";
 import { extractRouteStyle, isTradRoute, ROUTE_STYLE_COLORS, ROUTE_STYLE_LABELS } from "./route-styles.js";
 
-export type StatStyleKey =
-  | "sport"
-  | "trad"
-  | "unknown"
-  | "boulder"
-  | "ice"
-  | "aid"
-  | "dry"
-  | "toprope"
-  | "deepwater";
+export type StatStyleKey = "sport" | "trad" | "unknown" | "boulder" | "ice" | "aid" | "dry" | "toprope" | "deepwater";
 
 export const STAT_STYLE_LABELS: Record<StatStyleKey, string> = {
   sport: ROUTE_STYLE_LABELS.sport!,
@@ -105,7 +90,10 @@ export function computeSectorStats(
   },
 ): SectorStatsSummary {
   const styleCounts = new Map<StatStyleKey, number>();
-  const gradeBuckets = new Map<string, { rank: number; total: number; byStyle: Partial<Record<StatStyleKey, number>> }>();
+  const gradeBuckets = new Map<
+    string,
+    { rank: number; total: number; byStyle: Partial<Record<StatStyleKey, number>> }
+  >();
 
   let total = 0;
   let ungraded = 0;
@@ -168,14 +156,14 @@ export function computeSectorStats(
     gradeBuckets.set(displayLabel, bucket);
   }
 
-  const typeDistribution: TypeDistributionEntry[] = STAT_STYLE_ORDER.filter((style) => (styleCounts.get(style) ?? 0) > 0).map(
-    (style) => ({
-      style,
-      label: STAT_STYLE_LABELS[style],
-      color: STAT_STYLE_COLORS[style],
-      count: styleCounts.get(style)!,
-    }),
-  );
+  const typeDistribution: TypeDistributionEntry[] = STAT_STYLE_ORDER.filter(
+    (style) => (styleCounts.get(style) ?? 0) > 0,
+  ).map((style) => ({
+    style,
+    label: STAT_STYLE_LABELS[style],
+    color: STAT_STYLE_COLORS[style],
+    count: styleCounts.get(style)!,
+  }));
 
   const gradeDistribution: GradeDistributionBucket[] = [...gradeBuckets.entries()]
     .map(([grade, data]) => ({ grade, ...data }))

@@ -1,6 +1,12 @@
 import type { OsmFeature } from "osm-api";
 import type { DataTree } from "#lib/types.js";
-import { featureToTypeOSM, getClimbingStyles, getGrade, isMultipitchRoute, parseClimbingLength } from "../parse/osm-tags.js";
+import {
+  featureToTypeOSM,
+  getClimbingStyles,
+  getGrade,
+  isMultipitchRoute,
+  parseClimbingLength,
+} from "../parse/osm-tags.js";
 import { getLocalizedName } from "../parse/localized-name.js";
 import { getImagesFromTags } from "#components/topo/topo-helpers.js";
 import { collectLoadedOsmNodes } from "../parse/diagnostics.js";
@@ -56,7 +62,10 @@ export function buildTypstDocument(root: DataTree, rootSlug: string, extraElemen
     .map((f) => {
       const tags = f.tags ?? {};
       const grade = getGrade(tags)?.v.v ?? "—";
-      const styles = getClimbingStyles(tags).map((s) => s.label).join(", ") || "—";
+      const styles =
+        getClimbingStyles(tags)
+          .map((s) => s.label)
+          .join(", ") || "—";
       const len = parseClimbingLength(tags["climbing:length"])?.meters;
       const length = len !== undefined ? `${len} m` : "—";
       const pitches = tags["climbing:pitches"]?.trim() || (isMultipitchRoute(tags) ? "2+" : "1");

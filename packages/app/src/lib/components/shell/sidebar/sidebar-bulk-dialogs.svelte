@@ -85,7 +85,9 @@
 
   const filteredFolders = $derived.by(() => {
     const q = folderFilter.trim().toLowerCase();
-    return q ? folderOptions.filter((o) => o.label.toLowerCase().includes(q) || o.slug.toLowerCase().includes(q)) : folderOptions;
+    return q
+      ? folderOptions.filter((o) => o.label.toLowerCase().includes(q) || o.slug.toLowerCase().includes(q))
+      : folderOptions;
   });
 
   function confirmNewSector(event: SubmitEvent) {
@@ -169,7 +171,8 @@
             {#each filteredFolders as opt (opt.slug)}
               <button
                 type="button"
-                class="flex items-center rounded px-2 py-1.5 text-left text-sm hover:bg-accent {targetParentSlug === opt.slug
+                class="flex items-center rounded px-2 py-1.5 text-left text-sm hover:bg-accent {targetParentSlug ===
+                opt.slug
                   ? 'bg-accent font-medium'
                   : ''}"
                 style:padding-left="{0.5 + opt.depth * 0.75}rem"

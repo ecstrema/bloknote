@@ -1,11 +1,7 @@
 import { createContext } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
 
-export function computeRangeSelection(
-  orderedSlugs: string[],
-  anchor: string | undefined,
-  target: string,
-): string[] {
+export function computeRangeSelection(orderedSlugs: string[], anchor: string | undefined, target: string): string[] {
   const targetIdx = orderedSlugs.indexOf(target);
   if (targetIdx === -1) return [target];
   const anchorIdx = anchor ? orderedSlugs.indexOf(anchor) : -1;

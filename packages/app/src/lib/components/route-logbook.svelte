@@ -5,11 +5,7 @@
   import { Select } from "#components/ui/select/index.js";
   import { Textarea } from "#components/ui/textarea/index.js";
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
-  import {
-    normalizedRatingToStars,
-    starsToNormalizedRating,
-    type AscentStyle,
-  } from "@bloknote/common";
+  import { normalizedRatingToStars, starsToNormalizedRating, type AscentStyle } from "@bloknote/common";
   import MessageSquareIcon from "@lucide/svelte/icons/message-square";
   import StarIcon from "@lucide/svelte/icons/star";
   import CheckIcon from "@lucide/svelte/icons/check";
@@ -124,7 +120,9 @@
             aria-label="{star} star{star === 1 ? '' : 's'}"
             onclick={() => (reviewStars = reviewStars === star ? 0 : star)}
           >
-            <StarIcon class={star <= reviewStars ? "size-4 fill-amber-400 text-amber-500" : "size-4 text-muted-foreground"} />
+            <StarIcon
+              class={star <= reviewStars ? "size-4 fill-amber-400 text-amber-500" : "size-4 text-muted-foreground"}
+            />
           </button>
         {/each}
       </div>

@@ -68,11 +68,7 @@ function makeState() {
   const cragNode = region.children!["europe/france/fontainebleau/crag-a"]!;
   tree.integrateNodeIntoTree(cragNode, "europe/france/fontainebleau/crag-a", "europe/france/fontainebleau");
 
-  const state = new AppState(
-    tree,
-    { slugs: [], items: [] },
-    { current: tree.root },
-  );
+  const state = new AppState(tree, { slugs: [], items: [] }, { current: tree.root });
   return { state, tree, cragNode };
 }
 
@@ -205,10 +201,9 @@ describe("AppState.createSectorWithItems", () => {
 
     state.undoStack.redo();
     expect(tree.getReactiveNode("estrie/pic-aux-corbeaux")!.feature.type).toBe("relation");
-    expect((tree.getReactiveNode("estrie/pic-aux-corbeaux")!.feature as OsmRelation).members.map((m) => m.ref)).toEqual([
-      101,
-      102,
-    ]);
+    expect((tree.getReactiveNode("estrie/pic-aux-corbeaux")!.feature as OsmRelation).members.map((m) => m.ref)).toEqual(
+      [101, 102],
+    );
   });
 
   it("keeps a way crag as a stripped member when promoting to a relation", () => {

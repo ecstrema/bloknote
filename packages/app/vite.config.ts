@@ -23,7 +23,9 @@ const API_FILES = new Set(["data.json", "children.json", "stats.json", "download
 
 function getAppVersion(): string {
   try {
-    return execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
+    return execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
   } catch {
     return "local";
   }

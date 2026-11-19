@@ -150,7 +150,8 @@ export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature
       id: "generic:climbing:grade",
       severity: "warning",
       title: 'Generic "climbing:grade" tag',
-      description: "Use a scale-specific tag (such as climbing:grade:french or climbing:grade:yds) instead of climbing:grade.",
+      description:
+        "Use a scale-specific tag (such as climbing:grade:french or climbing:grade:yds) instead of climbing:grade.",
       tags: ["climbing:grade"],
       fixes: fixes.length > 0 ? fixes : undefined,
     });
@@ -226,7 +227,8 @@ export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature
       id: "crag:has-subareas",
       severity: "warning",
       title: "Crag contains sub-areas",
-      description: 'A climbing=crag should only contain routes; use climbing=area when a node contains other areas or crags.',
+      description:
+        "A climbing=crag should only contain routes; use climbing=area when a node contains other areas or crags.",
       tags: ["climbing"],
       fixes: [{ label: "Change to climbing=area", patch: { set: { climbing: "area" } } }],
     });

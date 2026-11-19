@@ -169,10 +169,12 @@
 <TopoViewer
   bind:image={expandedImage}
   imageData={expandedImage ? directCommonsImage(expandedImage, resolvedCategories) : undefined}
-  bind:ratio={() => (expandedImage ? ratios[expandedImage.normalizedTitle] : undefined),
+  bind:ratio={
+    () => (expandedImage ? ratios[expandedImage.normalizedTitle] : undefined),
     (v) => {
       if (expandedImage && v) ratios[expandedImage.normalizedTitle] = v;
-    }}
+    }
+  }
   {featureSlug}
   featureName={feature.tags?.name ?? ""}
   canRemoveOwnImage={expandedImage ? ownImages.some((img) => img.key === expandedImage?.key) : false}
@@ -180,9 +182,4 @@
   overlayPaths={expandedImage ? overlayPathsFor(expandedImage) : []}
 />
 
-<AddImageDialog
-  bind:open={addOpen}
-  {reusableImages}
-  {resolvedCategories}
-  onadd={attachImageToFeature}
-/>
+<AddImageDialog bind:open={addOpen} {reusableImages} {resolvedCategories} onadd={attachImageToFeature} />

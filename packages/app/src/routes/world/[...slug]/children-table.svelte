@@ -39,7 +39,9 @@
               {getLocalizedName(child.feature) || "No Name"}
             </a>
             {#if child.feature.type !== "geographic"}
-              <span class="ml-1.5 inline-block rounded bg-muted px-1.5 py-0.5 text-[11px] font-normal text-muted-foreground no-underline">
+              <span
+                class="ml-1.5 inline-block rounded bg-muted px-1.5 py-0.5 text-[11px] font-normal text-muted-foreground no-underline"
+              >
                 {getAreaKindLabel(child.feature)}
               </span>
             {/if}

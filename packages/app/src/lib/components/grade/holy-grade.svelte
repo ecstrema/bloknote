@@ -35,7 +35,8 @@
   const targetScaleId = $derived.by(() => {
     if (!scale) return;
     if (scale.gradeType === "route" && preferredRouteScale.current !== "local") return preferredRouteScale.current;
-    if (scale.gradeType === "boulder" && preferredBoulderScale.current !== "local") return preferredBoulderScale.current;
+    if (scale.gradeType === "boulder" && preferredBoulderScale.current !== "local")
+      return preferredBoulderScale.current;
     return undefined;
   });
 

@@ -14767,7 +14767,7 @@ msgstr "Wallis e Futuna"
 #: src/routes/docs/+page.svelte
 #: src/routes/settings/+page.svelte
 msgid "Bloknote"
-msgstr ""
+msgstr "Bloknote"
 
 #: src/routes/+page.svelte
 msgid "Main navigation"
@@ -14804,7 +14804,7 @@ msgstr "O caminho excede o limite de 255 caracteres de uma tag do OSM."
 #: src/routes/docs/+page.svelte
 #: src/routes/settings/accounts-tab.svelte
 msgid "Wikimedia Commons"
-msgstr ""
+msgstr "Wikimedia Commons"
 
 #. 0: commonsUsername || "uploader"
 #: src/lib/components/topo/add-image-dialog.svelte
@@ -14865,11 +14865,11 @@ msgstr "Horário de funcionamento: {0}"
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 msgid "FeatureCollection"
-msgstr ""
+msgstr "FeatureCollection"
 
 #: src/lib/components/location-map.svelte
 msgid "Feature"
-msgstr ""
+msgstr "Feature"
 
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
@@ -14877,7 +14877,7 @@ msgstr ""
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 msgid "Point"
-msgstr ""
+msgstr "Point"
 
 #: src/lib/components/diagnostics-panel.svelte
 #: src/lib/components/location-map.svelte
@@ -15081,7 +15081,7 @@ msgstr "Horário de funcionamento"
 
 #: src/lib/components/editable/editable-opening-hours.svelte
 msgid "Mo-Fr 10:00-22:00; Sa-Su 10:00-18:00"
-msgstr ""
+msgstr "Mo-Fr 10:00-22:00; Sa-Su 10:00-18:00"
 
 #: src/lib/components/editable/editable-tags.svelte
 msgid "Keys are limited to 255 characters"
@@ -15095,12 +15095,12 @@ msgstr "Esta tag já existe"
 #: src/lib/components/editable/editable-textarea.svelte
 #: src/lib/components/opening-hours.svelte
 msgid "Enter"
-msgstr ""
+msgstr "Enter"
 
 #: src/lib/components/editable/editable-tags.svelte
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Escape"
-msgstr ""
+msgstr "Escape"
 
 #: src/lib/components/editable/editable-tags.svelte
 msgid "Tag"
@@ -15162,7 +15162,7 @@ msgstr "<0>Entre com o OSM</0> para editar"
 #. 0: isDev ? "[DEV] " \\: ""; 1: name ? ` - ${name}` \\: ""
 #: src/lib/components/shell/head.svelte
 msgid "{0}Bloknote{1}"
-msgstr ""
+msgstr "{0}Bloknote{1}"
 
 #. 0: slug
 #: src/lib/components/shell/osm-changes.svelte
@@ -15446,7 +15446,7 @@ msgstr "Limpar filtros"
 
 #: src/lib/components/map-legend.svelte
 msgid "French"
-msgstr ""
+msgstr "Francês"
 
 #: src/routes/settings/+page.svelte
 #: src/routes/settings/+page.svelte
@@ -15459,24 +15459,24 @@ msgstr "Idioma da interface e dos nomes das regiões"
 
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Modified"
-msgstr ""
+msgstr "Modificado"
 
 #: src/lib/components/editable/editable-grade-value.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Delete"
-msgstr ""
+msgstr "Eliminar"
 
 #: src/routes/settings/+page.svelte
 msgid "Compare route grades"
-msgstr ""
+msgstr "Comparar graus de vias"
 
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Deleted"
-msgstr ""
+msgstr "Eliminado"
 
 #: src/routes/world/[...slug]/component-parse-failed.svelte
 msgid "Failed to analyze this element."
-msgstr ""
+msgstr "Não foi possível analisar este elemento."
 
 #: src/lib/data/region-names.svelte.js
 msgid "North America"
@@ -15484,74 +15484,74 @@ msgstr "América do Norte"
 
 #: src/lib/components/map-legend.svelte
 msgid "VIIa"
-msgstr ""
+msgstr "VIIa"
 
 #: src/lib/components/map-legend.svelte
 msgid "VIIIa"
-msgstr ""
+msgstr "VIIIa"
 
 #: src/lib/components/map-legend.svelte
 msgid "IXa"
-msgstr ""
+msgstr "IXa"
 
 #: src/lib/components/map-legend.svelte
 msgid "Xa"
-msgstr ""
+msgstr "Xa"
 
 #: src/lib/components/map-legend.svelte
 msgid "XIa"
-msgstr ""
+msgstr "XIa"
 
 #. 0: selection.size
 #. 0: selection.size
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "{0} selected"
-msgstr ""
+msgstr "{0} selecionados"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Clear selection"
-msgstr ""
+msgstr "Limpar seleção"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Apply"
-msgstr ""
+msgstr "Aplicar"
 
 #: src/lib/components/location-map.svelte
 msgid "LineString"
-msgstr ""
+msgstr "LineString"
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "OpenStreetMap"
-msgstr ""
+msgstr "OpenStreetMap"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "ArrowLeft"
-msgstr ""
+msgstr "ArrowLeft"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "ArrowRight"
-msgstr ""
+msgstr "ArrowRight"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "ArrowUp"
-msgstr ""
+msgstr "ArrowUp"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "ArrowDown"
-msgstr ""
+msgstr "ArrowDown"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Home"
-msgstr ""
+msgstr "Home"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "End"
-msgstr ""
+msgstr "End"
 
 #: src/lib/components/shell/undo-controls.svelte
 msgid "Undo (Ctrl+Z)"
-msgstr ""
+msgstr "Desfazer (Ctrl+Z)"
 
 #: src/lib/data/region-names.svelte.js
 msgid "Antilles"
@@ -15567,112 +15567,112 @@ msgstr "América do Sul"
 
 #: src/routes/+page.svelte
 msgid "Explore climbing routes and areas by region."
-msgstr ""
+msgstr "Explore vias e áreas de escalada por região."
 
 #: src/routes/+page.svelte
 msgid "All routes"
-msgstr ""
+msgstr "Todas as vias"
 
 #: src/routes/+page.svelte
 msgid "Explore routes"
-msgstr ""
+msgstr "Explorar vias"
 
 #: src/routes/+page.svelte
 msgid "Browse climbing areas by region."
-msgstr ""
+msgstr "Navegue pelas áreas de escalada por região."
 
 #: src/routes/+page.svelte
 msgid "Regions"
-msgstr ""
+msgstr "Regiões"
 
 #: src/routes/settings/+page.svelte
 msgid "Compare boulder grades"
-msgstr ""
+msgstr "Comparar graus de blocos"
 
 #~ msgid "New climbing data is available. Download it in the background?"
 #~ msgstr ""
 
 #: src/routes/world/+error.svelte
 msgid "Page not found | Bloknote"
-msgstr ""
+msgstr "Página não encontrada | Bloknote"
 
 #: src/routes/world/+error.svelte
 msgid "This page doesn't exist anymore"
-msgstr ""
+msgstr "Esta página já não existe"
 
 #: src/routes/world/+error.svelte
 msgid "Something went wrong"
-msgstr ""
+msgstr "Algo deu errado"
 
 #: src/routes/world/+error.svelte
 msgid "The closest page that still exists is <0/>."
-msgstr ""
+msgstr "A página existente mais próxima é <0/>."
 
 #: src/routes/world/+error.svelte
 msgid "<0/> could not be found. It may have been moved, renamed or removed."
-msgstr ""
+msgstr "Não foi possível encontrar <0/>. Talvez tenha sido movida, renomeada ou removida."
 
 #: src/routes/world/+error.svelte
 msgid "Go to the closest page"
-msgstr ""
+msgstr "Ir para a página mais próxima"
 
 #: src/routes/world/+error.svelte
 msgid "Go to the world"
-msgstr ""
+msgstr "Ir para o mundo"
 
 #: src/lib/components/map-legend.svelte
 msgid "Show map legend"
-msgstr ""
+msgstr "Mostrar legenda do mapa"
 
 #: src/lib/components/map-legend.svelte
 msgid "<0/> Legend"
-msgstr ""
+msgstr "Legenda de <0/>"
 
 #: src/lib/components/map-legend.svelte
 msgid "Close legend"
-msgstr ""
+msgstr "Fechar legenda"
 
 #: src/lib/components/map-legend.svelte
 msgid "Map Legend"
-msgstr ""
+msgstr "Legenda do mapa"
 
 #: src/lib/components/map-legend.svelte
 msgid "Ungraded"
-msgstr ""
+msgstr "Sem grau"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Drag the marker on the map to move the route."
-msgstr ""
+msgstr "Arraste o marcador no mapa para mover a via."
 
 #: src/lib/components/map-legend.svelte
 msgid "Both"
-msgstr ""
+msgstr "Ambos"
 
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/map-legend.svelte
 msgid "Grade"
-msgstr ""
+msgstr "Grau"
 
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/map-legend.svelte
 msgid "Type"
-msgstr ""
+msgstr "Tipo"
 
 #: src/lib/components/map-legend.svelte
 msgid "Color by"
-msgstr ""
+msgstr "Colorir por"
 
 #: src/lib/components/map-legend.svelte
 msgid "Grade (fill)"
-msgstr ""
+msgstr "Grau (preenchimento)"
 
 #: src/lib/components/map-legend.svelte
 msgid "Type (stroke)"
-msgstr ""
+msgstr "Tipo (traço)"
 
 #: src/lib/components/map-legend.svelte
 msgid "Gym"
-msgstr ""
+msgstr "Academia"
 
 #~ msgid "Graded project warning"
 #~ msgstr ""
@@ -15683,1065 +15683,1060 @@ msgstr ""
 #: src/lib/components/opening-hours.svelte
 #: src/lib/components/opening-hours.svelte
 msgid "None"
-msgstr ""
+msgstr "Nenhum"
 
 #: src/routes/settings/+page.svelte
 msgid "Profile"
-msgstr ""
+msgstr "Perfil"
 
 #: src/lib/components/trad-cam-icon.svelte
 msgid "Trad / mixed route"
-msgstr ""
+msgstr "Via tradicional / mista"
 
 #: src/lib/components/editable/editable-tags.svelte
 msgid "Deprecated tags"
-msgstr ""
+msgstr "Tags obsoletas"
 
 #: src/lib/components/editable/editable-tags.svelte
 msgid "No OpenStreetMap tags."
-msgstr ""
+msgstr "Sem tags do OpenStreetMap."
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "<0/> OSM Data"
-msgstr ""
+msgstr "Dados do OSM de <0/>"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "<0/> Overview"
-msgstr ""
+msgstr "Visão geral de <0/>"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "<0/> Map"
-msgstr ""
+msgstr "Mapa de <0/>"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "View on OpenStreetMap <0/>"
-msgstr ""
+msgstr "Ver no OpenStreetMap <0/>"
 
 #. 0: DAYS[day]
 #: src/lib/components/opening-hours.svelte
 msgid "Drag vertically to copy {0} hours to other days"
-msgstr ""
+msgstr "Arraste verticalmente para copiar as horas de {0} para outros dias"
 
 #. 0: DAYS[day]
 #. 0: DAYS[day]
 #: src/lib/components/opening-hours.svelte
 #: src/lib/components/opening-hours.svelte
 msgid "Clear {0}"
-msgstr ""
+msgstr "Limpar {0}"
 
 #: src/lib/components/editable/editable-opening-hours.svelte
 msgid "This opening_hours syntax could not be parsed."
-msgstr ""
+msgstr "Não foi possível analisar esta sintaxe de opening_hours."
 
 #: src/lib/components/editable/editable-opening-hours.svelte
 msgid "Complex rules can be edited in the text field above."
-msgstr ""
+msgstr "Regras complexas podem ser editadas no campo de texto acima."
 
 #: src/lib/components/editable/editable-length.svelte
 msgid "Boulder height"
-msgstr ""
+msgstr "Altura do bloco"
 
 #: src/lib/components/editable/editable-length.svelte
 msgid "Enter height..."
-msgstr ""
+msgstr "Digite a altura..."
 
 #: src/lib/components/editable/editable-length.svelte
 msgid "Enter length..."
-msgstr ""
+msgstr "Digite o comprimento..."
 
 #: src/lib/components/editable/editable-length.svelte
 msgid "m"
-msgstr ""
+msgstr "m"
 
 #: src/lib/components/editable/editable-grade-value.svelte
 msgid "Grades"
-msgstr ""
+msgstr "Graus"
 
 #: src/lib/components/editable/editable-grade-value.svelte
 msgid "Grading systems"
-msgstr ""
+msgstr "Sistemas de graduação"
 
 #: src/lib/components/commons-topo.svelte
 #: src/lib/components/commons-topo.svelte
 msgid "Images"
-msgstr ""
+msgstr "Imagens"
 
 #: src/lib/components/commons-topo.svelte
 msgid "Expand image"
-msgstr ""
+msgstr "Ampliar imagem"
 
 #: src/lib/components/commons-topo.svelte
 msgid "Climbing image"
-msgstr ""
+msgstr "Imagem de escalada"
 
 #: src/lib/components/commons-topo.svelte
 msgid "Loading…"
-msgstr ""
+msgstr "Carregando…"
 
 #: src/lib/components/commons-topo.svelte
 msgid "Image unavailable"
-msgstr ""
+msgstr "Imagem indisponível"
 
 #: src/lib/components/commons-topo.svelte
 msgid "Add image..."
-msgstr ""
+msgstr "Adicionar imagem..."
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Image"
-msgstr ""
+msgstr "Imagem"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Expanded image"
-msgstr ""
+msgstr "Imagem ampliada"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Tap or drag to add or move route points"
-msgstr ""
+msgstr "Toque ou arraste para adicionar ou mover pontos da via"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Previous point"
-msgstr ""
+msgstr "Ponto anterior"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Next point"
-msgstr ""
+msgstr "Próximo ponto"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Point marker"
-msgstr ""
+msgstr "Marcador de ponto"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "No marker"
-msgstr ""
+msgstr "Sem marcador"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Bolt / ring"
-msgstr ""
+msgstr "Spit / anel"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Anchor"
-msgstr ""
+msgstr "Ancoragem"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Piton"
-msgstr ""
+msgstr "Piton"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Fixed sling"
-msgstr ""
+msgstr "Costura fixa"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Unfinished"
-msgstr ""
+msgstr "Inacabado"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "<0/> Undo"
-msgstr ""
+msgstr "<0/> Desfazer"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Dotted"
-msgstr ""
+msgstr "Pontilhada"
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "<0/> Remove image"
-msgstr ""
+msgstr "<0/> Remover imagem"
 
 #. 0: editingRoute?.name
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Drawing: {0}. Tap on the image to add points, drag points to adjust."
-msgstr ""
+msgstr "Desenhando: {0}. Toque na imagem para adicionar pontos, arraste os pontos para ajustar."
 
 #: src/lib/components/topo/topo-viewer.svelte
 msgid "Drag a route onto the image to place its start, or tap a route to draw its path:"
-msgstr ""
+msgstr "Arraste uma via para a imagem para posicionar seu início, ou toque em uma via para desenhar seu traçado:"
 
 #: src/lib/components/topo/add-image-dialog.svelte
 #: src/routes/settings/+page.svelte
 #: src/routes/settings/+page.svelte
 msgid "Account"
-msgstr ""
+msgstr "Conta"
 
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "Uploading image…"
-msgstr ""
+msgstr "Enviando imagem…"
 
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "Add image"
-msgstr ""
+msgstr "Adicionar imagem"
 
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "Images are hosted on Wikimedia Commons under a free license and linked to this climbing feature on OpenStreetMap."
-msgstr ""
+msgstr "As imagens são hospedadas no Wikimedia Commons sob uma licença livre e vinculadas a este elemento de escalada no OpenStreetMap."
 
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "Log in with OpenStreetMap to attach images to this feature."
-msgstr ""
+msgstr "Entre com o OpenStreetMap para anexar imagens a este elemento."
 
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "Use an existing image from this area"
-msgstr ""
+msgstr "Usar uma imagem existente desta área"
 
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "Sign in to upload an image"
-msgstr ""
+msgstr "Entre para enviar uma imagem"
 
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "Own work"
-msgstr ""
+msgstr "Trabalho próprio"
 
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "Upload image"
-msgstr ""
+msgstr "Enviar imagem"
 
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "Filename <0/>"
-msgstr ""
+msgstr "Nome do arquivo <0/>"
 
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "License <0/>"
-msgstr ""
+msgstr "Licença <0/>"
 
 #: src/lib/components/map-links.svelte
 msgid "<0/> Open in..."
-msgstr ""
+msgstr "<0/> Abrir em..."
 
 #. 0: name
 #: src/lib/components/map-links.svelte
 msgid "Choose a maps provider for {0}."
-msgstr ""
+msgstr "Escolha um provedor de mapas para {0}."
 
 #: src/lib/components/map-links.svelte
 msgid "Choose a maps provider."
-msgstr ""
+msgstr "Escolha um provedor de mapas."
 
 #: src/lib/components/map-links.svelte
 msgid "Some options only open native apps on mobile devices."
-msgstr ""
+msgstr "Algumas opções abrem apenas aplicativos nativos em dispositivos móveis."
 
 #: src/lib/components/map-links.svelte
 #: src/routes/settings/+page.svelte
 msgid "Open in maps"
-msgstr ""
+msgstr "Abrir em mapas"
 
 #: src/lib/components/map-links.svelte
 msgid "No map providers enabled. Use \"More\" below to turn some on."
-msgstr ""
+msgstr "Nenhum provedor de mapas ativado. Use \"Mais\" abaixo para ativar alguns."
 
 #: src/lib/components/map-links.svelte
 msgid "More providers"
-msgstr ""
+msgstr "Mais provedores"
 
 #: src/lib/components/map-links.svelte
 msgid "<0/> Show fewer"
-msgstr ""
+msgstr "<0/> Mostrar menos"
 
 #. 0: extraProviders.length
 #. 0: hiddenCount
 #: src/lib/components/map-links.svelte
 #: src/lib/components/map-provider-toggles.svelte
 msgid "<0/> More ({0})"
-msgstr ""
+msgstr "<0/> Mais ({0})"
 
 #: src/lib/components/map-links.svelte
 #: src/lib/components/map-provider-toggles.svelte
 msgid "Mobile"
-msgstr ""
+msgstr "Móvel"
 
 #. 0: provider.label
 #: src/lib/components/map-links.svelte
 msgid "Enable {0}"
-msgstr ""
+msgstr "Ativar {0}"
 
 #. 0: provider.label
 #: src/lib/components/map-links.svelte
 msgid "Remove {0} from defaults"
-msgstr ""
+msgstr "Remover {0} dos padrões"
 
 #. 0: provider.label
 #: src/lib/components/map-links.svelte
 msgid "Add {0} to defaults"
-msgstr ""
+msgstr "Adicionar {0} aos padrões"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "<0/> Clear"
-msgstr ""
+msgstr "<0/> Limpar"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "<0/> Move to new sector"
-msgstr ""
+msgstr "<0/> Mover para novo setor"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Move to new sector"
-msgstr ""
+msgstr "Mover para novo setor"
 
 #. 0: moveTargetParent ? ` in ${getLocalizedName(moveTargetParent.feature)}` \\: ""; 1: selection.size; 2: selection.size === 1 ? "" \\: "s"
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Create a new sector{0} and move {1} selected item{2} into it."
-msgstr ""
+msgstr "Crie um novo setor{0} e mova para ele os {1} itens{2} selecionados."
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Sector name (optional)"
-msgstr ""
+msgstr "Nome do setor (opcional)"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Create & move"
-msgstr ""
+msgstr "Criar e mover"
 
 #. 0: placementMode
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Click on the map to place the new {0}."
-msgstr ""
+msgstr "Clique no mapa para posicionar o novo {0}."
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "<0/> Add route"
-msgstr ""
+msgstr "<0/> Adicionar via"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "<0/> Add sector"
-msgstr ""
+msgstr "<0/> Adicionar setor"
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Could not load the region hierarchy index."
-msgstr ""
+msgstr "Não foi possível carregar o índice hierárquico de regiões."
 
 #. 0: coords.lat.toFixed(4); 1: coords.lon.toFixed(4)
 #: src/lib/components/map-add-dialog.svelte
 msgid "No region covers ({0}, {1}). Click inside a mapped region."
-msgstr ""
+msgstr "Nenhuma região cobre ({0}, {1}). Clique dentro de uma região mapeada."
 
 #. 0: bestRegion
 #: src/lib/components/map-add-dialog.svelte
 msgid "Could not load region {0}."
-msgstr ""
+msgstr "Não foi possível carregar a região {0}."
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Add route on map"
-msgstr ""
+msgstr "Adicionar via no mapa"
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Add sector on map"
-msgstr ""
+msgstr "Adicionar setor no mapa"
 
 #. 0: coordinates.lat.toFixed(5); 1: coordinates.lon.toFixed(5)
 #: src/lib/components/map-add-dialog.svelte
 msgid "Location: {0}, {1}"
-msgstr ""
+msgstr "Localização: {0}, {1}"
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Detecting region and loading areas..."
-msgstr ""
+msgstr "Detectando região e carregando áreas..."
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Route name"
-msgstr ""
+msgstr "Nome da via"
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Sector name"
-msgstr ""
+msgstr "Nome do setor"
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Name (optional)"
-msgstr ""
+msgstr "Nome (opcional)"
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Parent"
-msgstr ""
+msgstr "Pai"
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Automatically placed in the detected region. You can choose any child or sub-sector of this region."
-msgstr ""
+msgstr "Posicionado automaticamente na região detectada. Você pode escolher qualquer filho ou subsetor desta região."
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Create route"
-msgstr ""
+msgstr "Criar via"
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Create sector"
-msgstr ""
+msgstr "Criar setor"
 
 #: src/routes/settings/+page.svelte
 msgid "Choose which map providers appear in the \"Open in\" drawer. Mobile-only apps cannot be detected automatically from a web browser."
-msgstr ""
+msgstr "Escolha quais provedores de mapas aparecem no painel \"Abrir em\". Aplicativos exclusivos de celular não podem ser detectados automaticamente por um navegador."
 
 #: src/lib/components/map-provider-toggles.svelte
 msgid "<0/> Fewer providers"
-msgstr ""
+msgstr "<0/> Menos provedores"
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Scanning area..."
-msgstr ""
+msgstr "Escaneando área..."
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "No tagging issues detected."
-msgstr ""
+msgstr "Nenhum problema de tags detectado."
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Showing first 2,000 elements."
-msgstr ""
+msgstr "Mostrando os primeiros 2.000 elementos."
 
 #. 0: counts.total; 1: counts.total === 1 ? "" \\: "s"; 2: allEntries.length; 3: allEntries.length === 1 ? "" \\: "s"; 4: counts.errors; 5: counts.errors === 1 ? "" \\: "s"; 6: counts.warnings; 7: counts.warnings === 1 ? "" \\: "s"
 #: src/lib/components/diagnostics-panel.svelte
 msgid "{0} issue{1} across {2} feature{3} ({4} error{5}, {6} warning{7}). <0/>"
-msgstr ""
+msgstr "{0} problema{1} em {2} elemento{3} ({4} erro{5}, {6} aviso{7}). <0/>"
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Scanning sub-areas..."
-msgstr ""
+msgstr "Escaneando subáreas..."
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Scan all sub-areas"
-msgstr ""
+msgstr "Escanear todas as subáreas"
 
 #. 0: counts.total
 #: src/lib/components/diagnostics-panel.svelte
 msgid "All ({0})"
-msgstr ""
+msgstr "Todos ({0})"
 
 #. 0: counts.errors
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Errors ({0})"
-msgstr ""
+msgstr "Erros ({0})"
 
 #. 0: counts.warnings
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Warnings ({0})"
-msgstr ""
+msgstr "Avisos ({0})"
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Filter by issue type"
-msgstr ""
+msgstr "Filtrar por tipo de problema"
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "All issue types"
-msgstr ""
+msgstr "Todos os tipos de problema"
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Log in with OpenStreetMap to apply quick fixes and publish a changeset."
-msgstr ""
+msgstr "Entre com o OpenStreetMap para aplicar correções rápidas e publicar um conjunto de mudanças."
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "All scanned tags look good."
-msgstr ""
+msgstr "Todas as tags escaneadas parecem boas."
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Edit OSM tags"
-msgstr ""
+msgstr "Editar tags do OSM"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Change grading system"
-msgstr ""
+msgstr "Mudar sistema de graduação"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Change climbing type"
-msgstr ""
+msgstr "Mudar tipo de escalada"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "<0/> Move to folder..."
-msgstr ""
+msgstr "<0/> Mover para pasta..."
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "<0/> Move to new sector..."
-msgstr ""
+msgstr "<0/> Mover para novo setor..."
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "<0/> Delete selected..."
-msgstr ""
+msgstr "<0/> Excluir selecionados..."
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Add ticks..."
-msgstr ""
+msgstr "Adicionar ascensões..."
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Log in to edit selected items"
-msgstr ""
+msgstr "Entre para editar os itens selecionados"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Bulk actions"
-msgstr ""
+msgstr "Ações em lote"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Move to folder..."
-msgstr ""
+msgstr "Mover para pasta..."
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Change grading system..."
-msgstr ""
+msgstr "Mudar sistema de graduação..."
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Change climbing type..."
-msgstr ""
+msgstr "Mudar tipo de escalada..."
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Delete selected..."
-msgstr ""
+msgstr "Excluir selecionados..."
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Log in to OpenStreetMap for bulk actions."
-msgstr ""
+msgstr "Entre no OpenStreetMap para ações em lote."
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Move to folder"
-msgstr ""
+msgstr "Mover para pasta"
 
 #. 0: selection.size; 1: selection.size === 1 ? "" \\: "s"
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Choose a destination folder or sector for {0} selected item{1}."
-msgstr ""
+msgstr "Escolha uma pasta ou setor de destino para os {0} itens{1} selecionados."
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Filter folders..."
-msgstr ""
+msgstr "Filtrar pastas..."
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Loading folders..."
-msgstr ""
+msgstr "Carregando pastas..."
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "No matching folders."
-msgstr ""
+msgstr "Nenhuma pasta correspondente."
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Move"
-msgstr ""
+msgstr "Mover"
 
 #. 0: selection.size
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Convert existing grades on {0} selected items."
-msgstr ""
+msgstr "Converter os graus existentes de {0} itens selecionados."
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Target grading system"
-msgstr ""
+msgstr "Sistema de graduação de destino"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Convert grades"
-msgstr ""
+msgstr "Converter graus"
 
 #. 0: selection.size
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Set the climbing type for {0} selected items."
-msgstr ""
+msgstr "Defina o tipo de escalada para {0} itens selecionados."
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Climbing type"
-msgstr ""
+msgstr "Tipo de escalada"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "<0/> Replace existing climbing type tags"
-msgstr ""
+msgstr "<0/> Substituir tags existentes do tipo de escalada"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Add ticks"
-msgstr ""
+msgstr "Adicionar ascensões"
 
 #. 0: selection.size
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Log a tick for {0} selected items."
-msgstr ""
+msgstr "Registre uma ascensão para {0} itens selecionados."
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Ascent style"
-msgstr ""
+msgstr "Estilo de ascensão"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 #: src/routes/settings/user-stats-panel.svelte
 msgid "Onsight"
-msgstr ""
+msgstr "Onsight"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 #: src/routes/settings/user-stats-panel.svelte
 msgid "Flash"
-msgstr ""
+msgstr "Flash"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 #: src/routes/settings/user-stats-panel.svelte
 msgid "Redpoint"
-msgstr ""
+msgstr "Redpoint"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 #: src/routes/settings/user-stats-panel.svelte
 msgid "Attempt"
-msgstr ""
+msgstr "Tentativa"
 
 #. 0: selection.size; 1: selection.size === 1 ? "" \\: "s"
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Delete {0} item{1}?"
-msgstr ""
+msgstr "Excluir {0} item{1}?"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "This removes the selected items from the tree and marks them for deletion in your pending OpenStreetMap changeset."
-msgstr ""
+msgstr "Isso remove os itens selecionados da árvore e os marca para exclusão no seu conjunto de mudanças pendente do OpenStreetMap."
 
 #. 0: targetSlug
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Could not load \"{0}\" to apply this fix."
-msgstr ""
+msgstr "Não foi possível carregar \"{0}\" para aplicar esta correção."
 
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Could not apply fix."
-msgstr ""
+msgstr "Não foi possível aplicar a correção."
 
 #~ msgid "Drag to reorder or move"
 #~ msgstr ""
 
 #: src/lib/components/shell/app-settings-menu.svelte
 msgid "Profile & settings"
-msgstr ""
+msgstr "Perfil e configurações"
 
 #. 0: activeTab === "account" ? "Account" \\: "Settings"
 #: src/routes/settings/+page.svelte
 msgid "{0} | Bloknote"
-msgstr ""
+msgstr "{0} | Bloknote"
 
 #: src/routes/settings/+page.svelte
 msgid "<0/> Settings"
-msgstr ""
+msgstr "<0/> Configurações"
 
 #: src/routes/settings/+page.svelte
 msgid "<0/> Account"
-msgstr ""
+msgstr "<0/> Conta"
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Stores the shared climbing directory—routes, sectors, crags, gyms, grades, and tags. Sign in to add, edit, reorganize, or fix climbing data and publish your changesets."
-msgstr ""
+msgstr "Armazena o diretório de escalada compartilhado: vias, setores, crags, academias, graus e tags. Entre para adicionar, editar, reorganizar ou corrigir dados de escalada e publicar seus conjuntos de mudanças."
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Atmosphere"
-msgstr ""
+msgstr "Atmosphere"
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and starred climbs—in your own data repository, separate from OpenStreetMap."
-msgstr ""
+msgstr "Armazena sua atividade de escalada pessoal no AT Protocol: registros de ascensões, resenhas de vias, avaliações e favoritos, no seu próprio repositório de dados, separado do OpenStreetMap."
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Disconnect Atmosphere"
-msgstr ""
+msgstr "Desconectar Atmosphere"
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Signed in as <0/>"
-msgstr ""
+msgstr "Conectado como <0/>"
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Hosts freely licensed topo photos and crag images linked from OpenStreetMap climbing features. Sign in to upload new photos and attach them as topos."
-msgstr ""
+msgstr "Hospeda fotos de topos e imagens de crags com licença livre vinculadas dos elementos de escalada do OpenStreetMap. Entre para enviar novas fotos e anexá-las como topos."
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Log out of Wikimedia"
-msgstr ""
+msgstr "Sair da Wikimedia"
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Log in with Wikimedia"
-msgstr ""
+msgstr "Entrar com a Wikimedia"
 
 #: src/lib/components/shell/undo-controls.svelte
 msgid "Undo"
-msgstr ""
+msgstr "Desfazer"
 
 #: src/lib/components/shell/undo-controls.svelte
 msgid "Redo"
-msgstr ""
+msgstr "Refazer"
 
 #: src/lib/components/shell/undo-controls.svelte
 msgid "Redo (Ctrl+Shift+Z)"
-msgstr ""
+msgstr "Refazer (Ctrl+Shift+Z)"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "No issues"
-msgstr ""
+msgstr "Sem problemas"
 
 #: src/lib/components/sector-stats.svelte
 msgid "Climbing statistics"
-msgstr ""
+msgstr "Estatísticas de escalada"
 
 #. 0: stats.categories.boulder
 #: src/lib/components/sector-stats.svelte
 msgid "{0} boulders"
-msgstr ""
+msgstr "{0} blocos"
 
 #. 0: stats.categories.ice
 #: src/lib/components/sector-stats.svelte
 msgid "{0} ice"
-msgstr ""
+msgstr "{0} gelo"
 
 #. 0: stats.ungraded
 #: src/lib/components/sector-stats.svelte
 msgid "{0} ungraded"
-msgstr ""
+msgstr "{0} sem grau"
 
 #. 0: stats.total
 #: src/lib/components/sector-stats.svelte
 msgid "{0} climbs"
-msgstr ""
+msgstr "{0} escaladas"
 
 #: src/lib/components/sector-stats.svelte
 msgid "Single stacked distribution chart"
-msgstr ""
+msgstr "Um único gráfico de distribuição empilhado"
 
 #: src/lib/components/sector-stats.svelte
 msgid "Separate grade and type charts"
-msgstr ""
+msgstr "Gráficos separados de grau e tipo"
 
 #: src/lib/components/sector-stats.svelte
 msgid "<0/> Stacked"
-msgstr ""
+msgstr "<0/> Empilhado"
 
 #: src/lib/components/sector-stats.svelte
 msgid "<0/> Double"
-msgstr ""
+msgstr "<0/> Duplo"
 
 #: src/lib/components/sector-stats.svelte
 msgid "Grade distribution"
-msgstr ""
+msgstr "Distribuição de graus"
 
 #: src/lib/components/sector-stats.svelte
 msgid "Type distribution"
-msgstr ""
+msgstr "Distribuição de tipos"
 
 #. 0: name || 'folder'
 #: src/lib/components/shell/app-top-navigation.svelte
 msgid "Select child of {0}"
-msgstr ""
+msgstr "Selecionar filho de {0}"
 
 #: src/lib/components/shell/app-top-navigation.svelte
 msgid "No items"
-msgstr ""
+msgstr "Nenhum item"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Close sidebar"
-msgstr ""
+msgstr "Fechar barra lateral"
 
 #: src/lib/components/shell/app-top-navigation.svelte
 msgid "Show hidden breadcrumbs"
-msgstr ""
+msgstr "Mostrar breadcrumbs ocultos"
 
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Created"
-msgstr ""
+msgstr "Criado"
 
 #. 0: displayName
 #. 0: displayName
 #: src/lib/components/shell/osm-changes.svelte
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Revert changes to {0}"
-msgstr ""
+msgstr "Reverter alterações de {0}"
 
 #. 0: changedFeature.final.members.length
 #: src/lib/components/shell/osm-changes.svelte
 msgid "{0} members"
-msgstr ""
+msgstr "{0} membros"
 
 #. 0: nextLat?.toFixed(5) ?? ""; 1: nextLon?.toFixed(5) ?? ""
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Coordinates moved ({0}, {1})"
-msgstr ""
+msgstr "Coordenadas movidas ({0}, {1})"
 
 #. 0: membersDiff.initial.length; 1: membersDiff.final.length
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Members: {0} → {1}"
-msgstr ""
+msgstr "Membros: {0} → {1}"
 
 #. 0: item.feature.type !== "geographic" && item.feature.tags?.climbing === "crag" ? "crag" \\: "area"
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
 msgid "Delete {0}"
-msgstr ""
+msgstr "Excluir {0}"
 
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
 #: src/routes/world/[...slug]/children-table.svelte
 #: src/routes/world/[...slug]/route-page.svelte
 msgid "Ice / dry-tooling route"
-msgstr ""
+msgstr "Via de gelo / dry-tooling"
 
 #: src/lib/components/editable/editable-pitches.svelte
 msgid "Number of pitches"
-msgstr ""
+msgstr "Número de enfiadas"
 
 #: src/lib/components/editable/editable-pitches.svelte
 msgid "Pitches..."
-msgstr ""
+msgstr "Enfiadas..."
 
 #: src/routes/world/[...slug]/geographic-page.svelte
 msgid "Local grading schemes: <0/> (routes) · <1/> (boulders)"
-msgstr ""
+msgstr "Esquemas de graduação locais: <0/> (vias) · <1/> (blocos)"
 
 #: src/routes/world/[...slug]/+layout.svelte
 msgid "Bloknote home"
-msgstr ""
+msgstr "Página inicial do Bloknote"
 
 #: src/routes/world/[...slug]/area-page.svelte
 msgid "<0/> Export Typst"
-msgstr ""
+msgstr "<0/> Exportar Typst"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not update star"
-msgstr ""
+msgstr "Não foi possível atualizar a estrela"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not log tick"
-msgstr ""
+msgstr "Não foi possível registrar a ascensão"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not post comment"
-msgstr ""
+msgstr "Não foi possível publicar o comentário"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Logbook and comments"
-msgstr ""
+msgstr "Registro e comentários"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Starred"
-msgstr ""
+msgstr "Favorito"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Star"
-msgstr ""
+msgstr "Estrela"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Connect Atmosphere to log ticks & comments"
-msgstr ""
+msgstr "Conecte o Atmosphere para registrar ascensões e comentários"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Activity & Comments"
-msgstr ""
+msgstr "Atividade e comentários"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Ascent note (optional)"
-msgstr ""
+msgstr "Nota de ascensão (opcional)"
 
 #: src/lib/components/route-logbook.svelte
 msgid "<0/> Log tick"
-msgstr ""
+msgstr "<0/> Registrar ascensão"
 
 #. 0: star; 1: star === 1 ? '' \\: 's'
 #: src/lib/components/route-logbook.svelte
 msgid "{0} star{1}"
-msgstr ""
+msgstr "{0} estrela{1}"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Rating:"
-msgstr ""
+msgstr "Avaliação:"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Write a comment or route beta..."
-msgstr ""
+msgstr "Escreva um comentário ou beta da via..."
 
 #: src/lib/components/route-logbook.svelte
 msgid "<0/> Post comment"
-msgstr ""
+msgstr "<0/> Publicar comentário"
 
 #. 0: routeTicks.length
 #: src/lib/components/route-logbook.svelte
 msgid "Your ticks ({0})"
-msgstr ""
+msgstr "Suas ascensões ({0})"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Climber"
-msgstr ""
+msgstr "Escalador"
 
 #. 0: routeReviews.length
 #: src/lib/components/route-logbook.svelte
 msgid "Comments ({0})"
-msgstr ""
+msgstr "Comentários ({0})"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Diagnostics"
-msgstr ""
+msgstr "Diagnóstico"
 
 #: src/routes/+page.svelte
 #: src/routes/settings/+page.svelte
 msgid "Docs"
-msgstr ""
+msgstr "Docs"
 
 #: src/routes/docs/+page.svelte
 msgid "How Bloknote works"
-msgstr ""
+msgstr "Como o Bloknote funciona"
 
 #: src/routes/docs/+page.svelte
 msgid "OpenStreetMap integration"
-msgstr ""
+msgstr "Integração com o OpenStreetMap"
 
 #: src/routes/docs/+page.svelte
 msgid "ATProto Lexicons"
-msgstr ""
+msgstr "Léxicos do ATProto"
 
 #: src/routes/docs/+page.svelte
 msgid "Documentation | Bloknote"
-msgstr ""
+msgstr "Documentação | Bloknote"
 
 #: src/routes/docs/+page.svelte
 msgid "Documentation"
-msgstr ""
+msgstr "Documentação"
 
 #: src/routes/docs/+page.svelte
 msgid "<0>Map & route edits go to OpenStreetMap</0> under the Open Database License (ODbL), benefiting every open climbing app and mapper, not just Bloknote."
-msgstr ""
+msgstr "<0>As edições de mapas e vias vão para o OpenStreetMap</0> sob a Open Database License (ODbL), beneficiando todos os aplicativos de escalada abertos e mapeadores, não apenas o Bloknote."
 
 #: src/routes/docs/+page.svelte
 msgid "<0>Topo photos go to Wikimedia Commons</0> under a free Creative Commons license (CC BY-SA 4.0, CC BY 4.0, or CC0), so anyone can reuse and attribute them."
-msgstr ""
+msgstr "<0>As fotos de topos vão para o Wikimedia Commons</0> sob uma licença Creative Commons livre (CC BY-SA 4.0, CC BY 4.0 ou CC0), para que qualquer pessoa possa reutilizá-las e atribuí-las."
 
 #: src/routes/docs/+page.svelte
 msgid "<0>Personal activity stays yours</0>: ascents, stars, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
-msgstr ""
+msgstr "<0>Sua atividade pessoal continua sua</0>: ascensões, estrelas e comentários são modelados como registros do AT Protocol armazenados no seu servidor de dados pessoal (PDS)."
 
 #: src/routes/docs/+page.svelte
 msgid "How Bloknote works & Contributing"
-msgstr ""
+msgstr "Como o Bloknote funciona e como contribuir"
 
 #: src/routes/docs/+page.svelte
 msgid "Bloknote is a static, offline-capable climbing directory built entirely on open data. There is no proprietary central database: routes, crags, sectors, and gyms live on <0>OpenStreetMap</0>, topo photos live on <1>Wikimedia Commons</1>, and personal ticks or reviews belong to your own <2>Atmosphere (AT Protocol)</2> repository."
-msgstr ""
+msgstr "O Bloknote é um diretório de escalada estático e utilizável offline, construído inteiramente sobre dados abertos. Não há banco de dados central proprietário: vias, crags, setores e academias vivem no <0>OpenStreetMap</0>, as fotos de topos no <1>Wikimedia Commons</1>, e ascensões ou resenhas pessoais pertencem ao seu próprio repositório <2>Atmosphere (AT Protocol)</2>."
 
 #: src/routes/docs/+page.svelte
 msgid "Static builds & offline SQLite cache"
-msgstr ""
+msgstr "Builds estáticos e cache SQLite offline"
 
 #: src/routes/docs/+page.svelte
 msgid "A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static JSON endpoints. In your browser, Bloknote downloads this snapshot into a local WebAssembly SQLite database so tree browsing, filtering, and diagnostics work instantaneously—even offline."
-msgstr ""
+msgstr "Um pipeline agendado compila os dados de escalada mundiais do Overpass e os limites regionais em GeoJSON em endpoints JSON estáticos. No navegador, o Bloknote baixa esse instantâneo para um banco de dados SQLite WebAssembly local, para que a navegação em árvore, a filtragem e o diagnóstico funcionem instantaneamente — até offline."
 
 #: src/routes/docs/+page.svelte
 msgid "What contributing means"
-msgstr ""
+msgstr "O que significa contribuir"
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Multi-sector climbing areas or regions containing crags or sub-areas."
-msgstr ""
+msgstr "<0/> — Áreas de escalada multi-setor ou regiões contendo crags ou subáreas."
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Individual crags or cliffs containing routes (via <1/> relations)."
-msgstr ""
+msgstr "<0/> — Crags ou paredes individuais contendo vias (por relações <1/>)."
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> / <1/> / <2/> — Individual pitches or boulders."
-msgstr ""
+msgstr "<0/> / <1/> / <2/> — Enfiadas ou blocos individuais."
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> + <1/> — Indoor climbing gyms."
-msgstr ""
+msgstr "<0/> + <1/> — Academias de escalada."
 
 #: src/routes/docs/+page.svelte
 msgid "OpenStreetMap Integration"
-msgstr ""
+msgstr "Integração com o OpenStreetMap"
 
 #: src/routes/docs/+page.svelte
 msgid "Bloknote queries and edits climbing features using standard OpenStreetMap tagging conventions (<0/>)."
-msgstr ""
+msgstr "O Bloknote consulta e edita elementos de escalada usando as convenções de tags padrão do OpenStreetMap (<0/>)."
 
 #: src/routes/docs/+page.svelte
 msgid "Feature hierarchy"
-msgstr ""
+msgstr "Hierarquia de elementos"
 
 #: src/routes/docs/+page.svelte
 msgid "Editing & changesets"
-msgstr ""
+msgstr "Edição e conjuntos de mudanças"
 
 #: src/routes/docs/+page.svelte
 msgid "When signed in with OpenStreetMap (OAuth2), edits you make—renaming features, setting grades, normalizing lengths, dragging route markers, reordering relation members, or dragging routes into sectors—are batched into an undoable local changeset. If you drag loose routes into a crag mapped as a single node or way, Bloknote automatically promotes it into a <0/> relation so membership persists cleanly to OSM."
-msgstr ""
+msgstr "Quando conectado com o OpenStreetMap (OAuth2), as edições que você faz — renomear elementos, definir graus, normalizar comprimentos, arrastar marcadores de vias, reordenar membros de relações ou arrastar vias para setores — são agrupadas em um conjunto de mudanças local reversível. Se você arrastar vias soltas para um crag mapeado como um único nó ou way, o Bloknote o converte automaticamente em uma relação <0/> para que a pertença persista de forma limpa no OSM."
 
 #: src/routes/docs/+page.svelte
 msgid "Wikimedia Commons Integration"
-msgstr ""
+msgstr "Integração com o Wikimedia Commons"
 
 #: src/routes/docs/+page.svelte
 msgid "Climbing topos and crag images are hosted on <0>Wikimedia Commons</0> and linked directly from OSM elements using <1/> tags (e.g. <2/> or <3/>)."
-msgstr ""
+msgstr "Topos de escalada e imagens de crags são hospedados no <0>Wikimedia Commons</0> e vinculados diretamente dos elementos OSM usando tags <1/> (ex.: <2/> ou <3/>)."
 
 #: src/routes/docs/+page.svelte
 msgid "Route line overlays"
-msgstr ""
+msgstr "Sobreposições de traçado de vias"
 
 #: src/routes/docs/+page.svelte
 msgid "Route traces drawn in Bloknote's topo viewer are saved as normalized <0/> coordinate paths in <1/> (or <2/>) tags on the route feature, keeping image files clean while rendering crisp interactive overlays directly in OSM data."
-msgstr ""
+msgstr "Os traçados de vias desenhados no visualizador de topos do Bloknote são salvos como caminhos de coordenadas normalizados <0/> nas tags <1/> (ou <2/>) do elemento da via, mantendo os arquivos de imagem limpos enquanto renderiza sobreposições interativas nítidas diretamente nos dados do OSM."
 
 #: src/routes/docs/+page.svelte
 msgid "Uploading photos"
-msgstr ""
+msgstr "Enviando fotos"
 
 #: src/routes/docs/+page.svelte
 msgid "Bloknote uses Wikimedia Commons OAuth2 PKCE directly from your browser to upload photos with structured <0/> templates and free-license declarations, then links the resulting filename to the selected OSM climbing feature."
-msgstr ""
+msgstr "O Bloknote usa Wikimedia Commons OAuth2 PKCE diretamente do seu navegador para enviar fotos com modelos <0/> estruturados e declarações de licença livre, e depois vincula o nome do arquivo resultante ao elemento de escalada do OSM selecionado."
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Canonical reference to an OSM element (<1/> + numeric <2/>), resilient to OSM name/slug changes."
-msgstr ""
+msgstr "<0/> — Referência canônica a um elemento do OSM (<1/> + <2/> numérico), resistente a mudanças de nome/slug do OSM."
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Personal ascent or attempt record (<1/>, <2/>, <3/>, <4/>, optional qualifiers, timestamp, and notes)."
-msgstr ""
+msgstr "<0/> — Registro pessoal de ascensão ou tentativa (<1/>, <2/>, <3/>, <4/>, qualificadores opcionais, data e notas)."
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Route or crag review text, normalized rating (<1/>), and optional proposed OSM tag corrections."
-msgstr ""
+msgstr "<0/> — Texto de resenha de via ou crag, avaliação normalizada (<1/>) e correções opcionais propostas para tags do OSM."
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Bookmarked/starred climbing features."
-msgstr ""
+msgstr "<0/> — Elementos de escalada salvos/favoritados."
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — User preferences such as preferred route and boulder grading scales."
-msgstr ""
+msgstr "<0/> — Preferências do usuário, como escalas de graduação preferidas de vias e blocos."
 
 #: src/routes/docs/+page.svelte
 msgid "Atmosphere (ATProto) Lexicons"
-msgstr ""
+msgstr "Léxicos do Atmosphere (ATProto)"
 
 #: src/routes/docs/+page.svelte
 msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and reviews are portable across apps."
-msgstr ""
+msgstr "O Bloknote define esquemas de léxico abertos do AT Protocol sob <0/> e namespaces <1/> reutilizáveis, para que registros e resenhas pessoais de escalada sejam portáveis entre aplicativos."
 
 #: src/routes/docs/+page.svelte
 msgid "Core schemas"
-msgstr ""
+msgstr "Esquemas principais"
 
 #: src/routes/settings/user-stats-panel.svelte
 msgid "Your climbing stats"
-msgstr ""
+msgstr "Suas estatísticas de escalada"
 
 #. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
 #: src/routes/settings/user-stats-panel.svelte
 msgid "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
-msgstr ""
+msgstr "{0} ascensões ({1} concluídas, {2} tentativas) · {3} favoritas · {4} comentários"
 
 #: src/routes/settings/user-stats-panel.svelte
 msgid "Starred climbs"
-msgstr ""
+msgstr "Escaladas favoritas"
 
 #: src/routes/settings/user-stats-panel.svelte
 msgid "Recent ticks"
-msgstr ""
+msgstr "Ascensões recentes"
 
-#. 0: atproto.session.pdsUrl; 1: atproto.session.accessJwt ? " · authenticated" \\: " · local logbook"
-#: src/routes/settings/accounts-tab.svelte
-msgid "Connected as <0/> ({0}{1})"
-msgstr ""
+#~ msgid "Connected as <0/> ({0}{1})"
+#~ msgstr ""
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Handle (e.g. alice.bsky.social)"
-msgstr ""
+msgstr "Handle (ex.: alice.bsky.social)"
 
-#: src/routes/settings/accounts-tab.svelte
-msgid "App password (optional for PDS sync)"
-msgstr ""
+#~ msgid "App password (optional for PDS sync)"
+#~ msgstr ""
 
-#: src/routes/settings/accounts-tab.svelte
-msgid "Connecting..."
-msgstr ""
+#~ msgid "Connecting..."
+#~ msgstr ""
 
-#: src/routes/settings/accounts-tab.svelte
-msgid "Connect Atmosphere"
-msgstr ""
+#~ msgid "Connect Atmosphere"
+#~ msgstr ""
 
 #: src/lib/components/shell/osm-changes.svelte
 msgid "# feature modified"
@@ -16765,92 +16760,124 @@ msgstr[2] "# elementos modificados"
 #. 0: days
 #: src/routes/+layout.svelte
 msgid "{0} days ago"
-msgstr ""
+msgstr "{0} dias atrás"
 
 #. 0: days
 #: src/routes/+layout.svelte
 msgid "{0} days ago (over a week old)"
-msgstr ""
+msgstr "{0} dias atrás (mais de uma semana)"
 
 #: src/routes/+layout.svelte
 msgid "New climbing data is available"
-msgstr ""
+msgstr "Novos dados de escalada disponíveis"
 
 #. 0: dataAgeLabel()
 #: src/routes/+layout.svelte
 msgid "Your offline data is from {0}"
-msgstr ""
+msgstr "Seus dados offline são de {0}"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Pulse"
-msgstr ""
+msgstr "Pulse"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap)."
-msgstr ""
+msgstr "Este item ainda não tem data de edição no OSM (ainda não foi enviado para o OpenStreetMap)."
 
 #: src/lib/components/pulse-panel.svelte
 msgid "No OSM edit timestamps available."
-msgstr ""
+msgstr "Nenhuma data de edição do OSM disponível."
 
 #: src/lib/components/pulse-panel.svelte
 msgid "Edit statistics"
-msgstr ""
+msgstr "Estatísticas de edição"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "Last edit"
-msgstr ""
+msgstr "Última edição"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "Median edit age"
-msgstr ""
+msgstr "Idade mediana das edições"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "Oldest edit"
-msgstr ""
+msgstr "Edição mais antiga"
 
 #. 0: stats.total; 1: stats.total === 1 ? "" \\: "s"; 2: stats.untimed > 0 ? ` (+${stats.untimed} without timestamp)` \\: ""
 #: src/lib/components/pulse-panel.svelte
 msgid "{0} item{1}{2}"
-msgstr ""
+msgstr "{0} item{1}{2}"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "Last edits per year"
-msgstr ""
+msgstr "Últimas edições por ano"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "How stale is the mapping?"
-msgstr ""
+msgstr "Quão desatualizado está o mapeamento?"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "Recently edited items"
-msgstr ""
+msgstr "Itens editados recentemente"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "Recently edited"
-msgstr ""
+msgstr "Editado recentemente"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "Loading edit history…"
-msgstr ""
+msgstr "Carregando histórico de edições…"
 
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
 msgid "Add crag"
-msgstr ""
+msgstr "Adicionar crag"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Copy coordinates"
-msgstr ""
+msgstr "Copiar coordenadas"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Copied!"
-msgstr ""
+msgstr "Copiado!"
 
 #. 0: grade.v.v
 #: src/lib/components/editable/editable-grade-value.svelte
 msgid "This route is named as a project but has a grade assigned ({0}). Projects are typically unclimbed and ungraded."
-msgstr ""
+msgstr "Esta via é nomeada como projeto mas tem um grau atribuído ({0}). Projetos normalmente não foram escalados e não têm grau."
 
 #: src/lib/components/editable/editable-grade-value.svelte
 msgid "Remove grade"
-msgstr ""
+msgstr "Remover grau"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "User navigated back"
+msgstr "O usuário voltou"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "Login cancelled"
+msgstr "Login cancelado"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "Connected as <0/> · records are stored in your ATProto repository (PDS)"
+msgstr "Conectado como <0/> · os registros são armazenados no seu repositório ATProto (PDS)"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "Redirecting..."
+msgstr "Redirecionando..."
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "Continue"
+msgstr "Continuar"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "You will be redirected to your ATProto provider to log in and authorize Bloknote. No app password needed."
+msgstr "Você será redirecionado ao seu provedor ATProto para entrar e autorizar o Bloknote. Não é necessária senha de aplicativo."
+
+#: src/routes/settings/+page.svelte
+msgid "Report a translation issue"
+msgstr "Relatar um problema de tradução"
+
+#: src/routes/settings/+page.svelte
+msgid "Request another language"
+msgstr "Solicitar outro idioma"

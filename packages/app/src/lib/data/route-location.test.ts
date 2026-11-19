@@ -20,7 +20,11 @@ function makeNode(id: number, lat: number, lon: number): DataTree<OsmNode> {
   };
 }
 
-function makeRelation(id: number, children: Record<string, DataTree> = {}, center?: { lat: number; lon: number }): DataTree {
+function makeRelation(
+  id: number,
+  children: Record<string, DataTree> = {},
+  center?: { lat: number; lon: number },
+): DataTree {
   const feature = {
     type: "relation",
     id,

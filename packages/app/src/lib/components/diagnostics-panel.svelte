@@ -196,13 +196,25 @@
   {#if allEntries.length > 0}
     <div class="flex flex-wrap items-center gap-2">
       <div class="flex gap-1">
-        <Button size="xs" variant={severityFilter === "all" ? "default" : "outline"} onclick={() => (severityFilter = "all")}>
+        <Button
+          size="xs"
+          variant={severityFilter === "all" ? "default" : "outline"}
+          onclick={() => (severityFilter = "all")}
+        >
           All ({counts.total})
         </Button>
-        <Button size="xs" variant={severityFilter === "error" ? "default" : "outline"} onclick={() => (severityFilter = "error")}>
+        <Button
+          size="xs"
+          variant={severityFilter === "error" ? "default" : "outline"}
+          onclick={() => (severityFilter = "error")}
+        >
           Errors ({counts.errors})
         </Button>
-        <Button size="xs" variant={severityFilter === "warning" ? "default" : "outline"} onclick={() => (severityFilter = "warning")}>
+        <Button
+          size="xs"
+          variant={severityFilter === "warning" ? "default" : "outline"}
+          onclick={() => (severityFilter = "warning")}
+        >
           Warnings ({counts.warnings})
         </Button>
       </div>
@@ -241,10 +253,15 @@
         <div class="rounded-md border p-3 flex flex-col gap-2">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-wrap items-center gap-2 text-sm">
-              <a href={featureHref(entry.slug, entry.feature, "diagnostics")} class="font-medium underline underline-offset-2">
+              <a
+                href={featureHref(entry.slug, entry.feature, "diagnostics")}
+                class="font-medium underline underline-offset-2"
+              >
                 {featureName}
               </a>
-              <span class="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground capitalize">{typeLabel}</span>
+              <span class="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground capitalize"
+                >{typeLabel}</span
+              >
               {#if entry.slug !== slug}
                 <span class="text-xs text-muted-foreground">{entry.slug}</span>
               {/if}
