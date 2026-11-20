@@ -217,12 +217,37 @@ class AtProtoClient {
       this.ticks = merge(this.ticks, remoteTicks as LocalTickEntry[]);
       this.stars = merge(this.stars, remoteStars as LocalStarEntry[]);
       this.reviews = merge(this.reviews, remoteReviews as LocalReviewEntry[]);
+      // Records logged offline were kept without a uri: push them to the PDS now that we are online
+      await Promise.all([
+        this.#uploadPending(TICK_COLLECTION, this.ticks),
+        this.#uploadPending(STAR_COLLECTION, this.stars),
+        this.#uploadPending(REVIEW_COLLECTION, this.reviews),
+      ]);
       this.#persistTicks();
       this.#persistStars();
       this.#persistReviews();
     } catch (error) {
       console.error("Could not load ATProto records from the PDS", error);
     }
+  }
+
+  /**
+   * Uploads local-only entries (logged offline, missing from the PDS) and stamps them with their uri.
+   * The app never deletes ticks or reviews, and deleting a star also removes its local copy, so a
+   * uri-less entry can only be one that never reached the PDS.
+   */
+  async #uploadPending(collection: string, entries: Array<LocalTickEntry | LocalStarEntry | LocalReviewEntry>) {
+    await Promise.allSettled(
+      entries
+        .filter((e) => !e.uri && e.subject.id > 0)
+        .map(async (e) => {
+          const record: Record<string, unknown> = { ...e };
+          delete record.uri;
+          delete record.label;
+          delete record.author;
+          e.uri = await this.#createRemoteRecord(collection, record);
+        }),
+    );
   }
 
   async #listRemote<T extends { uri?: string }>(collection: string): Promise<T[]> {
@@ -327,14 +352,20 @@ class AtProtoClient {
       label: feature.tags?.name,
       ...(comment?.trim() ? { comment: comment.trim() } : {}),
     };
-    if (feature.id > 0) {
-      record.uri = await this.#createRemoteRecord(TICK_COLLECTION, {
-        subject: record.subject,
-        style: record.style,
-        climbedAt: record.climbedAt,
-        createdAt: record.createdAt,
-        ...(record.comment ? { comment: record.comment } : {}),
-      });
+    if (this.session && feature.id > 0) {
+      try {
+        record.uri = await this.#createRemoteRecord(TICK_COLLECTION, {
+          subject: record.subject,
+          style: record.style,
+          climbedAt: record.climbedAt,
+          createdAt: record.createdAt,
+          ...(record.comment ? { comment: record.comment } : {}),
+        });
+      } catch (error) {
+        // Offline: keep the tick locally, #hydrate pushes pending records once back online.
+        // Session errors still surface: the user must log in again.
+        if (!this.#oauthSession) throw error;
+      }
     }
     this.ticks = [record, ...this.ticks];
     this.#persistTicks();
@@ -370,11 +401,15 @@ class AtProtoClient {
       createdAt: new Date().toISOString(),
       label: feature.tags?.name,
     };
-    if (feature.id > 0) {
-      entry.uri = await this.#createRemoteRecord(STAR_COLLECTION, {
-        subject: entry.subject,
-        createdAt: entry.createdAt,
-      });
+    if (this.session && feature.id > 0) {
+      try {
+        entry.uri = await this.#createRemoteRecord(STAR_COLLECTION, {
+          subject: entry.subject,
+          createdAt: entry.createdAt,
+        });
+      } catch (error) {
+        if (!this.#oauthSession) throw error;
+      }
     }
     this.stars = [entry, ...this.stars];
     this.#persistStars();
@@ -393,13 +428,17 @@ class AtProtoClient {
       author: this.session.handle ?? this.session.did,
       label: feature.tags?.name,
     };
-    if (feature.id > 0) {
-      entry.uri = await this.#createRemoteRecord(REVIEW_COLLECTION, {
-        subject: entry.subject,
-        ...(entry.text ? { text: entry.text } : {}),
-        ...(entry.rating !== undefined ? { rating: entry.rating } : {}),
-        createdAt: entry.createdAt,
-      });
+    if (this.session && feature.id > 0) {
+      try {
+        entry.uri = await this.#createRemoteRecord(REVIEW_COLLECTION, {
+          subject: entry.subject,
+          ...(entry.text ? { text: entry.text } : {}),
+          ...(entry.rating !== undefined ? { rating: entry.rating } : {}),
+          createdAt: entry.createdAt,
+        });
+      } catch (error) {
+        if (!this.#oauthSession) throw error;
+      }
     }
     this.reviews = [entry, ...this.reviews];
     this.#persistReviews();
