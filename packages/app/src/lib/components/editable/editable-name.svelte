@@ -37,7 +37,7 @@
   tagKey="name"
   {feature}
   {featureSlug}
-  placeholder="Enter Name..."
+  placeholder="Name"
   class="text-2xl font-semibold"
   onblur={syncUrlSlug}
 />

@@ -38,7 +38,7 @@
         {tagKey}
         {feature}
         {featureSlug}
-        placeholder="Enter description..."
+        placeholder="Description"
         class="text-sm"
         onfocus={() => (focusedKey = tagKey)}
         onblur={() => {

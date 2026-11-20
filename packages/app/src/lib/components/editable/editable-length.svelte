@@ -56,7 +56,7 @@
         singleLine
         class={cn(invalid && "text-destructive")}
         value={inputValue}
-        placeholder={isBoulder ? "Enter height..." : "Enter length..."}
+        placeholder={isBoulder ? "Height" : "Length"}
         oninput={(event) => {
           draft = event.currentTarget.value;
           setLength(draft);

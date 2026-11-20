@@ -59,7 +59,7 @@
   {#snippet children(tooltipProps)}
     <textarea
       class={cn(
-        "bg-none border-none p-0 m-0 outline-none appearance-none focus:outline-accent-foreground field-sizing-content resize-none self-start",
+        "bg-none rounded-sm border border-transparent p-0 m-0 outline-none appearance-none focus:outline-accent-foreground field-sizing-content resize-none self-start hover:border-ring/50 focus:border-ring",
         singleLine && "whitespace-nowrap overflow-hidden",
         className,
       )}

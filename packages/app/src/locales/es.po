@@ -15038,9 +15038,8 @@ msgstr "Cerrar sesión en OpenStreetMap"
 msgid "Log in with OpenStreetMap"
 msgstr "Iniciar sesión con OpenStreetMap"
 
-#: src/lib/components/editable/editable-description.svelte
-msgid "Enter description..."
-msgstr "Introduce una descripción..."
+#~ msgid "Enter description..."
+#~ msgstr "Introduce una descripción..."
 
 #: src/lib/components/editable/editable-grade-value.svelte
 msgid "Add Grade"
@@ -15071,9 +15070,8 @@ msgstr "El pie no es una unidad de longitud oficialmente admitida."
 msgid "Rewrite as meters"
 msgstr "Reescribir en metros"
 
-#: src/lib/components/editable/editable-name.svelte
-msgid "Enter Name..."
-msgstr "Introduce un nombre..."
+#~ msgid "Enter Name..."
+#~ msgstr "Introduce un nombre..."
 
 #: src/lib/components/editable/editable-opening-hours.svelte
 msgid "Opening hours"
@@ -15741,13 +15739,11 @@ msgstr "Las reglas complejas se pueden editar en el campo de texto de arriba."
 msgid "Boulder height"
 msgstr "Altura del bloque"
 
-#: src/lib/components/editable/editable-length.svelte
-msgid "Enter height..."
-msgstr "Introduce la altura..."
+#~ msgid "Enter height..."
+#~ msgstr "Introduce la altura..."
 
-#: src/lib/components/editable/editable-length.svelte
-msgid "Enter length..."
-msgstr "Introduce la longitud..."
+#~ msgid "Enter length..."
+#~ msgstr "Introduce la longitud..."
 
 #: src/lib/components/editable/editable-length.svelte
 msgid "m"
@@ -16465,9 +16461,8 @@ msgstr "Vía de hielo / dry-tooling"
 msgid "Number of pitches"
 msgstr "Número de largos"
 
-#: src/lib/components/editable/editable-pitches.svelte
-msgid "Pitches..."
-msgstr "Largos..."
+#~ msgid "Pitches..."
+#~ msgstr "Largos..."
 
 #: src/routes/world/[...slug]/geographic-page.svelte
 msgid "Local grading schemes: <0/> (routes) · <1/> (boulders)"
@@ -16881,3 +16876,23 @@ msgstr "Informar de un problema de traducción"
 #: src/routes/settings/+page.svelte
 msgid "Request another language"
 msgstr "Solicitar otro idioma"
+
+#: src/lib/components/editable/editable-length.svelte
+msgid "Height"
+msgstr ""
+
+#: src/lib/components/editable/editable-length.svelte
+msgid "Length"
+msgstr ""
+
+#: src/lib/components/editable/editable-description.svelte
+msgid "Description"
+msgstr ""
+
+#: src/lib/components/editable/editable-name.svelte
+msgid "Name"
+msgstr ""
+
+#: src/lib/components/editable/editable-pitches.svelte
+msgid "Pitches"
+msgstr ""

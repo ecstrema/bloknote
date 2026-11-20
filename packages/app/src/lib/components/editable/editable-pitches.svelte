@@ -36,7 +36,7 @@
       singleLine
       class={cn(invalid && "text-destructive")}
       value={inputValue}
-      placeholder="Pitches..."
+      placeholder="Pitches"
       oninput={(e) => {
         draft = e.currentTarget.value;
         setPitches(draft);
