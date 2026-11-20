@@ -2,6 +2,7 @@
   import * as Sidebar from "#components/ui/sidebar/index.js";
   import type { ComponentProps } from "svelte";
   import { onMount } from "svelte";
+  import { afterNavigate } from "$app/navigation";
   import { gradeTextToReference } from "#lib/data/db/grade-text.js";
   import { featureToType, getName } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
@@ -43,6 +44,11 @@
 
   const appState = getAppState();
   const sidebar = Sidebar.useSidebar();
+
+  // Reveal the current position when navigating: reopen the sidebar if it was collapsed.
+  afterNavigate(() => {
+    if (!sidebar.isMobile && !sidebar.open) sidebar.setOpen(true);
+  });
 
   let filters = $state<SearchFilters>({ text: "", types: [], styles: [], tags: [] });
   let gradeText = $state({ min: "", max: "" });
