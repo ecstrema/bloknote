@@ -30,15 +30,12 @@
 
 <ClimbingStyles {feature} />
 
-<p class="flex items-center gap-2 text-sm">
-  <PhoneIcon class="size-4 text-muted-foreground" aria-hidden="true" />
-  <span class="text-muted-foreground">Phone</span>
-  {#if phone}
+{#if phone}
+  <p class="flex items-center gap-2 text-sm">
+    <PhoneIcon class="size-4 text-muted-foreground" aria-hidden="true" />
     <a class="underline underline-offset-2" href={`tel:${phone}`}>{phone}</a>
-  {:else}
-    <span class="text-muted-foreground">Not listed</span>
-  {/if}
-</p>
+  </p>
+{/if}
 
 {#if website}
   <p class="flex items-center gap-2 text-sm">

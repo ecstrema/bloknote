@@ -15259,13 +15259,11 @@ msgstr "Keine Unterelemente"
 msgid "Areas"
 msgstr "Gebiete"
 
-#: src/routes/world/[...slug]/gym-page.svelte
-msgid "Not listed"
-msgstr "Nicht aufgeführt"
+#~ msgid "Not listed"
+#~ msgstr "Nicht aufgeführt"
 
-#: src/routes/world/[...slug]/gym-page.svelte
-msgid "Phone"
-msgstr "Telefon"
+#~ msgid "Phone"
+#~ msgstr "Telefon"
 
 #: src/routes/world/[...slug]/gym-page.svelte
 msgid "Fee"

@@ -15259,13 +15259,11 @@ msgstr "No children"
 msgid "Areas"
 msgstr "Areas"
 
-#: src/routes/world/[...slug]/gym-page.svelte
-msgid "Not listed"
-msgstr "Not listed"
+#~ msgid "Not listed"
+#~ msgstr "Not listed"
 
-#: src/routes/world/[...slug]/gym-page.svelte
-msgid "Phone"
-msgstr "Phone"
+#~ msgid "Phone"
+#~ msgstr "Phone"
 
 #: src/routes/world/[...slug]/gym-page.svelte
 msgid "Fee"
