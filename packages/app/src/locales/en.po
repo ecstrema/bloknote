@@ -14896,18 +14896,21 @@ msgid "Route"
 msgstr "Route"
 
 #: src/lib/components/map-legend.svelte
+#: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Boulder"
 msgstr "Boulder"
 
 #: src/lib/components/map-legend.svelte
+#: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Ice"
 msgstr "Ice"
 
 #: src/lib/components/map-legend.svelte
+#: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Aid"
@@ -15379,6 +15382,7 @@ msgstr "{0} matches so far"
 msgid "Load more results"
 msgstr "Load more results"
 
+#: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 msgid "Routes"
 msgstr "Routes"
@@ -16395,13 +16399,11 @@ msgstr "<0/> Stacked"
 msgid "<0/> Double"
 msgstr "<0/> Double"
 
-#: src/lib/components/sector-stats.svelte
-msgid "Grade distribution"
-msgstr "Grade distribution"
+#~ msgid "Grade distribution"
+#~ msgstr "Grade distribution"
 
-#: src/lib/components/sector-stats.svelte
-msgid "Type distribution"
-msgstr "Type distribution"
+#~ msgid "Type distribution"
+#~ msgstr "Type distribution"
 
 #. 0: name || 'folder'
 #: src/lib/components/shell/app-top-navigation.svelte
@@ -16923,3 +16925,7 @@ msgstr "Downloading"
 #: src/lib/components/location-map.svelte
 msgid "{0} climbing data {1}%"
 msgstr "{0} climbing data {1}%"
+
+#: src/lib/components/sector-stats.svelte
+msgid "Dry"
+msgstr "Dry"

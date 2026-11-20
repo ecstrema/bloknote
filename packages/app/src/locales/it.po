@@ -14896,18 +14896,21 @@ msgid "Route"
 msgstr "Via"
 
 #: src/lib/components/map-legend.svelte
+#: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Boulder"
 msgstr "Boulder"
 
 #: src/lib/components/map-legend.svelte
+#: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Ice"
 msgstr "Ghiaccio"
 
 #: src/lib/components/map-legend.svelte
+#: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Aid"
@@ -15379,6 +15382,7 @@ msgstr "{0} risultati finora"
 msgid "Load more results"
 msgstr "Carica altri risultati"
 
+#: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 msgid "Routes"
 msgstr "Vie"
@@ -16395,13 +16399,11 @@ msgstr "<0/> Impilato"
 msgid "<0/> Double"
 msgstr "<0/> Doppio"
 
-#: src/lib/components/sector-stats.svelte
-msgid "Grade distribution"
-msgstr "Distribuzione dei gradi"
+#~ msgid "Grade distribution"
+#~ msgstr "Distribuzione dei gradi"
 
-#: src/lib/components/sector-stats.svelte
-msgid "Type distribution"
-msgstr "Distribuzione dei tipi"
+#~ msgid "Type distribution"
+#~ msgstr "Distribuzione dei tipi"
 
 #. 0: name || 'folder'
 #: src/lib/components/shell/app-top-navigation.svelte
@@ -16923,4 +16925,8 @@ msgstr ""
 #. 0: localDb.phase === "parsing" ? "Parsing" \\: "Downloading"; 1: Math.round((localDb.loaded / localDb.total) * 100)
 #: src/lib/components/location-map.svelte
 msgid "{0} climbing data {1}%"
+msgstr ""
+
+#: src/lib/components/sector-stats.svelte
+msgid "Dry"
 msgstr ""

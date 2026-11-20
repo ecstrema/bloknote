@@ -14,6 +14,7 @@
     STAT_STYLE_LABELS,
     STAT_STYLE_ORDER,
     type GradeDistributionBucket,
+    type StatStyleKey,
   } from "#lib/data/parse/sector-stats.js";
   import {
     getPreferredBoulderGradingScale,
@@ -81,7 +82,39 @@
   );
 
   const maxGradeCount = $derived(Math.max(1, ...stats.gradeDistribution.map((b) => b.total)));
-  const maxTypeCount = $derived(Math.max(1, ...stats.typeDistribution.map((t) => t.count)));
+
+  /** Grade distribution of each climbing type, for the per-type charts. Only types with climbs are kept. */
+  const typeGradeCharts = $derived.by(() => {
+    const groups: { key: string; label: string; styles: StatStyleKey[] }[] = [
+      { key: "routes", label: "Routes", styles: ["sport", "trad", "unknown", "toprope", "deepwater"] },
+      { key: "boulder", label: "Boulder", styles: ["boulder"] },
+      { key: "ice", label: "Ice", styles: ["ice"] },
+      { key: "dry", label: "Dry", styles: ["dry"] },
+      { key: "aid", label: "Aid", styles: ["aid"] },
+    ];
+    return groups
+      .map((group) => {
+        const buckets = stats.gradeDistribution
+          .map((bucket) => {
+            let y0 = 0;
+            const segments = group.styles.flatMap((style) => {
+              const count = bucket.byStyle[style] ?? 0;
+              if (count === 0) return [];
+              const seg = { style, count, y0, y1: y0 + count, color: STAT_STYLE_COLORS[style] };
+              y0 += count;
+              return [seg];
+            });
+            return { grade: bucket.grade, total: y0, segments };
+          })
+          .filter((bucket) => bucket.total > 0);
+        const count = group.styles.reduce(
+          (sum, style) => sum + (stats.typeDistribution.find((t) => t.style === style)?.count ?? 0),
+          0,
+        );
+        return { ...group, buckets, count };
+      })
+      .filter((chart) => chart.count > 0);
+  });
 
   const stackedSegments = $derived.by(() =>
     stats.gradeDistribution.map((bucket) => {
@@ -164,54 +197,63 @@
       {/if}
     {:else}
       <div class="grid gap-4 lg:grid-cols-2">
-        {#if stats.gradeDistribution.length > 0}
-          <div class="flex flex-col gap-1">
-            <p class="text-xs font-medium text-muted-foreground">Grade distribution</p>
-            {@render gradeChart(false)}
-          </div>
-        {/if}
-
-        <div class="flex flex-col gap-1">
-          <p class="text-xs font-medium text-muted-foreground">Type distribution</p>
-          <div class="h-[190px] w-full">
-            <Chart
-              data={stats.typeDistribution}
-              height={chartHeight}
-              x="label"
-              y="count"
-              xScale={scaleBand().padding(0.28)}
-              yScale={scaleLinear()}
-              yDomain={[0, maxTypeCount]}
-              {padding}
-            >
-              {#snippet children({ context })}
-                <Layer>
-                  <Axis placement="left" ticks={Math.min(4, maxTypeCount)} grid rule />
-                  <Axis placement="bottom" rule />
-                  {#each stats.typeDistribution as entry (entry.style)}
-                    {@const x = context.xScale(entry.label) ?? 0}
-                    {@const bw = context.xScale.bandwidth?.() ?? 20}
-                    {@const yTop = context.yScale(entry.count)}
-                    {@const yBot = context.yScale(0)}
-                    <Rect {x} y={yTop} width={bw} height={Math.max(1, yBot - yTop)} fill={entry.color} rx={2} />
-                    <Text
-                      x={x + bw / 2}
-                      y={yTop - 4}
-                      textAnchor="middle"
-                      fontSize={10}
-                      value={String(entry.count)}
-                      class="fill-muted-foreground"
-                    />
-                  {/each}
-                </Layer>
-              {/snippet}
-            </Chart>
-          </div>
-        </div>
+        {#each typeGradeCharts as chart (chart.key)}
+          {@render typeGradeChart(chart)}
+        {/each}
       </div>
     {/if}
   </section>
 {/if}
+
+{#snippet typeGradeChart(chart: (typeof typeGradeCharts)[number])}
+  {@const maxCount = Math.max(1, ...chart.buckets.map((b) => b.total))}
+  <div class="flex flex-col gap-1">
+    <p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+      <span class="size-2.5 rounded-xs" style:background-color={STAT_STYLE_COLORS[chart.styles[0]!]}>
+      </span>
+      {chart.label}
+      <span class="font-normal">({chart.count})</span>
+    </p>
+    <div class="h-[170px] w-full overflow-x-auto">
+      <div class="h-full" style:min-width="{Math.max(220, chart.buckets.length * 26)}px">
+        <Chart
+          data={chart.buckets}
+          height={170}
+          x="grade"
+          y="total"
+          xScale={scaleBand().padding(0.22)}
+          yScale={scaleLinear()}
+          yDomain={[0, maxCount]}
+          {padding}
+        >
+          {#snippet children({ context })}
+            <Layer>
+              <Axis placement="left" ticks={Math.min(4, maxCount)} grid rule />
+              <Axis placement="bottom" rule />
+              {#each chart.buckets as bucket (bucket.grade)}
+                {@const x = context.xScale(bucket.grade) ?? 0}
+                {@const bw = context.xScale.bandwidth?.() ?? 16}
+                {#each bucket.segments as seg (seg.style)}
+                  {@const yTop = context.yScale(seg.y1)}
+                  {@const yBot = context.yScale(seg.y0)}
+                  <Rect {x} y={yTop} width={bw} height={Math.max(1, yBot - yTop)} fill={seg.color} rx={1} />
+                {/each}
+                <Text
+                  x={x + bw / 2}
+                  y={context.yScale(bucket.total) - 4}
+                  textAnchor="middle"
+                  fontSize={10}
+                  value={String(bucket.total)}
+                  class="fill-muted-foreground"
+                />
+              {/each}
+            </Layer>
+          {/snippet}
+        </Chart>
+      </div>
+    </div>
+  </div>
+{/snippet}
 
 {#snippet gradeChart(stacked: boolean)}
   {#if stats.gradeDistribution.length > 0}
