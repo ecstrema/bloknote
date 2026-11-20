@@ -1,5 +1,8 @@
 import type { Key, OsmFeature, OsmChange, UploadPhase, UploadResult, OsmFeatureType, OsmRelation } from "osm-api";
 
+// For Map.prototype.getOrInsert on runtimes that don't implement it yet
+import "@bloknote/common/polyfills";
+
 import { isLoggedIn, login, logout, uploadChangeset, getFeature as getFeatureOsm } from "osm-api";
 
 import { getStaticIdentifier, type OsmIdentifier } from "@bloknote/common";
