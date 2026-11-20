@@ -14895,6 +14895,7 @@ msgstr "Unnamed"
 msgid "Route"
 msgstr "Route"
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
@@ -14902,6 +14903,7 @@ msgstr "Route"
 msgid "Boulder"
 msgstr "Boulder"
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
@@ -14909,6 +14911,7 @@ msgstr "Boulder"
 msgid "Ice"
 msgstr "Ice"
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
@@ -15391,16 +15394,19 @@ msgstr "Routes"
 msgid "Gyms"
 msgstr "Gyms"
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 msgid "Sport"
 msgstr "Sport"
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 msgid "Trad"
 msgstr "Trad"
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 msgid "Top rope"
@@ -15414,14 +15420,17 @@ msgstr "Speed"
 msgid "Multi-pitch"
 msgstr "Multi-pitch"
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 msgid "Mixed"
 msgstr "Mixed"
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 msgid "Dry tooling"
 msgstr "Dry tooling"
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 msgid "Deep-water solo"
 msgstr "Deep-water solo"
@@ -16854,9 +16863,8 @@ msgstr "User navigated back"
 msgid "Login cancelled"
 msgstr "Login cancelled"
 
-#: src/routes/settings/accounts-tab.svelte
-msgid "Connected as <0/> · records are stored in your ATProto repository (PDS)"
-msgstr "Connected as <0/> · records are stored in your ATProto repository (PDS)"
+#~ msgid "Connected as <0/> · records are stored in your ATProto repository (PDS)"
+#~ msgstr "Connected as <0/> · records are stored in your ATProto repository (PDS)"
 
 #: src/routes/settings/accounts-tab.svelte
 msgid "Redirecting..."
@@ -16929,3 +16937,23 @@ msgstr "{0} climbing data {1}%"
 #: src/lib/components/sector-stats.svelte
 msgid "Dry"
 msgstr "Dry"
+
+#: src/routes/settings/accounts-tab.svelte
+msgid "Connected as <0/> · records are stored in your ATProto repository (PDS) · <1>browse your data on pds.ls</1>"
+msgstr "Connected as <0/> · records are stored in your ATProto repository (PDS) · <1>browse your data on pds.ls</1>"
+
+#: src/lib/components/climbing-styles.svelte
+msgid "Climbing style"
+msgstr "Climbing style"
+
+#: src/lib/components/climbing-styles.svelte
+msgid "Style"
+msgstr "Style"
+
+#: src/lib/components/editable/editable-pitches.svelte
+msgid "Convert to a multi-pitch route"
+msgstr "Convert to a multi-pitch route"
+
+#: src/lib/components/editable/editable-pitches.svelte
+msgid "+ Multipitch"
+msgstr "+ Multipitch"

@@ -39,7 +39,7 @@
   <EditablePitches {feature} featureSlug={slug} />
 </div>
 
-<ClimbingStyles {feature} />
+<ClimbingStyles {feature} featureSlug={slug} editable />
 
 <EditableDescription {feature} featureSlug={slug} />
 
