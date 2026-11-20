@@ -1,5 +1,6 @@
 export const ROUTE_STYLE_COLORS: Record<string, string> = {
   sport: "#3b82f6",
+  viaferrata: "#84cc16",
   boulder: "#a855f7",
   trad: "#f59e0b",
   aid: "#ef4444",
@@ -13,6 +14,7 @@ export const ROUTE_STYLE_COLORS: Record<string, string> = {
 
 export const ROUTE_STYLE_LABELS: Record<string, string> = {
   sport: "Sport",
+  viaferrata: "Via ferrata",
   boulder: "Boulder",
   trad: "Trad",
   aid: "Aid",
@@ -25,6 +27,9 @@ export const ROUTE_STYLE_LABELS: Record<string, string> = {
 };
 
 export function extractRouteStyle(tags: Record<string, string>): string {
+  if (tags.highway === "via_ferrata" || tags.climbing === "via_ferrata") {
+    return "viaferrata";
+  }
   if (
     tags["climbing:boulder"] === "yes" ||
     tags.climbing === "boulder" ||

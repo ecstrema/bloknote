@@ -3,10 +3,21 @@ import type { OsmFeature } from "osm-api";
 import { featureToTypeOSM, getGrade } from "./osm-tags.js";
 import { extractRouteStyle, isTradRoute, ROUTE_STYLE_COLORS, ROUTE_STYLE_LABELS } from "./route-styles.js";
 
-export type StatStyleKey = "sport" | "trad" | "unknown" | "boulder" | "ice" | "aid" | "dry" | "toprope" | "deepwater";
+export type StatStyleKey =
+  | "sport"
+  | "viaferrata"
+  | "trad"
+  | "unknown"
+  | "boulder"
+  | "ice"
+  | "aid"
+  | "dry"
+  | "toprope"
+  | "deepwater";
 
 export const STAT_STYLE_LABELS: Record<StatStyleKey, string> = {
   sport: ROUTE_STYLE_LABELS.sport!,
+  viaferrata: ROUTE_STYLE_LABELS.viaferrata!,
   trad: "Trad / Mixed",
   unknown: "Unknown style",
   boulder: ROUTE_STYLE_LABELS.boulder!,
@@ -19,6 +30,7 @@ export const STAT_STYLE_LABELS: Record<StatStyleKey, string> = {
 
 export const STAT_STYLE_COLORS: Record<StatStyleKey, string> = {
   sport: ROUTE_STYLE_COLORS.sport!,
+  viaferrata: ROUTE_STYLE_COLORS.viaferrata!,
   trad: ROUTE_STYLE_COLORS.trad!,
   unknown: ROUTE_STYLE_COLORS.other!,
   boulder: ROUTE_STYLE_COLORS.boulder!,
@@ -31,6 +43,7 @@ export const STAT_STYLE_COLORS: Record<StatStyleKey, string> = {
 
 export const STAT_STYLE_ORDER: StatStyleKey[] = [
   "sport",
+  "viaferrata",
   "trad",
   "unknown",
   "boulder",
@@ -45,6 +58,7 @@ export function classifyClimbStyle(tags: Record<string, string> | undefined): St
   if (!tags) return "unknown";
   if (isTradRoute(tags)) return "trad";
   const extracted = extractRouteStyle(tags);
+  if (extracted === "viaferrata") return "viaferrata";
   if (extracted === "boulder") return "boulder";
   if (extracted === "ice") return "ice";
   if (extracted === "aid") return "aid";

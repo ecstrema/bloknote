@@ -195,7 +195,7 @@
 
   let bulkDialog = $state<BulkDialogKind>(null);
   const convertibleScales = allScales.filter((s) => !!scaleIdToTag(s.id));
-  const styleOptions = Object.entries(ROUTE_STYLE_LABELS).filter(([k]) => k !== "other");
+  const styleOptions = Object.entries(ROUTE_STYLE_LABELS).filter(([k]) => k !== "other" && k !== "viaferrata");
 
   const INDENT_STEP_PX = 15;
   let contentRef = $state<HTMLElement | null>(null);

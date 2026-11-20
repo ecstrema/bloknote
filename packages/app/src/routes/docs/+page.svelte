@@ -110,6 +110,10 @@
             <code>climbing=route_bottom</code> / <code>route_top</code> / <code>route</code> — Individual pitches or boulders.
           </li>
           <li><code>leisure=sports_centre</code> + <code>sport=climbing</code> — Indoor climbing gyms.</li>
+          <li>
+            <code>highway=via_ferrata</code> — Via ferrata routes (fixed-cable alpine routes), shown as a dedicated
+            route style.
+          </li>
         </ul>
         <h2>Editing &amp; changesets</h2>
         <p>

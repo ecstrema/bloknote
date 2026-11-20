@@ -13,6 +13,8 @@ describe("route-styles", () => {
     expect(extractRouteStyle({ "climbing:trad": "yes" })).toBe("trad");
     expect(extractRouteStyle({ "climbing:sport": "yes" })).toBe("sport");
     expect(extractRouteStyle({ "climbing:toprope": "yes" })).toBe("toprope");
+    expect(extractRouteStyle({ highway: "via_ferrata" })).toBe("viaferrata");
+    expect(extractRouteStyle({ climbing: "via_ferrata" })).toBe("viaferrata");
     expect(extractRouteStyle({})).toBe("sport");
   });
 

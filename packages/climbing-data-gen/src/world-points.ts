@@ -32,12 +32,13 @@ export const WORLD_CLIMBING_QUERY = `
 [out:json][timeout:600];
 (
   nwr["sport"="climbing"];
-  nwr["climbing"~"^(area|crag|boulder|route_bottom|bolt|route_top|route|abseil_route)(;.*)?$"];
+  nwr["climbing"~"^(area|crag|boulder|route_bottom|bolt|route_top|route|abseil_route|via_ferrata)(;.*)?$"];
+  nwr["highway"="via_ferrata"];
 );
 out center meta;`;
 
 const PLACE_CLIMBING_RE = /^(area|crag|boulder)(;.*)?$/;
-const ROUTE_CLIMBING_RE = /^(route|bolt|abseil|toprope|drytooling)/;
+const ROUTE_CLIMBING_RE = /^(route|bolt|abseil|toprope|drytooling|via_ferrata)/;
 
 function isPlaceFeature(tags: Record<string, string>): boolean {
   if (!tags.climbing) return true;

@@ -18,7 +18,7 @@ function feature(tags: Record<string, string>): OsmFeature {
 }
 
 describe("featureToTypeOSM", () => {
-  it.each(["route_bottom", "route_top", "route", "route_start", "abseil_route", "abseil", "toprope", "drytooling"])(
+  it.each(["route_bottom", "route_top", "route", "route_start", "abseil_route", "abseil", "toprope", "drytooling", "via_ferrata"])(
     "classifies climbing=%s as a route",
     (climbing) => {
       expect(featureToTypeOSM(feature({ climbing }))).toBe("route");
@@ -39,6 +39,11 @@ describe("featureToTypeOSM", () => {
       expect(featureToTypeOSM(feature({ leisure, sport: "climbing" }))).toBe("gym");
     },
   );
+
+  it("classifies highway=via_ferrata as a route", () => {
+    expect(featureToTypeOSM(feature({ highway: "via_ferrata", name: "Via Ferrata" }))).toBe("route");
+    expect(featureToTypeOSM(feature({ highway: "via_ferrata", climbing: "via_ferrata" }))).toBe("route");
+  });
 
   it("classifies leisure=pitch as a gym", () => {
     expect(featureToTypeOSM(feature({ leisure: "pitch" }))).toBe("gym");

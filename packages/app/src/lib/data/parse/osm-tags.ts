@@ -285,6 +285,7 @@ const routeClimbingValues = new Set([
   "abseil",
   "toprope",
   "drytooling",
+  "via_ferrata",
 ]);
 const areaClimbingValues = new Set(["area", "crag", "boulder", "bouldering"]);
 const gymClimbingValues = new Set(["indoor_wall", "artificial_wall", "wall", "gym"]);
@@ -300,7 +301,7 @@ export function featureToTypeOSM(feature: OsmFeature): OSMClimbingFeatureType | 
   if (!feature.tags) return;
 
   const tags = feature.tags;
-  if (hasClimbingValue(tags.climbing, routeClimbingValues)) return "route";
+  if (hasClimbingValue(tags.climbing, routeClimbingValues) || tags.highway === "via_ferrata") return "route";
 
   if (hasClimbingValue(tags.climbing, areaClimbingValues)) return "area";
 
@@ -335,7 +336,8 @@ export const processedTags: Record<OSMClimbingFeatureType, ProcessedTags> = {
     ),
     "climbing:length": lengthValidator,
     "climbing:pitches": (v: string) => /^[1-9]\d*$/.test(v.trim()),
-    climbing: allowMultipleValues(new Set(["route_bottom", "route_top"])),
+    climbing: allowMultipleValues(new Set(["route_bottom", "route_top", "via_ferrata"])),
+    highway: allowSingleValue("via_ferrata"),
   },
   area: {
     ...sharedProcessedTags,
