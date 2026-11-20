@@ -15079,13 +15079,12 @@ msgstr "Reescribir en metros"
 #~ msgid "Enter Name..."
 #~ msgstr "Introduce un nombre..."
 
-#: src/lib/components/editable/editable-opening-hours.svelte
+#: src/routes/world/[...slug]/gym-page.svelte
 msgid "Opening hours"
 msgstr "Horario de apertura"
 
-#: src/lib/components/editable/editable-opening-hours.svelte
-msgid "Mo-Fr 10:00-22:00; Sa-Su 10:00-18:00"
-msgstr "Mo-Fr 10:00-22:00; Sa-Su 10:00-18:00"
+#~ msgid "Mo-Fr 10:00-22:00; Sa-Su 10:00-18:00"
+#~ msgstr "Mo-Fr 10:00-22:00; Sa-Su 10:00-18:00"
 
 #: src/lib/components/editable/editable-tags.svelte
 msgid "Keys are limited to 255 characters"
@@ -15742,9 +15741,8 @@ msgstr "Borrar {0}"
 msgid "This opening_hours syntax could not be parsed."
 msgstr "No se pudo analizar esta sintaxis de opening_hours."
 
-#: src/lib/components/editable/editable-opening-hours.svelte
-msgid "Complex rules can be edited in the text field above."
-msgstr "Las reglas complejas se pueden editar en el campo de texto de arriba."
+#~ msgid "Complex rules can be edited in the text field above."
+#~ msgstr "Las reglas complejas se pueden editar en el campo de texto de arriba."
 
 #: src/lib/components/editable/editable-length.svelte
 msgid "Boulder height"
@@ -16979,4 +16977,9 @@ msgstr ""
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Via ferrata routes (fixed-cable alpine routes), shown as a dedicated route style."
+msgstr ""
+
+#. 0: charge
+#: src/routes/world/[...slug]/gym-page.svelte
+msgid "Fee: {0}"
 msgstr ""
