@@ -80,7 +80,9 @@ async function handleMapTile(request: Request): Promise<Response> {
     return res;
   } catch (err) {
     if (cached) return cached;
-    throw err;
+    // Report a normal HTTP error instead of throwing inside respondWith, so the
+    // browser logs maplibre's standard tile failure rather than a service worker error.
+    return new Response(undefined, { status: 504, statusText: "tile fetch failed" });
   }
 }
 
