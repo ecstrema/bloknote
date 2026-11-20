@@ -16958,3 +16958,11 @@ msgstr ""
 #: src/lib/components/editable/editable-pitches.svelte
 msgid "+ Multipitch"
 msgstr ""
+
+#: src/lib/components/pending-sync-badge.svelte
+msgid "Saved offline — will sync to your Atmosphere account when back online"
+msgstr ""
+
+#: src/lib/components/pending-sync-badge.svelte
+msgid "<0/> Saved offline"
+msgstr ""

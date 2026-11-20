@@ -16957,3 +16957,11 @@ msgstr "Convert to a multi-pitch route"
 #: src/lib/components/editable/editable-pitches.svelte
 msgid "+ Multipitch"
 msgstr "+ Multipitch"
+
+#: src/lib/components/pending-sync-badge.svelte
+msgid "Saved offline — will sync to your Atmosphere account when back online"
+msgstr "Saved offline — will sync to your Atmosphere account when back online"
+
+#: src/lib/components/pending-sync-badge.svelte
+msgid "<0/> Saved offline"
+msgstr "<0/> Saved offline"
