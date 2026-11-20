@@ -144,6 +144,9 @@
   const isFeatureDeletedUpstream = $derived.by(() => {
     if (item.feature.type === "geographic") return false;
 
+    // Locally created features have a negative temporary id: they do not exist on OSM yet
+    if (item.feature.id < 0) return false;
+
     const identifier = getStaticIdentifier(item.feature.type, item.feature.id);
     const refreshedFeatureState = appState.osmUser.refreshedFeatureStates[identifier];
     if (refreshedFeatureState === "pending") return false;

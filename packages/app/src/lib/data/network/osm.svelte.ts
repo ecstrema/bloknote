@@ -460,6 +460,9 @@ export class OsmUser {
     if (!browser || !online.current) return;
 
     const feature = item.feature;
+    // Locally created features have a negative temporary id and do not exist on OSM yet
+    if (feature.id < 0) return;
+
     const identifier = getStaticIdentifier(feature.type, feature.id);
 
     if (this.refreshedFeatureStates[identifier]) {
