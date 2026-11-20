@@ -84,6 +84,16 @@ interface ListRecordsResponse<T> {
   cursor?: string;
 }
 
+/** Extracts the human-readable error message from an XRPC error response body, if any */
+async function xrpcErrorMessage(res: Response): Promise<string> {
+  try {
+    const data = (await res.json()) as { message?: string };
+    return data.message ? `: ${data.message}` : "";
+  } catch {
+    return "";
+  }
+}
+
 class AtProtoClient {
   session = $state<AtProtoSession | undefined>(loadSession());
   ticks = $state<LocalTickEntry[]>(readJson<LocalTickEntry[]>(TICKS_STORAGE_KEY, []));
@@ -208,7 +218,7 @@ class AtProtoClient {
       const query = new URLSearchParams({ repo: session.did, collection, limit: "100" });
       if (cursor) query.set("cursor", cursor);
       const res = await this.#xrpc(`/xrpc/com.atproto.repo.listRecords?${query}`);
-      if (!res.ok) throw new Error(`Could not list ${collection} (HTTP ${res.status})`);
+      if (!res.ok) throw new Error(`Could not list ${collection} (HTTP ${res.status})${await xrpcErrorMessage(res)}`);
       const data = (await res.json()) as ListRecordsResponse<T>;
       for (const record of data.records ?? []) out.push(record.value);
       cursor = data.cursor;
@@ -245,10 +255,17 @@ class AtProtoClient {
       body: JSON.stringify({
         repo: session.did,
         collection,
+        // The lexicons are not published to the ATProto lexicon registry yet:
+        // disable PDS-side validation, otherwise known PDS instances reject the
+        // record with HTTP 400
+        validate: false,
         record: { $type: collection, ...record },
       }),
     });
-    if (!res.ok) throw new Error(`Could not save the record to your ATProto repository (HTTP ${res.status})`);
+    if (!res.ok)
+      throw new Error(
+        `Could not save the record to your ATProto repository (HTTP ${res.status})${await xrpcErrorMessage(res)}`,
+      );
     const data = (await res.json()) as { uri?: string };
     if (!data.uri) throw new Error("Your ATProto repository did not return a record URI");
     return data.uri;
@@ -264,7 +281,10 @@ class AtProtoClient {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ repo: session.did, collection, rkey }),
     });
-    if (!res.ok) throw new Error(`Could not delete the record from your ATProto repository (HTTP ${res.status})`);
+    if (!res.ok)
+      throw new Error(
+        `Could not delete the record from your ATProto repository (HTTP ${res.status})${await xrpcErrorMessage(res)}`,
+      );
   }
 
   #persistTicks() {
