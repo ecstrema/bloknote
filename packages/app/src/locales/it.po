@@ -16905,3 +16905,7 @@ msgstr ""
 #: src/lib/components/location-map.svelte
 msgid "Loading climbing data..."
 msgstr ""
+
+#: src/lib/components/location-map.svelte
+msgid "Map style"
+msgstr ""

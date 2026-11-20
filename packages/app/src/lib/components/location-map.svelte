@@ -15,7 +15,7 @@
   import type { MapElementFeature, MapElementFeatureCollection } from "#lib/data/db/types.js";
   import { FEATURE_COLORS } from "#lib/data/parse/route-styles.js";
   import type { OsmFeature } from "osm-api";
-  import { CLIMBING_LAYERS, featureToMapElement, formatPopupHtml, VECTOR_STYLE } from "./location-map-helper.js";
+  import { CLIMBING_LAYERS, featureToMapElement, formatPopupHtml, MAP_STYLES, VECTOR_STYLE } from "./location-map-helper.js";
 
   // One map (and WebGL context) for the whole app: kept across page navigation.
   let shared: { map: MapLibreMap; element: HTMLDivElement } | undefined;
@@ -25,6 +25,11 @@
   let activePlacementMode: "route" | "sector" | null = null;
   /** False until the view was first set to a place */
   let positioned = false;
+
+  const MAP_STYLE_KEY = "bloknote:map-style";
+  let currentStyleUrl =
+    typeof localStorage !== "undefined" ? (localStorage.getItem(MAP_STYLE_KEY) ?? VECTOR_STYLE) : VECTOR_STYLE;
+  let activeHighlightSlug = "";
 
   export function getMapCenter(): { lat: number; lon: number } | undefined {
     if (!shared || !shared.element.isConnected || !positioned) return undefined;
@@ -85,6 +90,84 @@
     const source = map.getSource<GeoJSONSource>("climbing-elements");
     if (!source) return;
     source.setData(collection);
+  }
+
+  /** Adds the climbing source and layers to the current style. Safe to call again after a style switch. */
+  function setupStyleLayers(map: MapLibreMap) {
+    // Hide basemap climbing POIs so vector tiles do not duplicate or conflict with our data
+    for (const layer of map.getStyle().layers || []) {
+      const l = layer as { id: string; "source-layer"?: string; filter?: any[] };
+      if (l["source-layer"] === "poi") {
+        const filter = Array.isArray(l.filter) ? l.filter : ["all"];
+        map.setFilter(l.id, [
+          "all",
+          filter,
+          ["!=", ["get", "class"], "sport"],
+          ["!=", ["get", "subclass"], "climbing"],
+        ] as any);
+      }
+    }
+
+    if (!map.getSource("climbing-elements")) {
+      map.addSource("climbing-elements", {
+        type: "geojson",
+        data: cachedCollection,
+        tolerance: 0.5,
+      });
+    }
+
+    for (const layer of CLIMBING_LAYERS) {
+      if (!map.getLayer(layer.id)) {
+        map.addLayer(layer);
+      }
+    }
+
+    applyColorMode(map, sharedColorMode);
+    applyHighlightFilters(map, activeHighlightSlug);
+  }
+
+  /** Switches the basemap style, keeping the climbing layers, and remembers the choice. */
+  function setMapStyle(url: string) {
+    if (!shared || url === currentStyleUrl) return;
+    currentStyleUrl = url;
+    try {
+      localStorage.setItem(MAP_STYLE_KEY, url);
+    } catch {
+      // Ignore storage failures
+    }
+    shared.map.setStyle(url);
+    shared.map.once("style.load", () => setupStyleLayers(shared!.map));
+  }
+
+  function applyHighlightFilters(map: MapLibreMap, slug: string) {
+    const cleanSlug = slug.replace(/^world\//, "");
+    if (map.getLayer("selected-ring")) {
+      map.setFilter("selected-ring", [
+        "all",
+        ["==", ["geometry-type"], "Point"],
+        ["!=", ["get", "elementType"], "sector"],
+        ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
+      ]);
+    }
+    if (map.getLayer("selected-sector")) {
+      map.setFilter("selected-sector", [
+        "all",
+        ["==", ["get", "elementType"], "sector"],
+        ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
+      ]);
+    }
+    if (map.getLayer("selected-sector-label")) {
+      map.setFilter("selected-sector-label", [
+        "all",
+        ["==", ["get", "elementType"], "sector"],
+        ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
+      ]);
+    }
+  }
+
+  function updateActiveHighlight(slug: string) {
+    activeHighlightSlug = slug;
+    if (shared?.map) applyHighlightFilters(shared.map, slug);
   }
 
   async function loadMapElements(map: MapLibreMap) {
@@ -172,7 +255,7 @@
     element.className = "size-full";
     const map = new MapLibreMap({
       container: element,
-      style: VECTOR_STYLE,
+      style: currentStyleUrl,
       center: [0, 30],
       zoom: 1.5,
       maxZoom: 22,
@@ -195,33 +278,7 @@
     );
 
     map.on("load", () => {
-      // Hide basemap climbing POIs so vector tiles do not duplicate or conflict with our data
-      for (const layer of map.getStyle().layers || []) {
-        const l = layer as { id: string; "source-layer"?: string; filter?: any[] };
-        if (l["source-layer"] === "poi") {
-          const filter = Array.isArray(l.filter) ? l.filter : ["all"];
-          map.setFilter(l.id, [
-            "all",
-            filter,
-            ["!=", ["get", "class"], "sport"],
-            ["!=", ["get", "subclass"], "climbing"],
-          ] as any);
-        }
-      }
-
-      map.addSource("climbing-elements", {
-        type: "geojson",
-        data: cachedCollection,
-        tolerance: 0.5,
-      });
-
-      for (const layer of CLIMBING_LAYERS) {
-        if (!map.getLayer(layer.id)) {
-          map.addLayer(layer);
-        }
-      }
-
-      applyColorMode(map, sharedColorMode);
+      setupStyleLayers(map);
 
       const popup = new Popup({
         closeButton: false,
@@ -332,6 +389,7 @@
   let host: HTMLDivElement;
   let attached = $state(false);
   let colorMode = $state<"grade" | "type" | "both">(sharedColorMode);
+  let styleUrl = $state(currentStyleUrl);
 
   /** True while the map has no climbing data to display yet, either downloading or reading the local database */
   const elementsLoading = $derived(
@@ -340,32 +398,9 @@
       (localDb.status === "ready" && !allElementsLoaded),
   );
 
-  function updateActiveHighlight(slug: string) {
-    if (!shared?.map) return;
-    const cleanSlug = slug.replace(/^world\//, "");
-    if (shared.map.getLayer("selected-ring")) {
-      shared.map.setFilter("selected-ring", [
-        "all",
-        ["==", ["geometry-type"], "Point"],
-        ["!=", ["get", "elementType"], "sector"],
-        ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
-      ]);
-    }
-    if (shared.map.getLayer("selected-sector")) {
-      shared.map.setFilter("selected-sector", [
-        "all",
-        ["==", ["get", "elementType"], "sector"],
-        ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
-      ]);
-    }
-    if (shared.map.getLayer("selected-sector-label")) {
-      shared.map.setFilter("selected-sector-label", [
-        "all",
-        ["==", ["get", "elementType"], "sector"],
-        ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
-      ]);
-    }
-  }
+  $effect(() => {
+    setMapStyle(styleUrl);
+  });
 
   function moveToTarget() {
     if (!attached || !shared) return;
@@ -538,6 +573,17 @@
 <div class={`relative ${className}`}>
   <div bind:this={host} class="relative h-full w-full overflow-hidden rounded-md border border-border">
     <MapLegend bind:colorMode />
+    <div class="absolute top-3 left-3 z-10">
+      <select
+        bind:value={styleUrl}
+        class="rounded-md border border-border/80 bg-background/90 px-2 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur hover:bg-background transition-colors"
+        aria-label="Map style"
+      >
+        {#each MAP_STYLES as style (style.id)}
+          <option value={style.url}>{style.label}</option>
+        {/each}
+      </select>
+    </div>
     {#if elementsLoading}
       <div class="absolute inset-0 z-10 flex items-center justify-center">
         <div class="flex items-center gap-2 rounded-md bg-background/80 px-3 py-2 shadow-sm backdrop-blur-sm">
