@@ -1,11 +1,12 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
   import { canEditOpeningHoursGraph, parseOpeningHours } from "#lib/data/parse/opening-hours.js";
+  import { ensureOpeningHoursLoaded, openingHoursReady } from "#lib/data/parse/opening-hours-ready.svelte.js";
   import { getCoordinates } from "#lib/data/parse/osm-tags.js";
   import type { OsmFeature } from "osm-api";
-  import OpeningHours from "#components/opening-hours.svelte";
   import EditableTextarea from "./editable-textarea.svelte";
   import EditableTooltip from "./editable-tooltip.svelte";
+  import Loader from "#components/ui/loader.svelte";
   import ClockIcon from "@lucide/svelte/icons/clock";
 
   const { feature, featureSlug }: { feature: OsmFeature; featureSlug: string } = $props();
@@ -13,9 +14,15 @@
   const appState = getAppState();
   const value = $derived(feature.tags?.opening_hours?.trim() ?? "");
   const coordinates = $derived(getCoordinates(feature));
-  const parsed = $derived(value ? parseOpeningHours(value, coordinates) : undefined);
-  const unparsable = $derived(value !== "" && !parsed);
-  const graphEditable = $derived(!!appState.osmUser.loggedIn && canEditOpeningHoursGraph(value, coordinates));
+  const parsed = $derived(openingHoursReady.value && value ? parseOpeningHours(value, coordinates) : undefined);
+  const unparsable = $derived(openingHoursReady.value && value !== "" && !parsed);
+  const graphEditable = $derived(
+    openingHoursReady.value && !!appState.osmUser.loggedIn && canEditOpeningHoursGraph(value, coordinates),
+  );
+
+  $effect(() => {
+    if (value || appState.osmUser.loggedIn) ensureOpeningHoursLoaded();
+  });
 </script>
 
 {#if value || appState.osmUser.loggedIn}
@@ -24,29 +31,39 @@
       <ClockIcon class="size-4 text-muted-foreground" aria-hidden="true" />
       <span class="text-muted-foreground">Opening hours</span>
     </p>
-    {#if !unparsable}
-      {#if graphEditable}
-        <EditableTooltip>
-          {#snippet children(tooltipProps)}
-            <div {...tooltipProps} class="self-start w-full max-w-md">
-              <OpeningHours
-                {value}
-                {coordinates}
-                editable={true}
-                onchangestart={() => appState.undoStack.beginGroup()}
-                onchange={(next) => appState.setTag(featureSlug, "opening_hours", next)}
-                onchangeend={() => appState.undoStack.endGroup()}
-              />
+    {#if openingHoursReady.value}
+      {#if !unparsable}
+        {#await import("#components/opening-hours.svelte")}
+          <Loader class="h-[190px] max-w-md" />
+        {:then { default: OpeningHours }}
+          {#if graphEditable}
+            <EditableTooltip>
+              {#snippet children(tooltipProps)}
+                <div {...tooltipProps} class="self-start w-full max-w-md">
+                  <OpeningHours
+                    {value}
+                    {coordinates}
+                    editable={true}
+                    onchangestart={() => appState.undoStack.beginGroup()}
+                    onchange={(next) => appState.setTag(featureSlug, "opening_hours", next)}
+                    onchangeend={() => appState.undoStack.endGroup()}
+                  />
+                </div>
+              {/snippet}
+            </EditableTooltip>
+          {:else}
+            <div class="self-start w-full max-w-md">
+              <OpeningHours {value} {coordinates} />
             </div>
-          {/snippet}
-        </EditableTooltip>
+          {/if}
+        {/await}
       {:else}
-        <div class="self-start w-full max-w-md">
+        {#await import("#components/opening-hours.svelte")}
+          <Loader class="h-[190px] max-w-md" />
+        {:then { default: OpeningHours }}
           <OpeningHours {value} {coordinates} />
-        </div>
+        {/await}
       {/if}
-    {:else}
-      <OpeningHours {value} {coordinates} />
     {/if}
     <EditableTextarea
       singleLine

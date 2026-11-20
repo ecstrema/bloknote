@@ -15,6 +15,7 @@
   import type { MapElementFeature, MapElementFeatureCollection } from "#lib/data/db/types.js";
   import { FEATURE_COLORS } from "#lib/data/parse/route-styles.js";
   import type { OsmFeature } from "osm-api";
+  import { setMapCenterProvider } from "./map-center.js";
   import { CLIMBING_LAYERS, featureToMapElement, formatPopupHtml, MAP_STYLES, VECTOR_STYLE } from "./location-map-helper.js";
 
   // One map (and WebGL context) for the whole app: kept across page navigation.
@@ -31,11 +32,11 @@
     typeof localStorage !== "undefined" ? (localStorage.getItem(MAP_STYLE_KEY) ?? VECTOR_STYLE) : VECTOR_STYLE;
   let activeHighlightSlug = "";
 
-  export function getMapCenter(): { lat: number; lon: number } | undefined {
+  setMapCenterProvider(() => {
     if (!shared || !shared.element.isConnected || !positioned) return undefined;
     const center = shared.map.getCenter();
     return { lat: center.lat, lon: center.lng };
-  }
+  });
   let allElementsLoaded = $state(false);
   let cachedCollection: MapElementFeatureCollection = { type: "FeatureCollection", features: [] };
   const loadedSlugs = new Set<string>();

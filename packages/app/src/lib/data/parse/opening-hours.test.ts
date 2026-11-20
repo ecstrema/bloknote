@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import {
   applyOpeningHoursDrag,
   canEditOpeningHoursGraph,
@@ -6,6 +6,7 @@ import {
   formatOpeningHours,
   formatTime,
   isValidOpeningHours,
+  loadOpeningHours,
   normalizeRanges,
   parseOpeningHours,
   prettifyOpeningHours,
@@ -16,6 +17,9 @@ import {
 const emptyWeek = (): WeekHours => DAYS.map(() => []);
 
 describe("opening-hours", () => {
+  beforeAll(async () => {
+    await loadOpeningHours();
+  });
   it("formats times including midnight end of day as 24:00", () => {
     expect(formatTime(0)).toBe("00:00");
     expect(formatTime(600)).toBe("10:00");

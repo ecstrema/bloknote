@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { DataTree } from "#lib/types.js";
-  import SectorStats from "#lib/components/sector-stats.svelte";
   import ChildrenTable from "./children-table.svelte";
   import type { GeographicFolderElement } from "@bloknote/climbing-data-gen";
   import { getDefaultGradingScales } from "#lib/data/parse/region-grading.js";
   import { page } from "$app/state";
+  import Loader from "#components/ui/loader.svelte";
 
   let {
     item = $bindable(),
@@ -23,5 +23,9 @@
   </p>
 {/if}
 
-<SectorStats {item} {slug} />
+{#await import("#lib/components/sector-stats.svelte")}
+  <Loader class="h-24" />
+{:then { default: SectorStats }}
+  <SectorStats {item} {slug} />
+{/await}
 <ChildrenTable bind:item />

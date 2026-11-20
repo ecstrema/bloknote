@@ -26,8 +26,7 @@
     "layerchart": "catalog:",
     "mode-watcher": "catalog:",
     "opening_hours": "catalog:",
-    "osm-api": "catalog:",
-    "polygon-clipping": "catalog:"
+    "osm-api": "catalog:"
   },
   "devDependencies": {
     "@bloknote/climbing-data-gen": "workspace:*",
@@ -39,7 +38,6 @@
     "@sveltejs/adapter-static": "catalog:",
     "@sveltejs/kit": "catalog:",
     "@sveltejs/vite-plugin-svelte": "catalog:",
-    "@tailwindcss/forms": "catalog:",
     "@tailwindcss/typography": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/bun": "catalog:",

@@ -1,6 +1,20 @@
-import opening_hours from "opening_hours";
+import type opening_hours from "opening_hours";
 
 export const DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] as const;
+
+let Oh: typeof opening_hours | undefined;
+
+/**
+ * Loads the `opening_hours` parser (a large library) on first use.
+ * The parsing functions below are inert until it is ready; use
+ * `ensureOpeningHoursLoaded` from `opening-hours-ready.svelte.js` before relying on them.
+ */
+export function loadOpeningHours(): Promise<void> {
+  if (Oh) return Promise.resolve();
+  return import("opening_hours").then((module) => {
+    Oh = module.default;
+  });
+}
 
 /** Minutes since midnight, `end` may be above 1440 for ranges closing after midnight */
 export interface TimeRange {
@@ -23,9 +37,9 @@ function toNominatim(coordinates?: OpeningHoursCoordinates) {
 
 function createOpeningHours(value: string, coordinates?: OpeningHoursCoordinates): opening_hours | undefined {
   const text = value.trim();
-  if (!text) return undefined;
+  if (!text || !Oh) return undefined;
   try {
-    return new opening_hours(text, toNominatim(coordinates));
+    return new Oh(text, toNominatim(coordinates));
   } catch {
     return undefined;
   }
@@ -108,6 +122,8 @@ export function parseOpeningHours(
 }
 
 export function isValidOpeningHours(value: string | undefined, coordinates?: OpeningHoursCoordinates): boolean {
+  // Permissive while the parser is not loaded, so valid tags are not flagged during the load window
+  if (!Oh) return true;
   return !!value && createOpeningHours(value, coordinates) !== undefined;
 }
 

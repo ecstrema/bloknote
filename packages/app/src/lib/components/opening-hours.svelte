@@ -14,6 +14,7 @@
     type OpeningHoursDrag,
     type WeekHours,
   } from "#lib/data/parse/opening-hours.js";
+  import { ensureOpeningHoursLoaded, openingHoursReady } from "#lib/data/parse/opening-hours-ready.svelte.js";
 
   let {
     value,
@@ -40,8 +41,12 @@
   let lastEmitted: string | undefined;
 
   const trimmed = $derived(value.trim());
-  const parsed = $derived(trimmed ? parseOpeningHours(trimmed, coordinates) : DAYS.map(() => []));
+  const parsed = $derived(
+    openingHoursReady.value && trimmed ? parseOpeningHours(trimmed, coordinates) : DAYS.map(() => []),
+  );
   const week = $derived(draftWeek ?? parsed);
+
+  ensureOpeningHoursLoaded();
 
   type DisplayedSegment = { start: number; end: number; source: "own" | "previous"; index: number };
 

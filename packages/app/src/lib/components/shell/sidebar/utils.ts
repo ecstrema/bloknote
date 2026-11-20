@@ -7,7 +7,7 @@ import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
 import { getParentSlug } from "#lib/helpers/slug.js";
-import { getMapCenter } from "#components/location-map.svelte";
+import { getMapCenter } from "#components/map-center.js";
 import type { AppState } from "#lib/data/app-state.js";
 import { getDefaultRouteCoordinates } from "#lib/data/route-location.js";
 import { createContext } from "svelte";

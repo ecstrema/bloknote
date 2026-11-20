@@ -3,10 +3,10 @@
   import ChildrenTable from "./children-table.svelte";
   import ClimbingStyles from "#components/climbing-styles.svelte";
   import CommonsTopo from "#lib/components/commons-topo.svelte";
-  import SectorStats from "#lib/components/sector-stats.svelte";
   import { getAreaKindLabel } from "#lib/data/parse/diagnostics.js";
   import { buildTypstDocument } from "#lib/data/export/typst.js";
   import { Button } from "#components/ui/button/index.js";
+  import Loader from "#components/ui/loader.svelte";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import FileDownIcon from "@lucide/svelte/icons/file-down";
   import type { OsmFeature } from "osm-api";
@@ -60,6 +60,10 @@
   <p class="text-sm text-muted-foreground">{item.stats.totalRoutes} routes in total</p>
 {/if}
 
-<SectorStats {item} {slug} />
+{#await import("#lib/components/sector-stats.svelte")}
+  <Loader class="h-24" />
+{:then { default: SectorStats }}
+  <SectorStats {item} {slug} />
+{/await}
 
 <ChildrenTable bind:item />

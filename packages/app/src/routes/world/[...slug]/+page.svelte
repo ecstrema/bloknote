@@ -16,14 +16,13 @@
   import { building } from "$app/env";
   import { page } from "$app/state";
   import { untrack } from "svelte";
-  import LocationMap from "#lib/components/location-map.svelte";
   import MapAddDialog from "#lib/components/map-add-dialog.svelte";
   import DiagnosticsPanel from "#lib/components/diagnostics-panel.svelte";
-  import PulsePanel from "#lib/components/pulse-panel.svelte";
   import { collectSubtreeDiagnostics } from "#lib/data/parse/diagnostics.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import type { DataJSON } from "@bloknote/climbing-data-gen";
   import { Button } from "#components/ui/button/index.js";
+  import Loader from "#components/ui/loader.svelte";
   import { getFallbackCoordinates } from "#lib/data/route-location.js";
   import EditableName from "#components/editable/editable-name.svelte";
   import EditableTags from "#components/editable/editable-tags.svelte";
@@ -354,18 +353,22 @@
           {/if}
         </div>
       {/if}
-      <LocationMap
-        class="h-[calc(100dvh-13rem)] min-h-80 shrink-0"
-        currentSlug={itemSlug}
-        currentFeature={item.feature}
-        {coordinates}
-        {fallbackCoordinates}
-        {bounds}
-        {placementMode}
-        onmapclick={onMapPlacementClick}
-        draggable={editable}
-        onmove={editable ? (pos) => appState.setCoordinates(itemSlug, pos) : undefined}
-      />
+      {#await import("#lib/components/location-map.svelte")}
+        <Loader class="h-[calc(100dvh-13rem)] min-h-80 shrink-0" />
+      {:then { default: LocationMap }}
+        <LocationMap
+          class="h-[calc(100dvh-13rem)] min-h-80 shrink-0"
+          currentSlug={itemSlug}
+          currentFeature={item.feature}
+          {coordinates}
+          {fallbackCoordinates}
+          {bounds}
+          {placementMode}
+          onmapclick={onMapPlacementClick}
+          draggable={editable}
+          onmove={editable ? (pos) => appState.setCoordinates(itemSlug, pos) : undefined}
+        />
+      {/await}
       {#if editable && coordinates}
         <p class="text-xs text-muted-foreground">Drag the marker on the map to move the route.</p>
       {/if}
@@ -416,7 +419,11 @@
 
   <Tabs.Content value="pulse" class="flex flex-col gap-4">
     {#if effectiveTab === "pulse"}
-      <PulsePanel {item} slug={itemSlug} />
+      {#await import("#lib/components/pulse-panel.svelte")}
+        <Loader class="h-32" />
+      {:then { default: PulsePanel }}
+        <PulsePanel {item} slug={itemSlug} />
+      {/await}
     {/if}
   </Tabs.Content>
 </Tabs.Root>
