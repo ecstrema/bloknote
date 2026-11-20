@@ -3,7 +3,7 @@
   import { getAppState } from "#lib/data/app-state.js";
   import { getClimbingStyles } from "#lib/data/parse/osm-tags.js";
   import * as DropdownMenu from "#components/ui/dropdown-menu/index.js";
-  import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";
+  import { cn } from "#lib/utils.js";
 
   let {
     feature,
@@ -47,11 +47,13 @@
 {#if canEdit}
   <DropdownMenu.Root>
     <DropdownMenu.Trigger
-      class="inline-flex items-center gap-1.5 rounded-sm border border-border px-2 py-1 text-xs font-medium hover:bg-accent"
+      class={cn(
+        "cursor-pointer rounded-sm text-sm hover:outline-1 hover:outline-offset-2 hover:outline-ring/50 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        styles.length === 0 && "text-muted-foreground",
+      )}
       aria-label="Climbing style"
     >
       {styles.map((s) => s.label).join(", ") || "Style"}
-      <ChevronDownIcon class="size-3 text-muted-foreground" />
     </DropdownMenu.Trigger>
     <DropdownMenu.Content align="start">
       <DropdownMenu.RadioGroup value={selected} onValueChange={setStyle}>

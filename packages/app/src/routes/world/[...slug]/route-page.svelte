@@ -37,9 +37,8 @@
   {/if}
   <EditableLength {feature} featureSlug={slug} />
   <EditablePitches {feature} featureSlug={slug} />
+  <ClimbingStyles {feature} featureSlug={slug} editable />
 </div>
-
-<ClimbingStyles {feature} featureSlug={slug} editable />
 
 <EditableDescription {feature} featureSlug={slug} />
 
