@@ -15098,12 +15098,10 @@ msgstr "Questo tag esiste già"
 #: src/lib/components/editable/editable-textarea.svelte
 #: src/lib/components/opening-hours.svelte
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
-#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
 msgid "Enter"
 msgstr "Enter"
 
 #: src/lib/components/editable/editable-tags.svelte
-#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Escape"
