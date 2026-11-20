@@ -23,9 +23,17 @@
   const itemType = $derived(featureToType(item.feature));
   const isCrag = $derived(item.feature.type !== "geographic" && item.feature.tags?.climbing === "crag");
 
-  const searchFilter = getSearchFilter();
-
   const appState = getAppState();
+
+  // The add buttons are only useful on the item being viewed and on its ancestors: showing them
+  // everywhere takes too much space in the sidebar.
+  const isActivePath = $derived(
+    appState.breadcrumbs.slugs.some((s) => s === slug) ||
+      (item.feature.type !== "geographic" &&
+        page.url.searchParams.get("id") === `${item.feature.type}-${item.feature.id}`),
+  );
+
+  const searchFilter = getSearchFilter();
 
   function addRoute() {
     addRouteFromSidebar(appState, item as DataTree<OsmWay | OsmRelation>, slug);
@@ -62,15 +70,15 @@
 
 {#if Object.keys(item.children ?? {}).length === 0}
   <span class="px-4 py-2 text-muted-foreground">No children</span>
+{/if}
 
-  {#if appState.osmUser.loggedIn && itemType === "area"}
-    <div class="flex gap-2 self-end">
-      <Button variant="outline" size="xs" class="font-normal" onclick={addRoute}>Add Route</Button>
-      {#if !isCrag}
-        <Button variant="outline" size="xs" class="font-normal" onclick={addSector}>Add Sector</Button>
-      {/if}
-    </div>
-  {/if}
+{#if appState.osmUser.loggedIn && itemType === "area" && isActivePath}
+  <div class="flex gap-2 self-end">
+    <Button variant="outline" size="xs" class="font-normal" onclick={addRoute}>Add Route</Button>
+    {#if !isCrag}
+      <Button variant="outline" size="xs" class="font-normal" onclick={addSector}>Add Sector</Button>
+    {/if}
+  </div>
 {/if}
 
 {#snippet showItem(slug: string)}
