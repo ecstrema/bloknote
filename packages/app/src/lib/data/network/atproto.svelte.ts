@@ -103,6 +103,9 @@ class AtProtoClient {
   #client?: BrowserOAuthClient;
   #oauthSession?: OAuthSession;
   #ready?: Promise<void>;
+  /** Last successful #hydrate, used to rate-limit the background re-syncs */
+  #lastHydrateAt = 0;
+  #syncing?: Promise<void>;
 
   constructor() {
     if (browser) {
@@ -111,7 +114,27 @@ class AtProtoClient {
       const legacy = localStorage.getItem(SESSION_STORAGE_KEY);
       if (legacy && legacy.includes("accessJwt")) localStorage.removeItem(SESSION_STORAGE_KEY);
       this.#start();
+      // Keep the local copies in sync with the PDS: records deleted upstream (e.g. from pds.ls)
+      // must disappear from the app without requiring a manual reload.
+      window.addEventListener("online", () => this.maybeSync(true));
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") this.maybeSync();
+      });
     }
+  }
+
+  /** Time after which coming back to the tab triggers a new PDS sync */
+  static #HYDRATE_INTERVAL = 5 * 60 * 1000;
+
+  /**
+   * Re-syncs the records from the PDS in the background: on connection regain, and when the tab
+   * becomes visible again after {@link AtProtoClient.#HYDRATE_INTERVAL}. No-op when offline,
+   * logged out, or when a sync already ran recently.
+   */
+  maybeSync(force = false) {
+    if (!browser || !this.session || this.#syncing || !navigator.onLine) return;
+    if (!force && Date.now() - this.#lastHydrateAt < AtProtoClient.#HYDRATE_INTERVAL) return;
+    this.#syncing = this.#hydrate().finally(() => (this.#syncing = undefined));
   }
 
   get configured(): boolean {
@@ -189,18 +212,16 @@ class AtProtoClient {
         this.#listRemote<LocalStarEntry>(STAR_COLLECTION),
         this.#listRemote<LocalReviewEntry>(REVIEW_COLLECTION),
       ]);
-      // Keep the cached labels and the local-only entries (never uploaded), then let the PDS win
+      // Keep the cached labels and the local-only entries (never uploaded), then let the PDS win.
+      // Local entries carrying a uri that the PDS does not return anymore were deleted upstream
+      // (e.g. from pds.ls) and are dropped: the PDS is the source of truth.
       const merge = <T extends { uri?: string; label?: string }>(local: T[], remote: T[]): T[] => {
         const labels = new Map(local.filter((e) => e.uri).map((e) => [e.uri!, e.label]));
-        const remoteUris = new Set(remote.map((e) => e.uri).filter((uri) => !!uri));
         // Content signature used to drop stale local copies that duplicate a remote record
         // (caches written by older versions stored remote entries without their uri)
         const signature = (e: T) => JSON.stringify({ ...e, uri: undefined, label: undefined });
         const remoteSignatures = new Set(remote.map(signature));
-        const localOnly = local.filter((e) => {
-          if (e.uri) return !remoteUris.has(e.uri);
-          return !remoteSignatures.has(signature(e));
-        });
+        const localOnly = local.filter((e) => !e.uri && !remoteSignatures.has(signature(e)));
         // Defensive: dedupe remote entries by uri
         const seen = new Set<string>();
         const dedupedRemote = remote.filter((e) => {
@@ -226,6 +247,7 @@ class AtProtoClient {
       this.#persistTicks();
       this.#persistStars();
       this.#persistReviews();
+      this.#lastHydrateAt = Date.now();
     } catch (error) {
       console.error("Could not load ATProto records from the PDS", error);
     }
