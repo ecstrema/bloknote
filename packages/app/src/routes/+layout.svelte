@@ -89,7 +89,11 @@
 <ModeWatcher />
 
 {#if downloading && downloadPercent !== undefined}
-  <div class="fixed top-0 inset-x-0 h-0.5 z-50 bg-primary/20" role="progressbar" aria-label="Downloading data">
+  <div
+    class="fixed top-0 inset-x-0 h-0.5 z-50 bg-primary/20"
+    role="progressbar"
+    aria-label={localDb.phase === "parsing" ? "Parsing data" : "Downloading data"}
+  >
     <div class="h-full bg-primary transition-[width]" style:width="{downloadPercent}%"></div>
   </div>
 {:else if downloading || navigating.to}

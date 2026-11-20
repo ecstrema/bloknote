@@ -70,7 +70,7 @@ async function buildDatabase(url: string, version: string, id: number) {
     if (done) break;
     chunks.push(value);
     loaded += value.length;
-    self.postMessage({ id, type: "progress", loaded, total } satisfies DbResponse);
+    self.postMessage({ id, type: "progress", loaded, total, phase: "download" } satisfies DbResponse);
   }
   const records: Record<string, DataJSON> = JSON.parse(await new Blob(chunks as BlobPart[]).text());
 
@@ -93,19 +93,25 @@ async function buildDatabase(url: string, version: string, id: number) {
     const insertPlace = db.prepare("INSERT INTO places (name, slug) VALUES (?, ?)");
     const insertStats = db.prepare("INSERT INTO stats (slug, total_routes) VALUES (?, ?)");
     try {
-      for (const [slug, feature] of Object.entries(records)) {
+      const slugs = Object.keys(records);
+      for (let i = 0; i < slugs.length; i++) {
+        const feature = records[slugs[i]!]!;
         const gradeRef = feature.type === "geographic" ? undefined : getGradeReference(feature.tags ?? {});
         insertElement
           .bind([
-            slug,
-            getParentSlug(slug) ?? "",
+            slugs[i],
+            getParentSlug(slugs[i]!) ?? "",
             JSON.stringify(feature),
             featureToType(feature) ?? "other",
             gradeRef ?? null,
           ])
           .stepReset();
         const name = getName(feature);
-        if (name) insertPlace.bind([name, slug]).stepReset();
+        if (name) insertPlace.bind([name, slugs[i]]).stepReset();
+        // Parsing and inserting is slow: report progress so the UI can show how far along it is
+        if (i % 2000 === 0) {
+          self.postMessage({ id, type: "progress", loaded: i, total: slugs.length, phase: "parsing" } satisfies DbResponse);
+        }
       }
       for (const [slug, total] of totals) insertStats.bind([slug, total]).stepReset();
     } finally {

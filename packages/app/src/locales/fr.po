@@ -16897,10 +16897,8 @@ msgstr ""
 msgid "Pitches"
 msgstr ""
 
-#. 0: Math.round((localDb.loaded / localDb.total) * 100)
-#: src/lib/components/location-map.svelte
-msgid "Downloading climbing data {0}%"
-msgstr ""
+#~ msgid "Downloading climbing data {0}%"
+#~ msgstr ""
 
 #: src/lib/components/location-map.svelte
 msgid "Loading climbing data..."
@@ -16908,4 +16906,21 @@ msgstr ""
 
 #: src/lib/components/location-map.svelte
 msgid "Map style"
+msgstr ""
+
+#: src/routes/+layout.svelte
+msgid "Parsing data"
+msgstr ""
+
+#: src/lib/components/location-map.svelte
+msgid "Parsing"
+msgstr ""
+
+#: src/lib/components/location-map.svelte
+msgid "Downloading"
+msgstr ""
+
+#. 0: localDb.phase === "parsing" ? "Parsing" \\: "Downloading"; 1: Math.round((localDb.loaded / localDb.total) * 100)
+#: src/lib/components/location-map.svelte
+msgid "{0} climbing data {1}%"
 msgstr ""

@@ -590,7 +590,8 @@
           <LoaderCircle class="size-4 animate-spin text-muted-foreground" />
           {#if localDb.status === "downloading" && localDb.total}
             <span class="text-xs text-muted-foreground">
-              Downloading climbing data {Math.round((localDb.loaded / localDb.total) * 100)}%
+              {localDb.phase === "parsing" ? "Parsing" : "Downloading"} climbing data
+              {Math.round((localDb.loaded / localDb.total) * 100)}%
             </span>
           {:else}
             <span class="text-xs text-muted-foreground">Loading climbing data...</span>

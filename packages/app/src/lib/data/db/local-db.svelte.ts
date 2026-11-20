@@ -29,6 +29,8 @@ class LocalDb {
   /** Bytes downloaded so far, and the total when the server tells it */
   loaded = $state(0);
   total = $state<number>();
+  /** Whether loaded/total currently refers to the download or to the parsing/insertion */
+  phase = $state<"download" | "parsing">("download");
 
   private worker?: Worker;
   private nextId = 0;
@@ -58,6 +60,7 @@ class LocalDb {
       if (event.data.type === "progress") {
         this.loaded = event.data.loaded;
         this.total = event.data.total;
+        this.phase = event.data.phase ?? "download";
         return;
       }
       if (event.data.type === "matchBatch") {

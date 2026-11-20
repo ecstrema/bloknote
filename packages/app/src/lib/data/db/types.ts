@@ -75,5 +75,5 @@ export type DbResponse =
   | { type: "matchBatch"; searchId: number; slugs: string[] }
   /** The search used its time budget (`exhausted` false) or has no more results */
   | { id: number; type: "matchPause"; exhausted: boolean }
-  | { id: number; type: "progress"; loaded: number; total: number | undefined }
+  | { id: number; type: "progress"; loaded: number; total: number | undefined; phase?: "download" | "parsing" }
   | { id: number; type: "error"; message: string };
