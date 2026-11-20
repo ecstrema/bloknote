@@ -293,9 +293,40 @@
 
   $effect(() => {
     if (isCurrentPage && ref) {
-      ref.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+      ref.scrollIntoView({ block: "nearest", inline: "nearest" });
+      // Collapsible ancestors animate open, so scroll again once they have settled
+      const timeout = setTimeout(
+        () => ref?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }),
+        300,
+      );
+      return () => clearTimeout(timeout);
     }
   });
+
+  let renaming = $state(false);
+  let renameValue = $state("");
+
+  function startRename() {
+    if (item.feature.type === "geographic" || !appState.osmUser.loggedIn) return;
+    renameValue = item.feature.tags?.name ?? "";
+    renaming = true;
+  }
+
+  function commitRename() {
+    if (!renaming) return;
+    renaming = false;
+    appState.setTag(slug, "name", renameValue.trim() || undefined);
+  }
+
+  function focusOnMount(el: HTMLInputElement) {
+    el.focus();
+    el.select();
+  }
+
+  function stopInputEvents(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
 </script>
 
 {#if itemType === "route" || itemType === "gym"}
@@ -308,6 +339,7 @@
     href={link}
     draggable={canDrag}
     onclick={handleItemClick}
+    ondblclick={startRename}
     ondragstart={onDragStart}
     ondragover={onDragOver}
     ondragleave={onDragLeave}
@@ -341,7 +373,22 @@
     {:else if itemType === "gym"}
       <BuildingIcon />
     {/if}
-    <span class="truncate">{name || "No name"}</span>
+    {#if renaming}
+      <input
+        use:focusOnMount
+        bind:value={renameValue}
+        onkeydown={(e) => {
+          if (e.key === "Enter") commitRename();
+          else if (e.key === "Escape") renaming = false;
+        }}
+        onblur={commitRename}
+        onclick={stopInputEvents}
+        onmousedown={stopInputEvents}
+        class="min-w-0 flex-1 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none"
+      />
+    {:else}
+      <span class="truncate">{name || "No name"}</span>
+    {/if}
   </Sidebar.MenuButton>
 {:else}
   <Collapsible.Root
@@ -365,6 +412,7 @@
             href={link}
             draggable={canDrag}
             onclick={handleItemClick}
+            ondblclick={startRename}
             ondragstart={onDragStart}
             ondragover={onDragOver}
             ondragleave={onDragLeave}
@@ -388,7 +436,22 @@
               <EarthIcon />
             {/if}
 
-            <span class="truncate grow">{name || "No name"}</span>
+            {#if renaming}
+              <input
+                use:focusOnMount
+                bind:value={renameValue}
+                onkeydown={(e) => {
+                  if (e.key === "Enter") commitRename();
+                  else if (e.key === "Escape") renaming = false;
+                }}
+                onblur={commitRename}
+                onclick={stopInputEvents}
+                onmousedown={stopInputEvents}
+                class="min-w-0 flex-1 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none"
+              />
+            {:else}
+              <span class="truncate grow">{name || "No name"}</span>
+            {/if}
           </Sidebar.MenuButton>
 
           {#if item.stats}
