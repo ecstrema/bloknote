@@ -5,6 +5,7 @@
   import * as Dialog from "#components/ui/dialog/index.js";
   import { Textarea } from "#components/ui/textarea/index.js";
   import { getNameOSM } from "#lib/data/parse/osm-tags.js";
+  import { getParentSlug } from "#lib/helpers/slug.js";
   import plural from "../../../locales/plural.js";
 
   import { Progress } from "#components/ui/progress/index.js";
@@ -36,8 +37,34 @@
     }
   });
 
+  /**
+   * Relations created without members have no position: unless they are members of an existing
+   * area relation, the static data rebuild cannot recover them and they would be lost.
+   */
+  function getUnplaceableCreatedRelations(): string[] {
+    const names: string[] = [];
+    for (const [slug, changedFeature] of appState.osmUser.changes) {
+      const final = changedFeature.final;
+      if (!final || final.type !== "relation" || final.id >= 0 || final.members.length > 0) continue;
+      const parentSlug = getParentSlug(slug);
+      const parent = parentSlug ? appState.tree.getReactiveNode(parentSlug) : undefined;
+      if (!parent) continue;
+      if (parent.feature.type === "relation" && parent.feature.id > 0) continue;
+      names.push(getNameOSM(final.tags ?? {}) || slug);
+    }
+    return names;
+  }
+
   async function submit() {
     error = undefined;
+    const unplaceable = getUnplaceableCreatedRelations();
+    if (unplaceable.length > 0) {
+      error =
+        `${plural(unplaceable.length, ["# empty relation cannot be submitted", "# empty relations cannot be submitted"])}: ` +
+        `${unplaceable.join(", ")}. Add routes or sectors to them, or move them inside an existing area — ` +
+        `empty relations placed directly in a region have no position and would be lost on the next data rebuild.`;
+      return;
+    }
     try {
       await appState.osmUser.submitChanges(comment);
       comment = "";
