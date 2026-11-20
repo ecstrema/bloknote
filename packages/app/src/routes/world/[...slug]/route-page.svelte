@@ -12,6 +12,7 @@
   import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
   import SnowflakeIcon from "@lucide/svelte/icons/snowflake";
+  import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
 
   let {
     item = $bindable(),
@@ -39,6 +40,8 @@
   <EditablePitches {feature} featureSlug={slug} />
   <ClimbingStyles {feature} featureSlug={slug} editable />
 </div>
+
+<ClimbingProviderLinks {feature} />
 
 <EditableDescription {feature} featureSlug={slug} />
 

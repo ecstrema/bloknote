@@ -9,6 +9,7 @@
   import GlobeIcon from "@lucide/svelte/icons/globe";
   import CircleDollarSignIcon from "@lucide/svelte/icons/circle-dollar-sign";
   import MapLinks from "#lib/components/map-links.svelte";
+import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
   import EditableOpeningHours from "#lib/components/editable/editable-opening-hours.svelte";
   import { getFee, getFeeCharge, getWebsite } from "#lib/data/parse/gym-tags.js";
 
@@ -60,6 +61,8 @@
     <MapLinks {coordinates} name={feature.tags?.name} />
   {/if}
 </div>
+
+<ClimbingProviderLinks {feature} />
 
 <EditableOpeningHours {feature} featureSlug={slug} />
 

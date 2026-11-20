@@ -16984,3 +16984,23 @@ msgstr "Fee: {0}"
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Click on the map to place the new route."
 msgstr "Click on the map to place the new route."
+
+#: src/lib/components/climbing-provider-links.svelte
+msgid "theCrag"
+msgstr "theCrag"
+
+#: src/lib/components/climbing-provider-links.svelte
+msgid "Search on theCrag"
+msgstr "Search on theCrag"
+
+#: src/lib/components/climbing-provider-links.svelte
+msgid "Mountain Project"
+msgstr "Mountain Project"
+
+#: src/lib/components/climbing-provider-links.svelte
+msgid "Search on Mountain Project"
+msgstr "Search on Mountain Project"
+
+#: src/lib/components/climbing-provider-links.svelte
+msgid "OpenClimbing"
+msgstr "OpenClimbing"

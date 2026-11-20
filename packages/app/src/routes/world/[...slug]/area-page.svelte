@@ -9,6 +9,7 @@
   import Loader from "#components/ui/loader.svelte";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import FileDownIcon from "@lucide/svelte/icons/file-down";
+import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
   import type { OsmFeature } from "osm-api";
   import type { DataTree } from "#lib/types.js";
 
@@ -54,6 +55,9 @@
     Export Typst
   </Button>
 </div>
+
+<ClimbingProviderLinks {feature} />
+
 <EditableDescription {feature} featureSlug={slug} />
 
 {#if item.stats?.totalRoutes}
