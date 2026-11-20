@@ -31,7 +31,7 @@
     const center = shared.map.getCenter();
     return { lat: center.lat, lon: center.lng };
   }
-  let allElementsLoaded = false;
+  let allElementsLoaded = $state(false);
   let cachedCollection: MapElementFeatureCollection = { type: "FeatureCollection", features: [] };
   const loadedSlugs = new Set<string>();
   let sharedColorMode: "grade" | "type" | "both" = "both";
@@ -300,6 +300,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { GeographicFolderElement } from "@bloknote/climbing-data-gen";
+  import LoaderCircle from "@lucide/svelte/icons/loader-circle";
   import MapLegend from "./map-legend.svelte";
 
   let {
@@ -331,6 +332,13 @@
   let host: HTMLDivElement;
   let attached = $state(false);
   let colorMode = $state<"grade" | "type" | "both">(sharedColorMode);
+
+  /** True while the map has no climbing data to display yet, either downloading or reading the local database */
+  const elementsLoading = $derived(
+    localDb.status === "unknown" ||
+      localDb.status === "downloading" ||
+      (localDb.status === "ready" && !allElementsLoaded),
+  );
 
   function updateActiveHighlight(slug: string) {
     if (!shared?.map) return;
@@ -530,6 +538,20 @@
 <div class={`relative ${className}`}>
   <div bind:this={host} class="relative h-full w-full overflow-hidden rounded-md border border-border">
     <MapLegend bind:colorMode />
+    {#if elementsLoading}
+      <div class="absolute inset-0 z-10 flex items-center justify-center">
+        <div class="flex items-center gap-2 rounded-md bg-background/80 px-3 py-2 shadow-sm backdrop-blur-sm">
+          <LoaderCircle class="size-4 animate-spin text-muted-foreground" />
+          {#if localDb.status === "downloading" && localDb.total}
+            <span class="text-xs text-muted-foreground">
+              Downloading climbing data {Math.round((localDb.loaded / localDb.total) * 100)}%
+            </span>
+          {:else}
+            <span class="text-xs text-muted-foreground">Loading climbing data...</span>
+          {/if}
+        </div>
+      </div>
+    {/if}
   </div>
 </div>
 

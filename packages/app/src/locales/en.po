@@ -16895,3 +16895,12 @@ msgstr "Name"
 #: src/lib/components/editable/editable-pitches.svelte
 msgid "Pitches"
 msgstr "Pitches"
+
+#. 0: Math.round((localDb.loaded / localDb.total) * 100)
+#: src/lib/components/location-map.svelte
+msgid "Downloading climbing data {0}%"
+msgstr "Downloading climbing data {0}%"
+
+#: src/lib/components/location-map.svelte
+msgid "Loading climbing data..."
+msgstr "Loading climbing data..."
