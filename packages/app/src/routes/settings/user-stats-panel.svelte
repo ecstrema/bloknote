@@ -87,7 +87,7 @@
       <div>
         <h3 class="text-xs font-semibold uppercase text-muted-foreground">Recent ticks</h3>
         <ul class="mt-1.5 space-y-1 text-xs">
-          {#each atproto.ticks.slice(0, 10) as tick (tick.createdAt)}
+          {#each atproto.ticks.slice(0, 10) as tick (tick)}
             <li class="flex flex-wrap items-baseline gap-2">
               <a
                 href={`${resolve("/world/[...slug]", { slug: "" })}?id=${tick.subject.type}-${tick.subject.id}`}

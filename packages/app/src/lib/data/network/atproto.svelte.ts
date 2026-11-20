@@ -185,15 +185,31 @@ class AtProtoClient {
     if (!session) return;
     try {
       const [remoteTicks, remoteStars, remoteReviews] = await Promise.all([
-        this.#listRemote<TickRecord>(TICK_COLLECTION),
-        this.#listRemote<StarRecord>(STAR_COLLECTION),
-        this.#listRemote<ReviewRecord>(REVIEW_COLLECTION),
+        this.#listRemote<LocalTickEntry>(TICK_COLLECTION),
+        this.#listRemote<LocalStarEntry>(STAR_COLLECTION),
+        this.#listRemote<LocalReviewEntry>(REVIEW_COLLECTION),
       ]);
       // Keep the cached labels and the local-only entries (never uploaded), then let the PDS win
       const merge = <T extends { uri?: string; label?: string }>(local: T[], remote: T[]): T[] => {
         const labels = new Map(local.filter((e) => e.uri).map((e) => [e.uri!, e.label]));
-        const localOnly = local.filter((e) => !e.uri);
-        return [...remote, ...localOnly].map((e) => ({
+        const remoteUris = new Set(remote.map((e) => e.uri).filter((uri) => !!uri));
+        // Content signature used to drop stale local copies that duplicate a remote record
+        // (caches written by older versions stored remote entries without their uri)
+        const signature = (e: T) => JSON.stringify({ ...e, uri: undefined, label: undefined });
+        const remoteSignatures = new Set(remote.map(signature));
+        const localOnly = local.filter((e) => {
+          if (e.uri) return !remoteUris.has(e.uri);
+          return !remoteSignatures.has(signature(e));
+        });
+        // Defensive: dedupe remote entries by uri
+        const seen = new Set<string>();
+        const dedupedRemote = remote.filter((e) => {
+          if (!e.uri) return true;
+          if (seen.has(e.uri)) return false;
+          seen.add(e.uri);
+          return true;
+        });
+        return [...dedupedRemote, ...localOnly].map((e) => ({
           ...e,
           label: e.label ?? (e.uri ? labels.get(e.uri) : undefined),
         }));
@@ -209,7 +225,7 @@ class AtProtoClient {
     }
   }
 
-  async #listRemote<T>(collection: string): Promise<T[]> {
+  async #listRemote<T extends { uri?: string }>(collection: string): Promise<T[]> {
     const session = this.#oauthSession;
     if (!session) throw new Error("ATProto is not configured");
     const out: T[] = [];
@@ -220,7 +236,8 @@ class AtProtoClient {
       const res = await this.#xrpc(`/xrpc/com.atproto.repo.listRecords?${query}`);
       if (!res.ok) throw new Error(`Could not list ${collection} (HTTP ${res.status})${await xrpcErrorMessage(res)}`);
       const data = (await res.json()) as ListRecordsResponse<T>;
-      for (const record of data.records ?? []) out.push(record.value);
+      // Keep the record uri: it is required to detect duplicates during merges and to delete records
+      for (const record of data.records ?? []) out.push({ ...record.value, uri: record.uri } as T);
       cursor = data.cursor;
     } while (cursor);
     return out;
