@@ -271,7 +271,10 @@
 
   function handleTreeKeydown(event: KeyboardEvent) {
     if (!contentRef) return;
-    const current = (event.target as HTMLElement | null)?.closest<HTMLElement>("[data-tree-depth]");
+    const target = event.target as HTMLElement | null;
+    // The rename input handles its own caret movement
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
+    const current = target?.closest<HTMLElement>("[data-tree-depth]");
     if (!current) return;
 
     const items = Array.from(contentRef.querySelectorAll<HTMLElement>("[data-tree-depth]")).filter(

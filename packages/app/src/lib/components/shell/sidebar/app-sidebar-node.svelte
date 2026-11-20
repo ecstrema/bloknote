@@ -346,8 +346,13 @@
     el.select();
   }
 
-  function stopInputEvents(event: Event) {
+  function stopInputClick(event: Event) {
     event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function stopInputMouseDown(event: Event) {
+    // Only stop the node's own handlers: preventDefault would block selecting the text
     event.stopPropagation();
   }
 </script>
@@ -360,7 +365,7 @@
     data-tree-depth={treeDepth}
     data-selected={isSelected || undefined}
     href={link}
-    draggable={canDrag}
+    draggable={canDrag && !renaming}
     onclick={handleItemClick}
     ondblclick={startRename}
     ondragstart={onDragStart}
@@ -405,8 +410,8 @@
           else if (e.key === "Escape") renaming = false;
         }}
         onblur={handleRenameBlur}
-        onclick={stopInputEvents}
-        onmousedown={stopInputEvents}
+        onclick={stopInputClick}
+        onmousedown={stopInputMouseDown}
         class="min-w-0 flex-1 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none"
       />
     {:else}
@@ -433,7 +438,7 @@
             data-tree-open={open}
             data-selected={isSelected || undefined}
             href={link}
-            draggable={canDrag}
+            draggable={canDrag && !renaming}
             onclick={handleItemClick}
             ondblclick={startRename}
             ondragstart={onDragStart}
@@ -468,8 +473,8 @@
                   else if (e.key === "Escape") renaming = false;
                 }}
                 onblur={handleRenameBlur}
-                onclick={stopInputEvents}
-                onmousedown={stopInputEvents}
+                onclick={stopInputClick}
+                onmousedown={stopInputMouseDown}
                 class="min-w-0 flex-1 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none"
               />
             {:else}
