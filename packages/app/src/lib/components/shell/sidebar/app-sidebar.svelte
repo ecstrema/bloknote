@@ -6,6 +6,7 @@
   import { featureToType, getName } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { resolve } from "$app/paths";
+  import { page } from "$app/state";
   import AppSidebarChildren from "./app-sidebar-children.svelte";
   import SearchFiltersPanel from "./search-filters.svelte";
 
@@ -72,6 +73,25 @@
   $effect(() => {
     filters.gradeMin = gradeTextToReference(gradeText.min);
     filters.gradeMax = gradeTextToReference(gradeText.max);
+  });
+
+  // The ?q= URL param pre-fills the search once the stored filters have been restored, so that
+  // external links can send someone to Bloknote with a specific search. It wins over the
+  // localStorage filters, and is left untouched when navigating without the param.
+  $effect(() => {
+    if (!restored) return;
+    const q = page.url.searchParams.get("q");
+    if (q !== null) filters.text = q;
+  });
+
+  // Keep the URL in sync with the current search query so it can be copied and shared.
+  // replaceState is used to avoid flooding the history on every keystroke.
+  $effect(() => {
+    const text = filters.text;
+    const url = new URL(window.location.href);
+    if (text.trim() !== "") url.searchParams.set("q", text);
+    else url.searchParams.delete("q");
+    history.replaceState(history.state, "", url);
   });
 
   const hasFilters = $derived(
