@@ -20,7 +20,7 @@
   import TradCamIcon from "#components/trad-cam-icon.svelte";
   import SnowflakeIcon from "@lucide/svelte/icons/snowflake";
   import type { OsmFeature } from "osm-api";
-  import { page } from "$app/state";
+  import { navigating, page } from "$app/state";
   import clsx from "clsx";
   import { getAppState } from "#lib/data/app-state.js";
   import {
@@ -40,7 +40,7 @@
     type SidebarDropPosition,
   } from "./utils";
   import { getParentSlug } from "#lib/helpers/slug.js";
-  import { goto } from "$app/navigation";
+  import { afterNavigate, goto } from "$app/navigation";
   import { getSidebarSelection } from "./selection.svelte";
   import { useSidebar } from "#components/ui/sidebar/index.js";
 
@@ -305,6 +305,9 @@
 
   let renaming = $state(false);
   let renameValue = $state("");
+  let renameInput = $state<HTMLInputElement | null>(null);
+  let blurTimer: ReturnType<typeof setTimeout> | undefined;
+  let refocusAfterNavigation = false;
 
   function startRename() {
     if (item.feature.type === "geographic" || !appState.osmUser.loggedIn) return;
@@ -318,8 +321,28 @@
     appState.setTag(slug, "name", renameValue.trim() || undefined);
   }
 
-  function focusOnMount(el: HTMLInputElement) {
-    el.focus();
+  function handleRenameBlur() {
+    // The first click of the double click navigates, and SvelteKit resets focus once that
+    // navigation settles, blurring the input right after it appeared. Keep editing and
+    // refocus after the navigation instead of committing.
+    if (navigating.to) {
+      refocusAfterNavigation = true;
+      return;
+    }
+    clearTimeout(blurTimer);
+    blurTimer = setTimeout(commitRename, 150);
+  }
+
+  afterNavigate(() => {
+    if (renaming && refocusAfterNavigation) {
+      refocusAfterNavigation = false;
+      renameInput?.focus({ preventScroll: true });
+    }
+  });
+
+  function focusRenameInput(el: HTMLInputElement) {
+    renameInput = el;
+    el.focus({ preventScroll: true });
     el.select();
   }
 
@@ -375,13 +398,13 @@
     {/if}
     {#if renaming}
       <input
-        use:focusOnMount
+        use:focusRenameInput
         bind:value={renameValue}
         onkeydown={(e) => {
           if (e.key === "Enter") commitRename();
           else if (e.key === "Escape") renaming = false;
         }}
-        onblur={commitRename}
+        onblur={handleRenameBlur}
         onclick={stopInputEvents}
         onmousedown={stopInputEvents}
         class="min-w-0 flex-1 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none"
@@ -438,13 +461,13 @@
 
             {#if renaming}
               <input
-                use:focusOnMount
+                use:focusRenameInput
                 bind:value={renameValue}
                 onkeydown={(e) => {
                   if (e.key === "Enter") commitRename();
                   else if (e.key === "Escape") renaming = false;
                 }}
-                onblur={commitRename}
+                onblur={handleRenameBlur}
                 onclick={stopInputEvents}
                 onmousedown={stopInputEvents}
                 class="min-w-0 flex-1 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none"
