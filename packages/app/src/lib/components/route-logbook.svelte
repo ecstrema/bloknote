@@ -5,6 +5,7 @@
   import { Select } from "#components/ui/select/index.js";
   import { Textarea } from "#components/ui/textarea/index.js";
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
+  import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
   import { normalizedRatingToStars, starsToNormalizedRating, type AscentStyle } from "@bloknote/common";
   import MessageSquareIcon from "@lucide/svelte/icons/message-square";
   import StarIcon from "@lucide/svelte/icons/star";
@@ -144,12 +145,15 @@
     <div class="border-t pt-2.5">
       <p class="mb-1.5 text-xs font-medium text-muted-foreground">Your ticks ({routeTicks.length})</p>
       <ul class="space-y-1 text-xs">
-        {#each routeTicks as tick (tick.createdAt)}
+        {#each routeTicks as tick (tick)}
           <li class="flex flex-wrap items-baseline gap-2">
             <span class="rounded bg-muted px-1.5 py-0.5 font-medium capitalize">{tick.style}</span>
             <span class="text-muted-foreground">{new Date(tick.climbedAt).toLocaleDateString()}</span>
             {#if tick.comment}
               <span>{tick.comment}</span>
+            {/if}
+            {#if !tick.uri}
+              <PendingSyncBadge />
             {/if}
           </li>
         {/each}
@@ -161,7 +165,7 @@
     <div class="border-t pt-2.5">
       <p class="mb-1.5 text-xs font-medium text-muted-foreground">Comments ({routeReviews.length})</p>
       <ul class="space-y-2 text-sm">
-        {#each routeReviews as review (review.createdAt)}
+        {#each routeReviews as review (review)}
           <li class="rounded bg-muted/40 p-2">
             <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <span class="font-medium text-foreground">{review.author ?? "Climber"}</span>
@@ -169,6 +173,9 @@
                 <span class="text-amber-500">{"★".repeat(normalizedRatingToStars(review.rating, 5))}</span>
               {/if}
               <span>{new Date(review.createdAt).toLocaleDateString()}</span>
+              {#if !review.uri}
+                <PendingSyncBadge />
+              {/if}
             </div>
             {#if review.text}
               <p class="mt-1 text-sm">{review.text}</p>

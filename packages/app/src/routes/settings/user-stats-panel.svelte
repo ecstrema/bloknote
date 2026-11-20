@@ -2,6 +2,7 @@
   import { resolve } from "$app/paths";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
   import { computeUserStats } from "@bloknote/common";
+  import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
   import { Chart, Layer, Axis, Rect, Text } from "layerchart/svg";
   import { scaleBand, scaleLinear } from "d3-scale";
 
@@ -69,7 +70,7 @@
       <div>
         <h3 class="text-xs font-semibold uppercase text-muted-foreground">Starred climbs</h3>
         <ul class="mt-1.5 flex flex-wrap gap-2 text-sm">
-          {#each atproto.stars as star (`${star.subject.type}-${star.subject.id}`)}
+          {#each atproto.stars as star (star)}
             <li>
               <a
                 href={`${resolve("/world/[...slug]", { slug: "" })}?id=${star.subject.type}-${star.subject.id}`}
@@ -77,6 +78,9 @@
               >
                 {star.label || `${star.subject.type}/${star.subject.id}`}
               </a>
+              {#if !star.uri}
+                <PendingSyncBadge />
+              {/if}
             </li>
           {/each}
         </ul>
@@ -99,6 +103,9 @@
               <span class="text-muted-foreground">{new Date(tick.climbedAt).toLocaleDateString()}</span>
               {#if tick.comment}
                 <span class="text-muted-foreground">— {tick.comment}</span>
+              {/if}
+              {#if !tick.uri}
+                <PendingSyncBadge />
               {/if}
             </li>
           {/each}
