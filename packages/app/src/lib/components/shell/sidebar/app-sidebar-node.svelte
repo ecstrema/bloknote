@@ -168,7 +168,7 @@
     }
     setSidebarDropPosition(slug, position);
 
-    if (position === "into" && (itemType === "area" || itemType === "geographic") && !open && !expandTimer) {
+    if (position === "into" && itemType === "area" && !open && !expandTimer) {
       expandTimer = setTimeout(() => {
         expandTimer = undefined;
         open = true;

@@ -134,9 +134,11 @@ describe("AppState.createSectorWithItems", () => {
     expect(state.bulkSetClimbingType([s1, s2], "trad")).toBe(2);
     expect((tree.getReactiveNode(s1)!.feature as OsmNode).tags?.["climbing:trad"]).toBe("yes");
 
-    state.moveItemsToParent([s1], "europe/france/fontainebleau");
-    expect(tree.getReactiveNode("europe/france/fontainebleau/r1")).toBeDefined();
-    expect(cragNode.children![s1]).toBeUndefined();
+    // Moving items into geographic regions is rejected: their placement is derived from
+    // the boundary data and would be lost on rebuild (fix #119).
+    expect(state.moveItemsToParent([s1], "europe/france/fontainebleau")).toEqual([]);
+    expect(tree.getReactiveNode(s1)).toBeDefined();
+    expect(cragNode.children![s1]).toBeDefined();
 
     state.deleteNodes([s2]);
     expect(tree.getReactiveNode(s2)).toBeUndefined();

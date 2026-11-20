@@ -243,6 +243,9 @@ export class AppState {
     if (topSlugs.length === 0) return [];
     const targetParent = this.tree.getReactiveNode(targetParentSlug);
     if (!targetParent) return [];
+    // Items cannot be moved into geographic regions: their placement is derived from the
+    // boundary data, so it would be lost on rebuild.
+    if (targetParent.feature.type === "geographic") return [];
 
     this.undoStack.beginGroup();
     const promote = this.#buildPromoteAreaAction(targetParent, targetParentSlug);

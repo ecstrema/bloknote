@@ -46,7 +46,7 @@
   let tickComment = $state("");
 
   const convertibleScales = allScales.filter((s) => !!scaleIdToTag(s.id));
-  const styleOptions = Object.entries(ROUTE_STYLE_LABELS).filter(([k]) => k !== "other");
+  const styleOptions = Object.entries(ROUTE_STYLE_LABELS).filter(([k]) => k !== "other" && k !== "viaferrata");
   const moveTargetParentSlug = $derived(commonParentSlug(selection.slugs));
   const moveTargetParent = $derived(
     moveTargetParentSlug !== undefined ? appState.tree.getReactiveNode(moveTargetParentSlug) : undefined,
@@ -71,9 +71,12 @@
     (async () => {
       try {
         const raw = regionSlug ? await collectRegionParentOptions(appState, regionSlug) : [];
-        folderOptions = raw.filter(
-          (opt) => !selectedSet.has(opt.slug) && !selection.slugs.some((s) => opt.slug.startsWith(`${s}/`)),
-        );
+        folderOptions = raw.filter((opt) => {
+          if (selectedSet.has(opt.slug)) return false;
+          if (selection.slugs.some((s) => opt.slug.startsWith(`${s}/`))) return false;
+          // Geographic regions are automatically derived from boundaries: moving items there would not persist.
+          return appState.tree.getReactiveNode(opt.slug)?.feature.type !== "geographic";
+        });
         if (folderOptions.length > 0 && !folderOptions.some((o) => o.slug === targetParentSlug)) {
           targetParentSlug = folderOptions[0]!.slug;
         }

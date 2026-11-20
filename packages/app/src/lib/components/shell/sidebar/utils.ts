@@ -117,7 +117,8 @@ export function canDropSidebarInto(
   loggedIn: boolean,
 ): boolean {
   if (!loggedIn || !draggedState || draggedState.slugs.length === 0) return false;
-  if (targetType !== "area" && targetType !== "geographic") return false;
+  // Geographic areas are automatically derived from the boundary data: membership would be lost on rebuild.
+  if (targetType !== "area") return false;
   if (draggedState.slugs.some((s) => s === targetSlug || targetSlug.startsWith(`${s}/`))) return false;
   return draggedState.slugs.some((s) => getParentSlug(s) !== targetSlug);
 }
