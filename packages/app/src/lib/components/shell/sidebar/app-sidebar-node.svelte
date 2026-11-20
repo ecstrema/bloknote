@@ -310,6 +310,8 @@
   let refocusAfterNavigation = false;
 
   function startRename() {
+    // A dblclick inside the rename input bubbles up here; don't reset the value being edited
+    if (renaming) return;
     if (item.feature.type === "geographic" || !appState.osmUser.loggedIn) return;
     renameValue = item.feature.tags?.name ?? "";
     renaming = true;
@@ -357,67 +359,80 @@
   }
 </script>
 
+<!-- The rename input lives outside the link/button row: nesting it inside an <a> or <button>
+     breaks focus, selection and caret movement in several browsers. -->
+{#snippet renameField()}
+  <input
+    use:focusRenameInput
+    bind:value={renameValue}
+    onkeydown={(e) => {
+      if (e.key === "Enter") commitRename();
+      else if (e.key === "Escape") renaming = false;
+    }}
+    onblur={handleRenameBlur}
+    onclick={stopInputClick}
+    onmousedown={stopInputMouseDown}
+    ondblclick={stopInputClick}
+    class="min-w-0 flex-1 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none"
+  />
+{/snippet}
+
 {#if itemType === "route" || itemType === "gym"}
-  <Sidebar.MenuButton
-    bind:ref={ref as HTMLButtonElement}
-    isActive={isCurrentPage}
-    data-sidebar-slug={slug}
-    data-tree-depth={treeDepth}
-    data-selected={isSelected || undefined}
-    href={link}
-    draggable={canDrag && !renaming}
-    onclick={handleItemClick}
-    ondblclick={startRename}
-    ondragstart={onDragStart}
-    ondragover={onDragOver}
-    ondragleave={onDragLeave}
-    ondrop={onDrop}
-    ondragend={onDragEnd}
-    class={clsx(
-      "data-[active=true]:bg-accent truncate w-full",
-      isSelected && "bg-primary/15 text-primary ring-1 ring-inset ring-primary/40",
-      dropPosition && "relative",
-    )}
-  >
-    {#if dropPosition === "before"}
-      <span class="pointer-events-none absolute inset-x-1 top-0 z-10 h-0.5 bg-primary" aria-hidden="true"></span>
-    {:else if dropPosition === "after"}
-      <span class="pointer-events-none absolute inset-x-1 bottom-0 z-10 h-0.5 bg-primary" aria-hidden="true"></span>
-    {/if}
-    {#if itemType === "route"}
-      {@const routeTags = (item.feature as OsmFeature).tags || {}}
-      {@const grade = getGrade(routeTags)}
-      {#if grade}
-        <HolyGrade class="text-xs font-semibold" grade={grade.v} />
-      {:else}
-        <CircleQuestionMarkIcon class="text-destructive" />
+  {#if renaming}
+    <div
+      bind:this={ref}
+      data-tree-depth={treeDepth}
+      class="flex h-6.5 w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-[13px]"
+    >
+      {@render renameField()}
+    </div>
+  {:else}
+    <Sidebar.MenuButton
+      bind:ref={ref as HTMLButtonElement}
+      isActive={isCurrentPage}
+      data-sidebar-slug={slug}
+      data-tree-depth={treeDepth}
+      data-selected={isSelected || undefined}
+      href={link}
+      draggable={canDrag}
+      onclick={handleItemClick}
+      ondblclick={startRename}
+      ondragstart={onDragStart}
+      ondragover={onDragOver}
+      ondragleave={onDragLeave}
+      ondrop={onDrop}
+      ondragend={onDragEnd}
+      class={clsx(
+        "data-[active=true]:bg-accent truncate w-full",
+        isSelected && "bg-primary/15 text-primary ring-1 ring-inset ring-primary/40",
+        dropPosition && "relative",
+      )}
+    >
+      {#if dropPosition === "before"}
+        <span class="pointer-events-none absolute inset-x-1 top-0 z-10 h-0.5 bg-primary" aria-hidden="true"></span>
+      {:else if dropPosition === "after"}
+        <span class="pointer-events-none absolute inset-x-1 bottom-0 z-10 h-0.5 bg-primary" aria-hidden="true"></span>
       {/if}
-      {#if isTradRoute(routeTags)}
-        <TradCamIcon />
+      {#if itemType === "route"}
+        {@const routeTags = (item.feature as OsmFeature).tags || {}}
+        {@const grade = getGrade(routeTags)}
+        {#if grade}
+          <HolyGrade class="text-xs font-semibold" grade={grade.v} />
+        {:else}
+          <CircleQuestionMarkIcon class="text-destructive" />
+        {/if}
+        {#if isTradRoute(routeTags)}
+          <TradCamIcon />
+        {/if}
+        {#if isIceRoute(routeTags)}
+          <SnowflakeIcon class="size-3.5 shrink-0 text-cyan-500" aria-label="Ice / dry-tooling route" />
+        {/if}
+      {:else if itemType === "gym"}
+        <BuildingIcon />
       {/if}
-      {#if isIceRoute(routeTags)}
-        <SnowflakeIcon class="size-3.5 shrink-0 text-cyan-500" aria-label="Ice / dry-tooling route" />
-      {/if}
-    {:else if itemType === "gym"}
-      <BuildingIcon />
-    {/if}
-    {#if renaming}
-      <input
-        use:focusRenameInput
-        bind:value={renameValue}
-        onkeydown={(e) => {
-          if (e.key === "Enter") commitRename();
-          else if (e.key === "Escape") renaming = false;
-        }}
-        onblur={handleRenameBlur}
-        onclick={stopInputClick}
-        onmousedown={stopInputMouseDown}
-        class="min-w-0 flex-1 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none"
-      />
-    {:else}
       <span class="truncate">{name || "No name"}</span>
-    {/if}
-  </Sidebar.MenuButton>
+    </Sidebar.MenuButton>
+  {/if}
 {:else}
   <Collapsible.Root
     bind:open
@@ -428,65 +443,60 @@
     onfocusin={() => (interacted = true)}
     class="w-full"
   >
-    <Collapsible.Trigger>
-      {#snippet child({ props })}
-        <Sidebar.MenuItem bind:ref={ref as HTMLLIElement} {...props} class="group/button">
-          <Sidebar.MenuButton
-            bind:ref={ref as HTMLButtonElement}
-            data-sidebar-slug={itemType !== "geographic" ? slug : undefined}
-            data-tree-depth={treeDepth}
-            data-tree-open={open}
-            data-selected={isSelected || undefined}
-            href={link}
-            draggable={canDrag && !renaming}
-            onclick={handleItemClick}
-            ondblclick={startRename}
-            ondragstart={onDragStart}
-            ondragover={onDragOver}
-            ondragleave={onDragLeave}
-            ondrop={onDrop}
-            ondragend={onDragEnd}
-            class={clsx(
-              isSelected && "bg-primary/15 text-primary ring-1 ring-inset ring-primary/40",
-              dropPosition === "into" && "bg-primary/15 ring-2 ring-inset ring-primary",
-              dropPosition && "relative",
-            )}
-          >
-            {#if dropPosition === "before"}
-              <span class="pointer-events-none absolute inset-x-1 top-0 z-10 h-0.5 bg-primary" aria-hidden="true"
-              ></span>
-            {:else if dropPosition === "after"}
-              <span class="pointer-events-none absolute inset-x-1 bottom-0 z-10 h-0.5 bg-primary" aria-hidden="true"
-              ></span>
-            {/if}
-            <ChevronRightIcon class={clsx("transition-transform", open && "rotate-90")} />
-            {#if itemType === "geographic"}
-              <EarthIcon />
-            {/if}
+    {#if renaming}
+      <div
+        bind:this={ref}
+        data-tree-depth={treeDepth}
+        data-tree-open={open}
+        class="flex h-6.5 w-full items-center rounded-md px-1.5 py-1 text-left text-[13px]"
+      >
+        {@render renameField()}
+      </div>
+    {:else}
+      <Collapsible.Trigger>
+        {#snippet child({ props })}
+          <Sidebar.MenuItem bind:ref={ref as HTMLLIElement} {...props} class="group/button">
+            <Sidebar.MenuButton
+              bind:ref={ref as HTMLButtonElement}
+              data-sidebar-slug={itemType !== "geographic" ? slug : undefined}
+              data-tree-depth={treeDepth}
+              data-tree-open={open}
+              data-selected={isSelected || undefined}
+              href={link}
+              draggable={canDrag}
+              onclick={handleItemClick}
+              ondblclick={startRename}
+              ondragstart={onDragStart}
+              ondragover={onDragOver}
+              ondragleave={onDragLeave}
+              ondrop={onDrop}
+              ondragend={onDragEnd}
+              class={clsx(
+                isSelected && "bg-primary/15 text-primary ring-1 ring-inset ring-primary/40",
+                dropPosition === "into" && "bg-primary/15 ring-2 ring-inset ring-primary",
+                dropPosition && "relative",
+              )}
+            >
+              {#if dropPosition === "before"}
+                <span class="pointer-events-none absolute inset-x-1 top-0 z-10 h-0.5 bg-primary" aria-hidden="true"
+                ></span>
+              {:else if dropPosition === "after"}
+                <span class="pointer-events-none absolute inset-x-1 bottom-0 z-10 h-0.5 bg-primary" aria-hidden="true"
+                ></span>
+              {/if}
+              <ChevronRightIcon class={clsx("transition-transform", open && "rotate-90")} />
+              {#if itemType === "geographic"}
+                <EarthIcon />
+              {/if}
 
-            {#if renaming}
-              <input
-                use:focusRenameInput
-                bind:value={renameValue}
-                onkeydown={(e) => {
-                  if (e.key === "Enter") commitRename();
-                  else if (e.key === "Escape") renaming = false;
-                }}
-                onblur={handleRenameBlur}
-                onclick={stopInputClick}
-                onmousedown={stopInputMouseDown}
-                class="min-w-0 flex-1 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none"
-              />
-            {:else}
               <span class="truncate grow">{name || "No name"}</span>
-            {/if}
-          </Sidebar.MenuButton>
+            </Sidebar.MenuButton>
 
-          {#if item.stats}
-            <Sidebar.MenuBadge class="group-hover/button:hidden">
-              {item.stats.totalRoutes}
-            </Sidebar.MenuBadge>
-          {/if}
+            {#if item.stats}
+              <Sidebar.MenuBadge class="group-hover/button:hidden">
+                {item.stats.totalRoutes}
+              </Sidebar.MenuBadge>
+            {/if}
 
           {#if interacted}
             <DropdownMenu.Root>
@@ -522,7 +532,8 @@
           {/if}
         </Sidebar.MenuItem>
       {/snippet}
-    </Collapsible.Trigger>
+        </Collapsible.Trigger>
+    {/if}
 
     <Collapsible.Content>
       {#if open}
