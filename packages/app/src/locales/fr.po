@@ -16966,3 +16966,19 @@ msgstr ""
 #: src/lib/components/pending-sync-badge.svelte
 msgid "<0/> Saved offline"
 msgstr ""
+
+#: src/lib/components/shell/osm-changes.svelte
+msgid "# empty relation cannot be submitted"
+msgid_plural "# empty relations cannot be submitted"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#. 0: unplaceable.join(", ")
+#: src/lib/components/shell/osm-changes.svelte
+msgid "{0}. Add routes or sectors to them, or move them inside an existing area — "
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — Via ferrata routes (fixed-cable alpine routes), shown as a dedicated route style."
+msgstr ""

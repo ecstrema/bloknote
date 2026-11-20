@@ -16965,3 +16965,18 @@ msgstr "Saved offline — will sync to your Atmosphere account when back online"
 #: src/lib/components/pending-sync-badge.svelte
 msgid "<0/> Saved offline"
 msgstr "<0/> Saved offline"
+
+#: src/lib/components/shell/osm-changes.svelte
+msgid "# empty relation cannot be submitted"
+msgid_plural "# empty relations cannot be submitted"
+msgstr[0] "# empty relation cannot be submitted"
+msgstr[1] "# empty relations cannot be submitted"
+
+#. 0: unplaceable.join(", ")
+#: src/lib/components/shell/osm-changes.svelte
+msgid "{0}. Add routes or sectors to them, or move them inside an existing area — "
+msgstr "{0}. Add routes or sectors to them, or move them inside an existing area — "
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — Via ferrata routes (fixed-cable alpine routes), shown as a dedicated route style."
+msgstr "<0/> — Via ferrata routes (fixed-cable alpine routes), shown as a dedicated route style."
