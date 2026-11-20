@@ -15097,10 +15097,14 @@ msgstr "Questo tag esiste già"
 #: src/lib/components/editable/editable-tags.svelte
 #: src/lib/components/editable/editable-textarea.svelte
 #: src/lib/components/opening-hours.svelte
+#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
+#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
 msgid "Enter"
 msgstr "Enter"
 
 #: src/lib/components/editable/editable-tags.svelte
+#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
+#: src/lib/components/shell/sidebar/app-sidebar-node.svelte
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -15315,6 +15319,8 @@ msgstr "Senza nome"
 msgid "Add sector"
 msgstr "Aggiungi settore"
 
+#: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
 msgid "Add route"
 msgstr "Aggiungi via"
@@ -15992,18 +15998,14 @@ msgstr "Nome del settore (facoltativo)"
 msgid "Create & move"
 msgstr "Crea e sposta"
 
-#. 0: placementMode
-#: src/routes/world/[...slug]/+page.svelte
-msgid "Click on the map to place the new {0}."
-msgstr "Fai clic sulla mappa per posizionare il nuovo {0}."
+#~ msgid "Click on the map to place the new {0}."
+#~ msgstr "Fai clic sulla mappa per posizionare il nuovo {0}."
 
-#: src/routes/world/[...slug]/+page.svelte
-msgid "<0/> Add route"
-msgstr "<0/> Aggiungi via"
+#~ msgid "<0/> Add route"
+#~ msgstr "<0/> Aggiungi via"
 
-#: src/routes/world/[...slug]/+page.svelte
-msgid "<0/> Add sector"
-msgstr "<0/> Aggiungi settore"
+#~ msgid "<0/> Add sector"
+#~ msgstr "<0/> Aggiungi settore"
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Could not load the region hierarchy index."
@@ -16982,4 +16984,8 @@ msgstr ""
 #. 0: charge
 #: src/routes/world/[...slug]/gym-page.svelte
 msgid "Fee: {0}"
+msgstr ""
+
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Click on the map to place the new route."
 msgstr ""

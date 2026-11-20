@@ -7,6 +7,7 @@
     NavigationControl,
     Popup,
     type GeoJSONSource,
+    type IControl,
   } from "#lib/maplibre.js";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
@@ -23,7 +24,7 @@
   let dragMarker: Marker | undefined;
   let currentOnmove: ((position: { lat: number; lon: number }) => void) | undefined;
   let currentOnmapclick: ((position: { lat: number; lon: number }) => void) | undefined;
-  let activePlacementMode: "route" | "sector" | null = null;
+  let activePlacementMode: "route" | null = null;
   /** False until the view was first set to a place */
   let positioned = false;
 
@@ -138,6 +139,82 @@
     }
     shared.map.setStyle(url);
     shared.map.once("style.load", () => setupStyleLayers(shared!.map));
+  }
+
+  /** Map style selector, grouped with the other map commands in the top-right control cluster */
+  class MapStyleControl implements IControl {
+    private select: HTMLSelectElement | undefined;
+
+    onAdd() {
+      const container = document.createElement("div");
+      container.className = "maplibregl-ctrl";
+      const select = document.createElement("select");
+      select.className =
+        "cursor-pointer rounded-md border border-border/80 bg-background/90 px-1.5 py-0.5 text-xs font-medium text-foreground shadow-sm backdrop-blur transition-colors";
+      select.setAttribute("aria-label", "Map style");
+      for (const style of MAP_STYLES) {
+        const option = document.createElement("option");
+        option.value = style.url;
+        option.textContent = style.label;
+        option.selected = style.url === currentStyleUrl;
+        select.appendChild(option);
+      }
+      select.onchange = () => setMapStyle(select.value);
+      container.appendChild(select);
+      this.select = select;
+      return container;
+    }
+
+    onRemove() {
+      this.select?.remove();
+      this.select = undefined;
+    }
+  }
+
+  /** Current "Add route" state, synced from the LocationMap instance to the control */
+  let addRouteState: { active: boolean; toggle: () => void } | undefined;
+
+  /** "Add route" toggle, grouped with the other map commands in the top-right control cluster */
+  class AddRouteControl implements IControl {
+    private container: HTMLDivElement | undefined;
+    private button: HTMLButtonElement | undefined;
+
+    onAdd() {
+      const container = document.createElement("div");
+      container.className = "maplibregl-ctrl";
+      const button = document.createElement("button");
+      button.type = "button";
+      button.title = "Add route";
+      button.setAttribute("aria-label", "Add route");
+      button.className =
+        "flex size-7 cursor-pointer items-center justify-center rounded-md border border-border/80 bg-background/90 text-foreground shadow-sm backdrop-blur transition-colors hover:bg-background aria-checked:border-primary aria-checked:bg-primary aria-checked:text-primary-foreground";
+      button.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.914 11.105A7.298 7.298 0 0 0 20 10a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 32 32 0 0 0 .824-.738"/><circle cx="12" cy="10" r="3"/><path d="M16 18h6"/><path d="M19 15v6"/></svg>';
+      button.onclick = () => addRouteState?.toggle();
+      container.appendChild(button);
+      this.container = container;
+      this.button = button;
+      return container;
+    }
+
+    onRemove() {
+      this.container?.remove();
+      this.container = undefined;
+      this.button = undefined;
+    }
+
+    /** Shows the button only while adding a route is possible, and highlights it while placing */
+    update() {
+      if (!this.container) return;
+      this.container.hidden = !addRouteState;
+      this.button?.setAttribute("aria-checked", String(addRouteState?.active === true));
+    }
+  }
+
+  let addRouteControl = new AddRouteControl();
+
+  function syncAddRouteControl() {
+    addRouteControl.update();
   }
 
   function applyHighlightFilters(map: MapLibreMap, slug: string) {
@@ -277,6 +354,8 @@
       }),
       "top-right",
     );
+    map.addControl(new MapStyleControl(), "top-right");
+    map.addControl(addRouteControl, "top-right");
 
     map.on("load", () => {
       setupStyleLayers(map);
@@ -369,6 +448,7 @@
     bounds,
     draggable = false,
     placementMode = null,
+    addRoute,
     zoom = 15,
     class: className = "",
     onmove,
@@ -380,7 +460,9 @@
     fallbackCoordinates?: { lat: number; lon: number } | undefined;
     bounds?: { x0: number; x1: number; y0: number; y1: number } | undefined;
     draggable?: boolean;
-    placementMode?: "route" | "sector" | null;
+    placementMode?: "route" | null;
+    /** When set, an "Add route" button is shown with the other map commands to toggle placement */
+    addRoute?: { active: boolean; toggle: () => void };
     zoom?: number;
     class?: string;
     onmove?: (position: { lat: number; lon: number }) => void;
@@ -390,7 +472,6 @@
   let host: HTMLDivElement;
   let attached = $state(false);
   let colorMode = $state<"grade" | "type" | "both">(sharedColorMode);
-  let styleUrl = $state(currentStyleUrl);
 
   /** True while the map has no climbing data to display yet, either downloading or reading the local database */
   const elementsLoading = $derived(
@@ -399,8 +480,10 @@
       (localDb.status === "ready" && !allElementsLoaded),
   );
 
+  // Reflect the "Add route" placement state in the map control
   $effect(() => {
-    setMapStyle(styleUrl);
+    addRouteState = addRoute;
+    syncAddRouteControl();
   });
 
   function moveToTarget() {
@@ -574,17 +657,6 @@
 <div class={`relative ${className}`}>
   <div bind:this={host} class="relative h-full w-full overflow-hidden rounded-md border border-border">
     <MapLegend bind:colorMode />
-    <div class="absolute top-3 left-3 z-10">
-      <select
-        bind:value={styleUrl}
-        class="rounded-md border border-border/80 bg-background/90 px-2 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur hover:bg-background transition-colors"
-        aria-label="Map style"
-      >
-        {#each MAP_STYLES as style (style.id)}
-          <option value={style.url}>{style.label}</option>
-        {/each}
-      </select>
-    </div>
     {#if elementsLoading}
       <div class="absolute inset-0 z-10 flex items-center justify-center">
         <div class="flex items-center gap-2 rounded-md bg-background/80 px-3 py-2 shadow-sm backdrop-blur-sm">

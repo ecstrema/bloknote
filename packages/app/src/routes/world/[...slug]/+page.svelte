@@ -34,9 +34,7 @@
   import DatabaseIcon from "@lucide/svelte/icons/database";
   import ExternalLinkIcon from "@lucide/svelte/icons/external-link";
   import FileTextIcon from "@lucide/svelte/icons/file-text";
-  import FolderPlusIcon from "@lucide/svelte/icons/folder-plus";
   import MapIcon from "@lucide/svelte/icons/map";
-  import MapPinPlusIcon from "@lucide/svelte/icons/map-pin-plus";
   import StethoscopeIcon from "@lucide/svelte/icons/stethoscope";
   import ActivityIcon from "@lucide/svelte/icons/activity";
   import CheckCircle2Icon from "@lucide/svelte/icons/check-circle-2";
@@ -219,7 +217,7 @@
     !loadingDiagnostics && diagnosticsCount === 0 && (!isAreaLike || localDb.ready),
   );
 
-  let placementMode = $state<"route" | "sector" | null>(null);
+  let placementMode = $state<"route" | null>(null);
   let addDialogOpen = $state(false);
   let addDialogKind = $state<"route" | "sector">("route");
   let clickedCoordinates = $state<{ lat: number; lon: number } | undefined>(undefined);
@@ -236,8 +234,8 @@
     if (effectiveTab !== "map") placementMode = null;
   });
 
-  function togglePlacement(mode: "route" | "sector") {
-    placementMode = placementMode === mode ? null : mode;
+  function togglePlacement() {
+    placementMode = placementMode ? null : "route";
   }
 
   function onMapPlacementClick(coords: { lat: number; lon: number }) {
@@ -327,30 +325,10 @@
 
   <Tabs.Content value="map" class="flex flex-col gap-2">
     {#if effectiveTab === "map"}
-      {#if appState.osmUser.loggedIn}
+      {#if appState.osmUser.loggedIn && placementMode}
         <div class="flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            variant={placementMode === "route" ? "default" : "outline"}
-            onclick={() => togglePlacement("route")}
-          >
-            <MapPinPlusIcon />
-            Add route
-          </Button>
-          <Button
-            size="sm"
-            variant={placementMode === "sector" ? "default" : "outline"}
-            onclick={() => togglePlacement("sector")}
-          >
-            <FolderPlusIcon />
-            Add sector
-          </Button>
-          {#if placementMode}
-            <span class="text-xs text-muted-foreground">
-              Click on the map to place the new {placementMode}.
-            </span>
-            <Button size="xs" variant="ghost" onclick={() => (placementMode = null)}>Cancel</Button>
-          {/if}
+          <span class="text-xs text-muted-foreground">Click on the map to place the new route.</span>
+          <Button size="xs" variant="ghost" onclick={() => (placementMode = null)}>Cancel</Button>
         </div>
       {/if}
       {#await import("#lib/components/location-map.svelte")}
@@ -364,6 +342,7 @@
           {fallbackCoordinates}
           {bounds}
           {placementMode}
+          addRoute={appState.osmUser.loggedIn ? { active: placementMode === "route", toggle: togglePlacement } : undefined}
           onmapclick={onMapPlacementClick}
           draggable={editable}
           onmove={editable ? (pos) => appState.setCoordinates(itemSlug, pos) : undefined}
