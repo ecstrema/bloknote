@@ -6,6 +6,12 @@ import { resolve } from "$app/paths";
 // Create a unique cache name for this deployment
 const APP_CACHE = `APP-${version}`;
 const MAP_TILES_CACHE = "map-tiles-v1";
+const API_CACHE = "api-json-v1";
+
+// The static API is mounted under the app base path, like apiUrl() on the main thread
+const API_WORLD_PATH = `${resolve("/").replace(/\/$/, "")}/api/world`;
+/** Files excluded from the API fallback cache: the dataset download is handled by the SQLite worker, and the version check must stay fresh */
+const UNCACHED_API_FILES = new Set(["download.json", "data-version.json"]);
 
 const ASSETS = [
   ...immutable.map((a) => resolve(a.path)), // the app itself
@@ -28,8 +34,8 @@ self.addEventListener("activate", (event) => {
   // Remove previous cached data from disk
   async function deleteOldCaches() {
     for (const key of await caches.keys()) {
-      // Delete old app caches, preserve map tiles cache
-      if (key !== APP_CACHE && key !== MAP_TILES_CACHE) {
+      // Delete old app caches, preserve map tiles and api fallback caches
+      if (key !== APP_CACHE && key !== MAP_TILES_CACHE && key !== API_CACHE) {
         await caches.delete(key);
       }
     }
@@ -58,7 +64,10 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
 
   // Climbing data is handled by the local SQLite database, or fetched directly in low data mode.
-  if (url.pathname.startsWith("/bloknote/api/world")) {
+  // Network-first with a cache fallback, so pages already visited keep working offline.
+  if (url.pathname.startsWith(API_WORLD_PATH)) {
+    const file = url.pathname.split("/").at(-1) ?? "";
+    if (!UNCACHED_API_FILES.has(file)) event.respondWith(handleApiJson(event.request, url.pathname));
     return;
   }
 
@@ -91,6 +100,18 @@ async function handleMapTile(request: Request): Promise<Response> {
 async function handleAppFile(request: Request, pathname: string): Promise<Response> {
   const appCache = await caches.open(APP_CACHE);
   return import.meta.env.DEV ? safeFetch(request) : safeFetchWithCache(appCache, pathname, request);
+}
+
+// Static API json. Fresh from the network when online; the last fetched copy answers offline.
+async function handleApiJson(request: Request, pathname: string): Promise<Response> {
+  const cache = await caches.open(API_CACHE);
+  try {
+    return await safeFetchAndCache(cache, pathname, request);
+  } catch {
+    const cached = await cache.match(pathname);
+    if (cached) return cached;
+    return new Response(undefined, { status: 504, statusText: "api fetch failed" });
+  }
 }
 
 async function safeFetchWithCache(cache: Cache, pathname: string, request: Request) {

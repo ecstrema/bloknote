@@ -50,6 +50,8 @@
   }
 
   async function checkForDataUpdate(): Promise<void> {
+    // Offline: the version check requires the network, and the SW must not serve a cached copy
+    if (!navigator.onLine) return;
     if (localDb.status === "unknown" && localDb.hasMarker) await localDb.init();
     if (!localDb.ready || !localDb.persistent) return;
 
