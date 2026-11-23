@@ -6,7 +6,7 @@
     "https://ecstrema.github.io/bloknote/settings/account",
     "https://ecstrema.github.io/bloknote/settings?tab=account"
   ],
-  "scope": "atproto transition:generic",
+  "scope": "atproto repo:org.bloknote.logbook.tick?action=create&action=delete repo:org.openstreetmap.star?action=create&action=delete repo:org.openstreetmap.review?action=create&action=delete",
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
   "token_endpoint_auth_method": "none",

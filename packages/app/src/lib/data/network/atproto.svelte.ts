@@ -25,8 +25,15 @@ const REVIEW_COLLECTION = "org.openstreetmap.review";
  * the client. It must stay in sync with that file.
  */
 const PRODUCTION_CLIENT_ID = "https://ecstrema.github.io/bloknote/client-metadata.json";
-/** Full repository access on the user's PDS (ticks, stars, reviews, profile) */
-const OAUTH_SCOPE = "atproto transition:generic";
+/**
+ * Minimal granular permissions: only create/delete records in the app's own
+ * collections on the user's PDS (ticks, stars, reviews). No broad repository
+ * access, blobs, account, or identity permissions. Record listing
+ * (com.atproto.repo.listRecords) is a public endpoint, so no read permission
+ * is needed. Must stay in sync with static/client-metadata.json.
+ */
+const OAUTH_SCOPE =
+  "atproto repo:org.bloknote.logbook.tick?action=create&action=delete repo:org.openstreetmap.star?action=create&action=delete repo:org.openstreetmap.review?action=create&action=delete";
 
 export interface AtProtoSession {
   did: string;
