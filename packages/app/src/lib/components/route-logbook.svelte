@@ -5,7 +5,6 @@
   import { Select } from "#components/ui/select/index.js";
   import { Textarea } from "#components/ui/textarea/index.js";
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
-  import BookmarkButton from "#components/bookmark-button.svelte";
   import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
   import { normalizedRatingToStars, starsToNormalizedRating, type AscentStyle } from "@bloknote/common";
         import type { OsmFeature } from "osm-api";
@@ -63,9 +62,7 @@
 <section class="flex flex-col gap-3 rounded-md border p-3.5" aria-label="Logbook and comments">
   <div class="flex flex-wrap items-center justify-between gap-2">
     <h2 class="text-sm font-semibold">Activity &amp; Comments</h2>
-    {#if atproto.configured}
-      <BookmarkButton labelled {feature} />
-    {:else}
+    {#if !atproto.configured}
       <a href={resolve("/settings/account")} class="text-xs text-primary hover:underline">
         Connect Atmosphere to log ticks &amp; comments
       </a>
