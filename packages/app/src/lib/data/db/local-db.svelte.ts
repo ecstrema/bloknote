@@ -2,7 +2,7 @@ import { browser, version } from "$app/env";
 import { apiUrl } from "../network/api-url";
 import type { DataJSON } from "@bloknote/climbing-data-gen";
 import type { AreaStats } from "#lib/types.js";
-import type { DbRequest, DbResponse, MapElementFeatureCollection, SearchFilters, TopLevelPoint } from "./types";
+import type { DbRequest, DbResponse, MapElementFeatureCollection, OsmRefEntry, SearchFilters, TopLevelPoint } from "./types";
 
 export type LocalDbStatus = "unknown" | "empty" | "downloading" | "ready" | "error";
 
@@ -201,6 +201,14 @@ class LocalDb {
 
   async getStats(slug: string): Promise<AreaStats | undefined> {
     return (await this.send({ type: "getStats", slug }, "stats")).data;
+  }
+
+  /** Looks elements up by OSM references like `way-123456`. Returns an entry only for the refs found. */
+  async getByOsmRefs(refs: string[]): Promise<Record<string, OsmRefEntry>> {
+    if (refs.length === 0) return {};
+    await this.init();
+    if (!this.ready) return {};
+    return (await this.send({ type: "getOsmRefs", refs }, "osmRefs")).data;
   }
 
   /** Streams the matching slugs to `onBatch`. `next()` runs for `budgetMs`, and resolves true when there are no more results. */

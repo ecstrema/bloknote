@@ -5,8 +5,42 @@
   import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
   import { Chart, Layer, Axis, Rect, Text } from "layerchart/svg";
   import { scaleBand, scaleLinear } from "d3-scale";
+  import { localDb } from "#lib/data/db/local-db.svelte.js";
+  import { getGrade } from "#lib/data/parse/osm-tags.js";
+  import HolyGrade from "#components/grade/holy-grade.svelte";
+  import type { Grade } from "#lib/types.js";
 
   const stats = $derived(computeUserStats(atproto.ticks));
+
+  /** Ticks and stars resolved against the local database: the route's slug, name, and grade */
+  type ResolvedRef = { slug: string; name?: string; grade?: Grade };
+  let resolvedRefs = $state<Record<string, ResolvedRef>>({});
+
+  const osmRefs = $derived([
+    ...new Set(
+      [...atproto.ticks, ...atproto.stars].map((entry) => `${entry.subject.type}-${entry.subject.id}`),
+    ),
+  ]);
+
+  $effect(() => {
+    const refs = osmRefs;
+    if (!localDb.ready || refs.length === 0) return;
+    void localDb.getByOsmRefs(refs).then((entries) => {
+      resolvedRefs = Object.fromEntries(
+        Object.entries(entries).map(([ref, entry]) => {
+          const tags = "tags" in entry.data ? (entry.data.tags ?? {}) : {};
+          return [ref, { slug: entry.slug, name: tags.name, grade: getGrade(tags)?.v }];
+        }),
+      );
+    });
+  });
+
+  function refHref(type: string, id: number): string {
+    const resolved = resolvedRefs[`${type}-${id}`];
+    return resolved
+      ? resolve("/world/[...slug]", { slug: resolved.slug })
+      : `${resolve("/world/[...slug]", { slug: "" })}?id=${type}-${id}`;
+  }
 
   const styleBars = $derived([
     { label: "Onsight", count: stats.byStyle.onsight ?? 0, color: "#10b981" },
@@ -73,10 +107,12 @@
           {#each atproto.stars as star (star)}
             <li>
               <a
-                href={`${resolve("/world/[...slug]", { slug: "" })}?id=${star.subject.type}-${star.subject.id}`}
+                href={refHref(star.subject.type, star.subject.id)}
                 class="inline-flex rounded border px-2 py-0.5 text-xs hover:bg-muted"
               >
-                {star.label || `${star.subject.type}/${star.subject.id}`}
+                {resolvedRefs[`${star.subject.type}-${star.subject.id}`]?.name
+                  ?? star.label
+                  ?? `${star.subject.type}/${star.subject.id}`}
               </a>
               {#if !star.uri}
                 <PendingSyncBadge />
@@ -94,11 +130,19 @@
           {#each atproto.ticks.slice(0, 10) as tick (tick)}
             <li class="flex flex-wrap items-baseline gap-2">
               <a
-                href={`${resolve("/world/[...slug]", { slug: "" })}?id=${tick.subject.type}-${tick.subject.id}`}
+                href={refHref(tick.subject.type, tick.subject.id)}
                 class="font-medium underline underline-offset-2"
               >
-                {tick.label || `${tick.subject.type}/${tick.subject.id}`}
+                {resolvedRefs[`${tick.subject.type}-${tick.subject.id}`]?.name
+                  ?? tick.label
+                  ?? `${tick.subject.type}/${tick.subject.id}`}
               </a>
+              {#if resolvedRefs[`${tick.subject.type}-${tick.subject.id}`]?.grade}
+                <HolyGrade
+                  class="text-xs font-semibold"
+                  grade={resolvedRefs[`${tick.subject.type}-${tick.subject.id}`]!.grade}
+                />
+              {/if}
               <span class="rounded bg-muted px-1.5 py-0.5 capitalize">{tick.style}</span>
               <span class="text-muted-foreground">{new Date(tick.climbedAt).toLocaleDateString()}</span>
               {#if tick.comment}

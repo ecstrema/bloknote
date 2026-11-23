@@ -58,10 +58,17 @@ export type DbRequest =
   | { id: number; type: "getChildren"; slug: string }
   | { id: number; type: "getSubtreeElements"; slug: string; limit?: number }
   | { id: number; type: "getStats"; slug: string }
+  /** Looks elements up by OSM references like `way-123456` */
+  | { id: number; type: "getOsmRefs"; refs: string[] }
   | { id: number; type: "filterStart"; searchId: number; filters: SearchFilters; budgetMs: number }
   /** Continues a search that paused after using its time budget */
   | { id: number; type: "filterMore"; searchId: number; budgetMs: number }
   | { id: number; type: "filterCancel"; searchId: number };
+
+export interface OsmRefEntry {
+  slug: string;
+  data: DataJSON;
+}
 
 export type DbResponse =
   | { id: number; type: "status"; ready: boolean; persistent: boolean; opfsUsable: boolean }
@@ -69,6 +76,7 @@ export type DbResponse =
   | { id: number; type: "children"; data: Record<string, DataJSON> }
   | { id: number; type: "subtreeElements"; data: Record<string, DataJSON>; truncated: boolean }
   | { id: number; type: "stats"; data: AreaStats | undefined }
+  | { id: number; type: "osmRefs"; data: Record<string, OsmRefEntry> }
   | { id: number; type: "topLevel"; data: TopLevelPoint[] }
   | { id: number; type: "allMapElements"; data: MapElementFeatureCollection }
   /** Streamed while a search runs, without being a reply to a request */

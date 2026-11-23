@@ -10,10 +10,10 @@ import {
   FEATURE_COLORS,
   ROUTE_STYLE_COLORS,
 } from "#lib/data/parse/route-styles.js";
-import type { DbRequest, DbResponse, MapElementFeature, SearchFilters } from "./types";
+import type { DbRequest, DbResponse, MapElementFeature, OsmRefEntry, SearchFilters } from "./types";
 
 /** Bump when the tables change: the database is then downloaded again */
-const SCHEMA = 2;
+const SCHEMA = 3;
 
 let dbPromise: Promise<{ db: Database; persistent: boolean; opfsUsable: boolean }> | undefined;
 
@@ -85,9 +85,11 @@ function createSchema(db: Database) {
     DROP TABLE IF EXISTS stats;
     DROP TABLE IF EXISTS places;
     CREATE TABLE elements (
-      slug TEXT PRIMARY KEY, parent_slug TEXT NOT NULL, data TEXT NOT NULL, type TEXT NOT NULL, grade_ref REAL
+      slug TEXT PRIMARY KEY, parent_slug TEXT NOT NULL, data TEXT NOT NULL, type TEXT NOT NULL, grade_ref REAL,
+      osm_ref TEXT
     );
     CREATE INDEX elements_parent ON elements (parent_slug);
+    CREATE INDEX elements_osm_ref ON elements (osm_ref);
     CREATE TABLE stats (slug TEXT PRIMARY KEY, total_routes INTEGER NOT NULL);
     CREATE VIRTUAL TABLE places USING fts5(
       name, slug UNINDEXED,
@@ -135,7 +137,7 @@ async function buildDatabase(url: string, version: string, bytes: number | undef
     createSchema(db);
     db.exec("DELETE FROM meta;");
     const insertElement = db.prepare(
-      "INSERT INTO elements (slug, parent_slug, data, type, grade_ref) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO elements (slug, parent_slug, data, type, grade_ref, osm_ref) VALUES (?, ?, ?, ?, ?, ?)",
     );
     const insertPlace = db.prepare("INSERT INTO places (name, slug) VALUES (?, ?)");
     const insertStats = db.prepare("INSERT INTO stats (slug, total_routes) VALUES (?, ?)");
@@ -151,6 +153,7 @@ async function buildDatabase(url: string, version: string, bytes: number | undef
             JSON.stringify(feature),
             featureToType(feature) ?? "other",
             gradeRef ?? null,
+            feature.type === "geographic" ? null : `${feature.type}-${feature.id}`,
           ])
           .stepReset();
         const name = getName(feature);
@@ -493,6 +496,14 @@ async function handle(req: DbRequest): Promise<DbResponse> {
     case "getStats": {
       const total = db.selectValue("SELECT total_routes FROM stats WHERE slug = ?", [req.slug]) as number | undefined;
       return { id: req.id, type: "stats", data: { totalRoutes: total ?? 0 } };
+    }
+    case "getOsmRefs": {
+      const data: Record<string, OsmRefEntry> = {};
+      for (const ref of req.refs) {
+        const rows = db.selectArrays("SELECT slug, data FROM elements WHERE osm_ref = ?", [ref]);
+        if (rows[0]) data[ref] = { slug: rows[0][0] as string, data: JSON.parse(rows[0][1] as string) };
+      }
+      return { id: req.id, type: "osmRefs", data };
     }
     case "filterStart": {
       const query = buildFilterQuery(req.filters);
