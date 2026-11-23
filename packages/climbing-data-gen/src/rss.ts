@@ -2,6 +2,13 @@ import type { OsmFeature } from "osm-api";
 
 /** Site root used to build feed and item links */
 export const SITE_BASE_URL = "https://ecstrema.github.io/bloknote";
+/** OpenStreetMap website root, for element and contributor profile links */
+export const OSM_BASE_URL = "https://www.openstreetmap.org";
+/** OpenClimbing root, for the mirror page of an OSM element */
+export const OPENCLIMBING_BASE_URL = "https://openclimbing.org/en";
+/** Wikimedia Commons URLs for the wikimedia_commons tag: file pages and direct images */
+export const COMMONS_WIKI_URL = "https://commons.wikimedia.org/wiki";
+export const COMMONS_FILE_URL = "https://commons.wikimedia.org/wiki/Special:FilePath";
 /** Items added or edited less than this many days ago are included in the feeds */
 export const RSS_RECENT_DAYS = 30;
 /** Maximum number of items in a single feed */
@@ -41,11 +48,47 @@ export function describeClimbingFeature(el: OsmFeature): string {
 
 const GRADE_TAG_PREFIX = "climbing:grade:";
 
+/** Percent-encodes a Commons file title for a URL, keeping the "File:" prefix raw */
+function encodeCommonsTitle(file: string): string {
+  const colon = file.indexOf(":");
+  return colon === -1 ? encodeURIComponent(file) : `${file.slice(0, colon + 1)}${encodeURIComponent(file.slice(colon + 1))}`;
+}
+
+/** File page and direct image URLs for each file listed in a wikimedia_commons tag (; separated) */
+function commonsFiles(value: string | undefined): { page: string; image: string }[] {
+  return (value ?? "")
+    .split(";")
+    .map((file) => file.trim())
+    .filter(Boolean)
+    .map((file) => ({
+      page: `${COMMONS_WIKI_URL}/${encodeCommonsTitle(file)}`,
+      image: `${COMMONS_FILE_URL}/${encodeCommonsTitle(file)}?width=480`,
+    }));
+}
+
+/** The "… was added by <contributor>" paragraph, with a link to the OSM profile */
+function authorParagraph(summary: string, user: string | undefined): string {
+  if (!user) return escapeXml(`${summary} was added by an anonymous editor`);
+  const profile = `${OSM_BASE_URL}/user/${encodeURIComponent(user)}`;
+  return `${escapeXml(`${summary} was added by`)} <a href="${escapeXml(profile)}">${escapeXml(user)}</a>`;
+}
+
+/** The paragraph of links to the same feature on OpenStreetMap, OpenClimbing and Bloknote */
+function linksParagraph(el: OsmFeature, bloknoteLink: string): string {
+  const links = [
+    ["OpenStreetMap", `${OSM_BASE_URL}/${el.type}/${el.id}`],
+    ["OpenClimbing", `${OPENCLIMBING_BASE_URL}/${el.type}/${el.id}`],
+    ["Bloknote", bloknoteLink],
+  ] as const;
+  return links.map(([label, href]) => `<a href="${escapeXml(href)}">${label}</a>`).join(" · ");
+}
+
 /**
  * Renders an RSS <item> for a climbing feature, or undefined when the element is not recent
  * (last edit older than RSS_RECENT_DAYS), unnamed, or carries no last-edit timestamp.
  * The Overpass data does not need any diffing against a previous build: each element carries
  * the date of its last edit, and newly created elements simply have a recent one.
+ * The description is escaped HTML: contributor credit, Commons photos, and provider links.
  */
 export function recentItemXml(el: OsmFeature, slug: string, now: number = Date.now()): RecentItem | undefined {
   const name = el.tags?.name;
@@ -60,13 +103,22 @@ export function recentItemXml(el: OsmFeature, slug: string, now: number = Date.n
   const cleanSlug = slug.replace(/^world\//, "");
   const link = `${SITE_BASE_URL}/world/${cleanSlug}`;
   const guid = `osm-${el.type}-${el.id}-v${el.version ?? 0}`;
+
+  const paragraphs = [`<p>${authorParagraph(summary, el.user)}</p>`];
+  for (const { page, image } of commonsFiles(el.tags?.wikimedia_commons)) {
+    paragraphs.push(
+      `<p><a href="${escapeXml(page)}"><img src="${escapeXml(image)}" alt="${escapeXml(`Photo of ${name}`)}" width="480"/></a></p>`,
+    );
+  }
+  paragraphs.push(`<p>${linksParagraph(el, link)}</p>`);
+
   const xml =
     `    <item>\n` +
     `      <title>${escapeXml(name)} — ${escapeXml(summary)}</title>\n` +
     `      <link>${escapeXml(link)}</link>\n` +
     `      <guid isPermaLink="false">${escapeXml(guid)}</guid>\n` +
     `      <pubDate>${new Date(timestamp).toUTCString()}</pubDate>\n` +
-    `      <description>${escapeXml(`${summary} on OpenStreetMap: https://www.openstreetmap.org/${el.type}/${el.id}`)}</description>\n` +
+    `      <description>${escapeXml(paragraphs.join(""))}</description>\n` +
     `    </item>`;
   return { timestamp, xml };
 }

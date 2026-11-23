@@ -23,7 +23,13 @@ describe("rss", () => {
 
   it("renders an item for a recent named element", () => {
     const item = recentItemXml(
-      feature({ id: 42, version: 3, timestamp: "2026-11-20T10:00:00Z", tags: { climbing: "crag", name: "Bas Cuvier" } }),
+      feature({
+        id: 42,
+        version: 3,
+        timestamp: "2026-11-20T10:00:00Z",
+        user: "Alice",
+        tags: { climbing: "crag", name: "Bas Cuvier" },
+      }),
       "world/europe/france/bas-cuvier",
       NOW,
     );
@@ -32,6 +38,92 @@ describe("rss", () => {
     expect(item!.xml).toContain("world/europe/france/bas-cuvier");
     expect(item!.xml).toContain('isPermaLink="false">osm-node-42-v3<');
     expect(item!.xml).toContain("Fri, 20 Nov 2026 10:00:00 GMT");
+  });
+
+  it("credits the contributor with a profile link in the description", () => {
+    const item = recentItemXml(
+      feature({ id: 1, timestamp: "2026-11-20T10:00:00Z", user: "Jérôme", tags: { name: "X" } }),
+      "world/x",
+      NOW,
+    )!;
+    expect(item.xml).toContain("Climbing feature was added by");
+    expect(item.xml).toContain(`href=&quot;https://www.openstreetmap.org/user/${encodeURIComponent("Jérôme")}&quot;`);
+    expect(item.xml).toContain("Jérôme&lt;/a&gt;");
+  });
+
+  it("falls back to an anonymous editor when the contributor is unknown", () => {
+    const item = recentItemXml(
+      feature({ id: 1, timestamp: "2026-11-20T10:00:00Z", tags: { name: "X" } }),
+      "world/x",
+      NOW,
+    )!;
+    expect(item.xml).toContain("was added by an anonymous editor");
+  });
+
+  it("links the feature on OpenStreetMap, OpenClimbing and Bloknote", () => {
+    const item = recentItemXml(
+      feature({ id: 7, timestamp: "2026-11-20T10:00:00Z", user: "Bob", tags: { name: "X" } }),
+      "world/europe/france/x",
+      NOW,
+    )!;
+    expect(item.xml).toContain("OpenStreetMap&lt;/a&gt;");
+    expect(item.xml).toContain("OpenClimbing&lt;/a&gt;");
+    expect(item.xml).toContain("Bloknote&lt;/a&gt;");
+    expect(item.xml).toContain("https://www.openstreetmap.org/node/7");
+    expect(item.xml).toContain("https://openclimbing.org/en/node/7");
+    expect(item.xml).toContain("https://ecstrema.github.io/bloknote/world/europe/france/x");
+  });
+
+  it("includes Wikimedia Commons photos in the content", () => {
+    const item = recentItemXml(
+      feature({
+        id: 1,
+        timestamp: "2026-11-20T10:00:00Z",
+        user: "Bob",
+        tags: { name: "Bas Cuvier", wikimedia_commons: "File:Bas Cuvier.jpg" },
+      }),
+      "world/x",
+      NOW,
+    )!;
+    expect(item.xml).toContain("https://commons.wikimedia.org/wiki/Special:FilePath/File:Bas%20Cuvier.jpg?width=480");
+    expect(item.xml).toContain("https://commons.wikimedia.org/wiki/File:Bas%20Cuvier.jpg");
+    expect(item.xml).toContain("Photo of Bas Cuvier");
+  });
+
+  it("supports multiple Commons files separated by semicolons", () => {
+    const item = recentItemXml(
+      feature({
+        id: 1,
+        timestamp: "2026-11-20T10:00:00Z",
+        tags: { name: "X", wikimedia_commons: "File:A.jpg;File:B.png" },
+      }),
+      "world/x",
+      NOW,
+    )!;
+    expect(item.xml).toContain("A.jpg");
+    expect(item.xml).toContain("B.png");
+  });
+
+  it("percent-encodes special characters in Commons file titles", () => {
+    const item = recentItemXml(
+      feature({
+        id: 1,
+        timestamp: "2026-11-20T10:00:00Z",
+        tags: { name: "X", wikimedia_commons: "File:A & B.jpg" },
+      }),
+      "world/x",
+      NOW,
+    )!;
+    expect(item.xml).toContain("Special:FilePath/File:A%20%26%20B.jpg");
+  });
+
+  it("omits photos when there is no wikimedia_commons tag", () => {
+    const item = recentItemXml(
+      feature({ id: 1, timestamp: "2026-11-20T10:00:00Z", tags: { name: "X" } }),
+      "world/x",
+      NOW,
+    )!;
+    expect(item.xml).not.toContain("commons.wikimedia.org");
   });
 
   it("skips unnamed, timestamp-less, and stale elements", () => {
