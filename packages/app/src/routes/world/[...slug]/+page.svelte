@@ -293,21 +293,27 @@
     <Tabs.List variant="line" class="max-md:h-fit max-md:w-full max-md:flex-wrap max-md:justify-start">
       <Tabs.Trigger value="overview">
         <span class="icon-[lucide--file-text] shrink-0 size-4"></span>
+        <!-- @wc-context: Tab label: overview of the climbing item (route, crag, area or gym) -->
         Overview
       </Tabs.Trigger>
       <Tabs.Trigger value="map">
         <span class="icon-[lucide--map] shrink-0 size-4"></span>
+        <!-- @wc-context: Tab label: interactive map showing the location of the climbing item -->
         Map
       </Tabs.Trigger>
       {#if hasOsmData}
         <Tabs.Trigger value="osm">
           <span class="icon-[lucide--database] shrink-0 size-4"></span>
+          <!-- @wc-context: Tab label: raw OpenStreetMap tags of the climbing item -->
           OSM Data
         </Tabs.Trigger>
       {/if}
       <Tabs.Trigger value="diagnostics">
         <span class="icon-[lucide--stethoscope] shrink-0 size-4"></span>
-        <span>Diagnostics</span>
+        <span>
+          <!-- @wc-context: Tab label: problems found in the OpenStreetMap data of the climbing item -->
+          Diagnostics
+        </span>
         {#if diagnosticsCount > 0}
           <span
             class="rounded-full bg-amber-500/20 px-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300"
@@ -320,7 +326,10 @@
       </Tabs.Trigger>
       <Tabs.Trigger value="pulse">
         <span class="icon-[lucide--activity] shrink-0 size-4"></span>
-        <span>Pulse</span>
+        <span>
+          <!-- @wc-context: Tab label: Pulse, the activity panel with stars, comments and ticks from the community -->
+          Pulse
+        </span>
       </Tabs.Trigger>
     </Tabs.List>
   </div>

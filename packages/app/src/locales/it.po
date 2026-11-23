@@ -15715,17 +15715,14 @@ msgstr "Tag obsoleti"
 msgid "No OpenStreetMap tags."
 msgstr "Nessun tag OpenStreetMap."
 
-#: src/routes/world/[...slug]/+page.svelte
-msgid "<0/> OSM Data"
-msgstr "Dati OSM di <0/>"
+#~ msgid "<0/> OSM Data"
+#~ msgstr "Dati OSM di <0/>"
 
-#: src/routes/world/[...slug]/+page.svelte
-msgid "<0/> Overview"
-msgstr "Panoramica di <0/>"
+#~ msgid "<0/> Overview"
+#~ msgstr "Panoramica di <0/>"
 
-#: src/routes/world/[...slug]/+page.svelte
-msgid "<0/> Map"
-msgstr "Mappa di <0/>"
+#~ msgid "<0/> Map"
+#~ msgstr "Mappa di <0/>"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgid "View on OpenStreetMap <0/>"
@@ -16552,9 +16549,8 @@ msgstr "Arrampicatore"
 msgid "Comments ({0})"
 msgstr "Commenti ({0})"
 
-#: src/routes/world/[...slug]/+page.svelte
-msgid "Diagnostics"
-msgstr "Diagnostica"
+#~ msgid "Diagnostics"
+#~ msgstr "Diagnostica"
 
 #: src/routes/+page.svelte
 #: src/routes/settings/+layout.svelte
@@ -16764,9 +16760,8 @@ msgstr "Sono disponibili nuovi dati di arrampicata"
 msgid "Your offline data is from {0}"
 msgstr "I tuoi dati offline sono del {0}"
 
-#: src/routes/world/[...slug]/+page.svelte
-msgid "Pulse"
-msgstr "Pulse"
+#~ msgid "Pulse"
+#~ msgstr "Pulse"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap)."
@@ -16974,9 +16969,8 @@ msgstr ""
 msgid "Click on the map to place the new route."
 msgstr ""
 
-#: src/lib/components/climbing-provider-links.svelte
-msgid "theCrag"
-msgstr ""
+#~ msgid "theCrag"
+#~ msgstr ""
 
 #: src/lib/components/climbing-provider-links.svelte
 msgid "Search on theCrag"
@@ -17148,3 +17142,49 @@ msgstr ""
 #: src/routes/settings/account/user-stats-panel.svelte
 msgid "Bookmarked climbs"
 msgstr ""
+
+#: src/lib/components/climbing-provider-links.svelte
+msgid "<0/> View in..."
+msgstr "<0/> Vedi in..."
+
+#: src/lib/components/climbing-provider-links.svelte
+msgid "View in climbing apps"
+msgstr "Vedi nelle app di arrampicata"
+
+#: src/lib/components/climbing-provider-links.svelte
+msgid "Choose a climbing data provider."
+msgstr "Scegli un fornitore di dati di arrampicata."
+
+#~ msgid "Overview"
+#~ msgstr ""
+
+#~ msgid "Map"
+#~ msgstr ""
+
+#~ msgid "OSM Data"
+#~ msgstr ""
+
+#: src/routes/world/[...slug]/+page.svelte
+msgctxt "Tab label: overview of the climbing item (route, crag, area or gym)"
+msgid "Overview"
+msgstr "Panoramica"
+
+#: src/routes/world/[...slug]/+page.svelte
+msgctxt "Tab label: interactive map showing the location of the climbing item"
+msgid "Map"
+msgstr "Mappa"
+
+#: src/routes/world/[...slug]/+page.svelte
+msgctxt "Tab label: raw OpenStreetMap tags of the climbing item"
+msgid "OSM Data"
+msgstr "Dati OSM"
+
+#: src/routes/world/[...slug]/+page.svelte
+msgctxt "Tab label: problems found in the OpenStreetMap data of the climbing item"
+msgid "Diagnostics"
+msgstr "Diagnostica"
+
+#: src/routes/world/[...slug]/+page.svelte
+msgctxt "Tab label: Pulse, the activity panel with stars, comments and ticks from the community"
+msgid "Pulse"
+msgstr "Pulse"
