@@ -30,7 +30,7 @@
 
   const DATA_REFRESH_INTERVAL = 6 * 60 * 60 * 1000;
 
-  type DataUpdate = { version: string; date?: string };
+  type DataUpdate = { version: string; date?: string; bytes?: number };
 
   /** Set when the published dataset differs from the one stored locally */
   let dataUpdate = $state<DataUpdate>();
@@ -58,11 +58,15 @@
     try {
       const response = await fetch(apiUrl("", "data-version.json"), { cache: "no-store" });
       if (!response.ok) return;
-      const { version, date } = (await response.json()) as { version: number; date?: string };
+      const { version, date, bytes } = (await response.json()) as {
+        version: number;
+        date?: string;
+        bytes?: number;
+      };
       if (!version) return;
       const published = String(version);
       if (published === localDb.dataVersion) return;
-      dataUpdate = { version: published, date };
+      dataUpdate = { version: published, date, bytes };
     } catch (error) {
       console.error("Failed to check for updated climbing data:", error);
     }
@@ -70,9 +74,9 @@
 
   function updateData(): void {
     if (!dataUpdate) return;
-    const { version } = dataUpdate;
+    const { version, bytes } = dataUpdate;
     dataUpdate = undefined;
-    void localDb.refresh(version);
+    void localDb.refresh(version, bytes);
   }
 
   // When a visited page turns out to have newer data on OSM, check whether a newer dataset is published.

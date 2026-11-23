@@ -350,6 +350,8 @@ function writeStaticApiMetadata(worldDirectory: string) {
   );
   writeFileSync(
     join(worldDirectory, "data-version.json"),
-    JSON.stringify({ version, date: generatedAt.toISOString() }),
+    // bytes is the decompressed size of download.json: when the static host serves it with
+    // gzip/brotli, the transfer content-length is smaller and cannot be used as download total.
+    JSON.stringify({ version, date: generatedAt.toISOString(), bytes: Buffer.byteLength(downloadJson) }),
   );
 }

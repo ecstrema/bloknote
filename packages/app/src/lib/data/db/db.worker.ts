@@ -56,15 +56,15 @@ function getMeta(db: Database, key: string): string | undefined {
   return db.selectValue("SELECT value FROM meta WHERE key = ?", [key]) as string | undefined;
 }
 
-async function buildDatabase(url: string, version: string, id: number) {
+async function buildDatabase(url: string, version: string, bytes: number | undefined, id: number) {
   const { db } = await openDb();
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to download ${url}: ${res.status}`);
+  // Prefer the exact decompressed size published in data-version.json: with gzip/brotli the
+  // transfer content-length is smaller than the bytes read from the decoded stream, which made
+  // the percentage go way above 100%. Fall back to content-length for unencoded responses.
   const length = Number(res.headers.get("content-length"));
-  // `content-length` counts the compressed transfer size, while the reader below yields
-  // decompressed bytes: with gzip/brotli the percentage would go way above 100%, so only
-  // trust the total for unencoded responses
-  const total = length > 0 && !res.headers.get("content-encoding") ? length : undefined;
+  const total = bytes ?? (length > 0 && !res.headers.get("content-encoding") ? length : undefined);
   const chunks: Uint8Array[] = [];
   let loaded = 0;
   const reader = res.body!.getReader();
@@ -241,7 +241,7 @@ async function handle(req: DbRequest): Promise<DbResponse> {
     case "status":
       return { id: req.id, type: "status", ready: getMeta(db, "version") === `${req.version}:${SCHEMA}`, persistent };
     case "build":
-      await buildDatabase(req.url, req.version, req.id);
+      await buildDatabase(req.url, req.version, req.bytes, req.id);
       return { id: req.id, type: "status", ready: true, persistent };
     case "getNode": {
       const data = db.selectValue("SELECT data FROM elements WHERE slug = ?", [req.slug]) as string | undefined;

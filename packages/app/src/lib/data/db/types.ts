@@ -53,7 +53,7 @@ export type DbRequest =
   | { id: number; type: "status"; version: string }
   | { id: number; type: "getTopLevel" }
   | { id: number; type: "getAllMapElements" }
-  | { id: number; type: "build"; url: string; version: string }
+  | { id: number; type: "build"; url: string; version: string; bytes?: number }
   | { id: number; type: "getNode"; slug: string }
   | { id: number; type: "getChildren"; slug: string }
   | { id: number; type: "getSubtreeElements"; slug: string; limit?: number }

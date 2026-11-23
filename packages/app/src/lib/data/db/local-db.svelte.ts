@@ -126,14 +126,19 @@ class LocalDb {
     // Record the published dataset version rather than the app version, so the marker
     // stays comparable with the version passed to refresh() later on.
     let version = this.dataVersion;
+    let bytes: number | undefined;
     try {
       const res = await fetch(apiUrl("", "data-version.json"), { cache: "no-store" });
-      if (res.ok) version = String(((await res.json()) as { version: number }).version);
+      if (res.ok) {
+        const data = (await res.json()) as { version: number; bytes?: number };
+        version = String(data.version);
+        bytes = data.bytes;
+      }
     } catch {
       // Keep the previous marker when the published version cannot be fetched
     }
     try {
-      await this.send({ type: "build", version: version ?? "unknown", url: apiUrl("", "download.json") }, "status");
+      await this.send({ type: "build", version: version ?? "unknown", url: apiUrl("", "download.json"), bytes }, "status");
       localStorage.setItem(MARKER_KEY, version ?? "unknown");
       this.status = "ready";
     } catch (err) {
@@ -143,7 +148,7 @@ class LocalDb {
   }
 
   /** Rebuilds the local database only when the published dataset has changed. */
-  async refresh(dataVersion: string): Promise<void> {
+  async refresh(dataVersion: string, bytes?: number): Promise<void> {
     await this.init();
     if (this.status !== "ready") return;
 
@@ -157,7 +162,7 @@ class LocalDb {
     this.loaded = 0;
     this.total = undefined;
     try {
-      await this.send({ type: "build", version: dataVersion, url: apiUrl("", "download.json") }, "status");
+      await this.send({ type: "build", version: dataVersion, url: apiUrl("", "download.json"), bytes }, "status");
       localStorage.setItem(MARKER_KEY, dataVersion);
       this.upstreamChanged = false;
       this.status = "ready";
