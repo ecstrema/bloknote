@@ -137,3 +137,14 @@ bun run dev
 # Regenerate region name translations
 bun run region-names
 ```
+
+### Production build duration (`bun run build`)
+
+A full production build takes **~8 minutes** wall clock on this machine. The Vite bundle itself is
+fast (~6 s), but **prerendering the whole world tree dominates (~6–7 min)** and the static adapter
+adds ~1 more minute. When you run it, launch it in the background (`nohup ... &` with output
+redirected to a log file) and poll the log with **exponential backoff sleeps**: 30 s, 1 min, 2 min,
+4 min — expect the "Prerendering" phase to sit silently for several minutes before the adapter
+finishes. Do not use short fixed sleeps (30 s tool timeouts will kill your polling loop), and do
+not assume the build is stuck during prerendering.
+
