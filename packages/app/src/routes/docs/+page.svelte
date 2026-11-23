@@ -6,14 +6,18 @@
   import BloknoteLogo from "#components/bloknote-logo.svelte";
   import { Button } from "#components/ui/button/index.js";
 
-  type DocSectionId = "how-it-works" | "osm" | "wikimedia" | "lexicons";
+  type DocSectionId = "how-it-works" | "offline-data" | "osm" | "wikimedia" | "lexicons";
 
-  const sections: { id: DocSectionId; title: string }[] = [
-    { id: "how-it-works", title: "How Bloknote works" },
-    { id: "osm", title: "OpenStreetMap integration" },
-    { id: "wikimedia", title: "Wikimedia Commons" },
-    { id: "lexicons", title: "ATProto Lexicons" },
+  const sections: { id: DocSectionId; title: string; audience: "user" | "technical" }[] = [
+    { id: "how-it-works", title: "How Bloknote works", audience: "user" },
+    { id: "offline-data", title: "Offline data & static builds", audience: "technical" },
+    { id: "osm", title: "OpenStreetMap integration", audience: "technical" },
+    { id: "wikimedia", title: "Wikimedia Commons", audience: "technical" },
+    { id: "lexicons", title: "ATProto Lexicons", audience: "technical" },
   ];
+
+  const userSections = sections.filter((s) => s.audience === "user");
+  const technicalSections = sections.filter((s) => s.audience === "technical");
 
   function parseSection(value: string | null): DocSectionId {
     return sections.some((s) => s.id === value) ? (value as DocSectionId) : "how-it-works";
@@ -50,8 +54,19 @@
 
   <div class="mx-auto grid max-w-5xl gap-8 px-5 py-8 sm:grid-cols-[14rem_1fr] sm:px-8">
     <aside class="flex flex-col gap-1">
-      <p class="px-2 pb-1 text-xs font-semibold uppercase text-muted-foreground">Documentation</p>
-      {#each sections as section (section.id)}
+      <p class="px-2 pb-1 text-xs font-semibold uppercase text-muted-foreground">User guide</p>
+      {#each userSections as section (section.id)}
+        <Button
+          variant={active === section.id ? "secondary" : "ghost"}
+          size="sm"
+          class="justify-start"
+          onclick={() => selectSection(section.id)}
+        >
+          {section.title}
+        </Button>
+      {/each}
+      <p class="px-2 pt-3 pb-1 text-xs font-semibold uppercase text-muted-foreground">Technical</p>
+      {#each technicalSections as section (section.id)}
         <Button
           variant={active === section.id ? "secondary" : "ghost"}
           size="sm"
@@ -65,32 +80,55 @@
 
     <main class="prose prose-sm dark:prose-invert max-w-none">
       {#if active === "how-it-works"}
-        <h1>How Bloknote works &amp; Contributing</h1>
+        <h1>How Bloknote works</h1>
         <p>
-          Bloknote is a static, offline-capable climbing directory built entirely on open data. There is no proprietary
-          central database: routes, crags, sectors, and gyms live on <strong>OpenStreetMap</strong>, topo photos live on
-          <strong>Wikimedia Commons</strong>, and personal ticks or reviews belong to your own
-          <strong>Atmosphere (AT Protocol)</strong> repository.
+          Bloknote is a free climbing directory built entirely on open data. There is no proprietary central database:
+          the climbing map itself, your photos, and your personal logbook are stored in open services that you control.
         </p>
-        <h2>Static builds &amp; offline SQLite cache</h2>
-        <p>
-          A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static
-          JSON endpoints. In your browser, Bloknote downloads this snapshot into a local WebAssembly SQLite database so
-          tree browsing, filtering, and diagnostics work instantaneously—even offline.
-        </p>
-        <h2>What contributing means</h2>
+        <h2>Your data stays yours</h2>
         <ul>
           <li>
-            <strong>Map &amp; route edits go to OpenStreetMap</strong> under the Open Database License (ODbL), benefiting
-            every open climbing app and mapper, not just Bloknote.
+            <strong>The climbing map lives on OpenStreetMap</strong> — the shared, free map of the world. Any crag, sector,
+            or route you add or improve also benefits every other app, website, and mapper.
           </li>
           <li>
-            <strong>Topo photos go to Wikimedia Commons</strong> under a free Creative Commons license (CC BY-SA 4.0, CC BY
-            4.0, or CC0), so anyone can reuse and attribute them.
+            <strong>Photos live on Wikimedia Commons</strong> — the free media library, published under a free license so
+            anyone can reuse them.
           </li>
           <li>
-            <strong>Personal activity stays yours</strong>: ascents, bookmarks, and comments are modeled as AT Protocol
-            records stored in your personal data server (PDS).
+            <strong>Your logbook, comments, and bookmarks live in your own Atmosphere (AT Protocol) account</strong> — a
+            personal data repository that belongs to you, not to Bloknote. You keep full control and can take your data
+            with you to other apps.
+          </li>
+        </ul>
+        <p>
+          Because your climbing data is spread across open services instead of being locked in one app, you stay in full
+          control: leave Bloknote and your data remains — improve the map and every climber benefits.
+        </p>
+        <h2>Works offline</h2>
+        <p>
+          Once loaded, Bloknote keeps a local copy of the climbing directory on your device, so browsing, filtering, and
+          your logbook keep working without a connection.
+        </p>
+      {:else if active === "offline-data"}
+        <h1>Offline data &amp; static builds</h1>
+        <p>
+          A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static JSON
+          endpoints, published as a versioned snapshot.
+        </p>
+        <h2>Offline SQLite cache</h2>
+        <p>
+          In your browser, Bloknote downloads this snapshot into a local WebAssembly SQLite database so tree browsing,
+          filtering, and diagnostics work instantaneously—even offline.
+        </p>
+        <h2>Service worker caches</h2>
+        <ul>
+          <li><strong>App shell</strong> — the application bundles and pages, refreshed network-first on each update.</li>
+          <li><strong>Map tiles</strong> — vector tiles, fonts and sprites from the map providers you enable.</li>
+          <li><strong>Topo images</strong> — Wikimedia Commons images, pruned with a FIFO cap.</li>
+          <li>
+            <strong>Edit-map</strong> — the boundary editor is online-only: it needs live Overpass/OSM access and its
+            boundary files are never stored offline.
           </li>
         </ul>
       {:else if active === "osm"}

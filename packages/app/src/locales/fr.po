@@ -16562,6 +16562,7 @@ msgid "Docs"
 msgstr "Docs"
 
 #: src/routes/docs/+page.svelte
+#: src/routes/docs/+page.svelte
 msgid "How Bloknote works"
 msgstr "Fonctionnement de Bloknote"
 
@@ -16577,40 +16578,32 @@ msgstr "Lexiques ATProto"
 msgid "Documentation | Bloknote"
 msgstr "Documentation | Bloknote"
 
-#: src/routes/docs/+page.svelte
-msgid "Documentation"
-msgstr "Documentation"
+#~ msgid "Documentation"
+#~ msgstr "Documentation"
 
-#: src/routes/docs/+page.svelte
-msgid "<0>Map & route edits go to OpenStreetMap</0> under the Open Database License (ODbL), benefiting every open climbing app and mapper, not just Bloknote."
-msgstr "<0>Les modifications de cartes et de voies vont sur OpenStreetMap</0> sous la licence Open Database (ODbL), au bénéfice de toutes les applications d'escalade libres et de tous les contributeurs, pas seulement de Bloknote."
+#~ msgid "<0>Map & route edits go to OpenStreetMap</0> under the Open Database License (ODbL), benefiting every open climbing app and mapper, not just Bloknote."
+#~ msgstr "<0>Les modifications de cartes et de voies vont sur OpenStreetMap</0> sous la licence Open Database (ODbL), au bénéfice de toutes les applications d'escalade libres et de tous les contributeurs, pas seulement de Bloknote."
 
-#: src/routes/docs/+page.svelte
-msgid "<0>Topo photos go to Wikimedia Commons</0> under a free Creative Commons license (CC BY-SA 4.0, CC BY 4.0, or CC0), so anyone can reuse and attribute them."
-msgstr "<0>Les photos de topos vont sur Wikimedia Commons</0> sous une licence Creative Commons libre (CC BY-SA 4.0, CC BY 4.0 ou CC0), afin que chacun puisse les réutiliser et les attribuer."
+#~ msgid "<0>Topo photos go to Wikimedia Commons</0> under a free Creative Commons license (CC BY-SA 4.0, CC BY 4.0, or CC0), so anyone can reuse and attribute them."
+#~ msgstr "<0>Les photos de topos vont sur Wikimedia Commons</0> sous une licence Creative Commons libre (CC BY-SA 4.0, CC BY 4.0 ou CC0), afin que chacun puisse les réutiliser et les attribuer."
 
 #~ msgid "<0>Personal activity stays yours</0>: ascents, stars, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
 #~ msgstr "<0>Votre activité personnelle reste la vôtre</0> : ascensions, favoris et commentaires sont modélisés comme des enregistrements AT Protocol stockés sur votre serveur de données personnel (PDS)."
 
-#: src/routes/docs/+page.svelte
-msgid "How Bloknote works & Contributing"
-msgstr "Fonctionnement de Bloknote et contribution"
+#~ msgid "How Bloknote works & Contributing"
+#~ msgstr "Fonctionnement de Bloknote et contribution"
 
-#: src/routes/docs/+page.svelte
-msgid "Bloknote is a static, offline-capable climbing directory built entirely on open data. There is no proprietary central database: routes, crags, sectors, and gyms live on <0>OpenStreetMap</0>, topo photos live on <1>Wikimedia Commons</1>, and personal ticks or reviews belong to your own <2>Atmosphere (AT Protocol)</2> repository."
-msgstr "Bloknote est un annuaire d'escalade statique utilisable hors ligne, entièrement construit sur des données ouvertes. Il n'existe pas de base de données centrale propriétaire : les voies, crags, secteurs et salles vivent sur <0>OpenStreetMap</0>, les photos de topos sur <1>Wikimedia Commons</1>, et les ascensions ou avis personnels appartiennent à votre propre dépôt <2>Atmosphere (AT Protocol)</2>."
+#~ msgid "Bloknote is a static, offline-capable climbing directory built entirely on open data. There is no proprietary central database: routes, crags, sectors, and gyms live on <0>OpenStreetMap</0>, topo photos live on <1>Wikimedia Commons</1>, and personal ticks or reviews belong to your own <2>Atmosphere (AT Protocol)</2> repository."
+#~ msgstr "Bloknote est un annuaire d'escalade statique utilisable hors ligne, entièrement construit sur des données ouvertes. Il n'existe pas de base de données centrale propriétaire : les voies, crags, secteurs et salles vivent sur <0>OpenStreetMap</0>, les photos de topos sur <1>Wikimedia Commons</1>, et les ascensions ou avis personnels appartiennent à votre propre dépôt <2>Atmosphere (AT Protocol)</2>."
 
-#: src/routes/docs/+page.svelte
-msgid "Static builds & offline SQLite cache"
-msgstr "Compilation statique et cache SQLite hors ligne"
+#~ msgid "Static builds & offline SQLite cache"
+#~ msgstr "Compilation statique et cache SQLite hors ligne"
 
-#: src/routes/docs/+page.svelte
-msgid "A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static JSON endpoints. In your browser, Bloknote downloads this snapshot into a local WebAssembly SQLite database so tree browsing, filtering, and diagnostics work instantaneously—even offline."
-msgstr "Un pipeline planifié compile les données d'escalade Overpass mondiales et les frontières régionales GeoJSON en points d'accès JSON statiques. Dans votre navigateur, Bloknote télécharge cet instantané dans une base SQLite WebAssembly locale, afin que la navigation dans l'arborescence, le filtrage et les diagnostics soient instantanés — même hors ligne."
+#~ msgid "A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static JSON endpoints. In your browser, Bloknote downloads this snapshot into a local WebAssembly SQLite database so tree browsing, filtering, and diagnostics work instantaneously—even offline."
+#~ msgstr "Un pipeline planifié compile les données d'escalade Overpass mondiales et les frontières régionales GeoJSON en points d'accès JSON statiques. Dans votre navigateur, Bloknote télécharge cet instantané dans une base SQLite WebAssembly locale, afin que la navigation dans l'arborescence, le filtrage et les diagnostics soient instantanés — même hors ligne."
 
-#: src/routes/docs/+page.svelte
-msgid "What contributing means"
-msgstr "Ce que contribuer signifie"
+#~ msgid "What contributing means"
+#~ msgstr "Ce que contribuer signifie"
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Multi-sector climbing areas or regions containing crags or sub-areas."
@@ -17057,9 +17050,8 @@ msgstr ""
 msgid "Bookmark this climb"
 msgstr ""
 
-#: src/routes/docs/+page.svelte
-msgid "<0>Personal activity stays yours</0>: ascents, bookmarks, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
-msgstr ""
+#~ msgid "<0>Personal activity stays yours</0>: ascents, bookmarks, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
+#~ msgstr ""
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Bookmarked climbing features."
@@ -17076,4 +17068,81 @@ msgstr ""
 
 #: src/routes/settings/account/user-stats-panel.svelte
 msgid "Bookmarked climbs"
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+#: src/routes/docs/+page.svelte
+msgid "Offline data & static builds"
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "User guide"
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "Technical"
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "<0>The climbing map lives on OpenStreetMap</0> — the shared, free map of the world. Any crag, sector, or route you add or improve also benefits every other app, website, and mapper."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "<0>Photos live on Wikimedia Commons</0> — the free media library, published under a free license so anyone can reuse them."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "<0>Your logbook, comments, and bookmarks live in your own Atmosphere (AT Protocol) account</0> — a personal data repository that belongs to you, not to Bloknote. You keep full control and can take your data with you to other apps."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "Bloknote is a free climbing directory built entirely on open data. There is no proprietary central database: the climbing map itself, your photos, and your personal logbook are stored in open services that you control."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "Your data stays yours"
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "Because your climbing data is spread across open services instead of being locked in one app, you stay in full control: leave Bloknote and your data remains — improve the map and every climber benefits."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "Works offline"
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "Once loaded, Bloknote keeps a local copy of the climbing directory on your device, so browsing, filtering, and your logbook keep working without a connection."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "<0>App shell</0> — the application bundles and pages, refreshed network-first on each update."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "<0>Map tiles</0> — vector tiles, fonts and sprites from the map providers you enable."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "<0>Topo images</0> — Wikimedia Commons images, pruned with a FIFO cap."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "<0>Edit-map</0> — the boundary editor is online-only: it needs live Overpass/OSM access and its boundary files are never stored offline."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static JSON endpoints, published as a versioned snapshot."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "Offline SQLite cache"
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "In your browser, Bloknote downloads this snapshot into a local WebAssembly SQLite database so tree browsing, filtering, and diagnostics work instantaneously—even offline."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "Service worker caches"
 msgstr ""
