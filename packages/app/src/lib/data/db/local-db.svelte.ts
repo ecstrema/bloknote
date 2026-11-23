@@ -24,6 +24,8 @@ class LocalDb {
   status = $state<LocalDbStatus>("unknown");
   /** False when the database lives in memory only, and would be lost on reload */
   persistent = $state(true);
+  /** Whether the browser could actually use OPFS, even though another tab may hold the database */
+  opfsAvailable = $state(false);
   /** True when a visited page showed that OSM has newer data than the downloaded dataset */
   upstreamChanged = $state(false);
   /** Bytes downloaded so far, and the total when the server tells it */
@@ -106,6 +108,7 @@ class LocalDb {
     this.initPromise ??= this.send({ type: "status", version: this.dataVersion ?? version }, "status")
       .then((res) => {
         this.persistent = res.persistent;
+        this.opfsAvailable = res.opfsUsable;
         this.status = res.ready ? "ready" : "empty";
         if (!res.ready) localStorage.removeItem(MARKER_KEY);
       })

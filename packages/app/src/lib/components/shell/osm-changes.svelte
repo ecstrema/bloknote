@@ -1,7 +1,5 @@
 <script lang="ts">
-  import UploadIcon from "@lucide/svelte/icons/upload";
-  import DeleteIcon from "@lucide/svelte/icons/delete";
-  import { Button } from "#components/ui/button/index.js";
+      import { Button } from "#components/ui/button/index.js";
   import * as Dialog from "#components/ui/dialog/index.js";
   import { Textarea } from "#components/ui/textarea/index.js";
   import { getNameOSM } from "#lib/data/parse/osm-tags.js";
@@ -106,7 +104,7 @@
         class="fixed bottom-5 right-5 z-20 shadow-lg"
         aria-label="Review pending OpenStreetMap changes to submit them"
       >
-        <UploadIcon />
+        <span class="icon-[lucide--upload] shrink-0 size-4"></span>
         <span class="text-xs">{appState.osmUser.changes.size}</span>
       </Button>
     </Dialog.DialogTrigger>
@@ -151,7 +149,7 @@
                   aria-label="Revert changes to {displayName}"
                   onclick={() => appState.resetFeature(slug)}
                 >
-                  <DeleteIcon />
+                  <span class="icon-[lucide--delete] shrink-0 size-4"></span>
                 </Button>
               {/if}
             </div>

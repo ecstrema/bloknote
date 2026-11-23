@@ -6,9 +6,7 @@
   import { cn } from "#lib/utils.js";
   import { getAppState } from "#lib/data/app-state.js";
   import { Button } from "#components/ui/button/index.js";
-  import Trash2Icon from "@lucide/svelte/icons/trash-2";
-  import PlusIcon from "@lucide/svelte/icons/plus";
-
+    
   const {
     feature,
     featureSlug,
@@ -103,7 +101,7 @@
       class="self-start font-normal"
       onclick={() => (newTag = { key: "", value: "" })}
     >
-      <PlusIcon />
+      <span class="icon-[lucide--plus] shrink-0 size-4"></span>
       New tag
     </Button>
   {/if}
@@ -141,7 +139,7 @@
             title="Delete tag {key}"
             onclick={() => appState.deleteTag(featureSlug, key)}
           >
-            <Trash2Icon />
+            <span class="icon-[lucide--trash-2] shrink-0 size-4"></span>
           </Button>
         </Table.Cell>
       {/if}

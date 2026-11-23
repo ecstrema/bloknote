@@ -1,9 +1,5 @@
 <script lang="ts">
-  import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
-  import FolderIcon from "@lucide/svelte/icons/folder";
-  import FileJsonIcon from "@lucide/svelte/icons/file-json";
-  import CircleDashedIcon from "@lucide/svelte/icons/circle-dashed";
-  import clsx from "clsx";
+          import clsx from "clsx";
   import { BOUNDARY_STATE_COLORS } from "./types";
   import { LARGE_BOUNDARY_BYTES } from "@bloknote/reverse-geocoding-data/shared";
 
@@ -101,16 +97,16 @@
         manuallyOpen = !open;
       }}
     >
-      <ChevronRightIcon class={clsx("size-3.5 transition-transform", open && "rotate-90")} />
+      <span class={clsx("icon-[lucide--chevron-right] shrink-0 size-3.5 transition-transform", open && "rotate-90")}></span>
     </button>
 
     <span class="shrink-0 text-muted-foreground" title={sourceTitle()}>
       {#if !isLeaf}
-        <FolderIcon class="size-3.5" />
+        <span class="icon-[lucide--folder] shrink-0 size-3.5"></span>
       {:else if info.hasFile}
-        <FileJsonIcon class="size-3.5" />
+        <span class="icon-[lucide--file-json] shrink-0 size-3.5"></span>
       {:else}
-        <CircleDashedIcon class="size-3.5 text-rose-600" />
+        <span class="icon-[lucide--circle-dashed] shrink-0 size-3.5 text-rose-600"></span>
       {/if}
     </span>
 

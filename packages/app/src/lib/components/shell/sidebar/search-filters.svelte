@@ -2,9 +2,7 @@
   import { Button } from "#components/ui/button/index.js";
   import Input from "#components/ui/input/input.svelte";
   import * as DropdownMenu from "#components/ui/dropdown-menu/index.js";
-  import XIcon from "@lucide/svelte/icons/x";
-  import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";
-  import type { SearchFilters } from "#lib/data/db/types.js";
+      import type { SearchFilters } from "#lib/data/db/types.js";
   import { gradeTextToReference } from "#lib/data/db/grade-text.js";
 
   let {
@@ -85,7 +83,7 @@
       {#snippet child({ props })}
         <Button {...props} variant="outline" size="sm" class="justify-between">
           {styleSummary}
-          <ChevronDownIcon class="size-4" />
+          <span class="icon-[lucide--chevron-down] shrink-0 size-4"></span>
         </Button>
       {/snippet}
     </DropdownMenu.Trigger>
@@ -120,7 +118,7 @@
       {#each filters.tags as tag, i (i)}
         <Button size="xs" variant="secondary" onclick={() => (filters.tags = filters.tags.filter((_, j) => j !== i))}>
           {tag.key}{tag.value ? `=${tag.value}` : ""}
-          <XIcon class="size-3" />
+          <span class="icon-[lucide--x] shrink-0 size-3"></span>
         </Button>
       {/each}
     </div>

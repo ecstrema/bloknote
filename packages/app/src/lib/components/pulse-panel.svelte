@@ -12,9 +12,7 @@
   import { getParentSlug } from "#lib/helpers/slug.js";
   import { getItemUrl } from "#components/shell/sidebar/utils.js";
   import type { DataTree } from "#lib/types.js";
-  import ActivityIcon from "@lucide/svelte/icons/activity";
-  import LoaderIcon from "@lucide/svelte/icons/loader-circle";
-
+    
   let { item, slug }: { item: DataTree; slug: string } = $props();
 
   const appState = getAppState();
@@ -102,12 +100,12 @@
 <div class="flex flex-col gap-4">
   {#if loadingSubtree}
     <div class="flex items-center gap-2 rounded-md border p-4 text-sm text-muted-foreground">
-      <LoaderIcon class="size-4 animate-spin" aria-hidden="true" />
+      <span aria-hidden="true"  class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>
       <span>Loading edit history…</span>
     </div>
   {:else if stats.total === 0}
     <div class="flex items-center gap-2 rounded-md border p-4 text-sm text-muted-foreground">
-      <ActivityIcon class="size-4" aria-hidden="true" />
+      <span aria-hidden="true"  class="icon-[lucide--activity] shrink-0 size-4"></span>
       <span>
         {#if stats.untimed > 0}
           This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap).

@@ -1,9 +1,14 @@
 <script module lang="ts">
   import "maplibre-gl/dist/maplibre-gl.css";
+  import { mount, unmount } from "svelte";
   import {
     Map as MapLibreMap,
     Marker,
     Popup,
+    NavigationControl,
+    GeolocateControl,
+    TerrainControl,
+    ScaleControl,
     type GeoJSONSource,
     type IControl,
   } from "#lib/maplibre.js";
@@ -15,8 +20,9 @@
   import { FEATURE_COLORS } from "#lib/data/parse/route-styles.js";
   import type { OsmFeature } from "osm-api";
   import { setMapCenterProvider } from "./map-center.js";
-  import { MapButtonsControl, LOCATE_ICON, MINUS_ICON, PLUS_ICON } from "./map-controls.js";
-  import { CLIMBING_LAYERS, featureToMapElement, formatPopupHtml, MAP_STYLES, VECTOR_STYLE } from "./location-map-helper.js";
+  import { addTerrainSource } from "./map-controls.js";
+  import { CLIMBING_LAYERS, featureToMapElement, formatPopupHtml, VECTOR_STYLE } from "./location-map-helper.js";
+  import MapLegend from "./map-legend.svelte";
 
   // One map (and WebGL context) for the whole app: kept across page navigation.
   let shared: { map: MapLibreMap; element: HTMLDivElement } | undefined;
@@ -27,20 +33,28 @@
   /** False until the view was first set to a place */
   let positioned = false;
 
-  const MAP_STYLE_KEY = "bloknote:map-style";
-  let currentStyleUrl =
-    typeof localStorage !== "undefined" ? (localStorage.getItem(MAP_STYLE_KEY) ?? VECTOR_STYLE) : VECTOR_STYLE;
   let activeHighlightSlug = "";
+  /** Set while a lasso drag just finished, so the click that follows does not navigate */
+  let suppressNextClick = false;
+  let allElementsLoaded = $state(false);
+  let cachedCollection: MapElementFeatureCollection = { type: "FeatureCollection", features: [] };
+  const loadedSlugs = new Set<string>();
+  let sharedColorMode: "grade" | "type" | "both" = "both";
+  /** Slugs currently selected through the sidebar (or a map lasso), highlighted on the map */
+  let activeSelectionSlugs: string[] = [];
+  /** Set by the LocationMap instance, which has access to the sidebar selection context */
+  let lassoSelect: ((slugs: string[]) => void) | undefined;
+
+  function setSharedColorMode(mode: "grade" | "type" | "both") {
+    sharedColorMode = mode;
+    if (shared?.map) applyColorMode(shared.map, mode);
+  }
 
   setMapCenterProvider(() => {
     if (!shared || !shared.element.isConnected || !positioned) return undefined;
     const center = shared.map.getCenter();
     return { lat: center.lat, lon: center.lng };
   });
-  let allElementsLoaded = $state(false);
-  let cachedCollection: MapElementFeatureCollection = { type: "FeatureCollection", features: [] };
-  const loadedSlugs = new Set<string>();
-  let sharedColorMode: "grade" | "type" | "both" = "both";
 
   function setMarkerPosition(coords: { lat: number; lon: number }, draggable = false) {
     if (!shared) return;
@@ -58,23 +72,6 @@
         }
       });
     }
-  }
-
-  /** Marks the user's position on the map after the locate button is used */
-  let locateMarker: Marker | undefined;
-
-  function locateUser(map: MapLibreMap) {
-    if (!("geolocation" in navigator)) return;
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lngLat: [number, number] = [position.coords.longitude, position.coords.latitude];
-        if (locateMarker) locateMarker.setLngLat(lngLat);
-        else locateMarker = new Marker({ color: "#2563eb" }).setLngLat(lngLat).addTo(map);
-        map.easeTo({ center: lngLat });
-      },
-      (error) => console.error("Could not get the current position:", error.message),
-      { enableHighAccuracy: true },
-    );
   }
 
   function applyColorMode(map: MapLibreMap, mode: "grade" | "type" | "both") {
@@ -112,6 +109,7 @@
 
   /** Adds the climbing source and layers to the current style. Safe to call again after a style switch. */
   function setupStyleLayers(map: MapLibreMap) {
+    addTerrainSource(map);
     // Hide basemap climbing POIs so vector tiles do not duplicate or conflict with our data
     for (const layer of map.getStyle().layers || []) {
       const l = layer as { id: string; "source-layer"?: string; filter?: any[] };
@@ -144,49 +142,6 @@
     applyHighlightFilters(map, activeHighlightSlug);
   }
 
-  /** Switches the basemap style, keeping the climbing layers, and remembers the choice. */
-  function setMapStyle(url: string) {
-    if (!shared || url === currentStyleUrl) return;
-    currentStyleUrl = url;
-    try {
-      localStorage.setItem(MAP_STYLE_KEY, url);
-    } catch {
-      // Ignore storage failures
-    }
-    shared.map.setStyle(url);
-    shared.map.once("style.load", () => setupStyleLayers(shared!.map));
-  }
-
-  /** Map style selector, grouped with the other map commands in the top-right control cluster */
-  class MapStyleControl implements IControl {
-    private select: HTMLSelectElement | undefined;
-
-    onAdd() {
-      const container = document.createElement("div");
-      container.className = "maplibregl-ctrl";
-      const select = document.createElement("select");
-      select.className =
-        "cursor-pointer rounded-md border border-border/80 bg-background/90 px-1.5 py-0.5 text-xs font-medium text-foreground shadow-sm backdrop-blur transition-colors";
-      select.setAttribute("aria-label", "Map style");
-      for (const style of MAP_STYLES) {
-        const option = document.createElement("option");
-        option.value = style.url;
-        option.textContent = style.label;
-        option.selected = style.url === currentStyleUrl;
-        select.appendChild(option);
-      }
-      select.onchange = () => setMapStyle(select.value);
-      container.appendChild(select);
-      this.select = select;
-      return container;
-    }
-
-    onRemove() {
-      this.select?.remove();
-      this.select = undefined;
-    }
-  }
-
   /** Current "Add route" state, synced from the LocationMap instance to the control */
   let addRouteState: { active: boolean; toggle: () => void } | undefined;
 
@@ -202,10 +157,12 @@
       button.type = "button";
       button.title = "Add route";
       button.setAttribute("aria-label", "Add route");
+      // Styled after the MapLibre controls, which stay white in every color mode
       button.className =
-        "flex size-7 cursor-pointer items-center justify-center rounded-md border border-border/80 bg-background/90 text-foreground shadow-sm backdrop-blur transition-colors hover:bg-background aria-checked:border-primary aria-checked:bg-primary aria-checked:text-primary-foreground";
+        "flex h-[29px] w-[29px] cursor-pointer items-center justify-center overflow-hidden rounded-md border border-black/10 bg-white text-slate-800 shadow-[0_0_0_2px_rgba(0,0,0,0.1)] transition-colors hover:bg-slate-100 sm:w-auto sm:px-2 aria-checked:border-primary aria-checked:bg-primary aria-checked:text-primary-foreground";
       button.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.914 11.105A7.298 7.298 0 0 0 20 10a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 32 32 0 0 0 .824-.738"/><circle cx="12" cy="10" r="3"/><path d="M16 18h6"/><path d="M19 15v6"/></svg>';
+        '<span class="icon-[lucide--map-pin-plus] size-5 shrink-0 sm:hidden" aria-hidden="true"></span>' +
+        '<span class="hidden text-[13px] font-medium sm:inline">Add route</span>';
       button.onclick = () => addRouteState?.toggle();
       container.appendChild(button);
       this.container = container;
@@ -233,6 +190,29 @@
     addRouteControl.update();
   }
 
+  /** Collapsible legend, grouped with the other map commands in the top-right control cluster */
+  class LegendControl implements IControl {
+    private container: HTMLDivElement | undefined;
+    private instance: ReturnType<typeof mount> | undefined;
+
+    onAdd() {
+      const container = document.createElement("div");
+      container.className = "maplibregl-ctrl map-legend-ctrl";
+      this.instance = mount(MapLegend, { target: container, props: { onColorMode: setSharedColorMode } });
+      this.container = container;
+      return container;
+    }
+
+    onRemove() {
+      if (this.instance) unmount(this.instance as never);
+      this.instance = undefined;
+      this.container?.remove();
+      this.container = undefined;
+    }
+  }
+
+  let legendControl = new LegendControl();
+
   function applyHighlightFilters(map: MapLibreMap, slug: string) {
     const cleanSlug = slug.replace(/^world\//, "");
     if (map.getLayer("selected-ring")) {
@@ -240,7 +220,11 @@
         "all",
         ["==", ["geometry-type"], "Point"],
         ["!=", ["get", "elementType"], "sector"],
-        ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
+        [
+          "any",
+          ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
+          ["in", ["get", "slug"], ["literal", activeSelectionSlugs]],
+        ],
       ]);
     }
     if (map.getLayer("selected-sector")) {
@@ -343,38 +327,145 @@
     }
   }
 
+  type LassoPoint = { x: number; y: number };
+
+  /** Coordinates of every vertex of a rendered feature line, for the lasso hit test */
+  function featureLineCoordinates(geometry: GeoJSON.Geometry): [number, number][] {
+    if (geometry.type === "LineString") return geometry.coordinates as [number, number][];
+    if (geometry.type === "MultiLineString") return geometry.coordinates.flat() as [number, number][];
+    if (geometry.type === "Point") return [geometry.coordinates as [number, number]];
+    return [];
+  }
+
+  /** Even-odd ray casting against the closed freehand lasso */
+  function pointInPolygon(point: LassoPoint, polygon: LassoPoint[]) {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const a = polygon[i]!;
+      const b = polygon[j]!;
+      if (a.y > point.y !== b.y > point.y && point.x < ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x) inside = !inside;
+    }
+    return inside;
+  }
+
+  /** True when any route segment crosses a lasso edge, so routes poking through the shape are caught too */
+  function lineCrossesPolygon(points: LassoPoint[], polygon: LassoPoint[]) {
+    const cross = (o: LassoPoint, p: LassoPoint, q: LassoPoint) => (p.x - o.x) * (q.y - o.y) - (p.y - o.y) * (q.x - o.x);
+    for (let i = 1; i < points.length; i++) {
+      for (let j = 1; j < polygon.length; j++) {
+        const a = points[i - 1]!;
+        const b = points[i]!;
+        const c = polygon[j - 1]!;
+        const d = polygon[j]!;
+        if (cross(a, b, c) * cross(a, b, d) < 0 && cross(c, d, a) * cross(c, d, b) < 0) return true;
+      }
+    }
+    return false;
+  }
+
+
+  /** Shift+drag draws a freehand lasso and selects every route inside or crossing it, like the sidebar selection */
+  function setupLasso(map: MapLibreMap) {
+    let overlay: SVGSVGElement | undefined;
+    let path: SVGPathElement | undefined;
+    let trace: LassoPoint[] | undefined;
+
+    function endLasso() {
+      overlay?.remove();
+      overlay = path = undefined;
+      trace = undefined;
+      map.getCanvas().style.cursor = "";
+    }
+
+    function updateTrace(point: LassoPoint) {
+      if (!trace || !path) return;
+      const last = trace.at(-1);
+      // Skip points closer than 2px: keeps the SVG path and the hit-test polygon small
+      if (last && Math.hypot(point.x - last.x, point.y - last.y) < 2) return;
+      trace.push(point);
+      path.setAttribute("d", `M${trace.map((p) => `${Math.round(p.x)} ${Math.round(p.y)}`).join("L")}`);
+    }
+
+    map.on("mousedown", (e) => {
+      if (activePlacementMode || !e.originalEvent.shiftKey || e.originalEvent.button !== 0 || trace) return;
+      // Without the default box zoom, shift+drag would pan the map: freeze it while selecting
+      e.preventDefault();
+      suppressNextClick = true;
+      trace = [e.point];
+      overlay = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      overlay.classList.add("map-lasso-overlay");
+      path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.classList.add("map-lasso");
+      overlay.appendChild(path);
+      map.getContainer().appendChild(overlay);
+    });
+
+    map.on("mousemove", (e) => {
+      if (trace) updateTrace(e.point);
+    });
+
+    map.on("mouseup", (e) => {
+      if (!trace) return;
+      updateTrace(e.point);
+      const polygon = trace;
+      endLasso();
+      const slugs = new Set<string>();
+      for (const feature of map.queryRenderedFeatures({ layers: ["routes"] })) {
+        const points = featureLineCoordinates(feature.geometry).map((c) => map.project(c));
+        if (points.some((p) => pointInPolygon(p, polygon)) || lineCrossesPolygon(points, polygon)) {
+          const slug = feature.properties?.slug;
+          if (typeof slug === "string") slugs.add(slug);
+        }
+      }
+      // The click event fires right after mouseup: swallow it so it does not navigate
+      setTimeout(() => (suppressNextClick = false), 0);
+      if (slugs.size > 0) lassoSelect?.([...slugs]);
+    });
+
+    // Right-clicking the selection opens the same bulk context menu as the sidebar selection
+    map.getCanvas().addEventListener("contextmenu", (e) => {
+      if (activeSelectionSlugs.length === 0) return;
+      e.preventDefault();
+      const tree = document.querySelector<HTMLDivElement>('[role="tree"]');
+      if (!tree) return;
+      tree.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          cancelable: true,
+          button: 2,
+          clientX: e.clientX,
+          clientY: e.clientY,
+        }),
+      );
+    });
+  }
+
   function getSharedMap() {
     if (shared) return shared;
     const element = document.createElement("div");
-    element.className = "size-full";
+    element.className = "size-full location-map-host";
     const map = new MapLibreMap({
       container: element,
-      style: currentStyleUrl,
+      style: VECTOR_STYLE,
       center: [0, 30],
       zoom: 1.5,
       maxZoom: 22,
       maxTileCacheSize: 200,
       attributionControl: { compact: true },
-      dragRotate: false,
-      pitchWithRotate: false,
-      touchPitch: false,
     });
     if (typeof window !== "undefined") (window as any).__maplibre = map;
-    map.touchZoomRotate.disableRotation();
-    map.keyboard.disableRotation();
-    map.addControl(
-      new MapButtonsControl([
-        { title: "Zoom in", svg: PLUS_ICON, onClick: (map) => map.zoomIn(), desktopOnly: true },
-        { title: "Zoom out", svg: MINUS_ICON, onClick: (map) => map.zoomOut(), desktopOnly: true },
-        { title: "Show the current location", svg: LOCATE_ICON, onClick: (map) => locateUser(map) },
-      ]),
-      "top-right",
-    );
-    map.addControl(new MapStyleControl(), "top-right");
+    map.addControl(new NavigationControl({ visualizePitch: true }), "top-right");
+    map.addControl(new GeolocateControl({ positionOptions: { enableHighAccuracy: true } }), "top-right");
+    map.addControl(new TerrainControl({ source: "terrain" }), "top-right");
     map.addControl(addRouteControl, "top-right");
+    map.addControl(legendControl, "top-right");
+    map.addControl(new ScaleControl({ unit: "metric" }), "bottom-left");
+    // Shift+drag draws a selection lasso instead of the default box zoom
+    map.boxZoom.disable();
 
     map.on("load", () => {
       setupStyleLayers(map);
+      setupLasso(map);
 
       const popup = new Popup({
         closeButton: false,
@@ -420,6 +511,10 @@
       });
 
       map.on("click", (e) => {
+        if (suppressNextClick) {
+          suppressNextClick = false;
+          return;
+        }
         if (activePlacementMode && currentOnmapclick) {
           currentOnmapclick({ lat: e.lngLat.lat, lon: e.lngLat.lng });
           return;
@@ -453,8 +548,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { GeographicFolderElement } from "@bloknote/climbing-data-gen";
-  import LoaderCircle from "@lucide/svelte/icons/loader-circle";
-  import MapLegend from "./map-legend.svelte";
+  import { getSidebarSelection } from "./shell/sidebar/selection.svelte";
 
   let {
     currentSlug = "",
@@ -487,7 +581,6 @@
 
   let host: HTMLDivElement;
   let attached = $state(false);
-  let colorMode = $state<"grade" | "type" | "both">(sharedColorMode);
 
   /** True while the map has no climbing data to display yet, either downloading or reading the local database */
   const elementsLoading = $derived(
@@ -495,6 +588,15 @@
       localDb.status === "downloading" ||
       (localDb.status === "ready" && !allElementsLoaded),
   );
+
+  const selection = getSidebarSelection();
+
+  // The lasso and the sidebar share the same selection: both highlight on the map and the tree
+  $effect(() => {
+    lassoSelect = (slugs) => {
+      for (const slug of slugs) selection?.selected.add(slug);
+    };
+  });
 
   // Reflect the "Add route" placement state in the map control
   $effect(() => {
@@ -591,7 +693,7 @@
       moveToTarget();
       updateActiveHighlight(currentSlug);
       updateDraggableMarker();
-      applyColorMode(map, colorMode);
+      applyColorMode(map, sharedColorMode);
     };
 
     if (map.getLayer("routes")) {
@@ -661,22 +763,19 @@
     }
   });
 
-  // Dynamically update route circle color mode (grade, type, both)
+  // Highlight lasso/selected routes on the map when the sidebar selection changes
   $effect(() => {
-    sharedColorMode = colorMode;
-    if (attached && shared?.map) {
-      applyColorMode(shared.map, colorMode);
-    }
+    activeSelectionSlugs = selection ? [...selection.selected] : [];
+    if (attached && shared?.map) applyHighlightFilters(shared.map, currentSlug);
   });
 </script>
 
 <div class={`relative ${className}`}>
   <div bind:this={host} class="relative h-full w-full overflow-hidden rounded-md border border-border">
-    <MapLegend bind:colorMode />
     {#if elementsLoading}
       <div class="absolute inset-0 z-10 flex items-center justify-center">
         <div class="flex items-center gap-2 rounded-md bg-background/80 px-3 py-2 shadow-sm backdrop-blur-sm">
-          <LoaderCircle class="size-4 animate-spin text-muted-foreground" />
+          <span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin text-muted-foreground"></span>
           {#if localDb.status === "downloading" && localDb.total}
             <span class="text-xs text-muted-foreground">
               {localDb.phase === "parsing" ? "Parsing" : "Downloading"} climbing data
@@ -692,6 +791,13 @@
 </div>
 
 <style>
+  /* The compass (pitch indicator) only makes sense with 3D terrain enabled */
+  :global(.location-map-host .maplibregl-ctrl-compass) {
+    display: none;
+  }
+  :global(.location-map-host.map-3d .maplibregl-ctrl-compass) {
+    display: block;
+  }
   /* MapLibre popups are white, whatever the theme */
   :global(.location-map-popup .maplibregl-popup-content) {
     background: var(--popover);
@@ -714,5 +820,21 @@
   }
   :global(.location-map-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip) {
     border-left-color: var(--popover);
+  }
+  /* Freehand selection lasso drawn with shift+drag */
+  :global(.map-lasso-overlay) {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  :global(.map-lasso-overlay .map-lasso) {
+    fill: rgba(37, 99, 235, 0.1);
+    stroke: #2563eb;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
 </style>

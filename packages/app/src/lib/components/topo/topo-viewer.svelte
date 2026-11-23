@@ -4,14 +4,7 @@
   import * as Dialog from "#components/ui/dialog/index.js";
   import { Select } from "#components/ui/select/index.js";
   import { getAppState } from "#lib/data/app-state.js";
-  import CheckIcon from "@lucide/svelte/icons/check";
-  import ChevronLeftIcon from "@lucide/svelte/icons/chevron-left";
-  import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
-  import PencilIcon from "@lucide/svelte/icons/pencil";
-  import Trash2Icon from "@lucide/svelte/icons/trash-2";
-  import Undo2Icon from "@lucide/svelte/icons/undo-2";
-  import XIcon from "@lucide/svelte/icons/x";
-  import type { Key } from "osm-api";
+                import type { Key } from "osm-api";
   import {
     findMatchingImageTag,
     findNextImageTagKey,
@@ -269,9 +262,9 @@
 
       {#if appState.osmUser.loggedIn && editingRouteSlug}
         <div class="flex flex-wrap items-center gap-1.5 rounded-md border bg-muted/30 p-2">
-          <Button size="sm" onclick={saveEdit}><CheckIcon /> Save path</Button>
+          <Button size="sm" onclick={saveEdit}><span class="icon-[lucide--check] shrink-0 size-4"></span> Save path</Button>
           <Button size="sm" variant="outline" onclick={undoLastPoint} disabled={draftPoints.length === 0}>
-            <Undo2Icon /> Undo
+            <span class="icon-[lucide--undo-2] shrink-0 size-4"></span> Undo
           </Button>
           <Button
             size="icon-sm"
@@ -280,7 +273,7 @@
             onclick={() => stepPoint(-1)}
             disabled={draftPoints.length < 2}
           >
-            <ChevronLeftIcon />
+            <span class="icon-[lucide--chevron-left] shrink-0 size-4"></span>
           </Button>
           <Button
             size="icon-sm"
@@ -289,10 +282,10 @@
             onclick={() => stepPoint(1)}
             disabled={draftPoints.length < 2}
           >
-            <ChevronRightIcon />
+            <span class="icon-[lucide--chevron-right] shrink-0 size-4"></span>
           </Button>
           <Button size="sm" variant="outline" onclick={removeSelectedPoint} disabled={selectedPoint === undefined}>
-            <Trash2Icon /> Remove point
+            <span class="icon-[lucide--trash-2] shrink-0 size-4"></span> Remove point
           </Button>
           <Select
             class="h-8 w-auto px-2 text-xs"
@@ -316,7 +309,7 @@
           >
             Dotted
           </Button>
-          <Button size="icon-sm" variant="ghost" title="Cancel" onclick={resetEditing}><XIcon /></Button>
+          <Button size="icon-sm" variant="ghost" title="Cancel" onclick={resetEditing}><span class="icon-[lucide--x] shrink-0 size-4"></span></Button>
         </div>
         {#if editError}
           <p class="text-sm text-destructive">{editError}</p>
@@ -326,13 +319,13 @@
           <div>
             {#if treeRoutes.some((r) => r.slug === featureSlug)}
               <Button size="sm" variant="outline" onclick={() => startEditingRoute(featureSlug)}>
-                <PencilIcon /> Edit path
+                <span class="icon-[lucide--pencil] shrink-0 size-4"></span> Edit path
               </Button>
             {/if}
           </div>
           {#if canRemoveOwnImage}
             <Button size="sm" variant="ghost" class="text-destructive hover:text-destructive" onclick={removeOwnImage}>
-              <Trash2Icon /> Remove image
+              <span class="icon-[lucide--trash-2] shrink-0 size-4"></span> Remove image
             </Button>
           {/if}
         </div>

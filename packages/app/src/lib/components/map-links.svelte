@@ -4,11 +4,7 @@
   import { MAP_PROVIDERS, type MapCoordinates, type MapProvider } from "#lib/data/map-providers.js";
   import { settings } from "#lib/data/settings.svelte.js";
   import { IsMobile } from "#lib/hooks/is-mobile.svelte.js";
-  import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";
-  import ChevronUpIcon from "@lucide/svelte/icons/chevron-up";
-  import ExternalLinkIcon from "@lucide/svelte/icons/external-link";
-  import MapIcon from "@lucide/svelte/icons/map";
-
+        
   let { coordinates, name }: { coordinates: MapCoordinates; name?: string } = $props();
 
   const isMobile = new IsMobile();
@@ -29,7 +25,7 @@
   <Sheet.Trigger>
     {#snippet child({ props })}
       <Button {...props} variant="outline" size="sm" class="self-start">
-        <MapIcon aria-hidden="true" />
+        <span aria-hidden="true"  class="icon-[lucide--map] shrink-0 size-4"></span>
         Open in...
       </Button>
     {/snippet}
@@ -67,10 +63,10 @@
       {#if extraProviders.length > 0 || showMore}
         <Button type="button" variant="ghost" size="sm" class="mt-1 self-start" onclick={() => (showMore = !showMore)}>
           {#if showMore}
-            <ChevronUpIcon />
+            <span class="icon-[lucide--chevron-up] shrink-0 size-4"></span>
             Show fewer
           {:else}
-            <ChevronDownIcon />
+            <span class="icon-[lucide--chevron-down] shrink-0 size-4"></span>
             More ({extraProviders.length})
           {/if}
         </Button>
@@ -96,7 +92,7 @@
         </div>
         <p class="truncate text-xs text-muted-foreground">{provider.description}</p>
       </div>
-      <ExternalLinkIcon class="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <span aria-hidden="true"  class="icon-[lucide--external-link] shrink-0 size-4 shrink-0 text-muted-foreground"></span>
     </a>
     <input
       type="checkbox"

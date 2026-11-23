@@ -5,10 +5,7 @@
   import { getCoordinates, getPhone } from "#lib/data/parse/osm-tags.js";
   import type { DataTree } from "#lib/types.js";
   import type { OsmFeature } from "osm-api";
-  import PhoneIcon from "@lucide/svelte/icons/phone";
-  import GlobeIcon from "@lucide/svelte/icons/globe";
-  import CircleDollarSignIcon from "@lucide/svelte/icons/circle-dollar-sign";
-  import MapLinks from "#lib/components/map-links.svelte";
+        import MapLinks from "#lib/components/map-links.svelte";
 import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
   import EditableOpeningHours from "#lib/components/editable/editable-opening-hours.svelte";
   import { getFee, getFeeCharge, getWebsite } from "#lib/data/parse/gym-tags.js";
@@ -34,14 +31,14 @@ import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelt
 <div class="flex flex-wrap items-center gap-3 text-sm">
   {#if phone}
     <p class="flex items-center gap-1.5">
-      <PhoneIcon class="size-4 text-muted-foreground" aria-hidden="true" />
+      <span aria-hidden="true"  class="icon-[lucide--phone] shrink-0 size-4 text-muted-foreground"></span>
       <a class="underline underline-offset-2" href={`tel:${phone}`}>{phone}</a>
     </p>
   {/if}
 
   {#if website}
     <p class="flex items-center gap-1.5">
-      <GlobeIcon class="size-4 text-muted-foreground" aria-hidden="true" />
+      <span aria-hidden="true"  class="icon-[lucide--globe] shrink-0 size-4 text-muted-foreground"></span>
       <a class="underline underline-offset-2" href={website} target="_blank" rel="noopener noreferrer">
         {website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
       </a>
@@ -50,10 +47,12 @@ import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelt
 
   {#if fee !== undefined}
     <span class="flex items-center" title={fee ? (charge ? `Fee: ${charge}` : "Fee") : "Free"}>
-      <CircleDollarSignIcon
-        class={fee ? "size-4 text-foreground" : "size-4 text-muted-foreground"}
+      <span
+        class="icon-[lucide--circle-dollar-sign] shrink-0 size-4"
+        class:text-foreground={fee}
+        class:text-muted-foreground={!fee}
         aria-hidden="true"
-      />
+      ></span>
     </span>
   {/if}
 

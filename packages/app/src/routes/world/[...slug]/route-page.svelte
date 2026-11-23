@@ -11,7 +11,6 @@
   import { getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
   import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
-  import SnowflakeIcon from "@lucide/svelte/icons/snowflake";
   import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
 
   let {
@@ -34,7 +33,7 @@
     <TradCamIcon class="self-center" />
   {/if}
   {#if isIceRoute(feature.tags)}
-    <SnowflakeIcon class="size-3.5 shrink-0 self-center text-cyan-500" aria-label="Ice / dry-tooling route" />
+    <span aria-label="Ice / dry-tooling route"  class="icon-[lucide--snowflake] shrink-0 size-3.5 shrink-0 self-center text-cyan-500"></span>
   {/if}
   <EditableLength {feature} featureSlug={slug} />
   <EditablePitches {feature} featureSlug={slug} />

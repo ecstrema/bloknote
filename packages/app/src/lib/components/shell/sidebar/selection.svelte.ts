@@ -1,4 +1,3 @@
-import { createContext } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
 
 export function computeRangeSelection(orderedSlugs: string[], anchor: string | undefined, target: string): string[] {
@@ -56,4 +55,14 @@ export class SidebarSelection {
   }
 }
 
-export const [getSidebarSelection, setSidebarSelection] = createContext<SidebarSelection>();
+/** Shared app-wide, so non-sidebar surfaces (like the map lasso) select the same items */
+let instance: SidebarSelection | undefined;
+
+export function setSidebarSelection(selection: SidebarSelection): SidebarSelection {
+  instance = selection;
+  return selection;
+}
+
+export function getSidebarSelection(): SidebarSelection | undefined {
+  return instance;
+}

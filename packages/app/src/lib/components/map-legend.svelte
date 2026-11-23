@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { mode } from "mode-watcher";
   import type { RouteScaleId } from "@bloknote/holy-grade";
   import { getPreferredRouteGradingScale } from "#components/shell/providers/settings.svelte.js";
   import { getColorFromGrade } from "#lib/data/network/grade.js";
@@ -16,12 +15,27 @@
   };
 
   let {
-    colorMode = $bindable("both"),
+    onColorMode,
   }: {
-    colorMode?: "grade" | "type" | "both";
+    /** Called when the user picks another route coloring on the map */
+    onColorMode?: (mode: "grade" | "type" | "both") => void;
   } = $props();
 
   let open = $state(false);
+  let colorMode = $state<"grade" | "type" | "both">("both");
+
+  $effect(() => {
+    onColorMode?.(colorMode);
+  });
+
+  const TYPE_SWATCHES = [
+    { label: "Sport", fill: "bg-blue-500", border: "border-blue-500" },
+    { label: "Boulder", fill: "bg-purple-500", border: "border-purple-500" },
+    { label: "Trad", fill: "bg-amber-500", border: "border-amber-500" },
+    { label: "Aid", fill: "bg-red-500", border: "border-red-500" },
+    { label: "Ice", fill: "bg-cyan-500", border: "border-cyan-500" },
+    { label: "Top rope", fill: "bg-pink-500", border: "border-pink-500" },
+  ];
 
   const preferredScale = $derived.by(() => {
     try {
@@ -34,11 +48,11 @@
   const gradeReferences = $derived(DEFAULT_ROUTE_GRADES[preferredScale] ?? DEFAULT_ROUTE_GRADES.French);
 </script>
 
-<div class="absolute bottom-6 left-3 z-10 max-w-[260px]">
+<div class="map-legend max-w-[260px]">
   {#if !open}
     <button
       type="button"
-      class="flex items-center gap-1.5 rounded-md border border-border/80 bg-background/90 px-2.5 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur hover:bg-background transition-colors"
+      class="flex h-[29px] cursor-pointer items-center gap-1.5 rounded-md border border-black/10 bg-white px-2 text-[13px] font-medium text-slate-800 shadow-[0_0_0_2px_rgba(0,0,0,0.1)] transition-colors hover:bg-slate-100"
       onclick={() => (open = true)}
       aria-label="Show map legend"
     >
@@ -47,13 +61,13 @@
     </button>
   {:else}
     <div
-      class="rounded-lg border border-border/80 bg-background/95 p-3 text-xs text-foreground shadow-md backdrop-blur max-h-72 overflow-y-auto"
+      class="max-h-72 overflow-y-auto rounded-md border border-black/10 bg-white p-3 text-xs text-slate-800 shadow-[0_0_0_2px_rgba(0,0,0,0.1)]"
     >
-      <div class="flex items-center justify-between pb-2 border-b border-border/60">
-        <span class="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Map Legend</span>
+      <div class="flex items-center justify-between border-b border-black/10 pb-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Map Legend</span>
         <button
           type="button"
-          class="text-muted-foreground hover:text-foreground text-xs font-bold px-1"
+          class="cursor-pointer px-1 text-xs font-bold text-slate-500 hover:text-slate-800"
           onclick={() => (open = false)}
           aria-label="Close legend"
         >
@@ -62,12 +76,12 @@
       </div>
 
       <!-- Mode Selector -->
-      <div class="mt-2 flex items-center justify-between gap-2 pb-2 border-b border-border/40">
-        <label for="legend-mode" class="text-[11px] font-medium text-muted-foreground">Color by</label>
+      <div class="mt-2 flex items-center justify-between gap-2 border-b border-black/10 pb-2">
+        <label for="legend-mode" class="text-[11px] font-medium text-slate-500">Color by</label>
         <select
           id="legend-mode"
           bind:value={colorMode}
-          class="rounded border border-border bg-background px-2 py-0.5 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          class="cursor-pointer rounded border border-black/15 bg-white px-2 py-0.5 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           <option value="both">Both</option>
           <option value="grade">Grade</option>
@@ -78,7 +92,7 @@
       <!-- Grade -->
       {#if colorMode === "grade" || colorMode === "both"}
         <div class="mt-2.5">
-          <div class="font-medium text-[11px] text-muted-foreground mb-1.5 flex justify-between items-center">
+          <div class="mb-1.5 flex items-center justify-between text-[11px] font-medium text-slate-500">
             <span>{colorMode === "both" ? "Grade (fill)" : "Grade"}</span>
             <span class="text-[10px] opacity-70">({preferredScale})</span>
           </div>
@@ -87,12 +101,12 @@
               <div class="flex items-center gap-1.5">
                 <span
                   class="size-2.5 rounded-full border border-black/20"
-                  style:background={getColorFromGrade(g, preferredScale, mode.current === "dark")}
+                  style:background={getColorFromGrade(g, preferredScale, false)}
                 ></span>
                 <span>{g}</span>
               </div>
             {/each}
-            <div class="flex items-center gap-1.5 col-span-2">
+            <div class="col-span-2 flex items-center gap-1.5">
               <span class="size-2.5 rounded-full border border-black/20 bg-slate-400"></span>
               <span>Ungraded</span>
             </div>
@@ -102,62 +116,24 @@
 
       <!-- Type -->
       {#if colorMode === "type" || colorMode === "both"}
-        <div class="mt-2.5 pt-2 border-t border-border/60">
-          <div class="font-medium text-[11px] text-muted-foreground mb-1.5">
+        <div class="mt-2.5 border-t border-black/10 pt-2">
+          <div class="mb-1.5 text-[11px] font-medium text-slate-500">
             {colorMode === "both" ? "Type (stroke)" : "Type"}
           </div>
           <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
-            <div class="flex items-center gap-1.5">
+            {#each TYPE_SWATCHES as swatch (swatch.label)}
+              <div class="flex items-center gap-1.5">
+                {#if colorMode === "both"}
+                  <span class="size-2.5 rounded-full border-2 {swatch.border} bg-white"></span>
+                {:else}
+                  <span class="size-2.5 rounded-full {swatch.fill}"></span>
+                {/if}
+                <span>{swatch.label}</span>
+              </div>
+            {/each}
+            <div class="col-span-2 flex items-center gap-1.5">
               {#if colorMode === "both"}
-                <span class="size-2.5 rounded-full bg-white border-2 border-blue-500"></span>
-              {:else}
-                <span class="size-2.5 rounded-full bg-blue-500"></span>
-              {/if}
-              <span>Sport</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              {#if colorMode === "both"}
-                <span class="size-2.5 rounded-full bg-white border-2 border-purple-500"></span>
-              {:else}
-                <span class="size-2.5 rounded-full bg-purple-500"></span>
-              {/if}
-              <span>Boulder</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              {#if colorMode === "both"}
-                <span class="size-2.5 rounded-full bg-white border-2 border-amber-500"></span>
-              {:else}
-                <span class="size-2.5 rounded-full bg-amber-500"></span>
-              {/if}
-              <span>Trad</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              {#if colorMode === "both"}
-                <span class="size-2.5 rounded-full bg-white border-2 border-red-500"></span>
-              {:else}
-                <span class="size-2.5 rounded-full bg-red-500"></span>
-              {/if}
-              <span>Aid</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              {#if colorMode === "both"}
-                <span class="size-2.5 rounded-full bg-white border-2 border-cyan-500"></span>
-              {:else}
-                <span class="size-2.5 rounded-full bg-cyan-500"></span>
-              {/if}
-              <span>Ice</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              {#if colorMode === "both"}
-                <span class="size-2.5 rounded-full bg-white border-2 border-pink-500"></span>
-              {:else}
-                <span class="size-2.5 rounded-full bg-pink-500"></span>
-              {/if}
-              <span>Top rope</span>
-            </div>
-            <div class="flex items-center gap-1.5 col-span-2">
-              {#if colorMode === "both"}
-                <span class="size-2.5 rounded-full bg-white border-2 border-emerald-600"></span>
+                <span class="size-2.5 rounded-full border-2 border-emerald-600 bg-white"></span>
               {:else}
                 <span class="size-2.5 rounded-full bg-emerald-600"></span>
               {/if}
@@ -169,3 +145,8 @@
     </div>
   {/if}
 </div>
+
+<style>
+  /* The legend lives in the MapLibre control stack, which stays white in every color mode */
+</style>
+

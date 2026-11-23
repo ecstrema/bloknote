@@ -3,12 +3,7 @@
   import * as Collapsible from "#components/ui/collapsible/index.js";
   import * as Sidebar from "#components/ui/sidebar/index.js";
   import * as DropdownMenu from "#components/ui/dropdown-menu/index.js";
-  import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
-  import Ellipsis from "@lucide/svelte/icons/ellipsis";
-  import EarthIcon from "@lucide/svelte/icons/earth";
-  import CircleQuestionMarkIcon from "@lucide/svelte/icons/circle-question-mark";
-  import BuildingIcon from "@lucide/svelte/icons/building";
-  import type { DataTree } from "#lib/types.js";
+            import type { DataTree } from "#lib/types.js";
 
   import { featureToType } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
@@ -18,7 +13,6 @@
   import { getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
   import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
-  import SnowflakeIcon from "@lucide/svelte/icons/snowflake";
   import type { OsmFeature } from "osm-api";
   import { navigating, page } from "$app/state";
   import clsx from "clsx";
@@ -428,16 +422,16 @@
         {#if grade}
           <HolyGrade class="text-xs font-semibold" grade={grade.v} />
         {:else if !isProjectRoute(routeTags)}
-          <CircleQuestionMarkIcon class="text-destructive" />
+          <span class="icon-[lucide--circle-question-mark] shrink-0 size-4 text-destructive"></span>
         {/if}
         {#if isTradRoute(routeTags)}
           <TradCamIcon />
         {/if}
         {#if isIceRoute(routeTags)}
-          <SnowflakeIcon class="size-3.5 shrink-0 text-cyan-500" aria-label="Ice / dry-tooling route" />
+          <span aria-label="Ice / dry-tooling route"  class="icon-[lucide--snowflake] shrink-0 size-3.5 shrink-0 text-cyan-500"></span>
         {/if}
       {:else if itemType === "gym"}
-        <BuildingIcon />
+        <span class="icon-[lucide--building] shrink-0 size-4"></span>
       {/if}
       <span class="truncate">{name || "No name"}</span>
     </Sidebar.MenuButton>
@@ -481,6 +475,9 @@
               ondrop={onDrop}
               ondragend={onDragEnd}
               class={clsx(
+                // Always reserve the badge / "more" menu slot so the name truncates before the
+                // route count right away, instead of only once the menu action mounts on hover
+                "pr-7",
                 isSelected && "bg-primary/15 text-primary ring-1 ring-inset ring-primary/40",
                 dropPosition === "into" && "bg-primary/15 ring-2 ring-inset ring-primary",
                 dropPosition && "relative",
@@ -493,9 +490,9 @@
                 <span class="pointer-events-none absolute inset-x-1 bottom-0 z-10 h-0.5 bg-primary" aria-hidden="true"
                 ></span>
               {/if}
-              <ChevronRightIcon class={clsx("transition-transform", open && "rotate-90")} />
+              <span class={clsx("icon-[lucide--chevron-right] shrink-0 size-4 transition-transform", open && "rotate-90")}></span>
               {#if itemType === "geographic"}
-                <EarthIcon />
+                <span class="icon-[lucide--earth] shrink-0 size-4"></span>
               {/if}
 
               <span class="truncate grow">{name || "No name"}</span>
@@ -512,7 +509,7 @@
               <DropdownMenu.Trigger>
                 {#snippet child({ props })}
                   <Sidebar.MenuAction showOnHover {...props}>
-                    <Ellipsis />
+                    <span class="icon-[lucide--ellipsis] shrink-0 size-4"></span>
                   </Sidebar.MenuAction>
                 {/snippet}
               </DropdownMenu.Trigger>

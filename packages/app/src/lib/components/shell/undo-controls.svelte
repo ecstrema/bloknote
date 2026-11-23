@@ -1,9 +1,7 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
   import { Button } from "#components/ui/button/index.js";
-  import Undo2Icon from "@lucide/svelte/icons/undo-2";
-  import Redo2Icon from "@lucide/svelte/icons/redo-2";
-
+    
   const appState = getAppState();
 
   function isEditableTarget(target: EventTarget | null): boolean {
@@ -41,7 +39,7 @@
       aria-label="Undo"
       title="Undo (Ctrl+Z)"
     >
-      <Undo2Icon />
+      <span class="icon-[lucide--undo-2] shrink-0 size-4"></span>
     </Button>
     <Button
       variant="ghost"
@@ -51,7 +49,7 @@
       aria-label="Redo"
       title="Redo (Ctrl+Shift+Z)"
     >
-      <Redo2Icon />
+      <span class="icon-[lucide--redo-2] shrink-0 size-4"></span>
     </Button>
   </div>
 {/if}

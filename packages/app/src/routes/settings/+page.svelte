@@ -10,10 +10,7 @@
   import * as Tabs from "#components/ui/tabs/index.js";
   import MapProviderToggles from "#components/map-provider-toggles.svelte";
   import AccountsTab from "./accounts-tab.svelte";
-  import ArrowLeftIcon from "@lucide/svelte/icons/arrow-left";
-  import SettingsIcon from "@lucide/svelte/icons/settings";
-  import UserRoundIcon from "@lucide/svelte/icons/user-round";
-  import { allBoulderScales, allRouteScales, convertGrade, french } from "@bloknote/holy-grade";
+        import { allBoulderScales, allRouteScales, convertGrade, french } from "@bloknote/holy-grade";
   import { setMode, userPrefersMode } from "mode-watcher";
   import { settings } from "#lib/data/settings.svelte.js";
   import { i18n, locales, localeNames, setLocale } from "#lib/i18n.svelte.js";
@@ -81,7 +78,7 @@
         </a>
         {#if hasPreviousPage}
           <Button variant="ghost" onclick={() => window.history.back()}>
-            <ArrowLeftIcon />
+            <span class="icon-[lucide--arrow-left] shrink-0 size-4"></span>
             Back
           </Button>
         {:else}
@@ -104,11 +101,11 @@
     <Tabs.Root value={activeTab} onValueChange={onTabChange} class="gap-6">
       <Tabs.List>
         <Tabs.Trigger value="settings">
-          <SettingsIcon />
+          <span class="icon-[lucide--settings] shrink-0 size-4"></span>
           Settings
         </Tabs.Trigger>
         <Tabs.Trigger value="account">
-          <UserRoundIcon />
+          <span class="icon-[lucide--user-round] shrink-0 size-4"></span>
           Account
         </Tabs.Trigger>
       </Tabs.List>

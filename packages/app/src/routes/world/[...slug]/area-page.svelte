@@ -8,8 +8,7 @@
   import { Button } from "#components/ui/button/index.js";
   import Loader from "#components/ui/loader.svelte";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
-  import FileDownIcon from "@lucide/svelte/icons/file-down";
-import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
+  import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
   import type { OsmFeature } from "osm-api";
   import type { DataTree } from "#lib/types.js";
 
@@ -51,7 +50,7 @@ import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelt
     <ClimbingStyles {feature} />
   </div>
   <Button size="xs" variant="outline" onclick={exportTypst}>
-    <FileDownIcon />
+    <span class="icon-[lucide--file-down] shrink-0 size-4"></span>
     Export Typst
   </Button>
 </div>

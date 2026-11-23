@@ -30,15 +30,7 @@
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getCoordinates } from "#lib/data/parse/osm-tags.js";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
-  import BuildingIcon from "@lucide/svelte/icons/building";
-  import DatabaseIcon from "@lucide/svelte/icons/database";
-  import ExternalLinkIcon from "@lucide/svelte/icons/external-link";
-  import FileTextIcon from "@lucide/svelte/icons/file-text";
-  import MapIcon from "@lucide/svelte/icons/map";
-  import StethoscopeIcon from "@lucide/svelte/icons/stethoscope";
-  import ActivityIcon from "@lucide/svelte/icons/activity";
-  import CheckCircle2Icon from "@lucide/svelte/icons/check-circle-2";
-
+                
   type PageTab = "overview" | "map" | "osm" | "diagnostics" | "pulse";
   function parseTab(value: string | null): PageTab | undefined {
     return value === "overview" || value === "map" || value === "osm" || value === "diagnostics" || value === "pulse"
@@ -269,7 +261,7 @@
       {getLocalizedName(item.feature) || "No Name"}
     </h1>
   {:else if itemType === "gym"}
-    <BuildingIcon class="size-6 shrink-0" aria-hidden="true" />
+    <span aria-hidden="true"  class="icon-[lucide--building] shrink-0 size-6 shrink-0"></span>
     <EditableName feature={item.feature} featureSlug={itemSlug} />
   {:else}
     <EditableName feature={item.feature} featureSlug={itemSlug} />
@@ -281,21 +273,21 @@
     <!-- On phones the five tabs overflow one row: wrap onto several rows instead (issue #81) -->
     <Tabs.List variant="line" class="max-md:h-fit max-md:w-full max-md:flex-wrap max-md:justify-start">
       <Tabs.Trigger value="overview">
-        <FileTextIcon />
+        <span class="icon-[lucide--file-text] shrink-0 size-4"></span>
         Overview
       </Tabs.Trigger>
       <Tabs.Trigger value="map">
-        <MapIcon />
+        <span class="icon-[lucide--map] shrink-0 size-4"></span>
         Map
       </Tabs.Trigger>
       {#if hasOsmData}
         <Tabs.Trigger value="osm">
-          <DatabaseIcon />
+          <span class="icon-[lucide--database] shrink-0 size-4"></span>
           OSM Data
         </Tabs.Trigger>
       {/if}
       <Tabs.Trigger value="diagnostics">
-        <StethoscopeIcon />
+        <span class="icon-[lucide--stethoscope] shrink-0 size-4"></span>
         <span>Diagnostics</span>
         {#if diagnosticsCount > 0}
           <span
@@ -304,11 +296,11 @@
             {diagnosticsCount}{diagDbTruncated ? "+" : ""}
           </span>
         {:else if diagnosticsKnownClean}
-          <CheckCircle2Icon class="size-3.5 text-emerald-600 dark:text-emerald-400" aria-label="No issues" />
+          <span aria-label="No issues"  class="icon-[lucide--check-circle-2] shrink-0 size-3.5 text-emerald-600 dark:text-emerald-400"></span>
         {/if}
       </Tabs.Trigger>
       <Tabs.Trigger value="pulse">
-        <ActivityIcon />
+        <span class="icon-[lucide--activity] shrink-0 size-4"></span>
         <span>Pulse</span>
       </Tabs.Trigger>
     </Tabs.List>
@@ -389,7 +381,7 @@
             class="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground"
           >
             View on OpenStreetMap
-            <ExternalLinkIcon class="size-3.5" aria-hidden="true" />
+            <span aria-hidden="true"  class="icon-[lucide--external-link] shrink-0 size-3.5"></span>
           </a>
         {/if}
       </div>

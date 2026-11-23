@@ -28,14 +28,7 @@
   import { allScales } from "@bloknote/holy-grade";
   import SidebarBulkDialogs, { type BulkDialogKind } from "./sidebar-bulk-dialogs.svelte";
   import { SidebarSelection, setSidebarSelection } from "./selection.svelte";
-  import XIcon from "@lucide/svelte/icons/x";
-  import ListFilterIcon from "@lucide/svelte/icons/list-filter";
-  import ChevronsDownUpIcon from "@lucide/svelte/icons/chevrons-down-up";
-  import FolderInputIcon from "@lucide/svelte/icons/folder-input";
-  import FolderPlusIcon from "@lucide/svelte/icons/folder-plus";
-  import MoreHorizontalIcon from "@lucide/svelte/icons/more-horizontal";
-  import Trash2Icon from "@lucide/svelte/icons/trash-2";
-
+              
   /** Above this many matches, the tree isn't opened automatically to reveal them */
   const EXPAND_LIMIT = 1000;
   const STORAGE_KEY = "bloknote:search-filters";
@@ -366,7 +359,7 @@
             class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             onclick={() => (filters.text = "")}
           >
-            <XIcon class="size-4" />
+            <span class="icon-[lucide--x] shrink-0 size-4"></span>
           </button>
         {/if}
       </div>
@@ -377,7 +370,7 @@
         title="Collapse all"
         onclick={() => collapseVersion++}
       >
-        <ChevronsDownUpIcon />
+        <span class="icon-[lucide--chevrons-down-up] shrink-0 size-4"></span>
       </Button>
       <Button
         variant={showFilters ? "default" : "outline"}
@@ -386,7 +379,7 @@
         aria-expanded={showFilters}
         onclick={() => (showFilters = !showFilters)}
       >
-        <ListFilterIcon />
+        <span class="icon-[lucide--list-filter] shrink-0 size-4"></span>
       </Button>
       {#if sidebar.isMobile}
         <!-- Larger touch target and icon: the close button was hard to hit on phones (issue #81) -->
@@ -397,7 +390,7 @@
           aria-label="Close sidebar"
           onclick={() => sidebar.setOpenMobile(false)}
         >
-          <XIcon class="size-6" />
+          <span class="icon-[lucide--x] shrink-0 size-6"></span>
         </Button>
       {/if}
     </div>
@@ -455,11 +448,11 @@
               <ContextMenu.Separator />
               {#if appState.osmUser.loggedIn}
                 <ContextMenu.Item onclick={() => (bulkDialog = "move-folder")}>
-                  <FolderInputIcon />
+                  <span class="icon-[lucide--folder-input] shrink-0 size-4"></span>
                   Move to folder...
                 </ContextMenu.Item>
                 <ContextMenu.Item onclick={() => (bulkDialog = "new-sector")}>
-                  <FolderPlusIcon />
+                  <span class="icon-[lucide--folder-plus] shrink-0 size-4"></span>
                   Move to new sector...
                 </ContextMenu.Item>
                 <ContextMenu.Separator />
@@ -485,7 +478,7 @@
                 </ContextMenu.Sub>
                 <ContextMenu.Separator />
                 <ContextMenu.Item variant="destructive" onclick={() => (bulkDialog = "delete")}>
-                  <Trash2Icon />
+                  <span class="icon-[lucide--trash-2] shrink-0 size-4"></span>
                   Delete selected...
                 </ContextMenu.Item>
               {/if}
@@ -516,21 +509,21 @@
       <div class="flex items-center justify-between gap-2 text-xs">
         <span class="font-medium">{selection.size} selected</span>
         <Button size="xs" variant="ghost" onclick={() => selection.clear()}>
-          <XIcon />
+          <span class="icon-[lucide--x] shrink-0 size-4"></span>
           Clear
         </Button>
       </div>
       {#if appState.osmUser.loggedIn}
         <div class="flex gap-1">
           <Button size="sm" class="flex-1" onclick={() => (bulkDialog = "new-sector")}>
-            <FolderPlusIcon />
+            <span class="icon-[lucide--folder-plus] shrink-0 size-4"></span>
             Move to new sector
           </Button>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               {#snippet child({ props })}
                 <Button {...props} size="sm" variant="outline" aria-label="Bulk actions">
-                  <MoreHorizontalIcon />
+                  <span class="icon-[lucide--more-horizontal] shrink-0 size-4"></span>
                 </Button>
               {/snippet}
             </DropdownMenu.Trigger>

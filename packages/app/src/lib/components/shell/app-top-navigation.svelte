@@ -7,7 +7,6 @@
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { resolve } from "$app/paths";
   import type { BreadcrumbSegment } from "#lib/types.js";
-  import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
   import { onMount, settled } from "svelte";
   import { getAppState } from "#lib/data/app-state.js";
 
@@ -170,7 +169,7 @@
               class="focus-visible:ring-0 focus-visible:border-transparent"
               aria-label="Select child of {name || 'folder'}"
             >
-              <ChevronRightIcon />
+              <span class="icon-[lucide--chevron-right] shrink-0 size-4"></span>
             </Button>
           {/snippet}
         </DropdownMenu.Trigger>

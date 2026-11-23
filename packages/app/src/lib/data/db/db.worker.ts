@@ -15,22 +15,66 @@ import type { DbRequest, DbResponse, MapElementFeature, SearchFilters } from "./
 /** Bump when the tables change: the database is then downloaded again */
 const SCHEMA = 2;
 
-let dbPromise: Promise<{ db: Database; persistent: boolean }> | undefined;
+let dbPromise: Promise<{ db: Database; persistent: boolean; opfsUsable: boolean }> | undefined;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`timed out after ${ms}ms`)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
+/**
+ * OPFS sync access handles are exclusive: while the pool of another tab holds them, requests hang
+ * forever instead of failing. A short probe on a scratch file tells whether OPFS works at all,
+ * which distinguishes "another tab is using the database" from "the browser has no OPFS".
+ */
+async function probeOpfs(): Promise<boolean> {
+  try {
+    await withTimeout(
+      (async () => {
+        const root = await navigator.storage.getDirectory();
+        const name = ".bloknote-opfs-probe";
+        const handle = await root.getFileHandle(name, { create: true });
+        const access = await (handle as FileSystemFileHandle & { createSyncAccessHandle(): { close(): void } }).createSyncAccessHandle();
+        access.close();
+        await root.removeEntry(name);
+      })(),
+      3000,
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function openDb() {
   dbPromise ??= (async () => {
     const sqlite3 = await sqlite3InitModule();
     let db: Database;
     let persistent = false;
+    let opfsUsable = false;
     try {
-      const pool = await sqlite3.installOpfsSAHPoolVfs({ name: "bloknote" });
+      const pool = await withTimeout(sqlite3.installOpfsSAHPoolVfs({ name: "bloknote" }), 10_000);
       db = new pool.OpfsSAHPoolDb("/bloknote.sqlite3");
       persistent = true;
-    } catch {
+      opfsUsable = true;
+    } catch (err) {
+      console.warn("Persistent database unavailable, using the in-memory fallback:", err);
+      opfsUsable = await probeOpfs();
       db = new sqlite3.oo1.DB(":memory:");
     }
     db.exec("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)");
-    return { db, persistent };
+    return { db, persistent, opfsUsable };
   })();
   return dbPromise;
 }
@@ -236,13 +280,13 @@ async function runSearch(searchId: number, search: Search, budgetMs: number): Pr
 }
 
 async function handle(req: DbRequest): Promise<DbResponse> {
-  const { db, persistent } = await openDb();
+  const { db, persistent, opfsUsable } = await openDb();
   switch (req.type) {
     case "status":
-      return { id: req.id, type: "status", ready: getMeta(db, "version") === `${req.version}:${SCHEMA}`, persistent };
+      return { id: req.id, type: "status", ready: getMeta(db, "version") === `${req.version}:${SCHEMA}`, persistent, opfsUsable };
     case "build":
       await buildDatabase(req.url, req.version, req.bytes, req.id);
-      return { id: req.id, type: "status", ready: true, persistent };
+      return { id: req.id, type: "status", ready: true, persistent, opfsUsable };
     case "getNode": {
       const data = db.selectValue("SELECT data FROM elements WHERE slug = ?", [req.slug]) as string | undefined;
       return { id: req.id, type: "node", data: data === undefined ? undefined : JSON.parse(data) };

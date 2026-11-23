@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+@plugin "@iconify/tailwind4";
 @source not "../locales/";
 @import "tw-animate-css";
 @import "shadcn-svelte/tailwind.css";

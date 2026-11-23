@@ -15,19 +15,6 @@ import { getParentSlug } from "#lib/helpers/slug.js";
 
 export const VECTOR_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 
-export interface MapStyleOption {
-  id: string;
-  label: string;
-  url: string;
-}
-
-export const MAP_STYLES: MapStyleOption[] = [
-  { id: "liberty", label: "Liberty", url: "https://tiles.openfreemap.org/styles/liberty" },
-  { id: "positron", label: "Positron", url: "https://tiles.openfreemap.org/styles/positron" },
-  { id: "bright", label: "Bright", url: "https://tiles.openfreemap.org/styles/bright" },
-  { id: "dark", label: "Dark", url: "https://tiles.openfreemap.org/styles/dark" },
-];
-
 export function featureToMapElement(
   slug: string,
   feature: OsmFeature,

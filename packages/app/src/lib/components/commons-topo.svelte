@@ -1,6 +1,5 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
-  import ImagePlusIcon from "@lucide/svelte/icons/image-plus";
   import type { OsmFeature } from "osm-api";
   import AddImageDialog from "./topo/add-image-dialog.svelte";
   import {
@@ -160,7 +159,7 @@
       class="flex h-40 w-40 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-md border border-dashed text-muted-foreground transition hover:border-foreground/40 hover:text-foreground sm:h-44 sm:w-44"
       onclick={() => (addOpen = true)}
     >
-      <ImagePlusIcon class="size-7" aria-hidden="true" />
+      <span aria-hidden="true"  class="icon-[lucide--image-plus] shrink-0 size-7"></span>
       <span class="text-xs font-medium">Add image...</span>
     </button>
   </div>

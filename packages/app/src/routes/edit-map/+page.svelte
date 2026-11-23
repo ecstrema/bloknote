@@ -2,14 +2,7 @@
   import { resolve } from "$app/paths";
   import { Button } from "#components/ui/button/index.js";
   import { Input } from "#components/ui/input/index.js";
-  import DownloadIcon from "@lucide/svelte/icons/download";
-  import SaveIcon from "@lucide/svelte/icons/save";
-  import GitPullRequestIcon from "@lucide/svelte/icons/git-pull-request";
-  import Undo2Icon from "@lucide/svelte/icons/undo-2";
-  import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
-  import LoaderIcon from "@lucide/svelte/icons/loader-circle";
-  import CombineIcon from "@lucide/svelte/icons/combine";
-  import type { WorldClimbingPoints, WorldDownloadStatus } from "@bloknote/climbing-data-gen";
+                import type { WorldClimbingPoints, WorldDownloadStatus } from "@bloknote/climbing-data-gen";
   import { parseWorldClimbingPoints, WORLD_CLIMBING_QUERY } from "@bloknote/climbing-data-gen/world-points";
 
   import type { Feature } from "geojson";
@@ -276,13 +269,13 @@
   <div class="relative h-dvh w-full">
     <LoadingMap features={streamed} version={streamedVersion} />
     <p class="absolute top-3 left-3 flex items-center gap-2 rounded-md bg-background/90 px-3 py-2 text-sm shadow">
-      <LoaderIcon class="size-4 animate-spin" />
+      <span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>
       {status}
     </p>
   </div>
 {:else if !store}
   <div class="flex flex-col gap-1 p-6 text-sm">
-    <p class="flex items-center gap-2"><LoaderIcon class="size-4 animate-spin" /> {status}</p>
+    <p class="flex items-center gap-2"><span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span> {status}</p>
     {#if progress}
       <p class="text-muted-foreground">
         Started at {new Date(progress.startedAt).toLocaleTimeString()}
@@ -303,7 +296,7 @@
             disabled={!store.undoStack.length}
             onclick={undo}
           >
-            <Undo2Icon />
+            <span class="icon-[lucide--undo-2] shrink-0 size-4"></span>
           </Button>
           <Button
             size="sm"
@@ -311,7 +304,7 @@
             title="Toggle merge mode (M): select and merge multiple regions together"
             onclick={toggleMergeMode}
           >
-            <CombineIcon class="size-3.5 mr-1" />
+            <span class="icon-[lucide--combine] shrink-0 size-3.5 mr-1"></span>
             Merge{store.mergeSelection.size ? ` (${store.mergeSelection.size})` : ""}
           </Button>
           {#if DEV}
@@ -321,7 +314,7 @@
               onclick={save}
               title="Write the changes to packages/reverse-geocoding-data/data"
             >
-              {#if saving}<LoaderIcon class="animate-spin" />{:else}<SaveIcon />{/if} Save
+              {#if saving}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>{:else}<span class="icon-[lucide--save] shrink-0 size-4"></span>{/if} Save
               {#if stats?.modified}<span class="rounded bg-primary-foreground/20 px-1 text-xs">{stats.modified}</span
                 >{/if}
             </Button>
@@ -332,7 +325,7 @@
             onclick={download}
             title="Download the whole packages/reverse-geocoding-data/data as a zip"
           >
-            <DownloadIcon />
+            <span class="icon-[lucide--download] shrink-0 size-4"></span>
           </Button>
           <Button
             size="sm"
@@ -340,7 +333,7 @@
             onclick={togglePullRequest}
             title="Propose the changes as a pull request on GitHub"
           >
-            <GitPullRequestIcon /> PR
+            <span class="icon-[lucide--git-pull-request] shrink-0 size-4"></span> PR
             {#if !DEV && stats?.modified}<span class="rounded bg-primary-foreground/20 px-1 text-xs"
                 >{stats.modified}</span
               >{/if}
@@ -391,7 +384,7 @@
                 </p>
               {/if}
               <div class="flex items-center gap-2">
-                <Button size="xs" onclick={pullRequest}><GitPullRequestIcon /> Create the pull request</Button>
+                <Button size="xs" onclick={pullRequest}><span class="icon-[lucide--git-pull-request] shrink-0 size-4"></span> Create the pull request</Button>
                 <Button
                   size="xs"
                   variant="ghost"
@@ -420,7 +413,7 @@
             disabled={refreshing}
             onclick={refreshClimbing}
           >
-            <RefreshCwIcon class={refreshing ? "animate-spin" : ""} />
+            <span class="icon-[lucide--refresh-cw] shrink-0 size-4" class:animate-spin={refreshing}></span>
           </Button>
         </div>
         <div class="flex items-center gap-2">

@@ -1,9 +1,8 @@
 <script lang="ts">
-  import UserRoundIcon from "@lucide/svelte/icons/user-round";
   import { resolve } from "$app/paths";
   import { Button } from "#components/ui/button/index.js";
 </script>
 
 <Button href={resolve("/settings")} variant="outline" size="icon-lg" aria-label="Profile & settings">
-  <UserRoundIcon />
+  <span class="icon-[lucide--user-round] shrink-0 size-4"></span>
 </Button>

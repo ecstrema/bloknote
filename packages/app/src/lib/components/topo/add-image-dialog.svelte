@@ -12,9 +12,7 @@
     startCommonsLogin,
     uploadCommonsFile,
   } from "#lib/data/network/commons.js";
-  import InfoIcon from "@lucide/svelte/icons/info";
-  import UploadIcon from "@lucide/svelte/icons/upload";
-  import { onMount } from "svelte";
+      import { onMount } from "svelte";
   import { directCommonsImage, type CommonsImage, type ResolvedImage } from "./topo-helpers.js";
 
   let {
@@ -110,7 +108,7 @@
     </Dialog.Header>
 
     <div class="flex items-start gap-2 rounded-md bg-muted/60 p-2.5 text-xs text-muted-foreground">
-      <InfoIcon class="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+      <span aria-hidden="true"  class="icon-[lucide--info] shrink-0 mt-0.5 size-3.5 shrink-0"></span>
       <span>
         Images are hosted on Wikimedia Commons under a free license and linked to this climbing feature on
         OpenStreetMap.
@@ -203,7 +201,7 @@
             </label>
             <div class="sm:col-span-2">
               <Button size="sm" type="submit" disabled={uploading || !uploadFile || !uploadRightsConfirmed}>
-                <UploadIcon />
+                <span class="icon-[lucide--upload] shrink-0 size-4"></span>
                 {uploading ? "Uploading…" : "Upload image"}
               </Button>
             </div>

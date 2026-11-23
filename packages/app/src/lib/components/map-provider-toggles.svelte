@@ -3,9 +3,7 @@
   import { MAP_PROVIDERS } from "#lib/data/map-providers.js";
   import { settings } from "#lib/data/settings.svelte.js";
   import { IsMobile } from "#lib/hooks/is-mobile.svelte.js";
-  import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";
-  import ChevronUpIcon from "@lucide/svelte/icons/chevron-up";
-
+    
   let { showMore = $bindable(false) }: { showMore?: boolean } = $props();
 
   const isMobile = new IsMobile();
@@ -43,10 +41,10 @@
   {#if hiddenCount > 0 || showMore}
     <Button type="button" variant="ghost" size="sm" onclick={() => (showMore = !showMore)}>
       {#if showMore}
-        <ChevronUpIcon />
+        <span class="icon-[lucide--chevron-up] shrink-0 size-4"></span>
         Fewer providers
       {:else}
-        <ChevronDownIcon />
+        <span class="icon-[lucide--chevron-down] shrink-0 size-4"></span>
         More ({hiddenCount})
       {/if}
     </Button>

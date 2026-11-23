@@ -49,8 +49,10 @@ class DataClient {
     if (this.autoDownloadStarted || settings.lowData) return;
     this.autoDownloadStarted = true;
     localDb.init().then(() => {
-      // Without persistent storage, the download would have to be repeated on every visit
-      if (localDb.persistent && !settings.lowData) return localDb.download();
+      // Without any persistent storage the download would have to be repeated on every visit, so
+      // it is left to the user. But when OPFS works while the persistent database is merely held
+      // by another tab, downloading into memory makes this tab fully functional as well.
+      if (!settings.lowData && (localDb.persistent || localDb.opfsAvailable)) return localDb.download();
     });
   }
 

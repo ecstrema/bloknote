@@ -4,12 +4,14 @@
     Map as MapLibreMap,
     Popup,
     ScaleControl,
+    NavigationControl,
+    TerrainControl,
     type GeoJSONSource,
     type ExpressionSpecification,
     type MapLayerMouseEvent,
     type MapMouseEvent,
   } from "#lib/maplibre.js";
-  import { MapButtonsControl, MINUS_ICON, PLUS_ICON } from "#lib/components/map-controls.js";
+  import { addTerrainSource } from "#lib/components/map-controls.js";
   import type { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from "geojson";
   import { onMount } from "svelte";
   import { PersistentState } from "@friendofsvelte/state";
@@ -519,23 +521,14 @@
       center: [0, 30],
       zoom: 1.5,
       attributionControl: { compact: true },
-      dragRotate: false,
-      pitchWithRotate: false,
-      touchPitch: false,
     });
-    map.touchZoomRotate.disableRotation();
-    map.keyboard.disableRotation();
-    map.addControl(
-      new MapButtonsControl([
-        { title: "Zoom in", svg: PLUS_ICON, onClick: (map) => map.zoomIn(), desktopOnly: true },
-        { title: "Zoom out", svg: MINUS_ICON, onClick: (map) => map.zoomOut(), desktopOnly: true },
-      ]),
-      "top-right",
-    );
-    map.addControl(new ScaleControl({}), "bottom-right");
+    map.addControl(new NavigationControl({ visualizePitch: true }), "top-right");
+    map.addControl(new TerrainControl({ source: "terrain" }), "top-right");
+    map.addControl(new ScaleControl({ unit: "metric" }), "bottom-right");
 
     map.on("load", () => {
       const m = map!;
+      addTerrainSource(m);
       m.addSource("all-boundaries", { type: "geojson", data: empty });
       m.addSource("boundaries", { type: "geojson", data: empty });
       m.addSource("preview", { type: "geojson", data: empty });

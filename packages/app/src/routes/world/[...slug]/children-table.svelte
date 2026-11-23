@@ -6,15 +6,12 @@
   import { getAreaKindLabel } from "#lib/data/parse/diagnostics.js";
   import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
-  import SnowflakeIcon from "@lucide/svelte/icons/snowflake";
   import type { DataTree } from "#lib/types.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import { sortChildren, type SortedChildren } from "#components/shell/sidebar/utils.ts";
   import * as Table from "#components/ui/table/index.js";
   import type { OsmFeature } from "osm-api";
-  import CircleQuestionMarkIcon from "@lucide/svelte/icons/circle-question-mark";
-  import BuildingIcon from "@lucide/svelte/icons/building";
-
+    
   const {
     item = $bindable(),
   }: {
@@ -60,7 +57,7 @@
         <Table.Row>
           <Table.Cell class="font-medium underline underline-offset-2 ">
             <a href={resolve("/world/[...slug]", { slug })} class="flex gap-1 items-center">
-              <BuildingIcon class="size-5" />
+              <span class="icon-[lucide--building] shrink-0 size-5"></span>
               {getLocalizedName(child.feature) || "No Name"}
             </a>
           </Table.Cell>
@@ -81,13 +78,13 @@
               {#if grade}
                 <HolyGrade class="text-xs font-semibold" grade={grade.v} />
               {:else if !isProjectRoute(routeTags)}
-                <CircleQuestionMarkIcon class="size-5 text-destructive" />
+                <span class="icon-[lucide--circle-question-mark] shrink-0 size-5 text-destructive"></span>
               {/if}
               {#if isTradRoute(routeTags)}
                 <TradCamIcon />
               {/if}
               {#if isIceRoute(routeTags)}
-                <SnowflakeIcon class="size-3.5 shrink-0 text-cyan-500" aria-label="Ice / dry-tooling route" />
+                <span aria-label="Ice / dry-tooling route"  class="icon-[lucide--snowflake] shrink-0 size-3.5 shrink-0 text-cyan-500"></span>
               {/if}
             </span>
           </Table.Cell>

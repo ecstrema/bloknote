@@ -64,7 +64,7 @@ export type DbRequest =
   | { id: number; type: "filterCancel"; searchId: number };
 
 export type DbResponse =
-  | { id: number; type: "status"; ready: boolean; persistent: boolean }
+  | { id: number; type: "status"; ready: boolean; persistent: boolean; opfsUsable: boolean }
   | { id: number; type: "node"; data: DataJSON | undefined }
   | { id: number; type: "children"; data: Record<string, DataJSON> }
   | { id: number; type: "subtreeElements"; data: Record<string, DataJSON>; truncated: boolean }

@@ -2,8 +2,7 @@
   import type { OsmFeature } from "osm-api";
   import { getClimbingProviderLinks, type ClimbingProviderLink } from "#lib/data/climbing-providers.js";
   import { Button } from "#components/ui/button/index.js";
-  import ExternalLinkIcon from "@lucide/svelte/icons/external-link";
-
+  
   let { feature }: { feature: OsmFeature } = $props();
 
   const links = $derived(getClimbingProviderLinks(feature));
@@ -31,7 +30,7 @@
         rel="noopener noreferrer"
       >
         {#if link.direct}
-          <ExternalLinkIcon class="text-muted-foreground" aria-hidden="true" />
+          <span aria-hidden="true"  class="icon-[lucide--external-link] shrink-0 size-4 text-muted-foreground"></span>
         {/if}
         {@render linkLabel(link)}
       </Button>

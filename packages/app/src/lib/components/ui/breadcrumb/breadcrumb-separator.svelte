@@ -1,8 +1,7 @@
 <script lang="ts">
   import { cn, type WithElementRef } from "#lib/utils.js";
   import type { HTMLLiAttributes } from "svelte/elements";
-  import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
-
+  
   let { ref = $bindable(null), class: className, children, ...restProps }: WithElementRef<HTMLLiAttributes> = $props();
 </script>
 
@@ -17,6 +16,6 @@
   {#if children}
     {@render children?.()}
   {:else}
-    <ChevronRightIcon />
+    <span class="icon-[lucide--chevron-right] shrink-0 size-4"></span>
   {/if}
 </li>

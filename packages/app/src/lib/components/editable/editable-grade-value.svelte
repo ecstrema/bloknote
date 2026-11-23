@@ -12,10 +12,7 @@
   } from "#components/shell/providers/settings.svelte.js";
   import { convertGrade, getGradeFromReference, getScale, type ScaleId } from "@bloknote/holy-grade";
   import type { OsmFeature } from "osm-api";
-  import CheckIcon from "@lucide/svelte/icons/check";
-  import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
-  import Trash2Icon from "@lucide/svelte/icons/trash-2";
-
+      
   const {
     grade,
     feature,
@@ -148,7 +145,7 @@
               <HolyGrade grade={{ v: name, scale: activeScale.id }} convert={true} />
             </span>
             {#if selected}
-              <CheckIcon class="size-3.5 text-muted-foreground" />
+              <span class="icon-[lucide--check] shrink-0 size-3.5 text-muted-foreground"></span>
             {/if}
           </Button>
         {/each}
@@ -163,7 +160,7 @@
           onclick={() => (choosingScale = !choosingScale)}
         >
           <span>{activeScale.id}</span>
-          <ChevronsUpDownIcon class="size-3.5 text-muted-foreground" />
+          <span class="icon-[lucide--chevrons-up-down] shrink-0 size-3.5 text-muted-foreground"></span>
         </Button>
 
         {#if choosingScale}
@@ -192,7 +189,7 @@
           disabled={!grade}
           onclick={deleteGrade}
         >
-          <Trash2Icon class="size-3.5" />
+          <span class="icon-[lucide--trash-2] shrink-0 size-3.5"></span>
           <span>Delete</span>
         </Button>
       </div>

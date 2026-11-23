@@ -21,9 +21,7 @@
     getPreferredRouteGradingScale,
   } from "#components/shell/providers/settings.svelte.js";
   import type { DataTree } from "#lib/types.js";
-  import Columns2Icon from "@lucide/svelte/icons/columns-2";
-  import LayersIcon from "@lucide/svelte/icons/layers";
-
+    
   const LAYOUT_KEY = "bloknote:sector-stats-layout";
 
   let { item, slug }: { item: DataTree; slug: string } = $props();
@@ -160,7 +158,7 @@
           onclick={() => setLayout("stacked")}
           title="Single stacked distribution chart"
         >
-          <LayersIcon />
+          <span class="icon-[lucide--layers] shrink-0 size-4"></span>
           Stacked
         </Button>
         <Button
@@ -169,7 +167,7 @@
           onclick={() => setLayout("double")}
           title="Separate grade and type charts"
         >
-          <Columns2Icon />
+          <span class="icon-[lucide--columns-2] shrink-0 size-4"></span>
           Double
         </Button>
       </div>

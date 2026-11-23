@@ -7,10 +7,7 @@
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
   import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
   import { normalizedRatingToStars, starsToNormalizedRating, type AscentStyle } from "@bloknote/common";
-  import MessageSquareIcon from "@lucide/svelte/icons/message-square";
-  import StarIcon from "@lucide/svelte/icons/star";
-  import CheckIcon from "@lucide/svelte/icons/check";
-  import type { OsmFeature } from "osm-api";
+        import type { OsmFeature } from "osm-api";
 
   const {
     feature,
@@ -80,7 +77,7 @@
     <h2 class="text-sm font-semibold">Activity &amp; Comments</h2>
     {#if atproto.configured}
       <Button size="xs" variant={starred ? "secondary" : "outline"} disabled={busy} onclick={onToggleStar}>
-        <StarIcon class={starred ? "fill-amber-400 text-amber-500" : undefined} />
+        <span class="icon-[lucide--star] shrink-0 size-4" class:text-amber-500={starred}></span>
         {starred ? "Starred" : "Star"}
       </Button>
     {:else}
@@ -105,7 +102,7 @@
         </Select>
         <Input class="min-w-40 flex-1" bind:value={tickComment} placeholder="Ascent note (optional)" />
         <Button size="sm" type="submit" disabled={busy}>
-          <CheckIcon />
+          <span class="icon-[lucide--check] shrink-0 size-4"></span>
           Log tick
         </Button>
       </form>
@@ -121,9 +118,11 @@
             aria-label="{star} star{star === 1 ? '' : 's'}"
             onclick={() => (reviewStars = reviewStars === star ? 0 : star)}
           >
-            <StarIcon
-              class={star <= reviewStars ? "size-4 fill-amber-400 text-amber-500" : "size-4 text-muted-foreground"}
-            />
+            <span
+              class="icon-[lucide--star] shrink-0 size-4"
+              class:text-amber-500={star <= reviewStars}
+              class:text-muted-foreground={star > reviewStars}
+            ></span>
           </button>
         {/each}
       </div>
@@ -135,7 +134,7 @@
         class="self-start"
         disabled={busy || (!reviewText.trim() && reviewStars === 0)}
       >
-        <MessageSquareIcon />
+        <span class="icon-[lucide--message-square] shrink-0 size-4"></span>
         Post comment
       </Button>
     </form>

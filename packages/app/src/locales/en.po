@@ -14876,6 +14876,7 @@ msgstr "Feature"
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
 msgid "Point"
 msgstr "Point"
 
@@ -15528,6 +15529,7 @@ msgstr "Clear selection"
 msgid "Apply"
 msgstr "Apply"
 
+#: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 msgid "LineString"
 msgstr "LineString"
@@ -16908,9 +16910,8 @@ msgstr "Pitches"
 msgid "Loading climbing data..."
 msgstr "Loading climbing data..."
 
-#: src/lib/components/location-map.svelte
-msgid "Map style"
-msgstr "Map style"
+#~ msgid "Map style"
+#~ msgstr "Map style"
 
 #: src/routes/+layout.svelte
 msgid "Parsing data"
@@ -17016,14 +17017,15 @@ msgstr[1] "# routes have no position yet"
 msgid "{0}. Drag their marker on the map or the topo image to a real location before submitting — "
 msgstr "{0}. Drag their marker on the map or the topo image to a real location before submitting — "
 
-#: src/lib/components/location-map.svelte
-msgid "Zoom in"
-msgstr "Zoom in"
+#~ msgid "Zoom in"
+#~ msgstr "Zoom in"
+
+#~ msgid "Zoom out"
+#~ msgstr "Zoom out"
+
+#~ msgid "Show the current location"
+#~ msgstr "Show the current location"
 
 #: src/lib/components/location-map.svelte
-msgid "Zoom out"
-msgstr "Zoom out"
-
-#: src/lib/components/location-map.svelte
-msgid "Show the current location"
-msgstr "Show the current location"
+msgid "MultiLineString"
+msgstr "MultiLineString"
