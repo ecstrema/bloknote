@@ -1,19 +1,21 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
-  import { computeUserStats } from "@bloknote/common";
+  import { CLEAN_ASCENT_STYLES, computeUserStats, type ClimbingGradeRef, type OsmElementRef } from "@bloknote/common";
   import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
   import { Chart, Layer, Axis, Rect, Text } from "layerchart/svg";
   import { scaleBand, scaleLinear } from "d3-scale";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
-  import { getGrade } from "#lib/data/parse/osm-tags.js";
+  import { getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
+  import { extractRouteStyle } from "#lib/data/parse/route-styles.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
+  import { Button } from "#components/ui/button/index.js";
+  import { getReference, getScale, type ScaleId } from "@bloknote/holy-grade";
   import type { Grade } from "#lib/types.js";
 
-  const stats = $derived(computeUserStats(atproto.ticks));
+  type ResolvedRef = { slug: string; name?: string; grade?: Grade; gradeRef?: number; style?: string };
 
   /** Ticks and stars resolved against the local database: the route's slug, name, and grade */
-  type ResolvedRef = { slug: string; name?: string; grade?: Grade };
   let resolvedRefs = $state<Record<string, ResolvedRef>>({});
 
   const osmRefs = $derived([
@@ -29,11 +31,31 @@
       resolvedRefs = Object.fromEntries(
         Object.entries(entries).map(([ref, entry]) => {
           const tags = "tags" in entry.data ? (entry.data.tags ?? {}) : {};
-          return [ref, { slug: entry.slug, name: tags.name, grade: getGrade(tags)?.v }];
+          return [
+            ref,
+            {
+              slug: entry.slug,
+              name: tags.name,
+              grade: getGrade(tags)?.v,
+              gradeRef: getGradeReference(tags),
+              style: extractRouteStyle(tags),
+            },
+          ];
         }),
       );
     });
   });
+
+  const refKey = (subject: OsmElementRef) => `${subject.type}-${subject.id}`;
+
+  /** Grade of a tick's route, resolved against the local database */
+  function gradeLookup(subject: OsmElementRef): ClimbingGradeRef | undefined {
+    const grade = resolvedRefs[refKey(subject)]?.grade;
+    if (!grade || grade.scale === "unknown") return undefined;
+    return { scale: grade.scale, value: grade.v };
+  }
+
+  const stats = $derived(computeUserStats(atproto.ticks, gradeLookup));
 
   function refHref(type: string, id: number): string {
     const resolved = resolvedRefs[`${type}-${id}`];
@@ -51,6 +73,84 @@
 
   const maxStyleCount = $derived(Math.max(1, ...styleBars.map((b) => b.count)));
   const padding = { top: 14, right: 10, bottom: 24, left: 28 };
+
+  /** Distinct climbing days grouped per month */
+  const sessionMonths = $derived.by(() => {
+    const months = new Map<string, Set<string>>();
+    for (const tick of atproto.ticks) {
+      if (!tick.climbedAt) continue;
+      const day = tick.climbedAt.slice(0, 10);
+      const days = months.get(day.slice(0, 7)) ?? months.set(day.slice(0, 7), new Set()).get(day.slice(0, 7))!;
+      days.add(day);
+    }
+    return [...months.entries()]
+      .map(([month, days]) => ({ month, sessions: days.size }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  });
+  const sessionCount = $derived(sessionMonths.reduce((total, m) => total + m.sessions, 0));
+  const routeCount = $derived(new Set(atproto.ticks.map((t) => refKey(t.subject))).size);
+  const maxSessions = $derived(Math.max(1, ...sessionMonths.map((m) => m.sessions)));
+
+  /** Best clean send grade for each month, as a reference number for comparison */
+  const maxGradePerMonth = $derived.by(() => {
+    const months = new Map<string, { ref: number; grade: Grade }>();
+    for (const tick of atproto.ticks) {
+      if (!CLEAN_ASCENT_STYLES.has(tick.style) || !tick.climbedAt) continue;
+      const info = resolvedRefs[refKey(tick.subject)];
+      if (info?.gradeRef === undefined || !info.grade || info.grade.scale === "unknown") continue;
+      const month = tick.climbedAt.slice(0, 7);
+      const current = months.get(month);
+      if (!current || info.gradeRef > current.ref) months.set(month, { ref: info.gradeRef, grade: info.grade });
+    }
+    return [...months.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, entry]) => ({ month, ...entry }));
+  });
+  const maxGradeRef = $derived(Math.max(1, ...maxGradePerMonth.map((m) => m.ref)));
+
+  /** Tick count per route: the number of tries on each climbed route */
+  const triesPerRoute = $derived.by(() => {
+    const counts = new Map<string, { name: string; count: number }>();
+    for (const tick of atproto.ticks) {
+      const key = refKey(tick.subject);
+      const entry = counts.get(key) ?? { name: resolvedRefs[key]?.name ?? tick.label ?? key, count: 0 };
+      entry.count += 1;
+      counts.set(key, entry);
+    }
+    return [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 8);
+  });
+  const maxTries = $derived(Math.max(1, ...triesPerRoute.map((r) => r.count)));
+
+  /** Grade pyramid, filterable by route style */
+  let pyramidType = $state("all");
+  const pyramidTypes = $derived([
+    "all",
+    ...new Set(
+      atproto.ticks
+        .map((t) => resolvedRefs[refKey(t.subject)]?.style)
+        .filter((style): style is string => !!style),
+    ),
+  ]);
+  const pyramidStats = $derived(
+    computeUserStats(
+      pyramidType === "all"
+        ? atproto.ticks
+        : atproto.ticks.filter((t) => resolvedRefs[refKey(t.subject)]?.style === pyramidType),
+      gradeLookup,
+    ),
+  );
+  const pyramidEntries = $derived(
+    [...pyramidStats.pyramid].sort(
+      (a, b) =>
+        (getReference(a.grade, getScale(a.scale as ScaleId)!) ?? 0) -
+        (getReference(b.grade, getScale(b.scale as ScaleId)!) ?? 0),
+    ),
+  );
+  const maxPyramidCount = $derived(Math.max(1, ...pyramidEntries.map((e) => e.total)));
+  const pyramidHeight = $derived(pyramidEntries.length * 26 + padding.top + padding.bottom);
+
+  const monthLabel = (month: string) =>
+    new Date(`${month}-01T00:00:00`).toLocaleDateString(undefined, { month: "short", year: "2-digit" });
 </script>
 
 {#if atproto.configured || atproto.ticks.length > 0 || atproto.stars.length > 0 || atproto.reviews.length > 0}
@@ -58,8 +158,8 @@
     <div>
       <h2 class="font-medium">Your climbing stats</h2>
       <p class="mt-1 text-sm text-muted-foreground">
-        {stats.totalTicks} ticks ({stats.totalSends} sends, {stats.totalAttempts} attempts) · {atproto.stars.length}
-        bookmarked · {atproto.reviews.length} comments
+        {stats.totalTicks} ticks ({stats.totalSends} sends, {stats.totalAttempts} attempts) · {routeCount} routes ·
+        {sessionCount} sessions · {atproto.stars.length} bookmarked · {atproto.reviews.length} comments
       </p>
     </div>
 
@@ -97,6 +197,177 @@
             </Layer>
           {/snippet}
         </Chart>
+      </div>
+    {/if}
+
+    {#if pyramidEntries.length > 0}
+      <div class="flex flex-col gap-2">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <h3 class="text-xs font-semibold uppercase text-muted-foreground">Grade pyramid</h3>
+          <div class="flex flex-wrap gap-1">
+            {#each pyramidTypes as type (type)}
+              <Button
+                size="xs"
+                variant={pyramidType === type ? "secondary" : "ghost"}
+                class="h-6 capitalize"
+                onclick={() => (pyramidType = type)}
+              >
+                {type}
+              </Button>
+            {/each}
+          </div>
+        </div>
+        <div class="w-full max-w-md" style={`height: ${pyramidHeight}px`}>
+          <Chart
+            data={pyramidEntries}
+            height={pyramidHeight}
+            x="total"
+            y="grade"
+            xScale={scaleLinear()}
+            yScale={scaleBand().padding(0.2)}
+            xDomain={[0, maxPyramidCount]}
+            {padding}
+          >
+            {#snippet children({ context })}
+              <Layer>
+                <Axis placement="bottom" ticks={Math.min(4, maxPyramidCount)} grid rule />
+                {#each pyramidEntries as entry (entry.grade)}
+                  {@const y = context.yScale(entry.grade) ?? 0}
+                  {@const bh = context.yScale.bandwidth?.() ?? 16}
+                  {@const wTotal = context.xScale(entry.total) - context.xScale(0)}
+                  {@const wSends = context.xScale(entry.sends) - context.xScale(0)}
+                  <Rect
+                    x={context.xScale(0)}
+                    {y}
+                    width={Math.max(1, wTotal)}
+                    height={bh}
+                    fill="#f59e0b"
+                    rx={2}
+                    opacity={0.45}
+                  />
+                  <Rect x={context.xScale(0)} {y} width={Math.max(1, wSends)} height={bh} fill="#10b981" rx={2} />
+                  <Text x={4} y={y + bh / 2} fontSize={10} dominantBaseline="middle" value={entry.grade} />
+                {/each}
+              </Layer>
+            {/snippet}
+          </Chart>
+          <p class="mt-1 text-xs text-muted-foreground">
+            <span class="inline-block size-2 rounded-sm bg-[#10b981] align-middle"></span> sends ·
+            <span class="inline-block size-2 rounded-sm bg-[#f59e0b]/45 align-middle"></span> attempts
+          </p>
+        </div>
+      </div>
+    {/if}
+
+    {#if maxGradePerMonth.length > 1}
+      <div class="flex flex-col gap-2">
+        <h3 class="text-xs font-semibold uppercase text-muted-foreground">Max grade climbed per month</h3>
+        <div class="h-[160px] w-full max-w-md">
+          <Chart
+            data={maxGradePerMonth}
+            height={160}
+            x="month"
+            y="ref"
+            xScale={scaleBand().padding(0.28)}
+            yScale={scaleLinear()}
+            yDomain={[0, maxGradeRef]}
+            {padding}
+          >
+            {#snippet children({ context })}
+              <Layer>
+                <Axis placement="left" ticks={Math.min(4, maxGradeRef)} grid rule />
+                <Axis placement="bottom" rule format={(v: string) => monthLabel(v)} />
+                {#each maxGradePerMonth as entry (entry.month)}
+                  {@const x = context.xScale(entry.month) ?? 0}
+                  {@const bw = context.xScale.bandwidth?.() ?? 20}
+                  {@const yTop = context.yScale(entry.ref)}
+                  {@const yBot = context.yScale(0)}
+                  <Rect {x} y={yTop} width={bw} height={Math.max(1, yBot - yTop)} fill="#3b82f6" rx={2} />
+                  <Text
+                    x={x + bw / 2}
+                    y={yTop - 4}
+                    textAnchor="middle"
+                    fontSize={10}
+                    value={entry.grade.v}
+                    class="fill-muted-foreground"
+                  />
+                {/each}
+              </Layer>
+            {/snippet}
+          </Chart>
+        </div>
+      </div>
+    {/if}
+
+    {#if sessionMonths.length > 1}
+      <div class="flex flex-col gap-2">
+        <h3 class="text-xs font-semibold uppercase text-muted-foreground">Climbing sessions per month</h3>
+        <div class="h-[160px] w-full max-w-md">
+          <Chart
+            data={sessionMonths}
+            height={160}
+            x="month"
+            y="sessions"
+            xScale={scaleBand().padding(0.28)}
+            yScale={scaleLinear()}
+            yDomain={[0, maxSessions]}
+            {padding}
+          >
+            {#snippet children({ context })}
+              <Layer>
+                <Axis placement="left" ticks={Math.min(4, maxSessions)} grid rule />
+                <Axis placement="bottom" rule format={(v: string) => monthLabel(v)} />
+                {#each sessionMonths as entry (entry.month)}
+                  {@const x = context.xScale(entry.month) ?? 0}
+                  {@const bw = context.xScale.bandwidth?.() ?? 20}
+                  {@const yTop = context.yScale(entry.sessions)}
+                  {@const yBot = context.yScale(0)}
+                  <Rect {x} y={yTop} width={bw} height={Math.max(1, yBot - yTop)} fill="#10b981" rx={2} />
+                  <Text
+                    x={x + bw / 2}
+                    y={yTop - 4}
+                    textAnchor="middle"
+                    fontSize={10}
+                    value={String(entry.sessions)}
+                    class="fill-muted-foreground"
+                  />
+                {/each}
+              </Layer>
+            {/snippet}
+          </Chart>
+        </div>
+      </div>
+    {/if}
+
+    {#if triesPerRoute.length > 0}
+      {@const triesHeight = triesPerRoute.length * 26 + padding.top + padding.bottom}
+      <div class="flex flex-col gap-2">
+        <h3 class="text-xs font-semibold uppercase text-muted-foreground">Tries per route</h3>
+        <div class="w-full max-w-md" style={`height: ${triesHeight}px`}>
+          <Chart
+            data={triesPerRoute}
+            height={triesHeight}
+            x="count"
+            y="name"
+            xScale={scaleLinear()}
+            yScale={scaleBand().padding(0.2)}
+            xDomain={[0, maxTries]}
+            {padding}
+          >
+            {#snippet children({ context })}
+              <Layer>
+                <Axis placement="bottom" ticks={Math.min(4, maxTries)} grid rule />
+                {#each triesPerRoute as entry (entry.name)}
+                  {@const y = context.yScale(entry.name) ?? 0}
+                  {@const bh = context.yScale.bandwidth?.() ?? 16}
+                  {@const w = context.xScale(entry.count) - context.xScale(0)}
+                  <Rect x={context.xScale(0)} {y} width={Math.max(1, w)} height={bh} fill="#8b5cf6" rx={2} />
+                  <Text x={4} y={y + bh / 2} fontSize={10} dominantBaseline="middle" value={entry.name} />
+                {/each}
+              </Layer>
+            {/snippet}
+          </Chart>
+        </div>
       </div>
     {/if}
 
