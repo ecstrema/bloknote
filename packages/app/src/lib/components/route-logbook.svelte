@@ -19,14 +19,14 @@
 
   let tickStyle = $state<AscentStyle>("redpoint");
   let tickComment = $state("");
-  let reviewText = $state("");
-  let reviewStars = $state(0);
+  let commentText = $state("");
   let busy = $state(false);
   let error = $state<string>();
 
   const ref = $derived({ type: feature.type, id: feature.id });
   const routeTicks = $derived(atproto.ticks.filter((t) => sameElementRef(t.subject, ref)));
-  const routeReviews = $derived(atproto.reviews.filter((r) => sameElementRef(r.subject, ref)));
+  const routeComments = $derived(atproto.comments.filter((c) => sameElementRef(c.subject, ref)));
+  const routeRatings = $derived(atproto.ratings.filter((r) => sameElementRef(r.subject, ref)));
 
   async function onAddTick(event: SubmitEvent) {
     event.preventDefault();
@@ -42,17 +42,27 @@
     }
   }
 
-  async function onAddReview(event: SubmitEvent) {
+  async function onAddComment(event: SubmitEvent) {
     event.preventDefault();
     error = undefined;
     busy = true;
     try {
-      const rating = reviewStars > 0 ? starsToNormalizedRating(reviewStars, 5) : undefined;
-      await atproto.addReview(feature, reviewText, rating);
-      reviewText = "";
-      reviewStars = 0;
+      await atproto.addComment(feature, commentText);
+      commentText = "";
     } catch (e) {
       error = e instanceof Error ? e.message : "Could not post comment";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function onSetRating(stars: number) {
+    error = undefined;
+    busy = true;
+    try {
+      await atproto.addRating(feature, starsToNormalizedRating(stars, 5));
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Could not save rating";
     } finally {
       busy = false;
     }
@@ -101,36 +111,42 @@
       </form>
     {/if}
 
-    <form class="flex flex-col gap-2 border-t pt-3" onsubmit={onAddReview}>
-      <div class="flex items-center gap-1 text-xs text-muted-foreground">
+    <div class="flex flex-col gap-2 border-t pt-3">
+      <div class="flex items-center gap-1 text-xs text-muted-foreground" role="group" aria-label="Star rating">
         <span>Rating:</span>
         {#each [1, 2, 3, 4, 5] as star (star)}
           <button
             type="button"
-            class="p-0.5 hover:scale-110"
-            aria-label="{star} star{star === 1 ? '' : 's'}"
-            onclick={() => (reviewStars = reviewStars === star ? 0 : star)}
+            class="p-0.5 hover:scale-110 disabled:opacity-50"
+            aria-label="Rate {star} star{star === 1 ? '' : 's'}"
+            disabled={busy || !atproto.configured}
+            onclick={() => onSetRating(star)}
           >
             <span
               class="icon-[lucide--star] shrink-0 size-4"
-              class:text-amber-500={star <= reviewStars}
-              class:text-muted-foreground={star > reviewStars}
+              class:text-amber-500={star <= (routeRatings[0] ? normalizedRatingToStars(routeRatings[0].rating, 5) : 0)}
+              class:text-muted-foreground={star > (routeRatings[0] ? normalizedRatingToStars(routeRatings[0].rating, 5) : 0)}
             ></span>
           </button>
         {/each}
+        {#if routeRatings[0]}
+          <span class="ml-1">{new Date(routeRatings[0].createdAt).toLocaleDateString()}</span>
+        {/if}
       </div>
-      <Textarea rows={2} bind:value={reviewText} placeholder="Write a comment or route beta..." />
-      <Button
-        size="sm"
-        type="submit"
-        variant="outline"
-        class="self-start"
-        disabled={busy || (!reviewText.trim() && reviewStars === 0)}
-      >
-        <span class="icon-[lucide--message-square] shrink-0 size-4"></span>
-        Post comment
-      </Button>
-    </form>
+      <form class="flex flex-col gap-2" onsubmit={onAddComment}>
+        <Textarea rows={2} bind:value={commentText} placeholder="Write a comment or route beta..." />
+        <Button
+          size="sm"
+          type="submit"
+          variant="outline"
+          class="self-start"
+          disabled={busy || !commentText.trim()}
+        >
+          <span class="icon-[lucide--message-square] shrink-0 size-4"></span>
+          Post comment
+        </Button>
+      </form>
+    </div>
   {/if}
 
   {#if routeTicks.length > 0}
@@ -153,25 +169,20 @@
     </div>
   {/if}
 
-  {#if routeReviews.length > 0}
+  {#if routeComments.length > 0}
     <div class="border-t pt-2.5">
-      <p class="mb-1.5 text-xs font-medium text-muted-foreground">Comments ({routeReviews.length})</p>
+      <p class="mb-1.5 text-xs font-medium text-muted-foreground">Comments ({routeComments.length})</p>
       <ul class="space-y-2 text-sm">
-        {#each routeReviews as review (review)}
+        {#each routeComments as comment (comment)}
           <li class="rounded bg-muted/40 p-2">
             <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span class="font-medium text-foreground">{review.author ?? "Climber"}</span>
-              {#if review.rating !== undefined}
-                <span class="text-amber-500">{"★".repeat(normalizedRatingToStars(review.rating, 5))}</span>
-              {/if}
-              <span>{new Date(review.createdAt).toLocaleDateString()}</span>
-              {#if !review.uri}
+              <span class="font-medium text-foreground">{comment.author ?? "Climber"}</span>
+              <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
+              {#if !comment.uri}
                 <PendingSyncBadge />
               {/if}
             </div>
-            {#if review.text}
-              <p class="mt-1 text-sm">{review.text}</p>
-            {/if}
+            <p class="mt-1 text-sm">{comment.text}</p>
           </li>
         {/each}
       </ul>

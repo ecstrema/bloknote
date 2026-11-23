@@ -16514,10 +16514,8 @@ msgstr "Ascent note (optional)"
 msgid "<0/> Log tick"
 msgstr "<0/> Log tick"
 
-#. 0: star; 1: star === 1 ? '' \\: 's'
-#: src/lib/components/route-logbook.svelte
-msgid "{0} star{1}"
-msgstr "{0} star{1}"
+#~ msgid "{0} star{1}"
+#~ msgstr "{0} star{1}"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Rating:"
@@ -16540,7 +16538,7 @@ msgstr "Your ticks ({0})"
 msgid "Climber"
 msgstr "Climber"
 
-#. 0: routeReviews.length
+#. 0: routeComments.length
 #: src/lib/components/route-logbook.svelte
 msgid "Comments ({0})"
 msgstr "Comments ({0})"
@@ -16665,9 +16663,8 @@ msgstr "<0/> — Canonical reference to an OSM element (<1/> + numeric <2/>), re
 msgid "<0/> — Personal ascent or attempt record (<1/>, <2/>, <3/>, <4/>, optional qualifiers, timestamp, and notes)."
 msgstr "<0/> — Personal ascent or attempt record (<1/>, <2/>, <3/>, <4/>, optional qualifiers, timestamp, and notes)."
 
-#: src/routes/docs/+page.svelte
-msgid "<0/> — Route or crag review text, normalized rating (<1/>), and optional proposed OSM tag corrections."
-msgstr "<0/> — Route or crag review text, normalized rating (<1/>), and optional proposed OSM tag corrections."
+#~ msgid "<0/> — Route or crag review text, normalized rating (<1/>), and optional proposed OSM tag corrections."
+#~ msgstr "<0/> — Route or crag review text, normalized rating (<1/>), and optional proposed OSM tag corrections."
 
 #~ msgid "<0/> — Bookmarked/starred climbing features."
 #~ msgstr "<0/> — Bookmarked/starred climbing features."
@@ -16680,9 +16677,8 @@ msgstr "<0/> — User preferences such as preferred route and boulder grading sc
 msgid "Atmosphere (ATProto) Lexicons"
 msgstr "Atmosphere (ATProto) Lexicons"
 
-#: src/routes/docs/+page.svelte
-msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and reviews are portable across apps."
-msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and reviews are portable across apps."
+#~ msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and reviews are portable across apps."
+#~ msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and reviews are portable across apps."
 
 #: src/routes/docs/+page.svelte
 msgid "Core schemas"
@@ -17124,9 +17120,8 @@ msgstr "Service worker caches"
 msgid "<0/> — Bookmarked climbing features."
 msgstr "<0/> — Bookmarked climbing features."
 
-#: src/routes/settings/account/accounts-tab.svelte
-msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
-msgstr "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
+#~ msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
+#~ msgstr "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
 
 #~ msgid "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
 #~ msgstr "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
@@ -17233,10 +17228,8 @@ msgstr "Number of pitches <0/>"
 msgid "Not a multipitch"
 msgstr "Not a multipitch"
 
-#. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: routeCount; 4: sessionCount; 5: atproto.stars.length; 6: atproto.reviews.length
-#: src/routes/settings/logbook/user-stats-panel.svelte
-msgid "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments"
-msgstr "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments"
+#~ msgid "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments"
+#~ msgstr "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments"
 
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Grade pyramid"
@@ -17311,6 +17304,40 @@ msgstr "Connect your Atmosphere account in the <0>Account</0> tab to keep your t
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Via ferrata"
 msgstr "Via ferrata"
+
+#: src/lib/components/route-logbook.svelte
+msgid "Could not save rating"
+msgstr "Could not save rating"
+
+#: src/lib/components/route-logbook.svelte
+msgid "Star rating"
+msgstr "Star rating"
+
+#. 0: star; 1: star === 1 ? '' \\: 's'
+#: src/lib/components/route-logbook.svelte
+msgid "Rate {0} star{1}"
+msgstr "Rate {0} star{1}"
+
+#: src/routes/settings/account/accounts-tab.svelte
+msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, comments, star ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
+msgstr "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, comments, star ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
+
+#. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: routeCount; 4: sessionCount; 5: atproto.stars.length; 6: atproto.comments.length; 7: atproto.ratings.length
+#: src/routes/settings/logbook/user-stats-panel.svelte
+msgid "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments · {7} ratings"
+msgstr "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments · {7} ratings"
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — Standalone comment text on a route or crag, independent of ratings so each can be created and deleted separately."
+msgstr "<0/> — Standalone comment text on a route or crag, independent of ratings so each can be created and deleted separately."
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — Standalone normalized rating (<1/>) for a route or crag."
+msgstr "<0/> — Standalone normalized rating (<1/>) for a route or crag."
+
+#: src/routes/docs/+page.svelte
+msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and comments are portable across apps."
+msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and comments are portable across apps."
 
 #. 0: import.meta.env.DEV ? "[DEV] " \\: ""
 #: src/routes/grade-comparison/via-ferrata/+page.svelte

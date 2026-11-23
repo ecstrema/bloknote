@@ -252,13 +252,14 @@
   }
 </script>
 
-{#if atproto.configured || atproto.ticks.length > 0 || atproto.stars.length > 0 || atproto.reviews.length > 0}
+{#if atproto.configured || atproto.ticks.length > 0 || atproto.stars.length > 0 || atproto.comments.length > 0 || atproto.ratings.length > 0}
   <section class="flex flex-col gap-4 border-t py-6">
     <div>
       <h2 class="font-medium">Your climbing stats</h2>
       <p class="mt-1 text-sm text-muted-foreground">
         {stats.totalTicks} ticks ({stats.totalSends} sends, {stats.totalAttempts} attempts) · {routeCount} routes ·
-        {sessionCount} sessions · {atproto.stars.length} bookmarked · {atproto.reviews.length} comments
+        {sessionCount} sessions · {atproto.stars.length} bookmarked · {atproto.comments.length} comments ·
+        {atproto.ratings.length} ratings
       </p>
     </div>
 

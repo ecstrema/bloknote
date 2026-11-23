@@ -67,26 +67,27 @@ export interface TickRecord {
 }
 
 /**
- * Proposed change or addition to an OpenStreetMap tag key-value pair.
- * Allows users to propose corrections or updates (e.g. name, grade) as part of a review.
+ * Standalone comment on an OpenStreetMap element (node, way, or relation).
+ * Corresponds to org.bloknote.comment.
+ * Deliberately minimal: only the element reference, the text, and timestamps. Ratings, ticks,
+ * and bookmarks are separate record types so each piece of personal data can be created and
+ * deleted independently (see issue #163).
  */
-export interface ProposedTagChange {
-  key: string;
-  value: string;
+export interface CommentRecord {
+  subject: OsmElementRef;
+  text: string;
+  createdAt: string;
 }
 
 /**
- * Review and rating for an OpenStreetMap element (node, way, or relation).
- * Corresponds to org.openstreetmap.review.
- * Contains element reference (subject), review text, normalized rating (0.0 to 1.0),
- * optional proposed OSM tag changes (e.g. for name or grade proposals), and submission timestamp.
- * Rating is a float from 0.0 (no stars) to 1.0 (full rating), easily adaptable to 3, 4, or 5 star systems.
+ * Standalone star rating of an OpenStreetMap element (node, way, or relation).
+ * Corresponds to org.bloknote.rating.
+ * Normalized rating from 0.0 (no stars) to 1.0 (full rating), easily adaptable to 3, 4, or 5
+ * star systems. Comments live in their own org.bloknote.comment records.
  */
-export interface ReviewRecord {
+export interface RatingRecord {
   subject: OsmElementRef;
-  text?: string;
-  rating?: number; // 0.0 to 1.0
-  proposedTags?: ProposedTagChange[];
+  rating: number; // 0.0 to 1.0
   createdAt: string;
 }
 
@@ -135,9 +136,4 @@ export function normalizedRatingToStars(rating: number, maxStars: number = 5): n
 /** Converts a star rating in an N-star system to normalized rating (0.0 - 1.0). */
 export function starsToNormalizedRating(stars: number, maxStars: number = 5): number {
   return Math.max(0, Math.min(1, stars / maxStars));
-}
-
-/** Finds a proposed tag value by key from a review record. */
-export function getProposedTag(review: ReviewRecord, key: string): string | undefined {
-  return review.proposedTags?.find((t) => t.key === key)?.value;
 }

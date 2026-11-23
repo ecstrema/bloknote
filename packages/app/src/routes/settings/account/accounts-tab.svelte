@@ -122,7 +122,7 @@
   <div>
     <h2 class="font-medium">Atmosphere</h2>
     <p class="mt-1 text-sm text-muted-foreground">
-      Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and
+      Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, comments, star ratings, and
       bookmarked climbs—in your own data repository, separate from OpenStreetMap.
     </p>
     {#if atproto.session}

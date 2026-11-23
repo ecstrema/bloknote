@@ -183,7 +183,7 @@
         <h1>Atmosphere (ATProto) Lexicons</h1>
         <p>
           Bloknote defines open AT Protocol Lexicon schemas under <code>org.bloknote.*</code> and reusable
-          <code>org.openstreetmap.*</code> namespaces so personal climbing logs and reviews are portable across apps.
+          <code>org.openstreetmap.*</code> namespaces so personal climbing logs and comments are portable across apps.
         </p>
         <h2>Core schemas</h2>
         <ul>
@@ -198,8 +198,11 @@
             <code>flash</code>, <code>redpoint</code>, <code>attempt</code>, optional qualifiers, timestamp, and notes).
           </li>
           <li>
-            <code>org.openstreetmap.review</code> — Route or crag review text, normalized rating (<code>0.0–1.0</code>),
-            and optional proposed OSM tag corrections.
+            <code>org.bloknote.comment</code> — Standalone comment text on a route or crag, independent of ratings so
+            each can be created and deleted separately.
+          </li>
+          <li>
+            <code>org.bloknote.rating</code> — Standalone normalized rating (<code>0.0–1.0</code>) for a route or crag.
           </li>
           <li>
             <code>org.openstreetmap.star</code> — Bookmarked climbing features.
