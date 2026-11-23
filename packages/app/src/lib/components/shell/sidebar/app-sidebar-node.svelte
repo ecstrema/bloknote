@@ -506,7 +506,13 @@
 
           {#if interacted}
             <DropdownMenu.Root>
-              <DropdownMenu.Trigger>
+              <DropdownMenu.Trigger
+                onclick={(e) => {
+                  // The action menu lives inside the Collapsible.Trigger; stop the event so
+                  // opening the menu doesn't also collapse or expand the node (issue #174).
+                  e.stopPropagation();
+                }}
+              >
                 {#snippet child({ props })}
                   <Sidebar.MenuAction showOnHover {...props}>
                     <span class="icon-[lucide--ellipsis] shrink-0 size-4"></span>
