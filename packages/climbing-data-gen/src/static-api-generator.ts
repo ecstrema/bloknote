@@ -6,6 +6,7 @@ import type { Coordinates, DataJSON, GeographicFolderElement, OverpassRequest } 
 import { ensureDirExists, slugify } from "@bloknote/reverse-geocoding-data";
 import type { OsmFeature } from "osm-api";
 import { getStaticIdentifier, osmIndexFile } from "@bloknote/common";
+import { RSS_MAX_ITEMS, recentItemXml, renderRssFeed, type RecentItem } from "./rss.ts";
 
 export type StaticApiGeneratorOptions = {
   outApiDirectory: string;
@@ -290,6 +291,8 @@ type DataJSONRecord = Record<string, DataJSON>;
 interface GeneratedDirectory {
   data?: DataJSON;
   totalRoutes: number;
+  /** Recently added or edited features in this subtree, newest first (see rss.ts) */
+  recent: RecentItem[];
 }
 
 const routeClimbingValues = new Set([
@@ -334,10 +337,28 @@ function writeStaticApiMetadata(worldDirectory: string) {
       totalRoutes += isRoute(result.data) ? 1 : result.totalRoutes;
     }
 
+    // RSS feed of the recently added or edited features in this subtree (see issue #142)
+    const recent: RecentItem[] = [];
+    if (data && data.type !== "geographic") {
+      const item = recentItemXml(data, slug);
+      if (item) recent.push(item);
+    }
+    for (const { result } of childResults) {
+      recent.push(...result.recent);
+    }
+    recent.sort((a, b) => b.timestamp - a.timestamp);
+    if (recent.length > 0) {
+      const title = data?.type === "geographic" ? data.name : (data as OsmFeature | undefined)?.tags?.name ?? slug;
+      writeFileSync(
+        join(directory, "feed.xml"),
+        renderRssFeed({ title, slug, items: recent.slice(0, RSS_MAX_ITEMS) }),
+      );
+    }
+
     writeFileSync(join(directory, "children.json"), JSON.stringify(children));
     writeFileSync(join(directory, "stats.json"), JSON.stringify({ totalRoutes }));
 
-    return { data, totalRoutes };
+    return { data, totalRoutes, recent: recent.slice(0, RSS_MAX_ITEMS) };
   }
 
   visit(worldDirectory, "");
