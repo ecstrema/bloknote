@@ -92,7 +92,7 @@
   });
 </script>
 
-<ModeWatcher />
+<ModeWatcher modeStorageKey="bloknote:mode" themeStorageKey="bloknote:theme" />
 
 {#if downloading && downloadPercent !== undefined}
   <div

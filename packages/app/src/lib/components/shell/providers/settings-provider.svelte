@@ -5,10 +5,13 @@
   import { setPreferredRouteGradingScale, setPreferredBoulderGradingScale } from "./settings.svelte";
   import type { BoulderScaleId, RouteScaleId } from "@bloknote/holy-grade";
 
-  const preferredRouteGradingScale = new PersistentState<RouteScaleId | "local">("preferredRouteGradingScale", "local");
+  const preferredRouteGradingScale = new PersistentState<RouteScaleId | "local">(
+    "bloknote:preferred-route-grading-scale",
+    "local",
+  );
 
   const preferredBoulderGradingScale = new PersistentState<BoulderScaleId | "local">(
-    "preferredBoulderGradingScale",
+    "bloknote:preferred-boulder-grading-scale",
     "local",
   );
 

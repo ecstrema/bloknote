@@ -8,6 +8,11 @@ function initialValue(): boolean {
   if (!browser) return false;
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored !== null) return stored === "true";
+  return connectionSaveData();
+}
+
+/** The implicit default when no preference is stored */
+function connectionSaveData(): boolean {
   return (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
 }
 
@@ -37,7 +42,10 @@ class Settings {
 
   set lowData(value: boolean) {
     this.#lowData = value;
-    if (browser) localStorage.setItem(STORAGE_KEY, String(value));
+    if (!browser) return;
+    // Settings at their default value are not stored: absence means the same behavior
+    if (value === connectionSaveData()) localStorage.removeItem(STORAGE_KEY);
+    else localStorage.setItem(STORAGE_KEY, String(value));
   }
 
   isMapProviderEnabled(id: string, isMobile: boolean): boolean {
@@ -47,13 +55,29 @@ class Settings {
     return provider ? isMapProviderDefaultEnabled(provider, isMobile) : false;
   }
 
-  setMapProviderEnabled(id: string, enabled: boolean) {
+  setMapProviderEnabled(id: string, enabled: boolean, isMobile?: boolean) {
     this.#mapProviderOverrides = { ...this.#mapProviderOverrides, [id]: enabled };
-    if (browser) localStorage.setItem(MAP_PROVIDERS_STORAGE_KEY, JSON.stringify(this.#mapProviderOverrides));
+    this.#persistMapProviders(isMobile);
   }
 
   toggleMapProvider(id: string, isMobile: boolean) {
-    this.setMapProviderEnabled(id, !this.isMapProviderEnabled(id, isMobile));
+    this.setMapProviderEnabled(id, !this.isMapProviderEnabled(id, isMobile), isMobile);
+  }
+
+  /** Stores only the overrides that differ from the provider defaults, and nothing at all when there are none */
+  #persistMapProviders(isMobile?: boolean) {
+    if (!browser) return;
+    const overrides =
+      isMobile === undefined
+        ? this.#mapProviderOverrides
+        : Object.fromEntries(
+            Object.entries(this.#mapProviderOverrides).filter(([id, enabled]) => {
+              const provider = MAP_PROVIDERS.find((p) => p.id === id);
+              return !provider || isMapProviderDefaultEnabled(provider, isMobile) !== enabled;
+            }),
+          );
+    if (Object.keys(overrides).length === 0) localStorage.removeItem(MAP_PROVIDERS_STORAGE_KEY);
+    else localStorage.setItem(MAP_PROVIDERS_STORAGE_KEY, JSON.stringify(overrides));
   }
 
   getEnabledMapProviders(isMobile: boolean): MapProvider[] {
