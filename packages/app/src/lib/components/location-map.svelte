@@ -21,7 +21,7 @@
   import type { OsmFeature } from "osm-api";
   import { setMapCenterProvider } from "./map-center.js";
   import { addTerrainSource } from "./map-controls.js";
-  import { CLIMBING_LAYERS, featureToMapElement, formatPopupHtml, VECTOR_STYLE } from "./location-map-helper.js";
+  import { CLIMBING_LAYERS, applyElementTypeVisibility, featureToMapElement, formatPopupHtml, VECTOR_STYLE } from "./location-map-helper.js";
   import MapLegend from "./map-legend.svelte";
 
   // One map (and WebGL context) for the whole app: kept across page navigation.
@@ -200,7 +200,10 @@
     onAdd() {
       const container = document.createElement("div");
       container.className = "maplibregl-ctrl map-legend-ctrl";
-      this.instance = mount(MapLegend, { target: container, props: { onColorMode: setSharedColorMode } });
+      this.instance = mount(MapLegend, {
+        target: container,
+        props: { onColorMode: setSharedColorMode, onElementTypeVisibility: setSharedElementTypeVisibility },
+      });
       this.container = container;
       return container;
     }
@@ -214,6 +217,12 @@
   }
 
   let legendControl = new LegendControl();
+
+  /** Applies the legend element-type visibility toggles to the shared map (issue #173) */
+  function setSharedElementTypeVisibility(hiddenTypes: string[]) {
+    if (!shared?.map) return;
+    applyElementTypeVisibility(shared.map, new Set(hiddenTypes));
+  }
 
   function applyHighlightFilters(map: MapLibreMap, slug: string) {
     const cleanSlug = slug.replace(/^world\//, "");

@@ -16,16 +16,24 @@
 
   let {
     onColorMode,
+    onElementTypeVisibility,
   }: {
     /** Called when the user picks another route coloring on the map */
     onColorMode?: (mode: "grade" | "type" | "both") => void;
+    /** Called when the user toggles which element types are shown on the map (issue #173) */
+    onElementTypeVisibility?: (hiddenTypes: string[]) => void;
   } = $props();
 
   let open = $state(false);
   let colorMode = $state<"grade" | "type" | "both">("both");
+  let hiddenTypes = $state<string[]>([]);
 
   $effect(() => {
     onColorMode?.(colorMode);
+  });
+
+  $effect(() => {
+    onElementTypeVisibility?.(hiddenTypes);
   });
 
   const TYPE_SWATCHES = [
@@ -36,6 +44,20 @@
     { label: "Ice", fill: "bg-cyan-500", border: "border-cyan-500" },
     { label: "Top rope", fill: "bg-pink-500", border: "border-pink-500" },
   ];
+
+  /** Element types the user can hide from the map, with their legend labels */
+  const VISIBILITY_TOGGLES = [
+    { type: "route", label: "Routes" },
+    { type: "area", label: "Areas / Crags" },
+    { type: "sector", label: "Sectors" },
+    { type: "cliff", label: "Cliffs" },
+    { type: "gym", label: "Gyms" },
+  ];
+
+  function toggleElementType(type: string, visible: boolean) {
+    if (visible) hiddenTypes = hiddenTypes.filter((t) => t !== type);
+    else hiddenTypes = [...hiddenTypes, type];
+  }
 
   const preferredScale = $derived.by(() => {
     try {
@@ -142,6 +164,24 @@
           </div>
         </div>
       {/if}
+
+      <!-- Visibility filters -->
+      <div class="mt-2.5 border-t border-black/10 pt-2">
+        <div class="mb-1.5 text-[11px] font-medium text-slate-500">Show on map</div>
+        <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
+          {#each VISIBILITY_TOGGLES as toggle (toggle.type)}
+            <label class="flex cursor-pointer items-center gap-1.5">
+              <input
+                type="checkbox"
+                class="size-3 accent-blue-500"
+                checked={!hiddenTypes.includes(toggle.type)}
+                onchange={(e) => toggleElementType(toggle.type, e.currentTarget.checked)}
+              />
+              <span class={hiddenTypes.includes(toggle.type) ? "text-slate-400 line-through" : ""}>{toggle.label}</span>
+            </label>
+          {/each}
+        </div>
+      </div>
     </div>
   {/if}
 </div>

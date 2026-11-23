@@ -10,6 +10,7 @@ import {
 import { getCoordinates, getGrade } from "#lib/data/parse/osm-tags.js";
 import { getColorFromGrade } from "#lib/data/network/grade.js";
 import type { LayerSpecification } from "#lib/maplibre.js";
+import type { Map as MapLibreMap } from "maplibre-gl";
 
 import { getParentSlug } from "#lib/helpers/slug.js";
 
@@ -178,6 +179,39 @@ export function buildSectorContour(points: [number, number][], bufferDist = SECT
     expanded.push([expanded[0]![0], expanded[0]![1]]);
   }
   return expanded;
+}
+
+/**
+ * Non-selection layers per elementType, used by the legend visibility toggles (issue #173).
+ * Selection highlights stay visible regardless of the toggles.
+ */
+export const ELEMENT_TYPE_LAYERS: Record<string, string[]> = {
+  route: ["routes", "route-labels"],
+  area: ["areas"],
+  gym: ["gyms"],
+  cliff: ["cliffs"],
+  sector: ["sectors-contour", "sectors-label"],
+};
+
+/**
+ * Shows or hides every non-selection layer of the given element types on the map.
+ * Passing "all" (or an empty hidden set) restores the original filters.
+ */
+export function applyElementTypeVisibility(map: MapLibreMap, hiddenTypes: ReadonlySet<string>) {
+  for (const [elementType, layerIds] of Object.entries(ELEMENT_TYPE_LAYERS)) {
+    for (const layerId of layerIds) {
+      if (!map.getLayer(layerId)) continue;
+      const layer = CLIMBING_LAYERS.find((l) => l.id === layerId) as (LayerSpecification & { filter?: unknown }) | undefined;
+      const base = layer?.filter;
+      if (!base) continue;
+      map.setFilter(
+        layerId,
+        hiddenTypes.has(elementType)
+          ? ["all", base as any, ["!=", ["get", "elementType"], elementType]]
+          : (base as any),
+      );
+    }
+  }
 }
 
 export function formatPopupHtml(props: MapElementFeature["properties"]): string {
