@@ -46,9 +46,12 @@
       : undefined;
   }
 
-  let { params }: PageProps = $props();
+  let { params, data }: PageProps = $props();
 
   const slug = $derived(params.slug);
+  // The layout resolves the slug from the `?id=` param, which can differ from the URL
+  // path (e.g. a route opened from its crag): the page item lives at that slug.
+  const resolvedSlug = $derived(data.slug);
 
   const appState = getAppState();
 
@@ -68,7 +71,7 @@
     lastQueryId = id;
   });
   let item = $derived(queriedItem?.item ?? appState.currentNode.current);
-  const itemSlug = $derived(queriedItem?.slug ?? slug);
+  const itemSlug = $derived(queriedItem?.slug ?? resolvedSlug);
   const itemType = $derived(featureToType(item.feature));
   const hasOsmData = $derived(item.feature.type !== "geographic");
 
