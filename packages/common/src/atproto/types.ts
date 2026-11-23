@@ -45,6 +45,8 @@ export type AscentInfo = "clean" | "toprope" | "lead" | "solo" | "second" | "aid
 export interface OsmElementRef {
   type: BasicOsmType;
   id: number;
+  /** Element version the record refers to, when known: pins the exact state in the OSM API history */
+  version?: number;
 }
 
 /** Backward-compatibility alias for OsmElementRef */
@@ -54,13 +56,15 @@ export type OsmSubjectRef = OsmElementRef;
  * Record corresponding to org.bloknote.logbook.tick
  * Personal logbook tick recording an ascent or attempt on an OSM route.
  * Contains: subject (OSM element ref), core style, optional ascent qualifiers (ascentInfo),
- * climbedAt timestamp, creation timestamp, and comment.
+ * the climber's own grade opinion, climbedAt timestamp, creation timestamp, and comment.
  * Private ticks are stored in private ATProto Spaces.
  */
 export interface TickRecord {
   subject: OsmElementRef;
   style: AscentStyle;
   ascentInfo?: AscentInfo[];
+  /** The climber's own grade opinion, which may differ from the grade tagged in OSM */
+  grade?: ClimbingGradeRef;
   climbedAt: string;
   createdAt: string;
   comment?: string;

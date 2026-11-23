@@ -464,7 +464,7 @@ class AtProtoClient {
     if (!this.session) throw new Error("ATProto is not configured");
     const now = new Date().toISOString();
     const record: LocalTickEntry = {
-      subject: { type: feature.type, id: feature.id },
+      subject: { type: feature.type, id: feature.id, ...(feature.version > 0 ? { version: feature.version } : {}) },
       style,
       climbedAt: now,
       createdAt: now,
@@ -522,6 +522,7 @@ class AtProtoClient {
         style: entry.style,
         climbedAt: entry.climbedAt,
         createdAt: entry.createdAt,
+        ...(entry.grade ? { grade: entry.grade } : {}),
         ...(entry.comment ? { comment: entry.comment } : {}),
       });
     } catch (error) {
