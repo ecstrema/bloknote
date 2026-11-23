@@ -6,6 +6,16 @@ const TOKEN_STORAGE_KEY = "bloknote.commons.token";
 const FLOW_STORAGE_KEY = "bloknote.commons.oauth";
 const CLIENT_ID = "e776566ba980892324adfc092f191dc0";
 
+/**
+ * Wikimedia compares the redirect_uri of the authorization request verbatim with the callback
+ * registered for the "Climbhub" consumer on meta.wikimedia.org — any mismatch fails the consent
+ * step with "Client authentication failed" (issue #11). The consumer currently registers
+ * `https://ecstrema.github.io/climbhub/commons-oauth`, but the site moved to /bloknote, so the
+ * registration must be updated to `${window.location.origin}/bloknote/commons-oauth` (plus the
+ * localhost dev URL) via Special:OAuthConsumerRegistration/update. The client itself is public
+ * ("Client is confidential: No"), so the PKCE flow below without a client_secret is correct.
+ */
+
 type CommonsToken = { access_token: string; expires_at: number };
 
 function randomValue() {
