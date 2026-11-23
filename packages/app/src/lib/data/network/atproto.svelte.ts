@@ -1,5 +1,4 @@
 import { browser } from "$app/env";
-import { goto } from "$app/navigation";
 import type { AscentStyle, OsmElementRef, ReviewRecord, StarRecord, TickRecord } from "@bloknote/common";
 import {
   BrowserOAuthClient,
@@ -71,7 +70,10 @@ export function sameElementRef(a: OsmElementRef, b: OsmElementRef): boolean {
 }
 
 function createOAuthClient(): Promise<BrowserOAuthClient> {
-  const redirectUri = `${location.origin}${BASE}/settings`;
+  // The OAuth server redirects back to this exact URI: it must stay registered in
+  // static/client-metadata.json. The ?tab=account query makes the settings page open
+  // on the account tab, where the newly connected account is shown.
+  const redirectUri = `${location.origin}${BASE}/settings?tab=account`;
   // Loopback clients (localhost dev) use the special hardcoded client_id, while
   // the deployed app points to its hosted client-metadata.json
   const clientId = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname)
@@ -147,10 +149,7 @@ class AtProtoClient {
     this.#ready ??= (async () => {
       this.#client ??= await createOAuthClient();
       const result = await this.#client.init();
-      if (result) {
-        await this.#activate(result.session);
-        this.#redirectToAccountTab();
-      }
+      if (result) await this.#activate(result.session);
     })();
     try {
       await this.#ready;
@@ -159,19 +158,6 @@ class AtProtoClient {
       this.#oauthSession = undefined;
       this.session = undefined;
     }
-  }
-
-  /**
-   * After a completed login the OAuth server redirects back to the registered
-   * `/settings` redirect URI: clean its query parameters and continue to the
-   * account tab, where the newly connected account is shown.
-   */
-  #redirectToAccountTab() {
-    if (!location.pathname.endsWith("/settings")) return;
-    const url = new URL(location.href);
-    for (const param of [...url.searchParams.keys()]) url.searchParams.delete(param);
-    url.searchParams.set("tab", "account");
-    void goto(url, { replace: true });
   }
 
   async #activate(oauthSession: OAuthSession) {

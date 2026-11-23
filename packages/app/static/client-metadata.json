@@ -2,7 +2,7 @@
   "client_id": "https://ecstrema.github.io/bloknote/client-metadata.json",
   "client_name": "Bloknote",
   "client_uri": "https://ecstrema.github.io/bloknote/",
-  "redirect_uris": ["https://ecstrema.github.io/bloknote/settings"],
+  "redirect_uris": ["https://ecstrema.github.io/bloknote/settings?tab=account"],
   "scope": "atproto transition:generic",
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
