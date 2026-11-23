@@ -12,7 +12,7 @@
         "properties": {
           "subject": {
             "type": "ref",
-            "ref": "org.openstreetmap.core.defs#elementRef",
+            "ref": "org.bloknote.osm.defs#elementRef",
             "description": "The OpenStreetMap climbing route, pitch, or boulder being ticked"
           },
           "style": {

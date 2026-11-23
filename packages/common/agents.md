@@ -26,7 +26,7 @@
 
 ### AT Protocol Models & Helpers
 
-- `src/atproto/types.ts`: TypeScript interfaces mirroring the AT Protocol Lexicons (`org.bloknote.*` and `org.openstreetmap.*`) for ticks (`TickRecord`), reviews (`ReviewRecord`), stars (`StarRecord`), and user profiles (`ProfileRecord`), along with ATProto Spaces wrappers.
+- `src/atproto/types.ts`: TypeScript interfaces mirroring the AT Protocol Lexicons (`org.bloknote.*`) for ticks (`TickRecord`), comments (`CommentRecord`), ratings (`RatingRecord`), bookmarks (`StarRecord`), and user profiles (`ProfileRecord`), along with ATProto Spaces wrappers.
 - `src/atproto/stats.ts`: `computeUserStats(ticks)` dynamically aggregates user statistics (sends, attempts, style breakdown, grade pyramid) client-side from ticks without requiring a separate stats record.
 - `src/atproto/recovery.ts`: `findOsmRecoveryCandidates` and `relinkOsmElement` provide candidate recovery matching when an OpenStreetMap element is deleted/converted, using historical element data queried from the OSM API history.
 

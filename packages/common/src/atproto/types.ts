@@ -38,7 +38,7 @@ export type AscentInfo = "clean" | "toprope" | "lead" | "solo" | "second" | "aid
 
 /**
  * Reference to an OpenStreetMap element (node, way, or relation).
- * Corresponds to org.openstreetmap.core.defs#elementRef.
+ * Corresponds to org.bloknote.osm.defs#elementRef.
  * No snapshot metadata is stored in records: deleted OSM elements remain queryable
  * via the OSM API history endpoint.
  */
@@ -94,7 +94,7 @@ export interface RatingRecord {
 
 /**
  * General-purpose starred or bookmarked OpenStreetMap element.
- * Corresponds to org.openstreetmap.star.
+ * Corresponds to org.bloknote.bookmark (formerly org.openstreetmap.star).
  * Kept strictly minimal: only subject (OSM element ref) and createdAt timestamp.
  * Private star lists are stored in private ATProto Spaces.
  */

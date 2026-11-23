@@ -12,7 +12,7 @@
         "properties": {
           "subject": {
             "type": "ref",
-            "ref": "org.openstreetmap.core.defs#elementRef",
+            "ref": "org.bloknote.osm.defs#elementRef",
             "description": "The OpenStreetMap element (node, way, or relation) being commented on"
           },
           "text": {

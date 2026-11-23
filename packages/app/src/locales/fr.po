@@ -17339,9 +17339,8 @@ msgstr ""
 #~ msgid "<0/> — Standalone normalized rating (<1/>) for a route or crag."
 #~ msgstr ""
 
-#: src/routes/docs/+page.svelte
-msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and comments are portable across apps."
-msgstr ""
+#~ msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and comments are portable across apps."
+#~ msgstr ""
 
 #: src/lib/components/map-legend.svelte
 msgid "Areas / Crags"
@@ -17375,4 +17374,8 @@ msgstr ""
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Standalone integer rating (<1/>) for a route or crag."
+msgstr ""
+
+#: src/routes/docs/+page.svelte
+msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> so personal climbing logs and comments are portable across apps."
 msgstr ""

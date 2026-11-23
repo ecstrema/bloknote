@@ -1,6 +1,6 @@
 {
   "lexicon": 1,
-  "id": "org.openstreetmap.core.defs",
+  "id": "org.bloknote.osm.defs",
   "description": "Shared definitions and types for OpenStreetMap elements",
   "defs": {
     "elementRef": {

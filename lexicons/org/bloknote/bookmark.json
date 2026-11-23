@@ -1,7 +1,7 @@
 {
   "lexicon": 1,
-  "id": "org.openstreetmap.star",
-  "description": "A user's starred or bookmarked OpenStreetMap element (node, way, or relation)",
+  "id": "org.bloknote.bookmark",
+  "description": "A user's bookmarked OpenStreetMap element (node, way, or relation)",
   "defs": {
     "main": {
       "type": "record",
@@ -12,13 +12,13 @@
         "properties": {
           "subject": {
             "type": "ref",
-            "ref": "org.openstreetmap.core.defs#elementRef",
-            "description": "The OpenStreetMap element (node, way, or relation) being starred"
+            "ref": "org.bloknote.osm.defs#elementRef",
+            "description": "The OpenStreetMap element (node, way, or relation) being bookmarked"
           },
           "createdAt": {
             "type": "string",
             "format": "datetime",
-            "description": "ISO 8601 timestamp when the element was starred"
+            "description": "ISO 8601 timestamp when the element was bookmarked"
           }
         }
       }
