@@ -44,6 +44,8 @@
   let activeSelectionSlugs: string[] = [];
   /** Set by the LocationMap instance, which has access to the sidebar selection context */
   let lassoSelect: ((slugs: string[]) => void) | undefined;
+  /** Set by the LocationMap instance, which has access to the sidebar selection context */
+  let clearSidebarSelection: (() => void) | undefined;
 
   function setSharedColorMode(mode: "grade" | "type" | "both") {
     sharedColorMode = mode;
@@ -422,10 +424,27 @@
       if (slugs.size > 0) lassoSelect?.([...slugs]);
     });
 
-    // Right-clicking the selection opens the same bulk context menu as the sidebar selection
-    map.getCanvas().addEventListener("contextmenu", (e) => {
-      if (activeSelectionSlugs.length === 0) return;
-      e.preventDefault();
+    // Right-clicking a selected route opens the same bulk context menu as the sidebar selection.
+    // Right-drag rotates the 3D view: the menu only opens for a click without movement
+    // and only when the click lands on one of the selected routes.
+    let contextMenuStart: { x: number; y: number } | undefined;
+
+    map.on("mousedown", (e) => {
+      if (e.originalEvent.button === 2) contextMenuStart = { x: e.point.x, y: e.point.y };
+    });
+
+    // The map never shows the browser menu: the bulk menu is dispatched on mouseup below
+    map.getCanvas().addEventListener("contextmenu", (e) => e.preventDefault());
+
+    map.on("mouseup", (e) => {
+      if (e.originalEvent.button !== 2 || !contextMenuStart) return;
+      const moved = Math.hypot(e.point.x - contextMenuStart.x, e.point.y - contextMenuStart.y);
+      contextMenuStart = undefined;
+      if (moved > 3 || activeSelectionSlugs.length === 0) return;
+      const onSelected = map
+        .queryRenderedFeatures(e.point, { layers: ["routes", "selected-ring", "route-labels"] })
+        .some((f) => typeof f.properties?.slug === "string" && activeSelectionSlugs.includes(f.properties.slug));
+      if (!onSelected) return;
       const tree = document.querySelector<HTMLDivElement>('[role="tree"]');
       if (!tree) return;
       tree.dispatchEvent(
@@ -433,8 +452,8 @@
           bubbles: true,
           cancelable: true,
           button: 2,
-          clientX: e.clientX,
-          clientY: e.clientY,
+          clientX: e.originalEvent.clientX,
+          clientY: e.originalEvent.clientY,
         }),
       );
     });
@@ -519,6 +538,8 @@
           currentOnmapclick({ lat: e.lngLat.lat, lon: e.lngLat.lng });
           return;
         }
+        // A plain click on the map dismisses the active selection
+        if (activeSelectionSlugs.length > 0) clearSidebarSelection?.();
         const features = map.queryRenderedFeatures(e.point, { layers: interactiveLayers });
         const feature = features[0];
         if (!feature) return;
@@ -595,6 +616,10 @@
   $effect(() => {
     lassoSelect = (slugs) => {
       for (const slug of slugs) selection?.selected.add(slug);
+    };
+    clearSidebarSelection = () => {
+      selection?.clear();
+      selection?.setAnchor(undefined);
     };
   });
 
