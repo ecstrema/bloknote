@@ -2,7 +2,6 @@
   import "maplibre-gl/dist/maplibre-gl.css";
   import {
     Map as MapLibreMap,
-    NavigationControl,
     Popup,
     ScaleControl,
     type GeoJSONSource,
@@ -10,6 +9,7 @@
     type MapLayerMouseEvent,
     type MapMouseEvent,
   } from "#lib/maplibre.js";
+  import { MapButtonsControl, MINUS_ICON, PLUS_ICON } from "#lib/components/map-controls.js";
   import type { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from "geojson";
   import { onMount } from "svelte";
   import { PersistentState } from "@friendofsvelte/state";
@@ -525,7 +525,13 @@
     });
     map.touchZoomRotate.disableRotation();
     map.keyboard.disableRotation();
-    map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+    map.addControl(
+      new MapButtonsControl([
+        { title: "Zoom in", svg: PLUS_ICON, onClick: (map) => map.zoomIn(), desktopOnly: true },
+        { title: "Zoom out", svg: MINUS_ICON, onClick: (map) => map.zoomOut(), desktopOnly: true },
+      ]),
+      "top-right",
+    );
     map.addControl(new ScaleControl({}), "bottom-right");
 
     map.on("load", () => {

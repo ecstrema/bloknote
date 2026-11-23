@@ -17015,3 +17015,15 @@ msgstr[1] ""
 #: src/lib/components/shell/osm-changes.svelte
 msgid "{0}. Drag their marker on the map or the topo image to a real location before submitting — "
 msgstr ""
+
+#: src/lib/components/location-map.svelte
+msgid "Zoom in"
+msgstr "Hineinzoomen"
+
+#: src/lib/components/location-map.svelte
+msgid "Zoom out"
+msgstr "Herauszoomen"
+
+#: src/lib/components/location-map.svelte
+msgid "Show the current location"
+msgstr "Aktuelle Position anzeigen"

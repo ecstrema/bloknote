@@ -17015,3 +17015,15 @@ msgstr[1] "# routes have no position yet"
 #: src/lib/components/shell/osm-changes.svelte
 msgid "{0}. Drag their marker on the map or the topo image to a real location before submitting — "
 msgstr "{0}. Drag their marker on the map or the topo image to a real location before submitting — "
+
+#: src/lib/components/location-map.svelte
+msgid "Zoom in"
+msgstr "Zoom in"
+
+#: src/lib/components/location-map.svelte
+msgid "Zoom out"
+msgstr "Zoom out"
+
+#: src/lib/components/location-map.svelte
+msgid "Show the current location"
+msgstr "Show the current location"

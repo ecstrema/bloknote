@@ -138,36 +138,3 @@
   }
 }
 
-/* MapLibre controls (zoom, geolocate) styled like the app's custom map buttons
-   (see AddRouteControl in location-map.svelte: size-7, rounded-md, border, bg-background/90) */
-.maplibregl-map .maplibregl-ctrl-group {
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) * 0.8);
-  background: color-mix(in oklab, var(--background) 90%, transparent);
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  backdrop-filter: blur(4px);
-}
-.maplibregl-map .maplibregl-ctrl-group button {
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  color: var(--foreground);
-}
-.maplibregl-map .maplibregl-ctrl-group button:hover {
-  background-color: var(--accent);
-}
-.maplibregl-map .maplibregl-ctrl-group button + button {
-  border-top: 1px solid var(--border);
-}
-/* MapLibre hardcodes its control icons as dark-gray (#333) SVG sprites, which are
-   barely readable on the dark button background in dark mode: invert them. */
-.dark .maplibregl-map .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
-  filter: invert(1);
-}
-/* Zoom + and - buttons only make sense on relatively large screens, not phones */
-@media (max-width: 639px) {
-  .maplibregl-map .maplibregl-ctrl-group:has(> .maplibregl-ctrl-zoom-in) {
-    display: none;
-  }
-}

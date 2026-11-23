@@ -1,10 +1,8 @@
 <script module lang="ts">
   import "maplibre-gl/dist/maplibre-gl.css";
   import {
-    GeolocateControl,
     Map as MapLibreMap,
     Marker,
-    NavigationControl,
     Popup,
     type GeoJSONSource,
     type IControl,
@@ -17,6 +15,7 @@
   import { FEATURE_COLORS } from "#lib/data/parse/route-styles.js";
   import type { OsmFeature } from "osm-api";
   import { setMapCenterProvider } from "./map-center.js";
+  import { MapButtonsControl, LOCATE_ICON, MINUS_ICON, PLUS_ICON } from "./map-controls.js";
   import { CLIMBING_LAYERS, featureToMapElement, formatPopupHtml, MAP_STYLES, VECTOR_STYLE } from "./location-map-helper.js";
 
   // One map (and WebGL context) for the whole app: kept across page navigation.
@@ -59,6 +58,23 @@
         }
       });
     }
+  }
+
+  /** Marks the user's position on the map after the locate button is used */
+  let locateMarker: Marker | undefined;
+
+  function locateUser(map: MapLibreMap) {
+    if (!("geolocation" in navigator)) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lngLat: [number, number] = [position.coords.longitude, position.coords.latitude];
+        if (locateMarker) locateMarker.setLngLat(lngLat);
+        else locateMarker = new Marker({ color: "#2563eb" }).setLngLat(lngLat).addTo(map);
+        map.easeTo({ center: lngLat });
+      },
+      (error) => console.error("Could not get the current position:", error.message),
+      { enableHighAccuracy: true },
+    );
   }
 
   function applyColorMode(map: MapLibreMap, mode: "grade" | "type" | "both") {
@@ -346,12 +362,12 @@
     if (typeof window !== "undefined") (window as any).__maplibre = map;
     map.touchZoomRotate.disableRotation();
     map.keyboard.disableRotation();
-    map.addControl(new NavigationControl({ showCompass: false }), "top-right");
     map.addControl(
-      new GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: false,
-      }),
+      new MapButtonsControl([
+        { title: "Zoom in", svg: PLUS_ICON, onClick: (map) => map.zoomIn(), desktopOnly: true },
+        { title: "Zoom out", svg: MINUS_ICON, onClick: (map) => map.zoomOut(), desktopOnly: true },
+        { title: "Show the current location", svg: LOCATE_ICON, onClick: (map) => locateUser(map) },
+      ]),
       "top-right",
     );
     map.addControl(new MapStyleControl(), "top-right");
