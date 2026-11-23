@@ -261,6 +261,35 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
     },
   },
   {
+    id: "selected-cliff",
+    type: "line",
+    source: "climbing-elements",
+    filter: ["all", ["==", ["get", "elementType"], "cliff"], ["==", ["get", "slug"], ""]],
+    paint: {
+      "line-color": "#2563eb",
+      "line-width": 3.5,
+    },
+  },
+  {
+    id: "selected-cliff-label",
+    type: "symbol",
+    source: "climbing-elements",
+    filter: ["all", ["==", ["get", "elementType"], "cliff"], ["==", ["get", "slug"], ""]],
+    layout: {
+      "symbol-placement": "line",
+      "text-field": ["get", "name"],
+      "text-size": 12,
+      "text-offset": [0, -0.6],
+      "text-allow-overlap": true,
+      "text-ignore-placement": true,
+    },
+    paint: {
+      "text-color": "#1d4ed8",
+      "text-halo-color": "#ffffff",
+      "text-halo-width": 2,
+    },
+  },
+  {
     id: "cliffs",
     type: "line",
     source: "climbing-elements",

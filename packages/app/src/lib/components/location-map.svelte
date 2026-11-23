@@ -236,6 +236,20 @@
         ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
       ]);
     }
+    if (map.getLayer("selected-cliff")) {
+      map.setFilter("selected-cliff", [
+        "all",
+        ["==", ["get", "elementType"], "cliff"],
+        ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
+      ]);
+    }
+    if (map.getLayer("selected-cliff-label")) {
+      map.setFilter("selected-cliff-label", [
+        "all",
+        ["==", ["get", "elementType"], "cliff"],
+        ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
+      ]);
+    }
     if (map.getLayer("selected-sector-label")) {
       map.setFilter("selected-sector-label", [
         "all",
@@ -690,9 +704,31 @@
     return undefined;
   }
 
+  /** Whether the currently displayed feature is a cliff: those are highlighted as a line, not a center marker */
+  function isCurrentCliff(): boolean {
+    if (currentFeature && (currentFeature as OsmFeature).tags?.natural === "cliff") return true;
+    const cleanSlug = currentSlug.replace(/^world\//, "");
+    return cachedCollection.features.some(
+      (f) =>
+        f.properties.elementType === "cliff" &&
+        (f.properties.slug === currentSlug ||
+          f.properties.slug === cleanSlug ||
+          f.properties.slug === `world/${cleanSlug}`),
+    );
+  }
+
   function updateDraggableMarker() {
     if (!attached || !shared) return;
     currentOnmove = onmove;
+    // Cliffs are mapped as ways: highlighting their individual points through the selected-cliff
+    // line layer replaces the center marker (see issue #153)
+    if (isCurrentCliff()) {
+      if (dragMarker) {
+        dragMarker.remove();
+        dragMarker = undefined;
+      }
+      return;
+    }
     const coords = getEffectiveCoordinates();
 
     if (!coords) {
