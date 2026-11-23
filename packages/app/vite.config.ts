@@ -19,7 +19,7 @@ const HIERARCHY_INDEX_FILE = resolve(
   "../../reverse-geocoding-data/output/hierarchy-index.json",
 );
 const HIERARCHY_INDEX_PATH = `${BASE}/api/hierarchy-index.json`;
-const API_FILES = new Set(["data.json", "children.json", "stats.json", "download.json", "data-version.json"]);
+const API_FILES = new Set(["data.json", "children.json", "stats.json", "download.json", "data-version.json", "feed.xml"]);
 
 function getAppVersion(): string {
   try {
@@ -63,7 +63,10 @@ function climbingApi(): Plugin {
         const file = normalize(join(WORLD_DIR, pathname.slice(API_PREFIX.length)));
         if (!file.startsWith(WORLD_DIR) || !existsSync(file) || !statSync(file).isFile()) return next();
 
-        res.setHeader("content-type", "application/json");
+        res.setHeader(
+          "content-type",
+          basename(pathname).endsWith(".xml") ? "application/rss+xml" : "application/json",
+        );
         createReadStream(file).pipe(res);
       });
     },

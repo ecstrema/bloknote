@@ -15384,11 +15384,13 @@ msgstr "Bisher {0} Treffer"
 msgid "Load more results"
 msgstr "Weitere Ergebnisse laden"
 
+#: src/lib/components/map-legend.svelte
 #: src/lib/components/sector-stats.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 msgid "Routes"
 msgstr "Routen"
 
+#: src/lib/components/map-legend.svelte
 #: src/lib/components/shell/sidebar/search-filters.svelte
 msgid "Gyms"
 msgstr "Kletterhallen"
@@ -17339,7 +17341,32 @@ msgstr ""
 msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and comments are portable across apps."
 msgstr ""
 
+#: src/lib/components/map-legend.svelte
+msgid "Areas / Crags"
+msgstr ""
+
+#: src/lib/components/map-legend.svelte
+msgid "Sectors"
+msgstr ""
+
+#: src/lib/components/map-legend.svelte
+msgid "Cliffs"
+msgstr ""
+
+#: src/lib/components/map-legend.svelte
+msgid "Show on map"
+msgstr ""
+
 #. 0: import.meta.env.DEV ? "[DEV] " \\: ""
 #: src/routes/grade-comparison/via-ferrata/+page.svelte
 msgid "{0}Bloknote - Via Ferrata Grade Comparison"
+msgstr ""
+
+#: src/lib/components/rss-feed-button.svelte
+msgid "Recent climbing changes"
+msgstr ""
+
+#: src/lib/components/rss-feed-button.svelte
+#: src/lib/components/rss-feed-button.svelte
+msgid "Subscribe to the RSS feed of recently added or edited climbs"
 msgstr ""

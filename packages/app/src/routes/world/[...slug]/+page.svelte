@@ -31,6 +31,7 @@
   import { getCoordinates, getClimbingStyles, getGrade, parseClimbingLength } from "#lib/data/parse/osm-tags.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import BookmarkButton from "#components/bookmark-button.svelte";
+  import RssFeedButton from "#components/rss-feed-button.svelte";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
                 
   type PageTab = "overview" | "map" | "osm" | "diagnostics" | "pulse";
@@ -262,6 +263,7 @@
     <h1 class="text-2xl font-semibold">
       {getLocalizedName(item.feature) || "No Name"}
     </h1>
+    <RssFeedButton class="ms-auto" slug={itemSlug} />
   {:else if itemType === "gym"}
     <span aria-hidden="true"  class="icon-[lucide--building] shrink-0 size-6 shrink-0"></span>
     <EditableName feature={item.feature} featureSlug={itemSlug} />

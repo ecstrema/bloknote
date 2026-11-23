@@ -23,7 +23,8 @@ Overpass API (sport=climbing)
     |-- world/.../<region>/
     |     |-- data.json      (clustered climbing feature for this region)
     |     |-- children.json  (direct children, used for tree navigation)
-    |     `-- stats.json     (total route counts for this subtree)
+    |     |-- stats.json     (total route counts for this subtree)
+    |     `-- feed.xml       (RSS feed of recent subtree edits, only written when recent items exist)
     |-- world/download.json  (flat record of every feature, keyed by slug)
     |-- world/data-version.json (date-based version number (YYYYMMDD) and generation timestamp, used for client change detection and data age display)
     `-- osm-index/node-*.json   (sharded OSM node index for live OSM lookups)
@@ -35,7 +36,7 @@ Overpass API (sport=climbing)
 
 - **`src/download.ts`**: Queries the worldwide Overpass endpoint for all `sport=climbing` nodes, ways, and relations. Retries with 60s delays on timeout. Caches raw JSON in `src/climbing.json`.
 - **`src/reverse-geolocation.ts`**: Evaluates point coordinates against the hierarchy bounding box index (`HIERARCHY_INDEX`), then performs precise Turf point-in-polygon checks on leaf GeoJSON boundaries.
-- **`src/static-api-generator.ts`**: Partitions climbing places into regional directory buckets, writes per-region `data.json`, `children.json`, and `stats.json`, and assembles the top-level `download.json` (every feature in one flat record) plus `data-version.json` (a date-based version number YYYYMMDD and the generation timestamp).
+- **`src/static-api-generator.ts`**: Partitions climbing places into regional directory buckets, writes per-region `data.json`, `children.json`, `stats.json`, and `feed.xml` (see `src/rss.ts`), and assembles the top-level `download.json` (every feature in one flat record) plus `data-version.json` (a date-based version number YYYYMMDD and the generation timestamp).
 - **`src/world-points.ts`**: Extracts lightweight point coordinates and attributes for fast spatial sorting and map rendering.
 
 ---
