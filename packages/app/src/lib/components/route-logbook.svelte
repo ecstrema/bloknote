@@ -81,7 +81,7 @@
         {starred ? "Starred" : "Star"}
       </Button>
     {:else}
-      <a href={`${resolve("/settings")}?tab=account`} class="text-xs text-primary hover:underline">
+      <a href={resolve("/settings/account")} class="text-xs text-primary hover:underline">
         Connect Atmosphere to log ticks &amp; comments
       </a>
     {/if}

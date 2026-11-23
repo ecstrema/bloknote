@@ -2,7 +2,7 @@
   import * as Sidebar from "#components/ui/sidebar/index.js";
   import type { ComponentProps } from "svelte";
   import { onMount } from "svelte";
-  import { afterNavigate } from "$app/navigation";
+  import { afterNavigate, replaceState } from "$app/navigation";
   import { gradeTextToReference } from "#lib/data/db/grade-text.js";
   import { featureToType, getName } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
@@ -84,13 +84,14 @@
   });
 
   // Keep the URL in sync with the current search query so it can be copied and shared.
-  // replaceState is used to avoid flooding the history on every keystroke.
+  // replaceState is used to avoid flooding the history on every keystroke. The router-aware
+  // helper from $app/navigation is used: raw history.replaceState conflicts with SvelteKit.
   $effect(() => {
     const text = filters.text;
     const url = new URL(window.location.href);
     if (text.trim() !== "") url.searchParams.set("q", text);
     else url.searchParams.delete("q");
-    history.replaceState(history.state, "", url);
+    replaceState(url, history.state);
   });
 
   const hasFilters = $derived(

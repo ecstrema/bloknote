@@ -71,9 +71,8 @@ export function sameElementRef(a: OsmElementRef, b: OsmElementRef): boolean {
 
 function createOAuthClient(): Promise<BrowserOAuthClient> {
   // The OAuth server redirects back to this exact URI: it must stay registered in
-  // static/client-metadata.json. The ?tab=account query makes the settings page open
-  // on the account tab, where the newly connected account is shown.
-  const redirectUri = `${location.origin}${BASE}/settings?tab=account`;
+  // static/client-metadata.json. The account route shows the newly connected account.
+  const redirectUri = `${location.origin}${BASE}/settings/account`;
   // Loopback clients (localhost dev) use the special hardcoded client_id, while
   // the deployed app points to its hosted client-metadata.json
   const clientId = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname)

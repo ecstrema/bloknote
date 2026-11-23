@@ -14765,7 +14765,7 @@ msgstr "Wallis & Futuna"
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
 #: src/routes/docs/+page.svelte
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Bloknote"
 msgstr "Bloknote"
 
@@ -14802,7 +14802,7 @@ msgid "The path exceeds the 255-character OSM tag limit."
 msgstr "The path exceeds the 255-character OSM tag limit."
 
 #: src/routes/docs/+page.svelte
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Wikimedia Commons"
 msgstr "Wikimedia Commons"
 
@@ -14949,19 +14949,19 @@ msgstr "Scale"
 msgid "Reference"
 msgstr "Reference"
 
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "<0/> Back"
 msgstr "<0/> Back"
 
 #: src/routes/docs/+page.svelte
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Browse climbs"
 msgstr "Browse climbs"
 
 #: src/routes/+page.svelte
 #: src/routes/docs/+page.svelte
-#: src/routes/settings/+page.svelte
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Settings"
 msgstr "Settings"
 
@@ -15031,17 +15031,17 @@ msgstr "When enabled, Bloknote does not automatically download the full climbing
 msgid "<0/> Low data usage"
 msgstr "<0/> Low data usage"
 
-#: src/routes/settings/accounts-tab.svelte
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Checking login status..."
 msgstr "Checking login status..."
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Log out of OpenStreetMap"
 msgstr "Log out of OpenStreetMap"
 
 #: src/lib/components/topo/add-image-dialog.svelte
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Log in with OpenStreetMap"
 msgstr "Log in with OpenStreetMap"
 
@@ -15534,7 +15534,7 @@ msgstr "Apply"
 msgid "LineString"
 msgstr "LineString"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "OpenStreetMap"
 msgstr "OpenStreetMap"
 
@@ -15698,7 +15698,7 @@ msgstr "Gym"
 msgid "None"
 msgstr "None"
 
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Profile"
 msgstr "Profile"
 
@@ -15866,8 +15866,8 @@ msgid "Drag a route onto the image to place its start, or tap a route to draw it
 msgstr "Drag a route onto the image to place its start, or tap a route to draw its path:"
 
 #: src/lib/components/topo/add-image-dialog.svelte
-#: src/routes/settings/+page.svelte
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Account"
 msgstr "Account"
 
@@ -16257,25 +16257,25 @@ msgstr "Ascent style"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Onsight"
 msgstr "Onsight"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Flash"
 msgstr "Flash"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Redpoint"
 msgstr "Redpoint"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Attempt"
 msgstr "Attempt"
 
@@ -16305,47 +16305,47 @@ msgid "Profile & settings"
 msgstr "Profile & settings"
 
 #. 0: activeTab === "account" ? "Account" \\: "Settings"
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "{0} | Bloknote"
 msgstr "{0} | Bloknote"
 
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "<0/> Settings"
 msgstr "<0/> Settings"
 
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "<0/> Account"
 msgstr "<0/> Account"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Stores the shared climbing directory—routes, sectors, crags, gyms, grades, and tags. Sign in to add, edit, reorganize, or fix climbing data and publish your changesets."
 msgstr "Stores the shared climbing directory—routes, sectors, crags, gyms, grades, and tags. Sign in to add, edit, reorganize, or fix climbing data and publish your changesets."
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Atmosphere"
 msgstr "Atmosphere"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and starred climbs—in your own data repository, separate from OpenStreetMap."
 msgstr "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and starred climbs—in your own data repository, separate from OpenStreetMap."
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Disconnect Atmosphere"
 msgstr "Disconnect Atmosphere"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Signed in as <0/>"
 msgstr "Signed in as <0/>"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Hosts freely licensed topo photos and crag images linked from OpenStreetMap climbing features. Sign in to upload new photos and attach them as topos."
 msgstr "Hosts freely licensed topo photos and crag images linked from OpenStreetMap climbing features. Sign in to upload new photos and attach them as topos."
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Log out of Wikimedia"
 msgstr "Log out of Wikimedia"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Log in with Wikimedia"
 msgstr "Log in with Wikimedia"
 
@@ -16560,7 +16560,7 @@ msgid "Diagnostics"
 msgstr "Diagnostics"
 
 #: src/routes/+page.svelte
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Docs"
 msgstr "Docs"
 
@@ -16708,27 +16708,27 @@ msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusabl
 msgid "Core schemas"
 msgstr "Core schemas"
 
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Your climbing stats"
 msgstr "Your climbing stats"
 
 #. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
 msgstr "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
 
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Starred climbs"
 msgstr "Starred climbs"
 
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Recent ticks"
 msgstr "Recent ticks"
 
 #~ msgid "Connected as <0/> ({0}{1})"
 #~ msgstr "Connected as <0/> ({0}{1})"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Handle (e.g. alice.bsky.social)"
 msgstr "Handle (e.g. alice.bsky.social)"
 
@@ -16852,26 +16852,26 @@ msgstr "This route is named as a project but has a grade assigned ({0}). Project
 msgid "Remove grade"
 msgstr "Remove grade"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "User navigated back"
 msgstr "User navigated back"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Login cancelled"
 msgstr "Login cancelled"
 
 #~ msgid "Connected as <0/> · records are stored in your ATProto repository (PDS)"
 #~ msgstr "Connected as <0/> · records are stored in your ATProto repository (PDS)"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Redirecting..."
 msgstr "Redirecting..."
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Continue"
 msgstr "Continue"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "You will be redirected to your ATProto provider to log in and authorize Bloknote. No app password needed."
 msgstr "You will be redirected to your ATProto provider to log in and authorize Bloknote. No app password needed."
 
@@ -16934,7 +16934,7 @@ msgstr "{0} climbing data {1}%"
 msgid "Dry"
 msgstr "Dry"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Connected as <0/> · records are stored in your ATProto repository (PDS) · <1>browse your data on pds.ls</1>"
 msgstr "Connected as <0/> · records are stored in your ATProto repository (PDS) · <1>browse your data on pds.ls</1>"
 

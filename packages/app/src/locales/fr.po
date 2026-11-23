@@ -14765,7 +14765,7 @@ msgstr "Wallis-et-Futuna"
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
 #: src/routes/docs/+page.svelte
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Bloknote"
 msgstr "Bloknote"
 
@@ -14802,7 +14802,7 @@ msgid "The path exceeds the 255-character OSM tag limit."
 msgstr "Le tracé dépasse la limite de 255 caractères d'un tag OSM."
 
 #: src/routes/docs/+page.svelte
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Wikimedia Commons"
 msgstr "Wikimedia Commons"
 
@@ -14949,19 +14949,19 @@ msgstr "Échelle"
 msgid "Reference"
 msgstr "Référence"
 
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "<0/> Back"
 msgstr "<0/> Retour"
 
 #: src/routes/docs/+page.svelte
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Browse climbs"
 msgstr "Parcourir les voies"
 
 #: src/routes/+page.svelte
 #: src/routes/docs/+page.svelte
-#: src/routes/settings/+page.svelte
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Settings"
 msgstr "Paramètres"
 
@@ -15031,17 +15031,17 @@ msgstr "Lorsque cette option est activée, Bloknote ne télécharge pas automati
 msgid "<0/> Low data usage"
 msgstr "<0/> Faible consommation de données"
 
-#: src/routes/settings/accounts-tab.svelte
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Checking login status..."
 msgstr "Vérification de la connexion..."
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Log out of OpenStreetMap"
 msgstr "Se déconnecter d'OpenStreetMap"
 
 #: src/lib/components/topo/add-image-dialog.svelte
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Log in with OpenStreetMap"
 msgstr "Se connecter avec OpenStreetMap"
 
@@ -15534,7 +15534,7 @@ msgstr "Appliquer"
 msgid "LineString"
 msgstr "LineString"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "OpenStreetMap"
 msgstr "OpenStreetMap"
 
@@ -15698,7 +15698,7 @@ msgstr "Salle"
 msgid "None"
 msgstr "Aucun"
 
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Profile"
 msgstr "Profil"
 
@@ -15866,8 +15866,8 @@ msgid "Drag a route onto the image to place its start, or tap a route to draw it
 msgstr "Faites glisser une voie sur l'image pour placer son départ, ou touchez une voie pour dessiner son tracé :"
 
 #: src/lib/components/topo/add-image-dialog.svelte
-#: src/routes/settings/+page.svelte
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Account"
 msgstr "Compte"
 
@@ -16257,25 +16257,25 @@ msgstr "Style d'ascension"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Onsight"
 msgstr "Onsight"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Flash"
 msgstr "Flash"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Redpoint"
 msgstr "Redpoint"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Attempt"
 msgstr "Tentative"
 
@@ -16305,47 +16305,47 @@ msgid "Profile & settings"
 msgstr "Profil et paramètres"
 
 #. 0: activeTab === "account" ? "Account" \\: "Settings"
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "{0} | Bloknote"
 msgstr "{0} | Bloknote"
 
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "<0/> Settings"
 msgstr "<0/> Paramètres"
 
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "<0/> Account"
 msgstr "<0/> Compte"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Stores the shared climbing directory—routes, sectors, crags, gyms, grades, and tags. Sign in to add, edit, reorganize, or fix climbing data and publish your changesets."
 msgstr "Stocke le répertoire d'escalade partagé — voies, secteurs, crags, salles, cotations et tags. Connectez-vous pour ajouter, modifier, réorganiser ou corriger les données d'escalade et publier vos groupes de modifications."
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Atmosphere"
 msgstr "Atmosphere"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and starred climbs—in your own data repository, separate from OpenStreetMap."
 msgstr "Stocke votre activité d'escalade personnelle sur l'AT Protocol — ascensions et carnets, avis de voies, évaluations et favoris — dans votre propre dépôt de données, séparé d'OpenStreetMap."
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Disconnect Atmosphere"
 msgstr "Déconnecter Atmosphere"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Signed in as <0/>"
 msgstr "Connecté en tant que <0/>"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Hosts freely licensed topo photos and crag images linked from OpenStreetMap climbing features. Sign in to upload new photos and attach them as topos."
 msgstr "Héberge des photos de topos et des images de crags sous licence libre, reliées depuis les objets d'escalade d'OpenStreetMap. Connectez-vous pour envoyer de nouvelles photos et les joindre en tant que topos."
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Log out of Wikimedia"
 msgstr "Se déconnecter de Wikimedia"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Log in with Wikimedia"
 msgstr "Se connecter avec Wikimedia"
 
@@ -16560,7 +16560,7 @@ msgid "Diagnostics"
 msgstr "Diagnostic"
 
 #: src/routes/+page.svelte
-#: src/routes/settings/+page.svelte
+#: src/routes/settings/+layout.svelte
 msgid "Docs"
 msgstr "Docs"
 
@@ -16708,27 +16708,27 @@ msgstr "Bloknote définit des schémas de lexiques AT Protocol ouverts sous <0/>
 msgid "Core schemas"
 msgstr "Schémas principaux"
 
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Your climbing stats"
 msgstr "Vos statistiques d'escalade"
 
 #. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
 msgstr "{0} ascensions ({1} réussies, {2} tentatives) · {3} favoris · {4} commentaires"
 
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Starred climbs"
 msgstr "Ascensions favorites"
 
-#: src/routes/settings/user-stats-panel.svelte
+#: src/routes/settings/account/user-stats-panel.svelte
 msgid "Recent ticks"
 msgstr "Ascensions récentes"
 
 #~ msgid "Connected as <0/> ({0}{1})"
 #~ msgstr ""
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Handle (e.g. alice.bsky.social)"
 msgstr "Identifiant (p. ex. alice.bsky.social)"
 
@@ -16853,26 +16853,26 @@ msgstr "Cette voie est nommée comme un projet mais une cotation lui est attribu
 msgid "Remove grade"
 msgstr "Retirer la cotation"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "User navigated back"
 msgstr "L'utilisateur est revenu en arrière"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Login cancelled"
 msgstr "Connexion annulée"
 
 #~ msgid "Connected as <0/> · records are stored in your ATProto repository (PDS)"
 #~ msgstr "Connecté en tant que <0/> · les enregistrements sont stockés dans votre dépôt ATProto (PDS)"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Redirecting..."
 msgstr "Redirection..."
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Continue"
 msgstr "Continuer"
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "You will be redirected to your ATProto provider to log in and authorize Bloknote. No app password needed."
 msgstr "Vous serez redirigé vers votre fournisseur ATProto pour vous connecter et autoriser Bloknote. Aucun mot de passe d'application nécessaire."
 
@@ -16935,7 +16935,7 @@ msgstr ""
 msgid "Dry"
 msgstr ""
 
-#: src/routes/settings/accounts-tab.svelte
+#: src/routes/settings/account/accounts-tab.svelte
 msgid "Connected as <0/> · records are stored in your ATProto repository (PDS) · <1>browse your data on pds.ls</1>"
 msgstr ""
 

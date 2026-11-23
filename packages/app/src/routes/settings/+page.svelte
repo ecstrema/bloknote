@@ -1,16 +1,10 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { goto, afterNavigate } from "$app/navigation";
-  import { building } from "$app/env";
   import { resolve } from "$app/paths";
-  import { page } from "$app/state";
   import { Button } from "#components/ui/button/index.js";
-  import BloknoteLogo from "#components/bloknote-logo.svelte";
   import { Select } from "#components/ui/select/index.js";
   import * as Tabs from "#components/ui/tabs/index.js";
   import MapProviderToggles from "#components/map-provider-toggles.svelte";
-  import AccountsTab from "./accounts-tab.svelte";
-        import { allBoulderScales, allRouteScales, convertGrade, french } from "@bloknote/holy-grade";
+  import { allBoulderScales, allRouteScales, convertGrade, french } from "@bloknote/holy-grade";
   import { setMode, userPrefersMode } from "mode-watcher";
   import { settings } from "#lib/data/settings.svelte.js";
   import { i18n, locales, localeNames, setLocale } from "#lib/i18n.svelte.js";
@@ -18,12 +12,6 @@
     getPreferredBoulderGradingScale,
     getPreferredRouteGradingScale,
   } from "#lib/components/shell/providers/settings.svelte.js";
-
-  type SettingsTab = "settings" | "account";
-
-  function parseTab(value: string | null): SettingsTab {
-    return value === "account" || value === "accounts" ? "account" : "settings";
-  }
 
   const preferredRouteScale = getPreferredRouteGradingScale();
   const preferredBoulderScale = getPreferredBoulderGradingScale();
@@ -35,82 +23,9 @@
   const boulderExamples = $derived(
     boulderScale ? ["5A", "6A", "7A"].map((grade) => convertGrade(grade, french, boulderScale)).join(", ") : "",
   );
-
-  let activeTab = $state<SettingsTab>(building ? "settings" : parseTab(page.url.searchParams.get("tab")));
-  let hasPreviousPage = $state(false);
-
-  onMount(() => {
-    hasPreviousPage = window.history.length > 1;
-  });
-
-  // Keep the tab in sync with the URL on real navigations (e.g. the post-login
-  // redirect to ?tab=account). Shallow gotos from onTabChange are not navigations,
-  // so they update `activeTab` directly instead.
-  afterNavigate(() => {
-    activeTab = parseTab(page.url.searchParams.get("tab"));
-  });
-
-  function onTabChange(value: string) {
-    const next = parseTab(value);
-    activeTab = next;
-    if (building) return;
-    const url = new URL(page.url.href);
-    if (next === "settings") url.searchParams.delete("tab");
-    else url.searchParams.set("tab", next);
-    void goto(url, { state: page.state, shallow: true, replace: true });
-  }
 </script>
 
-<svelte:head>
-  <title>{activeTab === "account" ? "Account" : "Settings"} | Bloknote</title>
-</svelte:head>
-
-<div class="min-h-screen bg-background text-foreground">
-  <header class="border-b">
-    <div class="mx-auto flex h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
-      <a href={resolve("/")} class="inline-flex items-center gap-2 font-semibold tracking-tight">
-        <BloknoteLogo />
-        <span>Bloknote</span>
-      </a>
-      <div class="flex items-center gap-3">
-        <a href={resolve("/docs")} class="text-sm text-muted-foreground transition-colors hover:text-foreground">
-          Docs
-        </a>
-        {#if hasPreviousPage}
-          <Button variant="ghost" onclick={() => window.history.back()}>
-            <span class="icon-[lucide--arrow-left] shrink-0 size-4"></span>
-            Back
-          </Button>
-        {:else}
-          <a href={resolve("world")} class="text-sm text-muted-foreground transition-colors hover:text-foreground">
-            Browse climbs
-          </a>
-        {/if}
-      </div>
-    </div>
-  </header>
-
-  <main class="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
-    <div class="mb-6 border-l-4 border-primary pl-5">
-      <p class="text-xs font-semibold uppercase text-muted-foreground">Profile</p>
-      <h1 class="mt-1 text-3xl font-semibold tracking-tight">
-        {activeTab === "account" ? "Account" : "Settings"}
-      </h1>
-    </div>
-
-    <Tabs.Root value={activeTab} onValueChange={onTabChange} class="gap-6">
-      <Tabs.List>
-        <Tabs.Trigger value="settings">
-          <span class="icon-[lucide--settings] shrink-0 size-4"></span>
-          Settings
-        </Tabs.Trigger>
-        <Tabs.Trigger value="account">
-          <span class="icon-[lucide--user-round] shrink-0 size-4"></span>
-          Account
-        </Tabs.Trigger>
-      </Tabs.List>
-
-      <Tabs.Content value="settings">
+<Tabs.Content value="settings">
         <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
           <div>
             <h2 class="font-medium">Appearance</h2>
@@ -236,10 +151,3 @@
           <MapProviderToggles />
         </section>
       </Tabs.Content>
-
-      <Tabs.Content value="account">
-        <AccountsTab />
-      </Tabs.Content>
-    </Tabs.Root>
-  </main>
-</div>
