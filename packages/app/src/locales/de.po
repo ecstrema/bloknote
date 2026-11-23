@@ -14785,6 +14785,7 @@ msgstr "Laden"
 msgid "Update"
 msgstr "Aktualisieren"
 
+#: src/lib/components/shell/edit-nudge.svelte
 #: src/routes/+layout.svelte
 msgid "Dismiss"
 msgstr "Schließen"
@@ -14793,6 +14794,7 @@ msgstr "Schließen"
 msgid "A new version of Bloknote is available"
 msgstr "Eine neue Version von Bloknote ist verfügbar"
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/climbing-styles.svelte
 msgid "Climbing styles"
 msgstr "Kletterstile"
@@ -16472,9 +16474,8 @@ msgstr "Lokale Bewertungsskalen: <0/> (Routen) · <1/> (Boulder)"
 msgid "Bloknote home"
 msgstr "Bloknote-Startseite"
 
-#: src/routes/world/[...slug]/area-page.svelte
-msgid "<0/> Export Typst"
-msgstr "<0/> Typst exportieren"
+#~ msgid "<0/> Export Typst"
+#~ msgstr "<0/> Typst exportieren"
 
 #~ msgid "Could not update star"
 #~ msgstr "Stern konnte nicht aktualisiert werden"
@@ -16874,6 +16875,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
+#: src/lib/components/climbing-styles.svelte
 #: src/lib/components/editable/editable-pitches.svelte
 msgid "Pitches"
 msgstr ""
@@ -17126,10 +17128,8 @@ msgstr ""
 msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
 msgstr ""
 
-#. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
-#: src/routes/settings/account/user-stats-panel.svelte
-msgid "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
-msgstr ""
+#~ msgid "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
+#~ msgstr ""
 
 #: src/routes/settings/account/user-stats-panel.svelte
 msgid "Bookmarked climbs"
@@ -17215,4 +17215,82 @@ msgstr ""
 
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Save to OpenStreetMap"
+msgstr ""
+
+#: src/lib/components/climbing-styles.svelte
+msgid "Set as multipitch"
+msgstr ""
+
+#: src/lib/components/climbing-styles.svelte
+msgid "Remove the multipitch flag and pitch count"
+msgstr ""
+
+#: src/lib/components/climbing-styles.svelte
+msgid "Number of pitches <0/>"
+msgstr ""
+
+#: src/lib/components/climbing-styles.svelte
+msgid "Not a multipitch"
+msgstr ""
+
+#. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: routeCount; 4: sessionCount; 5: atproto.stars.length; 6: atproto.reviews.length
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments"
+msgstr ""
+
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "Grade pyramid"
+msgstr ""
+
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "<0/> sends · <1/> attempts"
+msgstr ""
+
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "Max grade climbed per month"
+msgstr ""
+
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "Climbing sessions per month"
+msgstr ""
+
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "Tries per route"
+msgstr ""
+
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "Check what happened to this route on OpenStreetMap"
+msgstr ""
+
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "Checking OpenStreetMap…"
+msgstr ""
+
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "The route still exists on OpenStreetMap but is missing from the climbing data."
+msgstr ""
+
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "The route was deleted from OpenStreetMap and no replacement was found nearby."
+msgstr ""
+
+#. 0: check.candidate.feature.name ?? `${check.candidate.feature.type}/${check.candidate.feature.id}`; 1: Math.round(check.candidate.confidence * 100)
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "Replacement found: {0} ({1}% match) <0>Relink tick</0>"
+msgstr ""
+
+#: src/lib/components/shell/edit-nudge.svelte
+msgid "Everything here is editable"
+msgstr ""
+
+#: src/lib/components/shell/edit-nudge.svelte
+msgid "Bloknote is built on OpenStreetMap: fix a name, add a grade, or map a missing route — every climber benefits."
+msgstr ""
+
+#: src/lib/components/shell/edit-nudge.svelte
+msgid "<0/> Log in with OpenStreetMap"
+msgstr ""
+
+#: src/routes/world/[...slug]/area-page.svelte
+msgid "<0/> Print"
 msgstr ""
