@@ -798,18 +798,19 @@
 <div class={`relative ${className}`}>
   <div bind:this={host} class="relative h-full w-full overflow-hidden rounded-md border border-border">
     {#if elementsLoading}
-      <div class="absolute inset-0 z-10 flex items-center justify-center">
-        <div class="flex items-center gap-2 rounded-md bg-background/80 px-3 py-2 shadow-sm backdrop-blur-sm">
-          <span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin text-muted-foreground"></span>
-          {#if localDb.status === "downloading" && localDb.total}
-            <span class="text-xs text-muted-foreground">
-              {localDb.phase === "parsing" ? "Parsing" : "Downloading"} climbing data
-              {Math.min(100, Math.round((localDb.loaded / localDb.total) * 100))}%
-            </span>
-          {:else}
-            <span class="text-xs text-muted-foreground">Loading climbing data...</span>
-          {/if}
-        </div>
+      <!-- Non-blocking: the user must still be able to pan/zoom the map while data loads (issue #141) -->
+      <div
+        class="pointer-events-none absolute top-2 right-2 z-10 flex items-center gap-2 rounded-md bg-background/80 px-3 py-2 shadow-sm backdrop-blur-sm"
+      >
+        <span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin text-muted-foreground"></span>
+        {#if localDb.status === "downloading" && localDb.total}
+          <span class="text-xs text-muted-foreground">
+            {localDb.phase === "parsing" ? "Parsing" : "Downloading"} climbing data
+            {Math.min(100, Math.round((localDb.loaded / localDb.total) * 100))}%
+          </span>
+        {:else}
+          <span class="text-xs text-muted-foreground">Loading climbing data...</span>
+        {/if}
       </div>
     {/if}
   </div>
