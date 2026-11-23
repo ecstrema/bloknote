@@ -160,6 +160,11 @@
 .maplibregl-map .maplibregl-ctrl-group button + button {
   border-top: 1px solid var(--border);
 }
+/* MapLibre hardcodes its control icons as dark-gray (#333) SVG sprites, which are
+   barely readable on the dark button background in dark mode: invert them. */
+.dark .maplibregl-map .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(1);
+}
 /* Zoom + and - buttons only make sense on relatively large screens, not phones */
 @media (max-width: 639px) {
   .maplibregl-map .maplibregl-ctrl-group:has(> .maplibregl-ctrl-zoom-in) {
