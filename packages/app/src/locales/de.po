@@ -15160,7 +15160,7 @@ msgstr "Hinzufügen"
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: src/lib/components/editable/editable-tooltip.svelte
+#: src/lib/components/editable/shared-login-tooltip.svelte
 msgid "<0>Log in with OSM</0> to edit"
 msgstr "<0>Mit OSM anmelden</0>, um zu bearbeiten"
 

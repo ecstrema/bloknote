@@ -26,6 +26,7 @@
   import { ModeWatcher } from "mode-watcher";
   import { onMount, untrack } from "svelte";
   import { initLocale } from "#lib/i18n.svelte.js";
+  import SharedLoginTooltip from "#components/editable/shared-login-tooltip.svelte";
   const { children } = $props();
 
   const DATA_REFRESH_INTERVAL = 6 * 60 * 60 * 1000;
@@ -109,6 +110,9 @@
 {/if}
 
 {@render children()}
+
+<!-- Single "Log in with OSM to edit" tooltip shared by all editable elements -->
+<SharedLoginTooltip />
 
 {#snippet updateBanner(text: string, detail: string | undefined, onUpdate: () => void, onDismiss: () => void)}
   <div
