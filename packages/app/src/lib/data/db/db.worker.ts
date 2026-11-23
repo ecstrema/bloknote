@@ -61,7 +61,10 @@ async function buildDatabase(url: string, version: string, id: number) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to download ${url}: ${res.status}`);
   const length = Number(res.headers.get("content-length"));
-  const total = length > 0 ? length : undefined;
+  // `content-length` counts the compressed transfer size, while the reader below yields
+  // decompressed bytes: with gzip/brotli the percentage would go way above 100%, so only
+  // trust the total for unencoded responses
+  const total = length > 0 && !res.headers.get("content-encoding") ? length : undefined;
   const chunks: Uint8Array[] = [];
   let loaded = 0;
   const reader = res.body!.getReader();

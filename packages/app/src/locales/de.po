@@ -16924,7 +16924,7 @@ msgstr ""
 msgid "Downloading"
 msgstr ""
 
-#. 0: localDb.phase === "parsing" ? "Parsing" \\: "Downloading"; 1: Math.round((localDb.loaded / localDb.total) * 100)
+#. 0: localDb.phase === "parsing" ? "Parsing" \\: "Downloading"; 1: Math.min(100, Math.round((localDb.loaded / localDb.total) * 100))
 #: src/lib/components/location-map.svelte
 msgid "{0} climbing data {1}%"
 msgstr ""

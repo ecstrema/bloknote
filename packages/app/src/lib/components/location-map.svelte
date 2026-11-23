@@ -664,7 +664,7 @@
           {#if localDb.status === "downloading" && localDb.total}
             <span class="text-xs text-muted-foreground">
               {localDb.phase === "parsing" ? "Parsing" : "Downloading"} climbing data
-              {Math.round((localDb.loaded / localDb.total) * 100)}%
+              {Math.min(100, Math.round((localDb.loaded / localDb.total) * 100))}%
             </span>
           {:else}
             <span class="text-xs text-muted-foreground">Loading climbing data...</span>
