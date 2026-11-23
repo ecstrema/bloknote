@@ -275,7 +275,8 @@
 
 <Tabs.Root value={effectiveTab} onValueChange={onTabChange} class="gap-4">
   <div class="border-b">
-    <Tabs.List variant="line">
+    <!-- On phones the five tabs overflow one row: wrap onto several rows instead (issue #81) -->
+    <Tabs.List variant="line" class="max-md:h-fit max-md:w-full max-md:flex-wrap max-md:justify-start">
       <Tabs.Trigger value="overview">
         <FileTextIcon />
         Overview

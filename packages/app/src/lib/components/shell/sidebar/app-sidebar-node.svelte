@@ -256,6 +256,10 @@
       if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
         selection.clear();
         selection.setAnchor(undefined);
+        // Geographic nodes render inside a Collapsible.Trigger, which swallows the anchor's default
+        // navigation on touch devices: navigate explicitly (issue #81).
+        event.preventDefault();
+        void goto(link, { state: page.state });
       }
       return;
     }
@@ -271,8 +275,13 @@
     } else {
       selection.clear();
       selection.setAnchor(slug);
-      if (sidebar.isMobile && (itemType === "route" || itemType === "gym")) {
-        sidebar.setOpenMobile(false);
+      if (itemType === "route" || itemType === "gym") {
+        if (sidebar.isMobile) sidebar.setOpenMobile(false);
+      } else {
+        // Folder nodes render inside a Collapsible.Trigger, which swallows the anchor's default
+        // navigation on touch devices: navigate explicitly (issue #81).
+        event.preventDefault();
+        void goto(link, { state: page.state });
       }
     }
   }

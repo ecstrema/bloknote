@@ -389,8 +389,15 @@
         <ListFilterIcon />
       </Button>
       {#if sidebar.isMobile}
-        <Button variant="ghost" size="icon" aria-label="Close sidebar" onclick={() => sidebar.setOpenMobile(false)}>
-          <XIcon />
+        <!-- Larger touch target and icon: the close button was hard to hit on phones (issue #81) -->
+        <Button
+          variant="ghost"
+          size="icon"
+          class="size-11"
+          aria-label="Close sidebar"
+          onclick={() => sidebar.setOpenMobile(false)}
+        >
+          <XIcon class="size-6" />
         </Button>
       {/if}
     </div>

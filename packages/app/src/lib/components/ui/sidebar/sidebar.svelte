@@ -20,6 +20,24 @@
   } = $props();
 
   const sidebar = useSidebar();
+
+  // Swipe left closes the mobile sidebar, like native off-canvas menus (issue #81)
+  let touchStart: { x: number; y: number } | undefined;
+
+  function onTouchStart(event: TouchEvent) {
+    const touch = event.touches[0];
+    touchStart = touch ? { x: touch.clientX, y: touch.clientY } : undefined;
+  }
+
+  function onTouchEnd(event: TouchEvent) {
+    const start = touchStart;
+    touchStart = undefined;
+    const touch = event.changedTouches[0];
+    if (!start || !touch) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (dx < -60 && Math.abs(dx) > Math.abs(dy) * 1.5) sidebar.setOpenMobile(false);
+  }
 </script>
 
 {#if collapsible === "none"}
@@ -48,7 +66,12 @@
         <Sheet.Title>Sidebar</Sheet.Title>
         <Sheet.Description>Displays the mobile sidebar.</Sheet.Description>
       </Sheet.Header>
-      <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
+      <div
+        role="presentation"
+        class="flex h-full min-h-0 w-full flex-col overflow-hidden"
+        ontouchstart={onTouchStart}
+        ontouchend={onTouchEnd}
+      >
         {@render children?.()}
       </div>
     </Sheet.Content>
