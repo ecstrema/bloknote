@@ -1,8 +1,9 @@
-export const OVERPASS_ENDPOINTS = [
-  "https://overpass.private.coffee/api/interpreter",
-  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
-  "https://overpass-api.de/api/interpreter",
-] as const;
+/**
+ * Only the official Overpass instance is used: mirrors are not synchronized, so data
+ * could go backwards between fetches (issue #149). The official instance can be slow
+ * or busy — callers must retry instead of falling back to another server.
+ */
+export const OVERPASS_ENDPOINTS = ["https://overpass-api.de/api/interpreter"] as const;
 
 export async function tryOverpassInstances<T>(request: (endpoint: string) => Promise<T>): Promise<T> {
   const failures: string[] = [];
@@ -16,5 +17,5 @@ export async function tryOverpassInstances<T>(request: (endpoint: string) => Pro
     }
   }
 
-  throw new Error(`All Overpass instances failed. ${failures.join("; ")}`);
+  throw new Error(`Overpass failed. ${failures.join("; ")}`);
 }
