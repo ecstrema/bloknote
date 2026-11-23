@@ -28,7 +28,9 @@
   import EditableTags from "#components/editable/editable-tags.svelte";
   import * as Tabs from "#components/ui/tabs/index.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
-  import { getCoordinates } from "#lib/data/parse/osm-tags.js";
+  import { getCoordinates, getClimbingStyles, getGrade, parseClimbingLength } from "#lib/data/parse/osm-tags.js";
+  import HolyGrade from "#components/grade/holy-grade.svelte";
+  import BookmarkButton from "#components/bookmark-button.svelte";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
                 
   type PageTab = "overview" | "map" | "osm" | "diagnostics" | "pulse";
@@ -255,7 +257,7 @@
   <OsmMissingFeature feature={item.feature} />
 {/if}
 
-<div class="flex items-center gap-2">
+<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
   {#if item.feature.type === "geographic"}
     <h1 class="text-2xl font-semibold">
       {getLocalizedName(item.feature) || "No Name"}
@@ -263,8 +265,25 @@
   {:else if itemType === "gym"}
     <span aria-hidden="true"  class="icon-[lucide--building] shrink-0 size-6 shrink-0"></span>
     <EditableName feature={item.feature} featureSlug={itemSlug} />
+    <BookmarkButton class="ms-auto" feature={item.feature} />
   {:else}
     <EditableName feature={item.feature} featureSlug={itemSlug} />
+    {#if itemType === "route"}
+      {@const routeTags = (item.feature as OsmFeature).tags ?? {}}
+      {@const grade = getGrade(routeTags)}
+      {#if grade}
+        <HolyGrade class="text-sm" grade={grade.v} />
+      {/if}
+      {@const length = parseClimbingLength(routeTags["climbing:length"])?.meters}
+      {#if length !== undefined}
+        <span class="text-sm text-muted-foreground" title="Route length">{length} m</span>
+      {/if}
+      {@const styles = getClimbingStyles(routeTags)}
+      {#if styles.length > 0}
+        <span class="text-sm text-muted-foreground" title="Climbing style">{styles.map((s) => s.label).join(", ")}</span>
+      {/if}
+    {/if}
+    <BookmarkButton class="ms-auto" feature={item.feature} />
   {/if}
 </div>
 

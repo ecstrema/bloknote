@@ -15053,6 +15053,7 @@ msgid "Add Grade"
 msgstr "Adicionar grau"
 
 #: src/lib/components/editable/editable-length.svelte
+#: src/routes/world/[...slug]/+page.svelte
 msgid "Route length"
 msgstr "Comprimento da via"
 
@@ -16931,6 +16932,7 @@ msgid "Connected as <0/> · records are stored in your ATProto repository (PDS) 
 msgstr ""
 
 #: src/lib/components/climbing-styles.svelte
+#: src/routes/world/[...slug]/+page.svelte
 msgid "Climbing style"
 msgstr ""
 
@@ -17024,20 +17026,35 @@ msgstr ""
 msgid "MultiLineString"
 msgstr ""
 
-#: src/lib/components/route-logbook.svelte
+#: src/lib/components/bookmark-button.svelte
 msgid "Could not update bookmark"
 msgstr ""
 
-#: src/lib/components/route-logbook.svelte
+#: src/lib/components/bookmark-button.svelte
 msgid "Bookmarked"
 msgstr ""
 
-#: src/lib/components/route-logbook.svelte
+#: src/lib/components/bookmark-button.svelte
 msgid "Bookmark"
 msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
+msgstr ""
+
+#. 0: length
+#: src/routes/world/[...slug]/+page.svelte
+msgid "{0} m"
+msgstr ""
+
+#: src/lib/components/bookmark-button.svelte
+#: src/lib/components/bookmark-button.svelte
+msgid "Remove bookmark"
+msgstr ""
+
+#: src/lib/components/bookmark-button.svelte
+#: src/lib/components/bookmark-button.svelte
+msgid "Bookmark this climb"
 msgstr ""
 
 #: src/routes/docs/+page.svelte

@@ -5,6 +5,7 @@
   import { Select } from "#components/ui/select/index.js";
   import { Textarea } from "#components/ui/textarea/index.js";
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
+  import BookmarkButton from "#components/bookmark-button.svelte";
   import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
   import { normalizedRatingToStars, starsToNormalizedRating, type AscentStyle } from "@bloknote/common";
         import type { OsmFeature } from "osm-api";
@@ -25,21 +26,8 @@
   let error = $state<string>();
 
   const ref = $derived({ type: feature.type, id: feature.id });
-  const starred = $derived(atproto.isStarred(feature));
   const routeTicks = $derived(atproto.ticks.filter((t) => sameElementRef(t.subject, ref)));
   const routeReviews = $derived(atproto.reviews.filter((r) => sameElementRef(r.subject, ref)));
-
-  async function onToggleStar() {
-    error = undefined;
-    busy = true;
-    try {
-      await atproto.toggleStar(feature);
-    } catch (e) {
-      error = e instanceof Error ? e.message : "Could not update bookmark";
-    } finally {
-      busy = false;
-    }
-  }
 
   async function onAddTick(event: SubmitEvent) {
     event.preventDefault();
@@ -76,10 +64,7 @@
   <div class="flex flex-wrap items-center justify-between gap-2">
     <h2 class="text-sm font-semibold">Activity &amp; Comments</h2>
     {#if atproto.configured}
-      <Button size="xs" variant={starred ? "secondary" : "outline"} disabled={busy} onclick={onToggleStar}>
-        <span class="icon-[lucide--star] shrink-0 size-4" class:text-amber-500={starred}></span>
-        {starred ? "Bookmarked" : "Bookmark"}
-      </Button>
+      <BookmarkButton labelled {feature} />
     {:else}
       <a href={resolve("/settings/account")} class="text-xs text-primary hover:underline">
         Connect Atmosphere to log ticks &amp; comments

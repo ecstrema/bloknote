@@ -15053,6 +15053,7 @@ msgid "Add Grade"
 msgstr "Add Grade"
 
 #: src/lib/components/editable/editable-length.svelte
+#: src/routes/world/[...slug]/+page.svelte
 msgid "Route length"
 msgstr "Route length"
 
@@ -16930,6 +16931,7 @@ msgid "Connected as <0/> · records are stored in your ATProto repository (PDS) 
 msgstr "Connected as <0/> · records are stored in your ATProto repository (PDS) · <1>browse your data on pds.ls</1>"
 
 #: src/lib/components/climbing-styles.svelte
+#: src/routes/world/[...slug]/+page.svelte
 msgid "Climbing style"
 msgstr "Climbing style"
 
@@ -17021,21 +17023,36 @@ msgstr "{0}. Drag their marker on the map or the topo image to a real location b
 msgid "MultiLineString"
 msgstr "MultiLineString"
 
-#: src/lib/components/route-logbook.svelte
+#: src/lib/components/bookmark-button.svelte
 msgid "Could not update bookmark"
 msgstr "Could not update bookmark"
 
-#: src/lib/components/route-logbook.svelte
+#: src/lib/components/bookmark-button.svelte
 msgid "Bookmarked"
 msgstr "Bookmarked"
 
-#: src/lib/components/route-logbook.svelte
+#: src/lib/components/bookmark-button.svelte
 msgid "Bookmark"
 msgstr "Bookmark"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
 msgstr "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
+
+#. 0: length
+#: src/routes/world/[...slug]/+page.svelte
+msgid "{0} m"
+msgstr "{0} m"
+
+#: src/lib/components/bookmark-button.svelte
+#: src/lib/components/bookmark-button.svelte
+msgid "Remove bookmark"
+msgstr "Remove bookmark"
+
+#: src/lib/components/bookmark-button.svelte
+#: src/lib/components/bookmark-button.svelte
+msgid "Bookmark this climb"
+msgstr "Bookmark this climb"
 
 #: src/routes/docs/+page.svelte
 msgid "<0>Personal activity stays yours</0>: ascents, bookmarks, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
