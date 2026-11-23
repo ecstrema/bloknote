@@ -21,7 +21,9 @@ export type GradeScaleId =
   | "DryTooling"
   | "Aid"
   | "UKAdj"
-  | "YDSDanger";
+  | "YDSDanger"
+  | "Huesler"
+  | "Schall";
 
 export interface ClimbingGradeRef {
   scale: GradeScaleId;

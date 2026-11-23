@@ -35,6 +35,12 @@
       label: "Danger",
       href: resolve("grade-comparison/danger"),
     },
+
+    {
+      id: "via-ferrata",
+      label: "Via ferrata",
+      href: resolve("grade-comparison/via-ferrata"),
+    },
   ];
 </script>
 

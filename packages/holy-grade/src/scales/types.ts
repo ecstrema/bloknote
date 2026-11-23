@@ -1,4 +1,4 @@
-export type GradeType = "route" | "boulder" | "ice" | "aid" | "danger";
+export type GradeType = "route" | "boulder" | "ice" | "aid" | "danger" | "viaFerrata";
 
 export type GradeMapping = Map<string, number>;
 
@@ -47,7 +47,8 @@ export type BoulderScaleId = "FB" | "Hueco";
 export type IceScaleId = "WI" | "Mixed" | "DryTooling";
 export type AidScaleId = "Aid";
 export type DangerScaleId = "UKAdj" | "YDSDanger";
-export type ScaleId = RouteScaleId | BoulderScaleId | IceScaleId | AidScaleId | DangerScaleId;
+export type ViaFerrataScaleId = "Huesler" | "Schall";
+export type ScaleId = RouteScaleId | BoulderScaleId | IceScaleId | AidScaleId | DangerScaleId | ViaFerrataScaleId;
 
 export interface ParsedGrade {
   /** The primary technical / difficulty grade (e.g. "5.10a", "5b", "6a", "V5") */

@@ -17307,3 +17307,12 @@ msgstr "Logbook"
 #: src/routes/settings/logbook/+page.svelte
 msgid "Connect your Atmosphere account in the <0>Account</0> tab to keep your ticks, bookmarks, and comments."
 msgstr "Connect your Atmosphere account in the <0>Account</0> tab to keep your ticks, bookmarks, and comments."
+
+#: src/routes/grade-comparison/+layout.svelte
+msgid "Via ferrata"
+msgstr "Via ferrata"
+
+#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
+#: src/routes/grade-comparison/via-ferrata/+page.svelte
+msgid "{0}Bloknote - Via Ferrata Grade Comparison"
+msgstr "{0}Bloknote - Via Ferrata Grade Comparison"

@@ -12,6 +12,8 @@ import {
   ukTech,
   ukAdj,
   ydsDanger,
+  husler,
+  schall,
   convertGrade,
   allScales,
   parseGrade,
@@ -171,6 +173,31 @@ describe("French <-> UK Technical", () => {
   ])("French %s <-> UKTech %s", (frenchGrade, ukTechGrade) => {
     expect(convertGrade(frenchGrade, french, ukTech)).toBe(ukTechGrade);
     expect(convertGrade(ukTechGrade, ukTech, french)).toBe(frenchGrade);
+  });
+});
+
+describe("Via ferrata: Hüsler <-> Schall", () => {
+  it.each([
+    ["K1", "F"],
+    ["K2", "PD"],
+    ["K3", "AD"],
+    ["K4", "D"],
+    ["K5", "TD"],
+    ["K6", "ED"],
+  ])("Hüsler %s <-> Schall %s", (huslerGrade, schallGrade) => {
+    expect(convertGrade(huslerGrade, husler, schall)).toBe(schallGrade);
+    expect(convertGrade(schallGrade, schall, husler)).toBe(huslerGrade);
+  });
+
+  it("accepts OSM's numeric via_ferrata_scale form", () => {
+    expect(husler.normalize("3")).toBe("K3");
+    expect(convertGrade("3", husler, schall)).toBe("AD");
+    expect(convertGrade("via_ferrata_scale=6".split("=")[1]!, husler, schall)).toBe("ED");
+  });
+
+  it("accepts the full French names in the Schall scale", () => {
+    expect(schall.normalize("Très difficile")).toBe("TD");
+    expect(schall.normalize("extrêmement difficile")).toBe("ED");
   });
 });
 

@@ -95,6 +95,7 @@ export const DIFFICULTY_RANGE: Record<GradeType, DifficultyRange> = {
   ice: { beginner: 1, intermediate: 5, advanced: 11, pro: 17, max: 26 },
   aid: { beginner: 0, intermediate: 2, advanced: 6, pro: 9, max: 13 },
   danger: { beginner: 3, intermediate: 12, advanced: 21, pro: 30, max: 37 },
+  viaFerrata: { beginner: 1, intermediate: 2, advanced: 4, pro: 5, max: 6 },
 };
 
 function checkDangerToken(token: string): { grade: string; scale: DangerScaleId } | undefined {

@@ -7,6 +7,7 @@ import {
   allIceScales,
   allRouteScales,
   allScales,
+  allViaFerrataScales,
   getReference,
   getScale,
   parseGrade,
@@ -113,6 +114,7 @@ export const gradeTags: [Key, ScaleId][] = [
   ["climbing:grade:dry", "DryTooling"],
   ["climbing:grade:aid", "Aid"],
   ["climbing:grade:yds_danger", "YDSDanger"],
+  ["via_ferrata_scale", "Huesler"],
 ];
 const processedGrades: ProcessedTags = {
   "climbing:grade": allowAll,
@@ -135,6 +137,8 @@ export function getRelatedGradeScales(tags: Tags, currentScale?: ScaleId | "unkn
   const isMixed = tags["climbing:mixed"] === "yes" || !!tags["climbing:grade:mixed"];
   const isDry = tags["climbing:dry"] === "yes" || tags.climbing === "drytooling" || !!tags["climbing:grade:dry"];
   const isAid = tags["climbing:aid"] === "yes" || !!tags["climbing:grade:aid"];
+  const isViaFerrata =
+    tags.climbing === "via_ferrata" || tags.highway === "via_ferrata" || tags.via_ferrata_scale !== undefined;
   const isRockRoute =
     tags["climbing:sport"] === "yes" ||
     tags["climbing:trad"] === "yes" ||
@@ -153,6 +157,7 @@ export function getRelatedGradeScales(tags: Tags, currentScale?: ScaleId | "unkn
   }
   if (isIce || isMixed || isDry) addAll(allIceScales);
   if (isAid) addAll(allAidScales);
+  if (isViaFerrata) addAll(allViaFerrataScales);
   if (isRockRoute) addAll(allRouteScales);
 
   if (currentScale && currentScale !== "unknown") {
@@ -161,6 +166,7 @@ export function getRelatedGradeScales(tags: Tags, currentScale?: ScaleId | "unkn
     else if (type === "ice") addAll(allIceScales);
     else if (type === "aid") addAll(allAidScales);
     else if (type === "danger") addAll(allDangerScales);
+    else if (type === "viaFerrata") addAll(allViaFerrataScales);
     else if (type === "route") addAll(allRouteScales);
   }
 

@@ -14,8 +14,19 @@ export { wi } from "./other/wi";
 export { mixed } from "./other/mixed";
 export { dryTooling } from "./other/dry-tooling";
 export { aid } from "./other/aid";
+export { husler } from "./via-ferrata/husler";
+export { schall } from "./via-ferrata/schall";
 
-import type { AidScaleId, BoulderScaleId, DangerScaleId, IceScaleId, RouteScaleId, Scale, ScaleId } from "./types";
+import type {
+  AidScaleId,
+  BoulderScaleId,
+  DangerScaleId,
+  IceScaleId,
+  RouteScaleId,
+  Scale,
+  ScaleId,
+  ViaFerrataScaleId,
+} from "./types";
 
 import { french } from "./route/french";
 import { fb } from "./bouldering/fb";
@@ -33,6 +44,8 @@ import { wi } from "./other/wi";
 import { mixed } from "./other/mixed";
 import { dryTooling } from "./other/dry-tooling";
 import { aid } from "./other/aid";
+import { husler } from "./via-ferrata/husler";
+import { schall } from "./via-ferrata/schall";
 
 export const allScales: Scale[] = [
   french,
@@ -51,11 +64,13 @@ export const allScales: Scale[] = [
   aid,
   ukAdj,
   ydsDanger,
+  husler,
+  schall,
 ];
 
 export const scalesById: Map<ScaleId, Scale> = new Map(allScales.map((s) => [s.id, s]));
 
-export const { allAidScales, allBoulderScales, allDangerScales, allIceScales, allRouteScales } =
+export const { allAidScales, allBoulderScales, allDangerScales, allIceScales, allRouteScales, allViaFerrataScales } =
   getScalesByType(allScales);
 
 function getScalesByType(scales: Scale[]) {
@@ -64,6 +79,7 @@ function getScalesByType(scales: Scale[]) {
   const allIceScales: Scale<IceScaleId>[] = [];
   const allAidScales: Scale<AidScaleId>[] = [];
   const allDangerScales: Scale<DangerScaleId>[] = [];
+  const allViaFerrataScales: Scale<ViaFerrataScaleId>[] = [];
 
   for (const scale of scales) {
     switch (scale.gradeType) {
@@ -82,9 +98,12 @@ function getScalesByType(scales: Scale[]) {
       case "danger":
         allDangerScales.push(scale as Scale<DangerScaleId>);
         break;
+      case "viaFerrata":
+        allViaFerrataScales.push(scale as Scale<ViaFerrataScaleId>);
+        break;
     }
   }
-  return { allRouteScales, allBoulderScales, allIceScales, allAidScales, allDangerScales };
+  return { allRouteScales, allBoulderScales, allIceScales, allAidScales, allDangerScales, allViaFerrataScales };
 }
 
 export function getScale(id: ScaleId): Scale | undefined {
