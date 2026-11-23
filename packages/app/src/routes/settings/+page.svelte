@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { goto } from "$app/navigation";
+  import { goto, afterNavigate } from "$app/navigation";
   import { building } from "$app/env";
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
@@ -44,6 +44,12 @@
 
   onMount(() => {
     hasPreviousPage = window.history.length > 1;
+  });
+
+  // Keep the tab in sync with the URL on real navigations (e.g. the post-login
+  // redirect to ?tab=account). Shallow gotos from onTabChange are not navigations,
+  // so they update `activeTab` directly instead.
+  afterNavigate(() => {
     activeTab = parseTab(page.url.searchParams.get("tab"));
   });
 

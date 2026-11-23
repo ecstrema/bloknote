@@ -1,4 +1,5 @@
 import { browser } from "$app/env";
+import { goto } from "$app/navigation";
 import type { AscentStyle, OsmElementRef, ReviewRecord, StarRecord, TickRecord } from "@bloknote/common";
 import {
   BrowserOAuthClient,
@@ -146,7 +147,10 @@ class AtProtoClient {
     this.#ready ??= (async () => {
       this.#client ??= await createOAuthClient();
       const result = await this.#client.init();
-      if (result) await this.#activate(result.session);
+      if (result) {
+        await this.#activate(result.session);
+        this.#redirectToAccountTab();
+      }
     })();
     try {
       await this.#ready;
@@ -155,6 +159,19 @@ class AtProtoClient {
       this.#oauthSession = undefined;
       this.session = undefined;
     }
+  }
+
+  /**
+   * After a completed login the OAuth server redirects back to the registered
+   * `/settings` redirect URI: clean its query parameters and continue to the
+   * account tab, where the newly connected account is shown.
+   */
+  #redirectToAccountTab() {
+    if (!location.pathname.endsWith("/settings")) return;
+    const url = new URL(location.href);
+    for (const param of [...url.searchParams.keys()]) url.searchParams.delete(param);
+    url.searchParams.set("tab", "account");
+    void goto(url, { replace: true });
   }
 
   async #activate(oauthSession: OAuthSession) {
