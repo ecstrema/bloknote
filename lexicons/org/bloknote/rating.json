@@ -1,0 +1,33 @@
+{
+  "lexicon": 1,
+  "id": "org.bloknote.rating",
+  "description": "Standalone star rating of an OpenStreetMap element (node, way, or relation)",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "rating", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "org.openstreetmap.core.defs#elementRef",
+            "description": "The OpenStreetMap element (node, way, or relation) being rated"
+          },
+          "rating": {
+            "type": "float",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Normalized rating from 0.0 (no stars) to 1.0 (full rating), adaptable to 3-star, 4-star, or 5-star display systems"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "ISO 8601 timestamp when the rating was created"
+          }
+        }
+      }
+    }
+  }
+}
