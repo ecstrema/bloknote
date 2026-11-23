@@ -348,7 +348,10 @@ function writeStaticApiMetadata(worldDirectory: string) {
     }
     recent.sort((a, b) => b.timestamp - a.timestamp);
     if (recent.length > 0) {
-      const title = data?.type === "geographic" ? data.name : (data as OsmFeature | undefined)?.tags?.name ?? slug;
+      const title =
+        data?.type === "geographic"
+          ? data.name
+          : (data as OsmFeature | undefined)?.tags?.name ?? slug.replace(/^world\/?/, "") || "Worldwide climbing";
       writeFileSync(
         join(directory, "feed.xml"),
         renderRssFeed({ title, slug, items: recent.slice(0, RSS_MAX_ITEMS) }),
