@@ -26,6 +26,7 @@
   import { ModeWatcher } from "mode-watcher";
   import { onMount, untrack } from "svelte";
   import { initLocale } from "#lib/i18n.svelte.js";
+  import EditNudge from "#lib/components/shell/edit-nudge.svelte";
   const { children } = $props();
 
   const DATA_REFRESH_INTERVAL = 6 * 60 * 60 * 1000;
@@ -142,6 +143,8 @@
     () => (dismissed = true),
   )}
 {/if}
+
+<EditNudge />
 
 <style>
   .loader-bar {
