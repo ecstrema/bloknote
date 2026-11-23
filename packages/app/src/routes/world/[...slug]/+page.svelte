@@ -331,9 +331,14 @@
     {:else if itemType === "geographic"}
       <GeographicPage bind:item={item as DataTree<GeographicFolderElement>} />
     {:else if itemType === "area"}
-      <AreaPage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} />
+      <AreaPage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} {coordinates} />
     {:else if itemType === "route"}
-      <RoutePage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} />
+      <RoutePage
+        bind:item={item as DataTree<OsmFeature>}
+        slug={itemSlug}
+        // Routes without their own position (mapped as ways) fall back to the parent crag's position
+        coordinates={coordinates ?? fallbackCoordinates}
+      />
     {:else if itemType === "gym"}
       <GymPage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} />
     {:else}

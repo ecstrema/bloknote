@@ -12,13 +12,16 @@
   import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
   import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
+  import MapLinks from "#lib/components/map-links.svelte";
 
   let {
     item = $bindable(),
     slug,
+    coordinates,
   }: {
     item: DataTree<OsmFeature>;
     slug: string;
+    coordinates?: { lat: number; lon: number };
   } = $props();
 
   const feature = $derived(item.feature);
@@ -40,7 +43,12 @@
   <ClimbingStyles {feature} featureSlug={slug} editable />
 </div>
 
-<ClimbingProviderLinks {feature} />
+<div class="flex flex-wrap items-center gap-2">
+  {#if coordinates}
+    <MapLinks {coordinates} name={feature.tags?.name} />
+  {/if}
+  <ClimbingProviderLinks {feature} />
+</div>
 
 <EditableDescription {feature} featureSlug={slug} />
 

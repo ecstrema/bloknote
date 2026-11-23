@@ -11,13 +11,16 @@
   import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
   import type { OsmFeature } from "osm-api";
   import type { DataTree } from "#lib/types.js";
+  import MapLinks from "#lib/components/map-links.svelte";
 
   let {
     item = $bindable(),
     slug,
+    coordinates,
   }: {
     item: DataTree<OsmFeature>;
     slug: string;
+    coordinates?: { lat: number; lon: number };
   } = $props();
 
   const feature = $derived(item.feature);
@@ -58,6 +61,10 @@
 <ClimbingProviderLinks {feature} />
 
 <EditableDescription {feature} featureSlug={slug} />
+
+{#if coordinates}
+  <MapLinks {coordinates} name={feature.tags?.name} />
+{/if}
 
 {#if item.stats?.totalRoutes}
   <p class="text-sm text-muted-foreground">{item.stats.totalRoutes} routes in total</p>
