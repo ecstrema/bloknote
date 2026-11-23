@@ -50,7 +50,17 @@ self.addEventListener("activate", (event) => {
   // and any other cache no longer kept here. Map tiles and Commons images are preserved.
   async function deleteOldCaches() {
     for (const key of await caches.keys()) {
-      if (!KEPT_CACHES.has(key)) await caches.delete(key);
+      if (!KEPT_CACHES.has(key)) {
+        await caches.delete(key);
+        continue;
+      }
+      // Drop edit-map pages cached by previous service worker versions (issue #176)
+      if (key === APP_CACHE) {
+        const cache = await caches.open(key);
+        for (const request of await cache.keys()) {
+          if (isEditMapPath(new URL(request.url).pathname)) await cache.delete(request);
+        }
+      }
     }
   }
 
@@ -100,6 +110,14 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(handleAppFile(event.request, url.pathname));
 });
 
+// The edit-map page is an advanced online-only tool: boundary files live on GitHub and the editor
+// needs live Overpass/OSM access, so it is never served from, or stored in, the offline cache (issue #176)
+const EDIT_MAP_PATH = resolve("/edit-map");
+
+function isEditMapPath(pathname: string): boolean {
+  return pathname === EDIT_MAP_PATH || pathname.startsWith(`${EDIT_MAP_PATH}/`);
+}
+
 async function handleMapTile(request: Request): Promise<Response> {
   const cache = await caches.open(MAP_TILES_CACHE);
   const cached = await cache.match(request);
@@ -119,8 +137,15 @@ async function handleMapTile(request: Request): Promise<Response> {
 }
 
 // Pages and static assets. Fresh from the network when online; the last fetched copy answers offline.
+// The edit-map tool is excluded beforehand: it is online-only.
 async function handleAppFile(request: Request, pathname: string): Promise<Response> {
-  if (import.meta.env.DEV) return safeFetch(request);
+  if (import.meta.env.DEV || isEditMapPath(pathname)) {
+    try {
+      return await safeFetch(request);
+    } catch {
+      return new Response(undefined, { status: 504, statusText: "app file fetch failed" });
+    }
+  }
   const cache = await caches.open(APP_CACHE);
   try {
     const res = await safeFetch(request);
