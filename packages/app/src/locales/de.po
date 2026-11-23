@@ -17023,33 +17023,37 @@ msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not update bookmark"
-msgstr "Stern konnte nicht aktualisiert werden"
+msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Bookmarked"
-msgstr "Gemerkt"
+msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Bookmark"
-msgstr "Stern"
+msgstr ""
 
-#: src/routes/settings/account/accounts-tab.svelte
-msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
-msgstr "Speichert deine persönliche Kletteraktivität im AT Protocol — Logbuch-Einträge und Begehungen, Routen-Rezensionen, Bewertungen und gemerkte Touren — in deinem eigenen Datenrepository, getrennt von OpenStreetMap."
+#: src/lib/components/route-logbook.svelte
+msgid "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
+msgstr ""
 
 #: src/routes/docs/+page.svelte
 msgid "<0>Personal activity stays yours</0>: ascents, bookmarks, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
-msgstr "<0>Deine persönliche Aktivität bleibt deine</0>: Begehungen, Sterne und Kommentare werden als AT-Protocol-Records in deinem persönlichen Datenserver (PDS) gespeichert."
+msgstr ""
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Bookmarked climbing features."
-msgstr "<0/> — Gemerkte/favorisierte Kletter-Objekte."
+msgstr ""
+
+#: src/routes/settings/account/accounts-tab.svelte
+msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
+msgstr ""
 
 #. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
 #: src/routes/settings/account/user-stats-panel.svelte
 msgid "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
-msgstr "{0} Begehungen ({1} Beendigungen, {2} Versuche) · {3} gemerkt · {4} Kommentare"
+msgstr ""
 
 #: src/routes/settings/account/user-stats-panel.svelte
 msgid "Bookmarked climbs"
-msgstr "Gemerkte Touren"
+msgstr ""

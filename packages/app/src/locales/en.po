@@ -17033,9 +17033,9 @@ msgstr "Bookmarked"
 msgid "Bookmark"
 msgstr "Bookmark"
 
-#: src/routes/settings/account/accounts-tab.svelte
-msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
-msgstr "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
+#: src/lib/components/route-logbook.svelte
+msgid "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
+msgstr "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
 
 #: src/routes/docs/+page.svelte
 msgid "<0>Personal activity stays yours</0>: ascents, bookmarks, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
@@ -17044,6 +17044,10 @@ msgstr "<0>Personal activity stays yours</0>: ascents, bookmarks, and comments a
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Bookmarked climbing features."
 msgstr "<0/> — Bookmarked climbing features."
+
+#: src/routes/settings/account/accounts-tab.svelte
+msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
+msgstr "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
 
 #. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
 #: src/routes/settings/account/user-stats-panel.svelte

@@ -17026,33 +17026,37 @@ msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not update bookmark"
-msgstr "Impossibile aggiornare il preferito"
+msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Bookmarked"
-msgstr "Preferito"
+msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Bookmark"
-msgstr "Stella"
+msgstr ""
 
-#: src/routes/settings/account/accounts-tab.svelte
-msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
-msgstr "Memorizza la tua attività di arrampicata personale sull'AT Protocol: salite registrate, recensioni delle vie, valutazioni e preferiti, nel tuo archivio dati personale, separato da OpenStreetMap."
+#: src/lib/components/route-logbook.svelte
+msgid "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
+msgstr ""
 
 #: src/routes/docs/+page.svelte
 msgid "<0>Personal activity stays yours</0>: ascents, bookmarks, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
-msgstr "<0>L'attività personale resta tua</0>: salite, preferiti e commenti sono modellati come record AT Protocol memorizzati nel tuo personal data server (PDS)."
+msgstr ""
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Bookmarked climbing features."
-msgstr "<0/> — Elementi di arrampicata salvati/nei preferiti."
+msgstr ""
+
+#: src/routes/settings/account/accounts-tab.svelte
+msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
+msgstr ""
 
 #. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
 #: src/routes/settings/account/user-stats-panel.svelte
 msgid "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
-msgstr "{0} salite ({1} riuscite, {2} tentativi) · {3} preferiti · {4} commenti"
+msgstr ""
 
 #: src/routes/settings/account/user-stats-panel.svelte
 msgid "Bookmarked climbs"
-msgstr "Scalate preferite"
+msgstr ""

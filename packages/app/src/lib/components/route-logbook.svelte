@@ -87,6 +87,17 @@
     {/if}
   </div>
 
+  <p class="text-xs text-muted-foreground">
+    Ticks, comments and bookmarks are currently private: only you can see them. Follow
+    <a
+      class="underline underline-offset-2"
+      href="https://github.com/ecstrema/bloknote/issues/172"
+      target="_blank"
+      rel="noreferrer">issue #172</a
+    >
+    for shared, live comments across apps.
+  </p>
+
   {#if error}
     <p class="text-xs text-destructive">{error}</p>
   {/if}
