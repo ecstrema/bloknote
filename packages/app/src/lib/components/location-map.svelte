@@ -788,6 +788,12 @@
     }
   });
 
+  // On a fresh visit the database is still downloading when the map loads, so loadMapElements
+  // found nothing (issue #150). Retry as soon as the database becomes ready.
+  $effect(() => {
+    if (localDb.ready && !allElementsLoaded && shared?.map) void loadMapElements(shared.map);
+  });
+
   // Highlight lasso/selected routes on the map when the sidebar selection changes
   $effect(() => {
     activeSelectionSlugs = selection ? [...selection.selected] : [];
