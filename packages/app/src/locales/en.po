@@ -17004,3 +17004,14 @@ msgstr "Search on Mountain Project"
 #: src/lib/components/climbing-provider-links.svelte
 msgid "OpenClimbing"
 msgstr "OpenClimbing"
+
+#: src/lib/components/shell/osm-changes.svelte
+msgid "# route has no position yet"
+msgid_plural "# routes have no position yet"
+msgstr[0] "# route has no position yet"
+msgstr[1] "# routes have no position yet"
+
+#. 0: unplaced.join(", ")
+#: src/lib/components/shell/osm-changes.svelte
+msgid "{0}. Drag their marker on the map or the topo image to a real location before submitting — "
+msgstr "{0}. Drag their marker on the map or the topo image to a real location before submitting — "

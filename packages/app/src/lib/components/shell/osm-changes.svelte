@@ -55,6 +55,18 @@
     return names;
   }
 
+  /** New routes are placed near existing ones or at the map center; if that failed they sit at the (0,0) default (issue #5) */
+  function getUnplacedCreatedNodes(): string[] {
+    const names: string[] = [];
+    for (const [slug, changedFeature] of appState.osmUser.changes) {
+      const final = changedFeature.final;
+      if (!final || final.type !== "node" || final.id >= 0) continue;
+      if (final.lat !== 0 || final.lon !== 0) continue;
+      names.push(getNameOSM(final.tags ?? {}) || slug);
+    }
+    return names;
+  }
+
   async function submit() {
     error = undefined;
     const unplaceable = getUnplaceableCreatedRelations();
@@ -63,6 +75,14 @@
         `${plural(unplaceable.length, ["# empty relation cannot be submitted", "# empty relations cannot be submitted"])}: ` +
         `${unplaceable.join(", ")}. Add routes or sectors to them, or move them inside an existing area — ` +
         `empty relations placed directly in a region have no position and would be lost on the next data rebuild.`;
+      return;
+    }
+    const unplaced = getUnplacedCreatedNodes();
+    if (unplaced.length > 0) {
+      error =
+        `${plural(unplaced.length, ["# route has no position yet", "# routes have no position yet"])}: ` +
+        `${unplaced.join(", ")}. Drag their marker on the map or the topo image to a real location before submitting — ` +
+        `routes cannot be uploaded at (0, 0).`;
       return;
     }
     try {
