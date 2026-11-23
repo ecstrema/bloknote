@@ -15,7 +15,7 @@
   import AppSidebarChildren from "./app-sidebar-children.svelte";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import { onMount, untrack } from "svelte";
-  import { getGrade } from "#lib/data/parse/osm-tags.js";
+  import { getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
   import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
   import SnowflakeIcon from "@lucide/svelte/icons/snowflake";
@@ -427,7 +427,7 @@
         {@const grade = getGrade(routeTags)}
         {#if grade}
           <HolyGrade class="text-xs font-semibold" grade={grade.v} />
-        {:else}
+        {:else if !isProjectRoute(routeTags)}
           <CircleQuestionMarkIcon class="text-destructive" />
         {/if}
         {#if isTradRoute(routeTags)}

@@ -2,7 +2,7 @@
   import { resolve } from "$app/paths";
   import { featureToType } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
-  import { getGrade } from "#lib/data/parse/osm-tags.js";
+  import { getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
   import { getAreaKindLabel } from "#lib/data/parse/diagnostics.js";
   import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
@@ -80,7 +80,7 @@
             <span class="inline-flex items-center gap-1">
               {#if grade}
                 <HolyGrade class="text-xs font-semibold" grade={grade.v} />
-              {:else}
+              {:else if !isProjectRoute(routeTags)}
                 <CircleQuestionMarkIcon class="size-5 text-destructive" />
               {/if}
               {#if isTradRoute(routeTags)}
