@@ -25,7 +25,7 @@
       <h2 class="font-medium">Your climbing stats</h2>
       <p class="mt-1 text-sm text-muted-foreground">
         {stats.totalTicks} ticks ({stats.totalSends} sends, {stats.totalAttempts} attempts) · {atproto.stars.length}
-        starred · {atproto.reviews.length} comments
+        bookmarked · {atproto.reviews.length} comments
       </p>
     </div>
 
@@ -68,7 +68,7 @@
 
     {#if atproto.stars.length > 0}
       <div>
-        <h3 class="text-xs font-semibold uppercase text-muted-foreground">Starred climbs</h3>
+        <h3 class="text-xs font-semibold uppercase text-muted-foreground">Bookmarked climbs</h3>
         <ul class="mt-1.5 flex flex-wrap gap-2 text-sm">
           {#each atproto.stars as star (star)}
             <li>

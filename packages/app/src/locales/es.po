@@ -16325,9 +16325,8 @@ msgstr "Almacena el directorio de escalada compartido: vías, sectores, crags, r
 msgid "Atmosphere"
 msgstr "Atmosphere"
 
-#: src/routes/settings/account/accounts-tab.svelte
-msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and starred climbs—in your own data repository, separate from OpenStreetMap."
-msgstr "Almacena tu actividad de escalada personal en el AT Protocol: ascensiones registradas, reseñas de vías, valoraciones y vías guardadas, en tu propio repositorio de datos, separado de OpenStreetMap."
+#~ msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and starred climbs—in your own data repository, separate from OpenStreetMap."
+#~ msgstr "Almacena tu actividad de escalada personal en el AT Protocol: ascensiones registradas, reseñas de vías, valoraciones y vías guardadas, en tu propio repositorio de datos, separado de OpenStreetMap."
 
 #: src/routes/settings/account/accounts-tab.svelte
 msgid "Disconnect Atmosphere"
@@ -16484,9 +16483,8 @@ msgstr "Inicio de Bloknote"
 msgid "<0/> Export Typst"
 msgstr "<0/> Exportar Typst"
 
-#: src/lib/components/route-logbook.svelte
-msgid "Could not update star"
-msgstr "No se pudo actualizar la estrella"
+#~ msgid "Could not update star"
+#~ msgstr "No se pudo actualizar la estrella"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not log tick"
@@ -16500,13 +16498,11 @@ msgstr "No se pudo publicar el comentario"
 msgid "Logbook and comments"
 msgstr "Registro y comentarios"
 
-#: src/lib/components/route-logbook.svelte
-msgid "Starred"
-msgstr "Guardado"
+#~ msgid "Starred"
+#~ msgstr "Guardado"
 
-#: src/lib/components/route-logbook.svelte
-msgid "Star"
-msgstr "Estrella"
+#~ msgid "Star"
+#~ msgstr "Estrella"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Connect Atmosphere to log ticks & comments"
@@ -16592,9 +16588,8 @@ msgstr "<0>Las ediciones de mapas y vías van a OpenStreetMap</0> bajo la Open D
 msgid "<0>Topo photos go to Wikimedia Commons</0> under a free Creative Commons license (CC BY-SA 4.0, CC BY 4.0, or CC0), so anyone can reuse and attribute them."
 msgstr "<0>Las fotos de topos van a Wikimedia Commons</0> bajo una licencia Creative Commons libre (CC BY-SA 4.0, CC BY 4.0 o CC0), para que cualquiera pueda reutilizarlas y atribuirlas."
 
-#: src/routes/docs/+page.svelte
-msgid "<0>Personal activity stays yours</0>: ascents, stars, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
-msgstr "<0>Tu actividad personal sigue siendo tuya</0>: las ascensiones, estrellas y comentarios se modelan como registros de AT Protocol almacenados en tu servidor de datos personal (PDS)."
+#~ msgid "<0>Personal activity stays yours</0>: ascents, stars, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
+#~ msgstr "<0>Tu actividad personal sigue siendo tuya</0>: las ascensiones, estrellas y comentarios se modelan como registros de AT Protocol almacenados en tu servidor de datos personal (PDS)."
 
 #: src/routes/docs/+page.svelte
 msgid "How Bloknote works & Contributing"
@@ -16688,9 +16683,8 @@ msgstr "<0/> — Registro personal de ascensión o intento (<1/>, <2/>, <3/>, <4
 msgid "<0/> — Route or crag review text, normalized rating (<1/>), and optional proposed OSM tag corrections."
 msgstr "<0/> — Texto de reseña de vía o crag, valoración normalizada (<1/>) y correcciones opcionales propuestas a etiquetas de OSM."
 
-#: src/routes/docs/+page.svelte
-msgid "<0/> — Bookmarked/starred climbing features."
-msgstr "<0/> — Elementos de escalada guardados/favoritos."
+#~ msgid "<0/> — Bookmarked/starred climbing features."
+#~ msgstr "<0/> — Elementos de escalada guardados/favoritos."
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — User preferences such as preferred route and boulder grading scales."
@@ -16712,14 +16706,11 @@ msgstr "Esquemas principales"
 msgid "Your climbing stats"
 msgstr "Tus estadísticas de escalada"
 
-#. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
-#: src/routes/settings/account/user-stats-panel.svelte
-msgid "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
-msgstr "{0} ascensiones ({1} encadenadas, {2} intentos) · {3} guardadas · {4} comentarios"
+#~ msgid "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
+#~ msgstr "{0} ascensiones ({1} encadenadas, {2} intentos) · {3} guardadas · {4} comentarios"
 
-#: src/routes/settings/account/user-stats-panel.svelte
-msgid "Starred climbs"
-msgstr "Escaladas guardadas"
+#~ msgid "Starred climbs"
+#~ msgstr "Escaladas guardadas"
 
 #: src/routes/settings/account/user-stats-panel.svelte
 msgid "Recent ticks"
@@ -17032,3 +17023,36 @@ msgstr ""
 #: src/lib/components/location-map.svelte
 msgid "MultiLineString"
 msgstr ""
+
+#: src/lib/components/route-logbook.svelte
+msgid "Could not update bookmark"
+msgstr "No se pudo actualizar la estrella"
+
+#: src/lib/components/route-logbook.svelte
+msgid "Bookmarked"
+msgstr "Guardado"
+
+#: src/lib/components/route-logbook.svelte
+msgid "Bookmark"
+msgstr "Estrella"
+
+#: src/routes/settings/account/accounts-tab.svelte
+msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
+msgstr "Almacena tu actividad de escalada personal en el AT Protocol: ascensiones registradas, reseñas de vías, valoraciones y vías guardadas, en tu propio repositorio de datos, separado de OpenStreetMap."
+
+#: src/routes/docs/+page.svelte
+msgid "<0>Personal activity stays yours</0>: ascents, bookmarks, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
+msgstr "<0>Tu actividad personal sigue siendo tuya</0>: las ascensiones, estrellas y comentarios se modelan como registros de AT Protocol almacenados en tu servidor de datos personal (PDS)."
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — Bookmarked climbing features."
+msgstr "<0/> — Elementos de escalada guardados/favoritos."
+
+#. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: atproto.stars.length; 4: atproto.reviews.length
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
+msgstr "{0} ascensiones ({1} encadenadas, {2} intentos) · {3} guardadas · {4} comentarios"
+
+#: src/routes/settings/account/user-stats-panel.svelte
+msgid "Bookmarked climbs"
+msgstr "Escaladas guardadas"

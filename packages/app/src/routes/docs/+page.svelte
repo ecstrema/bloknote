@@ -89,7 +89,7 @@
             4.0, or CC0), so anyone can reuse and attribute them.
           </li>
           <li>
-            <strong>Personal activity stays yours</strong>: ascents, stars, and comments are modeled as AT Protocol
+            <strong>Personal activity stays yours</strong>: ascents, bookmarks, and comments are modeled as AT Protocol
             records stored in your personal data server (PDS).
           </li>
         </ul>
@@ -164,7 +164,7 @@
             and optional proposed OSM tag corrections.
           </li>
           <li>
-            <code>org.openstreetmap.star</code> — Bookmarked/starred climbing features.
+            <code>org.openstreetmap.star</code> — Bookmarked climbing features.
           </li>
           <li>
             <code>org.bloknote.actor.profile</code> — User preferences such as preferred route and boulder grading scales.

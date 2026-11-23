@@ -35,7 +35,7 @@
     try {
       await atproto.toggleStar(feature);
     } catch (e) {
-      error = e instanceof Error ? e.message : "Could not update star";
+      error = e instanceof Error ? e.message : "Could not update bookmark";
     } finally {
       busy = false;
     }
@@ -78,7 +78,7 @@
     {#if atproto.configured}
       <Button size="xs" variant={starred ? "secondary" : "outline"} disabled={busy} onclick={onToggleStar}>
         <span class="icon-[lucide--star] shrink-0 size-4" class:text-amber-500={starred}></span>
-        {starred ? "Starred" : "Star"}
+        {starred ? "Bookmarked" : "Bookmark"}
       </Button>
     {:else}
       <a href={resolve("/settings/account")} class="text-xs text-primary hover:underline">
