@@ -15161,9 +15161,8 @@ msgstr "Hinzufügen"
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: src/lib/components/editable/shared-login-tooltip.svelte
-msgid "<0>Log in with OSM</0> to edit"
-msgstr "<0>Mit OSM anmelden</0>, um zu bearbeiten"
+#~ msgid "<0>Log in with OSM</0> to edit"
+#~ msgstr "<0>Mit OSM anmelden</0>, um zu bearbeiten"
 
 #. 0: isDev ? "[DEV] " \\: ""; 1: name ? ` - ${name}` \\: ""
 #: src/lib/components/shell/head.svelte
@@ -17142,15 +17141,15 @@ msgstr ""
 
 #: src/lib/components/climbing-provider-links.svelte
 msgid "<0/> View in..."
-msgstr "<0/> Ansehen in..."
+msgstr ""
 
 #: src/lib/components/climbing-provider-links.svelte
 msgid "View in climbing apps"
-msgstr "In Kletter-Apps ansehen"
+msgstr ""
 
 #: src/lib/components/climbing-provider-links.svelte
 msgid "Choose a climbing data provider."
-msgstr "Wähle einen Anbieter für Kletterdaten."
+msgstr ""
 
 #~ msgid "Overview"
 #~ msgstr ""
@@ -17164,24 +17163,40 @@ msgstr "Wähle einen Anbieter für Kletterdaten."
 #: src/routes/world/[...slug]/+page.svelte
 msgctxt "Tab label: overview of the climbing item (route, crag, area or gym)"
 msgid "Overview"
-msgstr "Übersicht"
+msgstr ""
 
 #: src/routes/world/[...slug]/+page.svelte
 msgctxt "Tab label: interactive map showing the location of the climbing item"
 msgid "Map"
-msgstr "Karte"
+msgstr ""
 
 #: src/routes/world/[...slug]/+page.svelte
 msgctxt "Tab label: raw OpenStreetMap tags of the climbing item"
 msgid "OSM Data"
-msgstr "OSM-Daten"
+msgstr ""
 
 #: src/routes/world/[...slug]/+page.svelte
 msgctxt "Tab label: problems found in the OpenStreetMap data of the climbing item"
 msgid "Diagnostics"
-msgstr "Diagnose"
+msgstr ""
 
 #: src/routes/world/[...slug]/+page.svelte
 msgctxt "Tab label: Pulse, the activity panel with stars, comments and ticks from the community"
 msgid "Pulse"
-msgstr "Puls"
+msgstr ""
+
+#: src/lib/components/shell/edit-button.svelte
+msgid "Edit this page"
+msgstr ""
+
+#: src/lib/components/shell/edit-button.svelte
+msgid "<0/> Edit"
+msgstr ""
+
+#: src/lib/components/shell/edit-button.svelte
+msgid "Edits are saved to OpenStreetMap, a free shared database that works across tons of apps and websites. Improve the climbing data once and every climber benefits."
+msgstr ""
+
+#: src/lib/components/shell/edit-button.svelte
+msgid "<0/> Log in with OSM"
+msgstr ""

@@ -15,7 +15,7 @@
   import { resolve } from "$app/paths";
   import BloknoteLogo from "#components/bloknote-logo.svelte";
   import OsmChanges from "#components/shell/osm-changes.svelte";
-  import SharedLoginTooltip from "#components/editable/shared-login-tooltip.svelte";
+  import EditButton from "#components/shell/edit-button.svelte";
   import UndoControls from "#components/shell/undo-controls.svelte";
 
   const { children, params, data }: WithChildren<LayoutProps> & { data: LayoutLoadType } = $props();
@@ -46,6 +46,6 @@
     </Sidebar.Inset>
   </Sidebar.Provider>
   <OsmChanges />
-  <!-- Single "Log in with OSM to edit" tooltip shared by all editable elements (needs the app state context) -->
-  <SharedLoginTooltip />
+  <!-- Edit entry point shown when not connected: asks the user to log in with OSM (needs the app state context) -->
+  <EditButton />
 </AppProvider>

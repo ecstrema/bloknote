@@ -15161,9 +15161,8 @@ msgstr "Add"
 msgid "Cancel"
 msgstr "Cancel"
 
-#: src/lib/components/editable/shared-login-tooltip.svelte
-msgid "<0>Log in with OSM</0> to edit"
-msgstr "<0>Log in with OSM</0> to edit"
+#~ msgid "<0>Log in with OSM</0> to edit"
+#~ msgstr "<0>Log in with OSM</0> to edit"
 
 #. 0: isDev ? "[DEV] " \\: ""; 1: name ? ` - ${name}` \\: ""
 #: src/lib/components/shell/head.svelte
@@ -17185,3 +17184,19 @@ msgstr "Diagnostics"
 msgctxt "Tab label: Pulse, the activity panel with stars, comments and ticks from the community"
 msgid "Pulse"
 msgstr "Pulse"
+
+#: src/lib/components/shell/edit-button.svelte
+msgid "Edit this page"
+msgstr "Edit this page"
+
+#: src/lib/components/shell/edit-button.svelte
+msgid "<0/> Edit"
+msgstr "<0/> Edit"
+
+#: src/lib/components/shell/edit-button.svelte
+msgid "Edits are saved to OpenStreetMap, a free shared database that works across tons of apps and websites. Improve the climbing data once and every climber benefits."
+msgstr "Edits are saved to OpenStreetMap, a free shared database that works across tons of apps and websites. Improve the climbing data once and every climber benefits."
+
+#: src/lib/components/shell/edit-button.svelte
+msgid "<0/> Log in with OSM"
+msgstr "<0/> Log in with OSM"
