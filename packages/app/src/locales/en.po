@@ -15188,13 +15188,11 @@ msgstr "{0} features modified"
 msgid "Could not submit changes"
 msgstr "Could not submit changes"
 
-#: src/lib/components/shell/osm-changes.svelte
-msgid "Review pending OpenStreetMap changes to submit them"
-msgstr "Review pending OpenStreetMap changes to submit them"
+#~ msgid "Review pending OpenStreetMap changes to submit them"
+#~ msgstr "Review pending OpenStreetMap changes to submit them"
 
-#: src/lib/components/shell/osm-changes.svelte
-msgid "OpenStreetMap changes"
-msgstr "OpenStreetMap changes"
+#~ msgid "OpenStreetMap changes"
+#~ msgstr "OpenStreetMap changes"
 
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Unnamed feature"
@@ -15204,13 +15202,11 @@ msgstr "Unnamed feature"
 msgid "Leave a comment"
 msgstr "Leave a comment"
 
-#: src/lib/components/shell/osm-changes.svelte
-msgid "Submitting..."
-msgstr "Submitting..."
+#~ msgid "Submitting..."
+#~ msgstr "Submitting..."
 
-#: src/lib/components/shell/osm-changes.svelte
-msgid "Submit changes"
-msgstr "Submit changes"
+#~ msgid "Submit changes"
+#~ msgstr "Submit changes"
 
 #: src/lib/components/shell/osm-changes.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
@@ -17200,3 +17196,23 @@ msgstr "Edits are saved to OpenStreetMap, a free shared database that works acro
 #: src/lib/components/shell/edit-button.svelte
 msgid "<0/> Log in with OSM"
 msgstr "<0/> Log in with OSM"
+
+#: src/lib/components/shell/osm-changes.svelte
+msgid "Review pending edits and save them to OpenStreetMap"
+msgstr "Review pending edits and save them to OpenStreetMap"
+
+#: src/lib/components/shell/osm-changes.svelte
+msgid "Save"
+msgstr "Save"
+
+#: src/lib/components/shell/osm-changes.svelte
+msgid "Pending edits"
+msgstr "Pending edits"
+
+#: src/lib/components/shell/osm-changes.svelte
+msgid "Saving..."
+msgstr "Saving..."
+
+#: src/lib/components/shell/osm-changes.svelte
+msgid "Save to OpenStreetMap"
+msgstr "Save to OpenStreetMap"

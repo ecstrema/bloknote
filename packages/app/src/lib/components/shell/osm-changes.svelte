@@ -102,15 +102,16 @@
     <Dialog.DialogTrigger>
       <Button
         class="fixed bottom-5 right-5 z-20 shadow-lg"
-        aria-label="Review pending OpenStreetMap changes to submit them"
+        aria-label="Review pending edits and save them to OpenStreetMap"
       >
         <span class="icon-[lucide--upload] shrink-0 size-4"></span>
+        <span>Save</span>
         <span class="text-xs">{appState.osmUser.changes.size}</span>
       </Button>
     </Dialog.DialogTrigger>
     <Dialog.Content>
       <Dialog.Header>
-        <Dialog.Title>OpenStreetMap changes</Dialog.Title>
+        <Dialog.Title>Pending edits</Dialog.Title>
         <Dialog.Description>
           {plural(appState.osmUser.changes.size, ["# feature modified", "# features modified"])}
         </Dialog.Description>
@@ -221,7 +222,7 @@
           {/snippet}
         </Dialog.Close>
         <Button onclick={submit} disabled={!!appState.osmUser.submitting || !appState.osmUser.loggedIn}>
-          {appState.osmUser.submitting ? "Submitting..." : "Submit changes"}
+          {appState.osmUser.submitting ? "Saving..." : "Save to OpenStreetMap"}
         </Button>
       </Dialog.Footer>
       {#if appState.osmUser.submitting}
