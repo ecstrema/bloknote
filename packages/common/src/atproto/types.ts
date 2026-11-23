@@ -82,12 +82,13 @@ export interface CommentRecord {
 /**
  * Standalone star rating of an OpenStreetMap element (node, way, or relation).
  * Corresponds to org.bloknote.rating.
- * Normalized rating from 0.0 (no stars) to 1.0 (full rating), easily adaptable to 3, 4, or 5
- * star systems. Comments live in their own org.bloknote.comment records.
+ * Integer rating from 0 (no stars) to {@link MAX_RATING} (full rating), easily adaptable to 3, 4,
+ * or 5 star systems. Integer because the AT Protocol data model has no floats: a 0.0-1.0 value
+ * like 0.6 is rejected by the PDS. Comments live in their own org.bloknote.comment records.
  */
 export interface RatingRecord {
   subject: OsmElementRef;
-  rating: number; // 0.0 to 1.0
+  rating: number; // integer, 0 to MAX_RATING
   createdAt: string;
 }
 
@@ -128,12 +129,25 @@ export interface SpaceRecordEntry<T> {
   isPrivate?: boolean;
 }
 
-/** Converts normalized rating (0.0 - 1.0) to a star rating in an N-star system (e.g. 1-5 or 1-3). */
+/** Upper bound of {@link RatingRecord.rating} */
+export const MAX_RATING = 100;
+
+const clampRating = (rating: number) => Math.max(0, Math.min(MAX_RATING, Math.round(rating)));
+
+/** Converts a rating (0 - {@link MAX_RATING}) to a star rating in an N-star system (e.g. 1-5 or 1-3). */
 export function normalizedRatingToStars(rating: number, maxStars: number = 5): number {
-  return Math.round(Math.max(0, Math.min(1, rating)) * maxStars);
+  return Math.round((clampRating(rating) / MAX_RATING) * maxStars);
 }
 
-/** Converts a star rating in an N-star system to normalized rating (0.0 - 1.0). */
+/** Converts a star rating in an N-star system to an integer rating (0 - {@link MAX_RATING}). */
 export function starsToNormalizedRating(stars: number, maxStars: number = 5): number {
-  return Math.max(0, Math.min(1, stars / maxStars));
+  return clampRating((stars / maxStars) * MAX_RATING);
+}
+
+/**
+ * Reads a rating written before ratings became integers: values up to 1 are 0.0-1.0 fractions
+ * (no N-star system produces 1 out of {@link MAX_RATING}), larger ones are already integers.
+ */
+export function ratingFromStored(rating: number): number {
+  return clampRating(rating <= 1 ? rating * MAX_RATING : rating);
 }

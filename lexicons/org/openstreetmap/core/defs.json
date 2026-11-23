@@ -21,20 +21,16 @@
     },
     "geoPoint": {
       "type": "object",
-      "description": "Geographic coordinate pair",
+      "description": "Geographic coordinate pair. Decimal-degree strings, like community.lexicon.location.geo, because the AT Protocol data model has no floats.",
       "required": ["latitude", "longitude"],
       "properties": {
         "latitude": {
-          "type": "float",
-          "minimum": -90,
-          "maximum": 90,
-          "description": "Latitude in decimal degrees"
+          "type": "string",
+          "description": "Latitude in decimal degrees, from -90 to 90"
         },
         "longitude": {
-          "type": "float",
-          "minimum": -180,
-          "maximum": 180,
-          "description": "Longitude in decimal degrees"
+          "type": "string",
+          "description": "Longitude in decimal degrees, from -180 to 180"
         }
       }
     }

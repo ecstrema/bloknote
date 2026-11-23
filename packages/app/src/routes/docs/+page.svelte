@@ -202,7 +202,7 @@
             each can be created and deleted separately.
           </li>
           <li>
-            <code>org.bloknote.rating</code> — Standalone normalized rating (<code>0.0–1.0</code>) for a route or crag.
+            <code>org.bloknote.rating</code> — Standalone integer rating (<code>0–100</code>) for a route or crag.
           </li>
           <li>
             <code>org.openstreetmap.star</code> — Bookmarked climbing features.

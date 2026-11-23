@@ -1,4 +1,5 @@
 import { browser } from "$app/env";
+import { MAX_RATING, ratingFromStored } from "@bloknote/common";
 import type { AscentStyle, CommentRecord, OsmElementRef, RatingRecord, StarRecord, TickRecord } from "@bloknote/common";
 import {
   BrowserOAuthClient,
@@ -120,6 +121,11 @@ function migrateLegacyReviews<T extends LocalCommentEntry | LocalRatingEntry>(cu
   return migrated.length > 0 ? [...migrated, ...current] : current;
 }
 
+/** Converts pre-integer 0.0-1.0 ratings (local caches, legacy records) to the integer scale */
+function withStoredRating<T extends { rating: number }>(entry: T): T {
+  return { ...entry, rating: ratingFromStored(entry.rating) };
+}
+
 export function sameElementRef(a: OsmElementRef, b: OsmElementRef): boolean {
   return a.type === b.type && a.id === b.id;
 }
@@ -159,7 +165,7 @@ class AtProtoClient {
     migrateLegacyReviews(readJson<LocalCommentEntry[]>(COMMENTS_STORAGE_KEY, []), "text"),
   );
   ratings = $state<LocalRatingEntry[]>(
-    migrateLegacyReviews(readJson<LocalRatingEntry[]>(RATINGS_STORAGE_KEY, []), "rating"),
+    migrateLegacyReviews(readJson<LocalRatingEntry[]>(RATINGS_STORAGE_KEY, []), "rating").map(withStoredRating),
   );
 
   #client?: BrowserOAuthClient;
@@ -314,7 +320,8 @@ class AtProtoClient {
       this.ticks = merge(this.ticks, remoteTicks as LocalTickEntry[]);
       this.stars = merge(this.stars, remoteStars as LocalStarEntry[]);
       this.comments = merge(this.comments, [...(remoteComments as LocalCommentEntry[]), ...legacyComments]);
-      this.ratings = merge(this.ratings, [...(remoteRatings as LocalRatingEntry[]), ...legacyRatings]);
+      const allRatings = [...(remoteRatings as LocalRatingEntry[]), ...legacyRatings];
+      this.ratings = merge(this.ratings, allRatings.map(withStoredRating));
       // Records logged offline were kept without a uri: push them to the PDS now that we are online
       await Promise.all([
         this.#uploadPending(TICK_COLLECTION, this.ticks),
@@ -583,7 +590,7 @@ class AtProtoClient {
 
   async addRating(feature: OsmFeature, rating: number): Promise<LocalRatingEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
-    if (!Number.isFinite(rating) || rating < 0 || rating > 1) throw new Error("Invalid rating");
+    if (!Number.isInteger(rating) || rating < 0 || rating > MAX_RATING) throw new Error("Invalid rating");
     const entry: LocalRatingEntry = {
       subject: { type: feature.type, id: feature.id },
       rating,
