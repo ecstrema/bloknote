@@ -2,11 +2,20 @@
   import { resolve } from "$app/paths";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
   import { CLEAN_ASCENT_STYLES, computeUserStats, type ClimbingGradeRef, type OsmElementRef } from "@bloknote/common";
+  import {
+    findOsmRecoveryCandidates,
+    relinkOsmElement,
+    type CandidateFeature,
+    type GeoPoint,
+    type RecoveryCandidate,
+  } from "@bloknote/common";
+  import { getFeature, getFeatureHistory, type OsmFeature, type OsmNode, type OsmRelation, type OsmWay } from "osm-api";
+  import type { LocalTickEntry } from "#lib/data/network/atproto.svelte.js";
   import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
   import { Chart, Layer, Axis, Rect, Text } from "layerchart/svg";
   import { scaleBand, scaleLinear } from "d3-scale";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
-  import { getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
+  import { getCoordinates, getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
   import { extractRouteStyle } from "#lib/data/parse/route-styles.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import { Button } from "#components/ui/button/index.js";
@@ -151,6 +160,96 @@
 
   const monthLabel = (month: string) =>
     new Date(`${month}-01T00:00:00`).toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+
+  /**
+   * Background checks for ticks whose route disappeared from the local dataset: the OSM element may
+   * have been deleted or converted, in which case a replacement is proposed for relinking the tick.
+   */
+  type TickCheck =
+    | { status: "checking" }
+    | { status: "existsOsm" }
+    | { status: "missing" }
+    | { status: "suggestion"; candidate: RecoveryCandidate }
+    | { status: "error"; message: string };
+  let tickChecks = $state<Record<string, TickCheck>>({});
+
+  function toCandidateFeature(feature: OsmFeature): CandidateFeature {
+    const coordinates = getCoordinates(feature);
+    return {
+      type: feature.type,
+      id: feature.id,
+      name: feature.tags?.name,
+      coordinates: coordinates ? { latitude: coordinates.lat, longitude: coordinates.lon } : undefined,
+      grade: getGrade(feature.tags ?? {})?.v.v,
+    };
+  }
+
+  /** Coordinates of a deleted element: nodes directly, ways through their first node (possibly also deleted) */
+  async function deletedFeatureCoordinates(
+    feature: OsmNode | OsmWay | OsmRelation,
+  ): Promise<GeoPoint | undefined> {
+    if (feature.type === "node") return { latitude: feature.lat, longitude: feature.lon };
+    if (feature.type === "way" && feature.nodes.length > 0) {
+      const nodeId = feature.nodes[0]!;
+      try {
+        const [node] = await getFeature("node", nodeId);
+        return { latitude: node.lat, longitude: node.lon };
+      } catch {
+        const [node] = await getFeatureHistory("node", nodeId).then((history) => history.slice(-1));
+        if (node) return { latitude: node.lat, longitude: node.lon };
+      }
+    }
+    return undefined;
+  }
+
+  async function checkTick(tick: LocalTickEntry) {
+    const key = refKey(tick.subject);
+    if (!localDb.ready || tickChecks[key]?.status === "checking") return;
+    tickChecks[key] = { status: "checking" };
+    try {
+      try {
+        await getFeature(tick.subject.type, tick.subject.id);
+        tickChecks[key] = { status: "existsOsm" };
+        return;
+      } catch {
+        // The element is gone (or the request failed, which the history call will also report)
+      }
+      const history = await getFeatureHistory(tick.subject.type, tick.subject.id);
+      const last = history.at(-1);
+      const coordinates = last ? await deletedFeatureCoordinates(last) : undefined;
+      if (!last || !coordinates) {
+        tickChecks[key] = { status: "missing" };
+        return;
+      }
+      const deleted = toCandidateFeature(last);
+      deleted.id = tick.subject.id;
+      deleted.coordinates = coordinates;
+      const nearby = await localDb.getNearbyElements(coordinates.latitude, coordinates.longitude, 250);
+      const candidates = findOsmRecoveryCandidates(
+        deleted,
+        nearby.map((c) => ({
+          type: c.type,
+          id: c.id,
+          name: c.name,
+          coordinates:
+            c.latitude !== undefined && c.longitude !== undefined
+              ? { latitude: c.latitude, longitude: c.longitude }
+              : undefined,
+          grade: c.grade,
+        })),
+        { maxDistanceMeters: 250 },
+      );
+      const top = candidates[0];
+      tickChecks[key] = top && top.confidence >= 0.5 ? { status: "suggestion", candidate: top } : { status: "missing" };
+    } catch (error) {
+      tickChecks[key] = { status: "error", message: error instanceof Error ? error.message : String(error) };
+    }
+  }
+
+  async function relinkTick(tick: LocalTickEntry, candidate: RecoveryCandidate) {
+    await atproto.relinkTick(tick, relinkOsmElement(candidate.feature));
+    delete tickChecks[refKey(tick.subject)];
+  }
 </script>
 
 {#if atproto.configured || atproto.ticks.length > 0 || atproto.stars.length > 0 || atproto.reviews.length > 0}
@@ -422,6 +521,19 @@
               {#if !tick.uri}
                 <PendingSyncBadge />
               {/if}
+              {#if localDb.ready && !resolvedRefs[refKey(tick.subject)]}
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:text-foreground"
+                  title="Check what happened to this route on OpenStreetMap"
+                  onclick={() => checkTick(tick)}
+                >
+                  <span class="icon-[lucide--search] size-3.5"></span>
+                </button>
+                {#if tickChecks[refKey(tick.subject)]}
+                  {@render tickCheckStatus(tickChecks[refKey(tick.subject)]!, tick)}
+                {/if}
+              {/if}
             </li>
           {/each}
         </ul>
@@ -429,3 +541,21 @@
     {/if}
   </section>
 {/if}
+
+{#snippet tickCheckStatus(check: TickCheck, tick: LocalTickEntry)}
+  <span class="basis-full text-xs text-muted-foreground">
+    {#if check.status === "checking"}
+      Checking OpenStreetMap…
+    {:else if check.status === "existsOsm"}
+      The route still exists on OpenStreetMap but is missing from the climbing data.
+    {:else if check.status === "missing"}
+      The route was deleted from OpenStreetMap and no replacement was found nearby.
+    {:else if check.status === "error"}
+      {check.message}
+    {:else if check.status === "suggestion"}
+      Replacement found: {check.candidate.feature.name ?? `${check.candidate.feature.type}/${check.candidate.feature.id}`}
+      ({Math.round(check.candidate.confidence * 100)}% match)
+      <Button size="xs" variant="outline" onclick={() => relinkTick(tick, check.candidate)}>Relink tick</Button>
+    {/if}
+  </span>
+{/snippet}

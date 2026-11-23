@@ -2,7 +2,7 @@ import sqlite3InitModule, { type Database } from "@sqlite.org/sqlite-wasm";
 import type { DataJSON } from "@bloknote/climbing-data-gen";
 import { featureToType, getName } from "#lib/data/parse/data.js";
 import { getParentSlug } from "#lib/helpers/slug.js";
-import { getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
+import { getCoordinates, getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
 import { getColorFromGrade } from "#lib/data/network/grade.js";
 import {
   buildSectorContour,
@@ -10,7 +10,7 @@ import {
   FEATURE_COLORS,
   ROUTE_STYLE_COLORS,
 } from "#lib/data/parse/route-styles.js";
-import type { DbRequest, DbResponse, MapElementFeature, OsmRefEntry, SearchFilters } from "./types";
+import type { DbRequest, DbResponse, MapElementFeature, NearbyCandidate, OsmRefEntry, SearchFilters } from "./types";
 
 /** Bump when the tables change: the database is then downloaded again */
 const SCHEMA = 3;
@@ -504,6 +504,38 @@ async function handle(req: DbRequest): Promise<DbResponse> {
         if (rows[0]) data[ref] = { slug: rows[0][0] as string, data: JSON.parse(rows[0][1] as string) };
       }
       return { id: req.id, type: "osmRefs", data };
+    }
+    case "getNearbyElements": {
+      // Degrees per meter: 111320m per latitude degree, longitude shrinks with cos(latitude)
+      const latDelta = req.radiusMeters / 111_320;
+      const lonDelta = req.radiusMeters / (111_320 * Math.cos((req.lat * Math.PI) / 180));
+      const rows = db.selectArrays(
+        `
+        SELECT data FROM elements
+        WHERE type != 'geographic'
+          AND json_extract(data, '$.tags.name') IS NOT NULL
+          AND COALESCE(json_extract(data, '$.lat'), json_extract(data, '$.center.lat')) BETWEEN ? AND ?
+          AND COALESCE(json_extract(data, '$.lon'), json_extract(data, '$.center.lon')) BETWEEN ? AND ?
+        LIMIT 500
+        `,
+        [req.lat - latDelta, req.lat + latDelta, req.lon - lonDelta, req.lon + lonDelta],
+      );
+      const data: NearbyCandidate[] = rows.flatMap(([json]) => {
+        const feature = JSON.parse(json as string) as DataJSON;
+        if (feature.type === "geographic") return [];
+        const coordinates = getCoordinates(feature);
+        return [
+          {
+            type: feature.type,
+            id: feature.id,
+            name: feature.tags?.name,
+            latitude: coordinates?.lat,
+            longitude: coordinates?.lon,
+            grade: getGrade(feature.tags ?? {})?.v.v,
+          },
+        ];
+      });
+      return { id: req.id, type: "nearbyElements", data };
     }
     case "filterStart": {
       const query = buildFilterQuery(req.filters);

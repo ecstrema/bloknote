@@ -60,6 +60,8 @@ export type DbRequest =
   | { id: number; type: "getStats"; slug: string }
   /** Looks elements up by OSM references like `way-123456` */
   | { id: number; type: "getOsmRefs"; refs: string[] }
+  /** Named elements within a bounding box, used to find replacements for deleted elements */
+  | { id: number; type: "getNearbyElements"; lat: number; lon: number; radiusMeters: number }
   | { id: number; type: "filterStart"; searchId: number; filters: SearchFilters; budgetMs: number }
   /** Continues a search that paused after using its time budget */
   | { id: number; type: "filterMore"; searchId: number; budgetMs: number }
@@ -70,6 +72,16 @@ export interface OsmRefEntry {
   data: DataJSON;
 }
 
+/** A named element candidate for relinking records whose OSM element was deleted or moved */
+export interface NearbyCandidate {
+  type: "node" | "way" | "relation";
+  id: number;
+  name?: string;
+  latitude?: number;
+  longitude?: number;
+  grade?: string;
+}
+
 export type DbResponse =
   | { id: number; type: "status"; ready: boolean; persistent: boolean; opfsUsable: boolean }
   | { id: number; type: "node"; data: DataJSON | undefined }
@@ -77,6 +89,7 @@ export type DbResponse =
   | { id: number; type: "subtreeElements"; data: Record<string, DataJSON>; truncated: boolean }
   | { id: number; type: "stats"; data: AreaStats | undefined }
   | { id: number; type: "osmRefs"; data: Record<string, OsmRefEntry> }
+  | { id: number; type: "nearbyElements"; data: NearbyCandidate[] }
   | { id: number; type: "topLevel"; data: TopLevelPoint[] }
   | { id: number; type: "allMapElements"; data: MapElementFeatureCollection }
   /** Streamed while a search runs, without being a reply to a request */

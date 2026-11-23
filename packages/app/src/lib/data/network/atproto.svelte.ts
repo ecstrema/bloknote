@@ -412,6 +412,39 @@ class AtProtoClient {
     return created;
   }
 
+  /**
+   * Moves a tick to a replacement OSM element when its original element was deleted or converted:
+   * the remote record (if uploaded) is deleted, and a new one is created with the same ascent data.
+   */
+  async relinkTick(tick: LocalTickEntry, replacement: OsmElementRef): Promise<LocalTickEntry> {
+    if (!this.session) throw new Error("ATProto is not configured");
+    if (tick.uri) await this.#deleteRemoteRecord(TICK_COLLECTION, tick.uri);
+    this.ticks = this.ticks.filter((t) => t !== tick);
+    this.#persistTicks();
+
+    const entry: LocalTickEntry = {
+      ...tick,
+      uri: undefined,
+      label: undefined,
+      subject: replacement,
+    };
+    try {
+      entry.uri = await this.#createRemoteRecord(TICK_COLLECTION, {
+        subject: entry.subject,
+        style: entry.style,
+        climbedAt: entry.climbedAt,
+        createdAt: entry.createdAt,
+        ...(entry.comment ? { comment: entry.comment } : {}),
+      });
+    } catch (error) {
+      // Offline: keep the relinked tick locally, #hydrate pushes pending records once back online.
+      if (!this.#oauthSession) throw error;
+    }
+    this.ticks = [entry, ...this.ticks];
+    this.#persistTicks();
+    return entry;
+  }
+
   isStarred(feature: OsmFeature): boolean {
     return this.stars.some((s) => sameElementRef(s.subject, { type: feature.type, id: feature.id }));
   }

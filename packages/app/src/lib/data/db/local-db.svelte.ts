@@ -2,7 +2,7 @@ import { browser, version } from "$app/env";
 import { apiUrl } from "../network/api-url";
 import type { DataJSON } from "@bloknote/climbing-data-gen";
 import type { AreaStats } from "#lib/types.js";
-import type { DbRequest, DbResponse, MapElementFeatureCollection, OsmRefEntry, SearchFilters, TopLevelPoint } from "./types";
+import type { DbRequest, DbResponse, MapElementFeatureCollection, NearbyCandidate, OsmRefEntry, SearchFilters, TopLevelPoint } from "./types";
 
 export type LocalDbStatus = "unknown" | "empty" | "downloading" | "ready" | "error";
 
@@ -209,6 +209,13 @@ class LocalDb {
     await this.init();
     if (!this.ready) return {};
     return (await this.send({ type: "getOsmRefs", refs }, "osmRefs")).data;
+  }
+
+  /** Named elements within `radiusMeters` of a coordinate, to find replacements for deleted OSM elements */
+  async getNearbyElements(lat: number, lon: number, radiusMeters: number): Promise<NearbyCandidate[]> {
+    await this.init();
+    if (!this.ready) return [];
+    return (await this.send({ type: "getNearbyElements", lat, lon, radiusMeters }, "nearbyElements")).data;
   }
 
   /** Streams the matching slugs to `onBatch`. `next()` runs for `budgetMs`, and resolves true when there are no more results. */
