@@ -11,10 +11,20 @@
 
   const { children }: { children: Snippet } = $props();
 
-  const activeTab = $derived(page.url.pathname === resolve("/settings/account") ? "account" : "settings");
+  type SettingsTab = "settings" | "logbook" | "account";
+
+  const activeTab = $derived<SettingsTab>(
+    page.url.pathname === resolve("/settings/account")
+      ? "account"
+      : page.url.pathname === resolve("/settings/logbook")
+        ? "logbook"
+        : "settings",
+  );
 
   function onTabChange(value: string) {
-    void goto(value === "account" ? resolve("/settings/account") : resolve("/settings"));
+    const route =
+      value === "account" ? resolve("/settings/account") : value === "logbook" ? resolve("/settings/logbook") : resolve("/settings");
+    void goto(route);
   }
 
   let hasPreviousPage = $state(false);
@@ -31,7 +41,7 @@
 </script>
 
 <svelte:head>
-  <title>{activeTab === "account" ? "Account" : "Settings"} | Bloknote</title>
+  <title>{activeTab === "account" ? "Account" : activeTab === "logbook" ? "Logbook" : "Settings"} | Bloknote</title>
 </svelte:head>
 
 <SettingsProvider>
@@ -64,7 +74,7 @@
       <div class="mb-6 border-l-4 border-primary pl-5">
         <p class="text-xs font-semibold uppercase text-muted-foreground">Profile</p>
         <h1 class="mt-1 text-3xl font-semibold tracking-tight">
-          {activeTab === "account" ? "Account" : "Settings"}
+          {activeTab === "account" ? "Account" : activeTab === "logbook" ? "Logbook" : "Settings"}
         </h1>
       </div>
 
@@ -73,6 +83,10 @@
           <Tabs.Trigger value="settings">
             <span class="icon-[lucide--settings] shrink-0 size-4"></span>
             Settings
+          </Tabs.Trigger>
+          <Tabs.Trigger value="logbook">
+            <span class="icon-[lucide--book-open] shrink-0 size-4"></span>
+            Logbook
           </Tabs.Trigger>
           <Tabs.Trigger value="account">
             <span class="icon-[lucide--user-round] shrink-0 size-4"></span>

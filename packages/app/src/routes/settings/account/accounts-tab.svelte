@@ -3,7 +3,6 @@
   import { isLoggedIn } from "osm-api";
   import { Button } from "#components/ui/button/index.js";
   import { Input } from "#components/ui/input/index.js";
-  import UserStatsPanel from "./user-stats-panel.svelte";
   import { loginOsm, logoutOsm } from "#lib/data/network/osm.svelte.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
   import {
@@ -185,5 +184,3 @@
     {/if}
   </Button>
 </section>
-
-<UserStatsPanel />

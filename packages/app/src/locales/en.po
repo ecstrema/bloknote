@@ -16252,25 +16252,25 @@ msgstr "Ascent style"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Onsight"
 msgstr "Onsight"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Flash"
 msgstr "Flash"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Redpoint"
 msgstr "Redpoint"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Attempt"
 msgstr "Attempt"
 
@@ -16299,7 +16299,7 @@ msgstr "Could not apply fix."
 msgid "Profile & settings"
 msgstr "Profile & settings"
 
-#. 0: activeTab === "account" ? "Account" \\: "Settings"
+#. 0: activeTab === "account" ? "Account" \\: activeTab === "logbook" ? "Logbook" \\: "Settings"
 #: src/routes/settings/+layout.svelte
 msgid "{0} | Bloknote"
 msgstr "{0} | Bloknote"
@@ -16688,7 +16688,7 @@ msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusabl
 msgid "Core schemas"
 msgstr "Core schemas"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Your climbing stats"
 msgstr "Your climbing stats"
 
@@ -16698,7 +16698,7 @@ msgstr "Your climbing stats"
 #~ msgid "Starred climbs"
 #~ msgstr "Starred climbs"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Recent ticks"
 msgstr "Recent ticks"
 
@@ -17131,7 +17131,7 @@ msgstr "Stores your personal climbing activity on the AT Protocol—logbook tick
 #~ msgid "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
 #~ msgstr "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Bookmarked climbs"
 msgstr "Bookmarked climbs"
 
@@ -17234,48 +17234,48 @@ msgid "Not a multipitch"
 msgstr "Not a multipitch"
 
 #. 0: stats.totalTicks; 1: stats.totalSends; 2: stats.totalAttempts; 3: routeCount; 4: sessionCount; 5: atproto.stars.length; 6: atproto.reviews.length
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments"
 msgstr "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Grade pyramid"
 msgstr "Grade pyramid"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "<0/> sends · <1/> attempts"
 msgstr "<0/> sends · <1/> attempts"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Max grade climbed per month"
 msgstr "Max grade climbed per month"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Climbing sessions per month"
 msgstr "Climbing sessions per month"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Tries per route"
 msgstr "Tries per route"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Check what happened to this route on OpenStreetMap"
 msgstr "Check what happened to this route on OpenStreetMap"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Checking OpenStreetMap…"
 msgstr "Checking OpenStreetMap…"
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "The route still exists on OpenStreetMap but is missing from the climbing data."
 msgstr "The route still exists on OpenStreetMap but is missing from the climbing data."
 
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "The route was deleted from OpenStreetMap and no replacement was found nearby."
 msgstr "The route was deleted from OpenStreetMap and no replacement was found nearby."
 
 #. 0: check.candidate.feature.name ?? `${check.candidate.feature.type}/${check.candidate.feature.id}`; 1: Math.round(check.candidate.confidence * 100)
-#: src/routes/settings/account/user-stats-panel.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Replacement found: {0} ({1}% match) <0>Relink tick</0>"
 msgstr "Replacement found: {0} ({1}% match) <0>Relink tick</0>"
 
@@ -17294,3 +17294,16 @@ msgstr "<0/> Log in with OpenStreetMap"
 #: src/routes/world/[...slug]/area-page.svelte
 msgid "<0/> Print"
 msgstr "<0/> Print"
+
+#: src/routes/settings/+layout.svelte
+msgid "<0/> Logbook"
+msgstr "<0/> Logbook"
+
+#: src/routes/settings/+layout.svelte
+#: src/routes/settings/+layout.svelte
+msgid "Logbook"
+msgstr "Logbook"
+
+#: src/routes/settings/logbook/+page.svelte
+msgid "Connect your Atmosphere account in the <0>Account</0> tab to keep your ticks, bookmarks, and comments."
+msgstr "Connect your Atmosphere account in the <0>Account</0> tab to keep your ticks, bookmarks, and comments."
