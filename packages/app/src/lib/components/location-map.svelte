@@ -32,6 +32,15 @@
   let activePlacementMode: "route" | null = null;
   /** False until the view was first set to a place */
   let positioned = false;
+  /** True once the user moved the map themselves: later target moves then re-center gently instead of flying */
+  let userPositioned = false;
+  /**
+   * Key of the target the camera currently flies to or sits on. Repeated moveToTarget calls for the
+   * same target (the reactive data updates several times while a page loads) must not restart the
+   * move: a restart cancels the running animation mid-way and leaves the map at an intermediate
+   * zoom after a page reload on the map tab (issue #192).
+   */
+  let cameraTargetKey: string | undefined;
 
   let activeHighlightSlug = "";
   /** Set while a lasso drag just finished, so the click that follows does not navigate */
@@ -578,7 +587,10 @@
 
       map.on("moveend", (e) => {
         if ((e as { originalEvent?: unknown }).originalEvent) {
+          userPositioned = true;
           positioned = true;
+          // The user took control of the camera: the next target move may re-position it
+          cameraTargetKey = undefined;
         }
       });
 
@@ -656,8 +668,17 @@
     if (!attached || !shared) return;
     const map = shared.map;
 
+    const key = bounds
+      ? `b:${bounds.x0},${bounds.y0},${bounds.x1},${bounds.y1}`
+      : coordinates
+        ? `c:${coordinates.lat},${coordinates.lon}`
+        : undefined;
+    // Nothing to move to, or the camera already flies to / sits on this exact target
+    if (!key || cameraTargetKey === key) return;
+    cameraTargetKey = key;
+    positioned = true;
+
     if (bounds) {
-      positioned = true;
       map.fitBounds(
         [
           [bounds.x0, bounds.y0],
@@ -670,12 +691,12 @@
 
     if (!coordinates) return;
 
-    if (positioned && map.getBounds().contains([coordinates.lon, coordinates.lat])) {
+    // Gentle re-centering when the user placed the view themselves and the target is visible
+    if (userPositioned && map.getBounds().contains([coordinates.lon, coordinates.lat])) {
       map.easeTo({ center: [coordinates.lon, coordinates.lat], duration: 500 });
       return;
     }
 
-    positioned = true;
     map.flyTo({
       center: [coordinates.lon, coordinates.lat],
       zoom: Math.max(map.getZoom(), zoom),
