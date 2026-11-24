@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { DataTree } from "#lib/types.js";
-  import { Button } from "#components/ui/button/index.js";
 
   import AppSidebarNode from "./app-sidebar-node.svelte";
   import { addRouteFromSidebar, getItemUrl, getSearchFilter, getSidebarChildren } from "./utils";
@@ -68,17 +67,29 @@
   {@render showItem(slug)}
 {/each}
 
-{#if Object.keys(item.children ?? {}).length === 0}
-  <span class="px-4 py-2 text-muted-foreground">No children</span>
-{/if}
-
 {#if appState.osmUser.loggedIn && itemType === "area" && isActivePath}
-  <div class="flex gap-2 self-end">
-    <Button variant="outline" size="xs" class="font-normal" onclick={addRoute}>Add Route</Button>
+  <div class="flex items-center gap-1 px-7 py-1">
+    <button
+      type="button"
+      class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-md border border-dashed border-border px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+      onclick={addRoute}
+    >
+      <span aria-hidden="true" class="icon-[lucide--plus] shrink-0 size-3"></span>
+      Route
+    </button>
     {#if !isCrag}
-      <Button variant="outline" size="xs" class="font-normal" onclick={addSector}>Add Sector</Button>
+      <button
+        type="button"
+        class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-md border border-dashed border-border px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+        onclick={addSector}
+      >
+        <span aria-hidden="true" class="icon-[lucide--plus] shrink-0 size-3"></span>
+        Sector
+      </button>
     {/if}
   </div>
+{:else if Object.keys(item.children ?? {}).length === 0}
+  <span class="px-4 py-2 text-muted-foreground">No children</span>
 {/if}
 
 {#snippet showItem(slug: string)}

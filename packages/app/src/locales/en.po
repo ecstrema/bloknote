@@ -15296,13 +15296,11 @@ msgstr "{0}Bloknote - Danger Grade Comparison"
 msgid "{0}Bloknote - Route Grade Comparison"
 msgstr "{0}Bloknote - Route Grade Comparison"
 
-#: src/lib/components/shell/sidebar/app-sidebar-children.svelte
-msgid "Add Route"
-msgstr "Add Route"
+#~ msgid "Add Route"
+#~ msgstr "Add Route"
 
-#: src/lib/components/shell/sidebar/app-sidebar-children.svelte
-msgid "Add Sector"
-msgstr "Add Sector"
+#~ msgid "Add Sector"
+#~ msgstr "Add Sector"
 
 #: src/lib/components/shell/app-top-navigation.svelte
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
@@ -17394,3 +17392,11 @@ msgstr "Delete tick"
 #: src/lib/components/route-logbook.svelte
 msgid "Delete comment"
 msgstr "Delete comment"
+
+#: src/lib/components/shell/sidebar/app-sidebar-children.svelte
+msgid "<0/> Sector"
+msgstr "<0/> Sector"
+
+#: src/lib/components/shell/sidebar/app-sidebar-children.svelte
+msgid "<0/> Route"
+msgstr "<0/> Route"

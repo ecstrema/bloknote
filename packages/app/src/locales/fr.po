@@ -15296,13 +15296,11 @@ msgstr "{0}Bloknote - Comparaison des cotations de danger"
 msgid "{0}Bloknote - Route Grade Comparison"
 msgstr "{0}Bloknote - Comparaison des cotations de voies"
 
-#: src/lib/components/shell/sidebar/app-sidebar-children.svelte
-msgid "Add Route"
-msgstr "Ajouter une voie"
+#~ msgid "Add Route"
+#~ msgstr "Ajouter une voie"
 
-#: src/lib/components/shell/sidebar/app-sidebar-children.svelte
-msgid "Add Sector"
-msgstr "Ajouter un secteur"
+#~ msgid "Add Sector"
+#~ msgstr "Ajouter un secteur"
 
 #: src/lib/components/shell/app-top-navigation.svelte
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
@@ -17373,27 +17371,35 @@ msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete tick"
-msgstr "Impossible de supprimer le tick"
+msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete comment"
-msgstr "Impossible de supprimer le commentaire"
+msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete rating"
-msgstr "Impossible de supprimer la note"
+msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Remove your rating"
-msgstr "Supprimer votre note"
+msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Delete tick"
-msgstr "Supprimer le tick"
+msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Delete comment"
-msgstr "Supprimer le commentaire"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/app-sidebar-children.svelte
+msgid "<0/> Sector"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/app-sidebar-children.svelte
+msgid "<0/> Route"
+msgstr ""
