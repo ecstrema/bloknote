@@ -403,14 +403,21 @@
       <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
         <span>{item.feature.type}/{item.feature.id}</span>
         {#if coordinates}
-          <button
+          <span>{coordinates.lat}, {coordinates.lon}</span>
+          <Button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1 underline underline-offset-2 hover:text-foreground"
+            variant="ghost"
+            size="icon-xs"
             title="Copy coordinates"
             onclick={copyCoordinates}
           >
-            {#if coordinatesCopied}Copied!{:else}{coordinates.lat}, {coordinates.lon}{/if}
-          </button>
+            {#if coordinatesCopied}
+              <span aria-hidden="true" class="icon-[lucide--check] shrink-0 size-3.5"></span>
+            {:else}
+              <span aria-hidden="true" class="icon-[lucide--copy] shrink-0 size-3.5"></span>
+            {/if}
+            <span class="sr-only">Copy coordinates</span>
+          </Button>
         {/if}
         {#if item.feature.id > 0}
           <a
