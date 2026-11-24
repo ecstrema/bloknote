@@ -16806,12 +16806,12 @@ msgid "Add crag"
 msgstr "Add crag"
 
 #: src/routes/world/[...slug]/+page.svelte
+#: src/routes/world/[...slug]/+page.svelte
 msgid "Copy coordinates"
 msgstr "Copy coordinates"
 
-#: src/routes/world/[...slug]/+page.svelte
-msgid "Copied!"
-msgstr "Copied!"
+#~ msgid "Copied!"
+#~ msgstr "Copied!"
 
 #. 0: grade.v.v
 #: src/lib/components/editable/editable-grade-value.svelte
