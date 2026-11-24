@@ -518,6 +518,24 @@ async function handle(req: DbRequest): Promise<DbResponse> {
       }
       return { id: req.id, type: "osmRefs", data };
     }
+    case "matchPlaceNames": {
+      // FTS name matches for the tick import (issue #154): up to 5 route candidates per queried name
+      const data: Record<string, { slug: string; data: DataJSON }[]> = {};
+      for (const query of req.queries) {
+        const match = toMatchQuery(query);
+        if (!match) {
+          data[query] = [];
+          continue;
+        }
+        const rows = db.selectArrays(
+          `SELECT e.slug, e.data FROM places JOIN elements e ON e.slug = places.slug
+           WHERE places MATCH ? AND e.type = 'route' LIMIT 5`,
+          [match],
+        );
+        data[query] = rows.map(([slug, json]) => ({ slug: slug as string, data: JSON.parse(json as string) }));
+      }
+      return { id: req.id, type: "placeNames", data };
+    }
     case "getNearbyElements": {
       // Degrees per meter: 111320m per latitude degree, longitude shrinks with cos(latitude)
       const latDelta = req.radiusMeters / 111_320;

@@ -14890,6 +14890,7 @@ msgstr "Point"
 #: src/lib/components/diagnostics-panel.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/pulse-panel.svelte
+#: src/routes/settings/logbook/tick-import.svelte
 #: src/routes/world/[...slug]/route-page.svelte
 msgid "Unnamed"
 msgstr "Senza nome"
@@ -17422,4 +17423,86 @@ msgstr ""
 #. 0: wayChildren.length
 #: src/routes/world/[...slug]/route-page.svelte
 msgid "Points ({0})"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "MountainProject"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "TheCrag"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Could not read the file."
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Unrecognized format: expected a MountainProject tick export or a TheCrag logbook CSV."
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Import failed."
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Import ticks from other platforms"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Connect your Atmosphere account in the <0>Account</0> tab to import ticks."
+msgstr ""
+
+#. 0: result.imported; 1: result.imported === 1 ? "" \\: "s"; 2: result.alreadyLogged; 3: result.unmatched
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Imported {0} tick{1} ({2} already logged, {3} without a matching OSM route)."
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "<0/> Matching routes..."
+msgstr ""
+
+#. 0: progress; 1: counts.matched
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "<0/> Importing {0}/{1} ticks..."
+msgstr ""
+
+#. 0: MAX_ROWS
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "(truncated to {0})"
+msgstr ""
+
+#. 0: rows.length; 1: rows.length === 1 ? "" \\: "s"; 2: formatters[format]; 3: counts.matched; 4: counts.unmatched; 5: counts.alreadyLogged
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "{0} tick{1} from {2} <0/>: {3} ready, {4} unmatched, {5} already logged."
+msgstr ""
+
+#. 0: counts.matched; 1: counts.matched === 1 ? "" \\: "s"
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "<0/> Import {0} tick{1}"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Not found in OSM data"
+msgstr ""
+
+#. 0: row.tick.routeName
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Matching OSM route for {0}"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Pick a route..."
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Already logged"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Import ticks"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are matched by name against the offline climbing data; routes that are not on OpenStreetMap yet cannot be imported."
 msgstr ""

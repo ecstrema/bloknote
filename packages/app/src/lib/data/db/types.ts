@@ -62,6 +62,8 @@ export type DbRequest =
   | { id: number; type: "getOsmRefs"; refs: string[] }
   /** Named elements within a bounding box, used to find replacements for deleted elements */
   | { id: number; type: "getNearbyElements"; lat: number; lon: number; radiusMeters: number }
+  /** FTS name matches for the given queries, used by the tick import (issue #154) */
+  | { id: number; type: "matchPlaceNames"; queries: string[] }
   | { id: number; type: "filterStart"; searchId: number; filters: SearchFilters; budgetMs: number }
   /** Continues a search that paused after using its time budget */
   | { id: number; type: "filterMore"; searchId: number; budgetMs: number }
@@ -92,6 +94,8 @@ export type DbResponse =
   | { id: number; type: "nearbyElements"; data: NearbyCandidate[] }
   | { id: number; type: "topLevel"; data: TopLevelPoint[] }
   | { id: number; type: "allMapElements"; data: MapElementFeatureCollection }
+  /** For each query, up to a few route candidates matching by name */
+  | { id: number; type: "placeNames"; data: Record<string, { slug: string; data: DataJSON }[]> }
   /** Streamed while a search runs, without being a reply to a request */
   | { type: "matchBatch"; searchId: number; slugs: string[] }
   /** The search used its time budget (`exhausted` false) or has no more results */

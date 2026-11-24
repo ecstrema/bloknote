@@ -3,6 +3,7 @@
   import * as Tabs from "#components/ui/tabs/index.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
   import UserStatsPanel from "./user-stats-panel.svelte";
+  import TickImport from "./tick-import.svelte";
 </script>
 
 <Tabs.Content value="logbook">
@@ -14,4 +15,5 @@
     </p>
   {/if}
   <UserStatsPanel />
+  <TickImport />
 </Tabs.Content>

@@ -461,13 +461,20 @@ class AtProtoClient {
     if (browser) localStorage.setItem(RATINGS_STORAGE_KEY, JSON.stringify(this.ratings));
   }
 
-  async addTick(feature: OsmFeature, style: AscentStyle, comment?: string): Promise<LocalTickEntry> {
+  async addTick(
+    feature: OsmFeature,
+    style: AscentStyle,
+    comment?: string,
+    climbedAt?: string,
+  ): Promise<LocalTickEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
     const now = new Date().toISOString();
+    // Imported ticks (issue #154) can carry the original ascent date
+    const climbed = climbedAt ?? now;
     const record: LocalTickEntry = {
       subject: { type: feature.type, id: feature.id },
       style,
-      climbedAt: now,
+      climbedAt: climbed,
       createdAt: now,
       label: feature.tags?.name,
       ...(comment?.trim() ? { comment: comment.trim() } : {}),

@@ -218,6 +218,13 @@ class LocalDb {
     return (await this.send({ type: "getNearbyElements", lat, lon, radiusMeters }, "nearbyElements")).data;
   }
 
+  /** Route candidates matching each queried name, for the tick import (issue #154) */
+  async matchPlaceNames(queries: string[]): Promise<Record<string, { slug: string; data: DataJSON }[]>> {
+    await this.init();
+    if (!this.ready || queries.length === 0) return {};
+    return (await this.send({ type: "matchPlaceNames", queries }, "placeNames")).data;
+  }
+
   /** Streams the matching slugs to `onBatch`. `next()` runs for `budgetMs`, and resolves true when there are no more results. */
   filter(filters: SearchFilters, onBatch: (slugs: string[]) => void, budgetMs = 10_000): FilterSearch {
     const searchId = this.nextId++;
