@@ -21,6 +21,8 @@
   }
 
   interface ImportRow {
+    /** Unique row id, used as the review-list key (exports may contain identical rows) */
+    id: number;
     tick: ImportedTick;
     candidates: ImportCandidate[];
     selectedSlug: string;
@@ -87,7 +89,7 @@
     phase = "matching";
     const importRows: ImportRow[] = parsed.ticks
       .slice(0, MAX_ROWS)
-      .map((tick) => ({ tick, candidates: [], selectedSlug: "", alreadyLogged: false }));
+      .map((tick, id) => ({ id, tick, candidates: [], selectedSlug: "", alreadyLogged: false }));
     const names = [...new Set(importRows.map((r) => r.tick.routeName))];
     for (const batch of chunk(names, MATCH_BATCH)) {
       const matches = await localDb.matchPlaceNames(batch);
@@ -220,7 +222,7 @@
     </div>
 
     <ul class="flex max-h-96 flex-col gap-1.5 overflow-y-auto rounded-md border p-2 text-sm">
-      {#each rows as row (row.tick.routeName + (row.tick.date ?? "") + row.tick.style)}
+      {#each rows as row (row.id)}
         {@const selected = row.candidates.find((c) => c.slug === row.selectedSlug)}
         <li class="flex flex-wrap items-center gap-2 border-b pb-1.5 last:border-b-0">
           <span class="min-w-40 flex-1 font-medium">{row.tick.routeName}</span>
