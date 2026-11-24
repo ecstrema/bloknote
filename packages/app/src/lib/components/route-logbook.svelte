@@ -67,6 +67,42 @@
       busy = false;
     }
   }
+
+  async function onDeleteTick(tick: (typeof routeTicks)[number]) {
+    error = undefined;
+    busy = true;
+    try {
+      await atproto.deleteTick(tick);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Could not delete tick";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function onDeleteComment(comment: (typeof routeComments)[number]) {
+    error = undefined;
+    busy = true;
+    try {
+      await atproto.deleteComment(comment);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Could not delete comment";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function onDeleteRating(rating: (typeof routeRatings)[number]) {
+    error = undefined;
+    busy = true;
+    try {
+      await atproto.deleteRating(rating);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Could not delete rating";
+    } finally {
+      busy = false;
+    }
+  }
 </script>
 
 <section class="flex flex-col gap-3 rounded-md border p-3.5" aria-label="Logbook and comments">
@@ -131,6 +167,18 @@
         {/each}
         {#if routeRatings[0]}
           <span class="ml-1">{new Date(routeRatings[0].createdAt).toLocaleDateString()}</span>
+          {#if atproto.configured}
+            <button
+              type="button"
+              class="ml-1 text-muted-foreground hover:text-destructive"
+              title="Remove your rating"
+              aria-label="Remove your rating"
+              disabled={busy}
+              onclick={() => onDeleteRating(routeRatings[0]!)}
+            >
+              <span aria-hidden="true" class="icon-[lucide--trash-2] shrink-0 size-3.5"></span>
+            </button>
+          {/if}
         {/if}
       </div>
       <form class="flex flex-col gap-2" onsubmit={onAddComment}>
@@ -163,6 +211,18 @@
             {#if !tick.uri}
               <PendingSyncBadge />
             {/if}
+            {#if atproto.configured}
+              <button
+                type="button"
+                class="ms-auto self-center text-muted-foreground hover:text-destructive"
+                title="Delete tick"
+                aria-label="Delete tick"
+                disabled={busy}
+                onclick={() => onDeleteTick(tick)}
+              >
+                <span aria-hidden="true" class="icon-[lucide--trash-2] shrink-0 size-3.5"></span>
+              </button>
+            {/if}
           </li>
         {/each}
       </ul>
@@ -180,6 +240,18 @@
               <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
               {#if !comment.uri}
                 <PendingSyncBadge />
+              {/if}
+              {#if atproto.configured}
+                <button
+                  type="button"
+                  class="ms-auto self-center text-muted-foreground hover:text-destructive"
+                  title="Delete comment"
+                  aria-label="Delete comment"
+                  disabled={busy}
+                  onclick={() => onDeleteComment(comment)}
+                >
+                  <span aria-hidden="true" class="icon-[lucide--trash-2] shrink-0 size-3.5"></span>
+                </button>
               {/if}
             </div>
             <p class="mt-1 text-sm">{comment.text}</p>

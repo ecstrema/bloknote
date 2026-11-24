@@ -17367,3 +17367,30 @@ msgstr ""
 #: src/lib/components/map-links.svelte
 msgid "<0/> Navigate..."
 msgstr ""
+
+#: src/lib/components/route-logbook.svelte
+msgid "Could not delete tick"
+msgstr ""
+
+#: src/lib/components/route-logbook.svelte
+msgid "Could not delete comment"
+msgstr ""
+
+#: src/lib/components/route-logbook.svelte
+msgid "Could not delete rating"
+msgstr ""
+
+#: src/lib/components/route-logbook.svelte
+#: src/lib/components/route-logbook.svelte
+msgid "Remove your rating"
+msgstr ""
+
+#: src/lib/components/route-logbook.svelte
+#: src/lib/components/route-logbook.svelte
+msgid "Delete tick"
+msgstr ""
+
+#: src/lib/components/route-logbook.svelte
+#: src/lib/components/route-logbook.svelte
+msgid "Delete comment"
+msgstr ""

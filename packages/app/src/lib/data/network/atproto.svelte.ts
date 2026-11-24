@@ -334,8 +334,8 @@ class AtProtoClient {
 
   /**
    * Uploads local-only entries (logged offline, missing from the PDS) and stamps them with their uri.
-   * The app never deletes ticks or reviews, and deleting a star also removes its local copy, so a
-   * uri-less entry can only be one that never reached the PDS.
+   * A uri-less entry can only be one that never reached the PDS: synced entries carry their uri,
+   * and deletes remove the entry (local and remote) in one step.
    */
   async #uploadPending(collection: string, entries: Array<LocalTickEntry | LocalStarEntry | LocalCommentEntry | LocalRatingEntry>) {
     await Promise.allSettled(
@@ -517,6 +517,30 @@ class AtProtoClient {
     this.ticks = [entry, ...this.ticks];
     this.#persistTicks();
     return entry;
+  }
+
+  /** Deletes a tick from the PDS (when synced) and from the local cache */
+  async deleteTick(tick: LocalTickEntry): Promise<void> {
+    if (!this.session) throw new Error("ATProto is not configured");
+    if (tick.uri) await this.#deleteRemoteRecord(TICK_COLLECTION, tick.uri);
+    this.ticks = this.ticks.filter((t) => t !== tick);
+    this.#persistTicks();
+  }
+
+  /** Deletes a comment from the PDS (when synced) and from the local cache */
+  async deleteComment(comment: LocalCommentEntry): Promise<void> {
+    if (!this.session) throw new Error("ATProto is not configured");
+    if (comment.uri) await this.#deleteRemoteRecord(COMMENT_COLLECTION, comment.uri);
+    this.comments = this.comments.filter((c) => c !== comment);
+    this.#persistComments();
+  }
+
+  /** Deletes a rating from the PDS (when synced) and from the local cache */
+  async deleteRating(rating: LocalRatingEntry): Promise<void> {
+    if (!this.session) throw new Error("ATProto is not configured");
+    if (rating.uri) await this.#deleteRemoteRecord(RATING_COLLECTION, rating.uri);
+    this.ratings = this.ratings.filter((r) => r !== rating);
+    this.#persistRatings();
   }
 
   isStarred(feature: OsmFeature): boolean {

@@ -17367,3 +17367,30 @@ msgstr "Subscribe to the RSS feed of recently added or edited climbs"
 #: src/lib/components/map-links.svelte
 msgid "<0/> Navigate..."
 msgstr "<0/> Navigate..."
+
+#: src/lib/components/route-logbook.svelte
+msgid "Could not delete tick"
+msgstr "Could not delete tick"
+
+#: src/lib/components/route-logbook.svelte
+msgid "Could not delete comment"
+msgstr "Could not delete comment"
+
+#: src/lib/components/route-logbook.svelte
+msgid "Could not delete rating"
+msgstr "Could not delete rating"
+
+#: src/lib/components/route-logbook.svelte
+#: src/lib/components/route-logbook.svelte
+msgid "Remove your rating"
+msgstr "Remove your rating"
+
+#: src/lib/components/route-logbook.svelte
+#: src/lib/components/route-logbook.svelte
+msgid "Delete tick"
+msgstr "Delete tick"
+
+#: src/lib/components/route-logbook.svelte
+#: src/lib/components/route-logbook.svelte
+msgid "Delete comment"
+msgstr "Delete comment"
