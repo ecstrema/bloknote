@@ -386,7 +386,22 @@ class AtProtoClient {
     this.#oauthSession = undefined;
     this.session = undefined;
     localStorage.removeItem(SESSION_STORAGE_KEY);
+    this.#clearLocalData();
     if (session) await session.signOut().catch(() => {});
+  }
+
+  /** Clears the locally cached Atmosphere records (ticks, stars, comments, ratings). Settings are kept. */
+  #clearLocalData() {
+    this.ticks = [];
+    this.stars = [];
+    this.comments = [];
+    this.ratings = [];
+    if (browser) {
+      localStorage.removeItem(TICKS_STORAGE_KEY);
+      localStorage.removeItem(STARS_STORAGE_KEY);
+      localStorage.removeItem(COMMENTS_STORAGE_KEY);
+      localStorage.removeItem(RATINGS_STORAGE_KEY);
+    }
   }
 
   async #createRemoteRecord(collection: string, record: object): Promise<string> {
