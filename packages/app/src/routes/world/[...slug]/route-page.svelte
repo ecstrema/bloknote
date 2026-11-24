@@ -43,14 +43,14 @@
   <ClimbingStyles {feature} featureSlug={slug} editable />
 </div>
 
+<EditableDescription {feature} featureSlug={slug} />
+
 <div class="flex flex-wrap items-center gap-2">
   {#if coordinates}
     <MapLinks {coordinates} name={feature.tags?.name} />
   {/if}
   <ClimbingProviderLinks {feature} />
 </div>
-
-<EditableDescription {feature} featureSlug={slug} />
 
 <CommonsTopo {feature} featureSlug={slug} />
 

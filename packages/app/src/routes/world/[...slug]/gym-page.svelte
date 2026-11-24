@@ -28,6 +28,8 @@ import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelt
 
 <ClimbingStyles {feature} />
 
+<EditableDescription {feature} featureSlug={slug} />
+
 <div class="flex flex-wrap items-center gap-3 text-sm">
   {#if phone}
     <p class="flex items-center gap-1.5">
@@ -64,7 +66,5 @@ import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelt
 <ClimbingProviderLinks {feature} />
 
 <EditableOpeningHours {feature} featureSlug={slug} />
-
-<EditableDescription {feature} featureSlug={slug} />
 
 <CommonsTopo {feature} featureSlug={slug} />

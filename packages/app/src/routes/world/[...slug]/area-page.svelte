@@ -38,9 +38,9 @@
   </Button>
 </div>
 
-<ClimbingProviderLinks {feature} />
-
 <EditableDescription {feature} featureSlug={slug} />
+
+<ClimbingProviderLinks {feature} />
 
 {#if coordinates}
   <MapLinks {coordinates} name={feature.tags?.name} />
