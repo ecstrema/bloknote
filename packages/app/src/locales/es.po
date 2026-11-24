@@ -14891,6 +14891,7 @@ msgstr "Point"
 #: src/lib/components/location-map.svelte
 #: src/lib/components/pulse-panel.svelte
 #: src/routes/settings/logbook/tick-import.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/world/[...slug]/route-page.svelte
 msgid "Unnamed"
 msgstr "Sin nombre"
@@ -15165,6 +15166,7 @@ msgstr "Añadir"
 #: src/lib/components/shell/osm-changes.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 #: src/lib/components/topo/topo-viewer.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Cancel"
 msgstr "Cancelar"
@@ -15218,6 +15220,7 @@ msgstr "Dejar un comentario"
 
 #: src/lib/components/shell/osm-changes.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Comment (optional)"
 msgstr "Comentario (opcional)"
 
@@ -16253,29 +16256,34 @@ msgstr "Registra una ascensión para {0} elementos seleccionados."
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Ascent style"
 msgstr "Estilo de ascensión"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Onsight"
 msgstr "Onsight"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Flash"
 msgstr "Flash"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Redpoint"
 msgstr "Redpoint"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Attempt"
 msgstr "Intento"
@@ -16536,7 +16544,9 @@ msgid "<0/> Post comment"
 msgstr "<0/> Publicar comentario"
 
 #. 0: routeTicks.length
+#. 0: sortedTicks.length
 #: src/lib/components/route-logbook.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Your ticks ({0})"
 msgstr "Tus ascensiones ({0})"
 
@@ -17201,6 +17211,7 @@ msgid "Review pending edits and save them to OpenStreetMap"
 msgstr ""
 
 #: src/lib/components/shell/osm-changes.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Save"
 msgstr ""
 
@@ -17396,6 +17407,8 @@ msgstr "Eliminar tu valoración"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Delete tick"
 msgstr "Eliminar registro de ascenso"
 
@@ -17453,16 +17466,13 @@ msgstr ""
 msgid "Connect your Atmosphere account in the <0>Account</0> tab to import ticks."
 msgstr ""
 
-#. 0: result.imported; 1: result.imported === 1 ? "" \\: "s"; 2: result.alreadyLogged; 3: result.unmatched
-#: src/routes/settings/logbook/tick-import.svelte
-msgid "Imported {0} tick{1} ({2} already logged, {3} without a matching OSM route)."
-msgstr ""
+#~ msgid "Imported {0} tick{1} ({2} already logged, {3} without a matching OSM route)."
+#~ msgstr ""
 
-#: src/routes/settings/logbook/tick-import.svelte
-msgid "<0/> Matching routes..."
-msgstr ""
+#~ msgid "<0/> Matching routes..."
+#~ msgstr ""
 
-#. 0: progress; 1: counts.matched
+#. 0: progress; 1: counts.matched + counts.unmatched
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "<0/> Importing {0}/{1} ticks..."
 msgstr ""
@@ -17472,22 +17482,21 @@ msgstr ""
 msgid "(truncated to {0})"
 msgstr ""
 
-#. 0: rows.length; 1: rows.length === 1 ? "" \\: "s"; 2: formatters[format]; 3: counts.matched; 4: counts.unmatched; 5: counts.alreadyLogged
-#: src/routes/settings/logbook/tick-import.svelte
-msgid "{0} tick{1} from {2} <0/>: {3} ready, {4} unmatched, {5} already logged."
-msgstr ""
+#~ msgid "{0} tick{1} from {2} <0/>: {3} ready, {4} unmatched, {5} already logged."
+#~ msgstr ""
 
-#. 0: counts.matched; 1: counts.matched === 1 ? "" \\: "s"
+#. 0: rows.length - counts.alreadyLogged; 1: rows.length - counts.alreadyLogged === 1 ? "" \\: "s"
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "<0/> Import {0} tick{1}"
 msgstr ""
 
-#: src/routes/settings/logbook/tick-import.svelte
-msgid "Not found in OSM data"
-msgstr ""
+#~ msgid "Not found in OSM data"
+#~ msgstr ""
 
 #. 0: row.tick.routeName
+#. 0: labelFor(tick)
 #: src/routes/settings/logbook/tick-import.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Matching OSM route for {0}"
 msgstr ""
 
@@ -17503,6 +17512,139 @@ msgstr ""
 msgid "Import ticks"
 msgstr ""
 
+#~ msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are matched by name against the offline climbing data; routes that are not on OpenStreetMap yet cannot be imported."
+#~ msgstr ""
+
+#. 0: result.imported; 1: result.imported === 1 ? "" \\: "s"; 2: result.alreadyLogged; 3: result.unmatched
 #: src/routes/settings/logbook/tick-import.svelte
-msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are matched by name against the offline climbing data; routes that are not on OpenStreetMap yet cannot be imported."
+msgid "Imported {0} tick{1} ({2} already logged, {3} without an OSM route)."
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "<0/> Matching routes in their crags..."
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
+msgstr ""
+
+#. 0: rows.length; 1: rows.length === 1 ? "" \\: "s"; 2: formatters[format]; 3: counts.matched; 4: counts.alreadyLogged
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "{0} tick{1} from {2} <0/>: {3} matched, {4} already logged."
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "OSM:"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Location:"
+msgstr ""
+
+#. 0: row.tick.grade
+#. 0: row.tick.routeType
+#: src/routes/settings/logbook/tick-import.svelte
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "(logbook: {0})"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Grade:"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Style:"
+msgstr ""
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Some details differ from the logbook: check the preview before importing."
+msgstr ""
+
+#. 0: counts.unmatched; 1: counts.unmatched === 1 ? "" \\: "s"
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "<0/> and {0} route{1} not found on OSM. Don't worry, you can add them still."
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
+msgid "Unnamed route"
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Could not save the tick."
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Could not delete the tick."
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Could not link the tick."
+msgstr ""
+
+#. 0: tick.name
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "No crag known for \"{0}\": open its crag page and use \"Add route\" on the map instead."
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Your ticks"
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "No ticks yet. Log them on a route page, or import a logbook above."
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Pending sync"
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Edit tick"
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Found in the OSM data:"
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Changing the route links the tick to it."
+msgstr ""
+
+#. 0: labelFor(tick)
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Parent crag for {0}"
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "<0/> Add to OSM"
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "You will place the route on the crag's map."
+msgstr ""
+
+#. 0: tick.grade ? ` · ${tick.grade}` \\: ""; 1: tick.crag ? ` · ${tick.crag}` \\: ""
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Not on OpenStreetMap{0}{1}"
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Ascent date"
+msgstr ""
+
+#. 0: pendingTick.name
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Adding \"{0}\" for your tick: click on the map to place the route."
+msgstr ""
+
+#. 0: pendingTick.name
+#: src/routes/world/[...slug]/+page.svelte
+msgid "Log in with OpenStreetMap to add \"{0}\" for your tick."
+msgstr ""
+
+#: src/routes/settings/logbook/user-stats-panel.svelte
+msgid "Not on OSM"
 msgstr ""

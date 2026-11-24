@@ -54,6 +54,8 @@ export interface LocalStarEntry extends StarRecord {
 export interface LocalTickEntry extends TickRecord {
   uri?: string;
   label?: string;
+  /** Deterministic local id (see tickLocalId), used to reference ticks in URLs */
+  localId?: string;
 }
 
 export interface LocalCommentEntry extends CommentRecord {
@@ -120,8 +122,40 @@ function migrateLegacyReviews<T extends LocalCommentEntry | LocalRatingEntry>(cu
   return migrated.length > 0 ? [...migrated, ...current] : current;
 }
 
-export function sameElementRef(a: OsmElementRef, b: OsmElementRef): boolean {
+export function sameElementRef(a: OsmElementRef | undefined, b: OsmElementRef | undefined): boolean {
+  if (!a || !b) return false;
   return a.type === b.type && a.id === b.id;
+}
+
+/** Deterministic local id for a tick: stable across PDS re-syncs without polluting the record */
+function tickLocalId(entry: LocalTickEntry | TickRecord): string {
+  const signature = JSON.stringify({
+    subject: entry.subject ?? null,
+    name: entry.name ?? null,
+    style: entry.style,
+    climbedAt: entry.climbedAt,
+    createdAt: entry.createdAt,
+  });
+  // djb2
+  let hash = 5381;
+  for (let i = 0; i < signature.length; i++) {
+    hash = ((hash << 5) + hash + signature.charCodeAt(i)) | 0;
+  }
+  return `t${(hash >>> 0).toString(36)}`;
+}
+
+/** The record stored in the PDS: the local-only fields (uri, label, localId) are stripped */
+function remoteTickRecord(entry: LocalTickEntry): TickRecord {
+  return {
+    ...(entry.subject ? { subject: entry.subject } : {}),
+    style: entry.style,
+    climbedAt: entry.climbedAt,
+    createdAt: entry.createdAt,
+    ...(entry.comment ? { comment: entry.comment } : {}),
+    ...(entry.name ? { name: entry.name } : {}),
+    ...(entry.grade ? { grade: entry.grade } : {}),
+    ...(entry.crag ? { crag: entry.crag } : {}),
+  };
 }
 
 function createOAuthClient(): Promise<BrowserOAuthClient> {
@@ -285,11 +319,12 @@ class AtProtoClient {
       // Keep the cached labels and the local-only entries (never uploaded), then let the PDS win.
       // Local entries carrying a uri that the PDS does not return anymore were deleted upstream
       // (e.g. from pds.ls) and are dropped: the PDS is the source of truth.
-      const merge = <T extends { uri?: string; label?: string }>(local: T[], remote: T[]): T[] => {
+      const merge = <T extends { uri?: string; label?: string; localId?: string }>(local: T[], remote: T[]): T[] => {
         const labels = new Map(local.filter((e) => e.uri).map((e) => [e.uri!, e.label]));
+        const localIds = new Map(local.filter((e) => e.uri && e.localId).map((e) => [e.uri!, e.localId!]));
         // Content signature used to drop stale local copies that duplicate a remote record
         // (caches written by older versions stored remote entries without their uri)
-        const signature = (e: T) => JSON.stringify({ ...e, uri: undefined, label: undefined });
+        const signature = (e: T) => JSON.stringify({ ...e, uri: undefined, label: undefined, localId: undefined });
         const remoteSignatures = new Set(remote.map(signature));
         const localOnly = local.filter((e) => !e.uri && !remoteSignatures.has(signature(e)));
         // Defensive: dedupe remote entries by uri
@@ -303,7 +338,8 @@ class AtProtoClient {
         return [...dedupedRemote, ...localOnly].map((e) => ({
           ...e,
           label: e.label ?? (e.uri ? labels.get(e.uri) : undefined),
-        }));
+          localId: e.localId ?? (e.uri ? localIds.get(e.uri) : undefined),
+        })) as T[];
       };
       const legacyComments = legacyReviews
         .filter((r) => typeof r.text === "string")
@@ -322,6 +358,7 @@ class AtProtoClient {
         this.#uploadPending(COMMENT_COLLECTION, this.comments),
         this.#uploadPending(RATING_COLLECTION, this.ratings),
       ]);
+      this.#ensureTickLocalIds();
       this.#persistTicks();
       this.#persistStars();
       this.#persistComments();
@@ -340,12 +377,14 @@ class AtProtoClient {
   async #uploadPending(collection: string, entries: Array<LocalTickEntry | LocalStarEntry | LocalCommentEntry | LocalRatingEntry>) {
     await Promise.allSettled(
       entries
-        .filter((e) => !e.uri && e.subject.id > 0)
+        // Subject-less ticks (routes not on OSM yet, issue #154) are uploaded too
+        .filter((e) => !e.uri && (!("subject" in e) || !e.subject || e.subject.id > 0))
         .map(async (e) => {
           const record: Record<string, unknown> = { ...e };
           delete record.uri;
           delete record.label;
           delete record.author;
+          delete record.localId;
           e.uri = await this.#createRemoteRecord(collection, record);
         }),
     );
@@ -429,6 +468,30 @@ class AtProtoClient {
     return data.uri;
   }
 
+  /** Overwrites an existing record in the PDS (used to edit ticks, see updateTick) */
+  async #putRemoteRecord(collection: string, uri: string, record: object): Promise<void> {
+    const session = this.#oauthSession;
+    if (!session) throw new Error("ATProto is not configured");
+    const rkey = uri.split("/").at(-1);
+    if (!rkey) throw new Error(`Invalid record URI: ${uri}`);
+    const res = await this.#xrpc("/xrpc/com.atproto.repo.putRecord", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        repo: session.did,
+        collection,
+        rkey,
+        // Same as createRecord: the lexicons are not published yet
+        validate: false,
+        record: { $type: collection, ...record },
+      }),
+    });
+    if (!res.ok)
+      throw new Error(
+        `Could not update the record in your ATProto repository (HTTP ${res.status})${await xrpcErrorMessage(res)}`,
+      );
+  }
+
   async #deleteRemoteRecord(collection: string, uri: string) {
     const session = this.#oauthSession;
     if (!session) throw new Error("ATProto is not configured");
@@ -447,6 +510,21 @@ class AtProtoClient {
 
   #persistTicks() {
     if (browser) localStorage.setItem(TICKS_STORAGE_KEY, JSON.stringify(this.ticks));
+  }
+
+  /** Assigns a stable unique local id to every tick (mutates entries missing or duplicating one) */
+  #ensureTickLocalIds() {
+    const seen = new Set<string>();
+    for (const entry of this.ticks) {
+      if (entry.localId && !seen.has(entry.localId)) {
+        seen.add(entry.localId);
+        continue;
+      }
+      let id = tickLocalId(entry);
+      while (seen.has(id)) id = `${id}x`;
+      entry.localId = id;
+      seen.add(id);
+    }
   }
 
   #persistStars() {
@@ -481,13 +559,7 @@ class AtProtoClient {
     };
     if (this.session && feature.id > 0) {
       try {
-        record.uri = await this.#createRemoteRecord(TICK_COLLECTION, {
-          subject: record.subject,
-          style: record.style,
-          climbedAt: record.climbedAt,
-          createdAt: record.createdAt,
-          ...(record.comment ? { comment: record.comment } : {}),
-        });
+        record.uri = await this.#createRemoteRecord(TICK_COLLECTION, remoteTickRecord(record));
       } catch (error) {
         // Offline: keep the tick locally, #hydrate pushes pending records once back online.
         // Session errors still surface: the user must log in again.
@@ -495,8 +567,89 @@ class AtProtoClient {
       }
     }
     this.ticks = [record, ...this.ticks];
+    this.#ensureTickLocalIds();
     this.#persistTicks();
     return record;
+  }
+
+  /**
+   * Adds a tick for a route that is not on OpenStreetMap (yet): the record carries the route
+   * name (and optionally grade and crag) instead of a subject (issue #154). The ticks list lets
+   * the user add the route to OSM later, or link the tick when the route appears in the data.
+   */
+  async addNameTick(
+    tick: { name: string; grade?: string; crag?: string },
+    style: AscentStyle,
+    comment?: string,
+    climbedAt?: string,
+  ): Promise<LocalTickEntry> {
+    if (!this.session) throw new Error("ATProto is not configured");
+    const now = new Date().toISOString();
+    const record: LocalTickEntry = {
+      style,
+      climbedAt: climbedAt ?? now,
+      createdAt: now,
+      name: tick.name,
+      ...(tick.grade ? { grade: tick.grade } : {}),
+      ...(tick.crag ? { crag: tick.crag } : {}),
+      ...(comment?.trim() ? { comment: comment.trim() } : {}),
+    };
+    if (this.#oauthSession) {
+      try {
+        record.uri = await this.#createRemoteRecord(TICK_COLLECTION, remoteTickRecord(record));
+      } catch (error) {
+        if (!this.#oauthSession) throw error;
+      }
+    }
+    this.ticks = [record, ...this.ticks];
+    this.#ensureTickLocalIds();
+    this.#persistTicks();
+    return record;
+  }
+
+  /** Finds a tick by its local id (used by the "add to OSM" flow, issue #154) */
+  findTick(localId: string): LocalTickEntry | undefined {
+    return this.ticks.find((t) => t.localId === localId);
+  }
+
+  /** Edits a tick (style, ascent date, comment) locally and in the PDS when synced */
+  async updateTick(
+    entry: LocalTickEntry,
+    patch: { style?: AscentStyle; climbedAt?: string; comment?: string },
+  ): Promise<LocalTickEntry> {
+    if (!this.session) throw new Error("ATProto is not configured");
+    if (patch.style !== undefined) entry.style = patch.style;
+    if (patch.climbedAt !== undefined) entry.climbedAt = patch.climbedAt;
+    if (patch.comment !== undefined) {
+      const trimmed = patch.comment.trim();
+      if (trimmed) entry.comment = trimmed;
+      else delete entry.comment;
+    }
+    if (entry.uri) {
+      try {
+        await this.#putRemoteRecord(TICK_COLLECTION, entry.uri, remoteTickRecord(entry));
+      } catch (error) {
+        if (!this.#oauthSession) throw error;
+      }
+    }
+    this.#ensureTickLocalIds();
+    this.#persistTicks();
+    return entry;
+  }
+
+  /** Attaches a subject-less tick to an OSM element (e.g. once the route exists in OSM) */
+  async linkTick(entry: LocalTickEntry, ref: OsmElementRef): Promise<LocalTickEntry> {
+    if (!this.session) throw new Error("ATProto is not configured");
+    entry.subject = ref;
+    if (entry.uri) {
+      try {
+        await this.#putRemoteRecord(TICK_COLLECTION, entry.uri, remoteTickRecord(entry));
+      } catch (error) {
+        if (!this.#oauthSession) throw error;
+      }
+    }
+    this.#persistTicks();
+    return entry;
   }
 
   async addBulkTicks(features: OsmFeature[], style: AscentStyle, comment?: string): Promise<TickRecord[]> {

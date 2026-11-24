@@ -8,6 +8,10 @@ export interface ImportedTick {
   cragName?: string;
   /** Full hierarchical location, when the export provides one (MountainProject) */
   location?: string;
+  /** Area path used to scope the OSM matching: deepest segment first (see matchTicks) */
+  area?: string;
+  /** Climbing style of the route as written in the export (Sport, Trad, Boulder...) */
+  routeType?: string;
   style: AscentStyle;
   /** ISO ascent date, when provided */
   date?: string;
@@ -123,6 +127,8 @@ export function parseTickCsv(csv: string): ParsedTickCsv | undefined {
         routeName,
         grade: clean(row[col("Ascent Grade")]) ?? clean(row[col("Route Grade")]),
         cragName: clean(row[col("Crag Name")]),
+        area: clean(row[col("Crag Path")]) ?? clean(row[col("Crag Name")]),
+        routeType: clean(row[col("Ascent Gear Style")]) ?? clean(row[col("Route Gear Style")]),
         style: theCragStyle(row[col("Ascent Type")]),
         date: normalizeDate(row[col("Ascent Date")]),
         notes: clean(row[col("Comment")]),
@@ -139,6 +145,8 @@ export function parseTickCsv(csv: string): ParsedTickCsv | undefined {
         grade: clean(row[col("Rating")]),
         cragName: lastLocationSegment(row[col("Location")]),
         location: clean(row[col("Location")]),
+        area: clean(row[col("Location")]),
+        routeType: clean(row[col("Route Type")]),
         style: mountainProjectStyle(row[col("Lead Style")]),
         date: normalizeDate(row[col("Date")]),
         notes: clean(row[col("Notes")]),

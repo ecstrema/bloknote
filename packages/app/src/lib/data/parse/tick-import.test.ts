@@ -35,6 +35,8 @@ describe("parseTickCsv", () => {
         grade: "5.12a",
         cragName: "Hemingway Wall",
         location: "International > North America > Canada > Alberta > Bow Valley > Grotto Canyon > Hemingway Wall",
+        area: "International > North America > Canada > Alberta > Bow Valley > Grotto Canyon > Hemingway Wall",
+        routeType: "Sport",
         style: "flash",
         date: "2026-07-26T00:00:00.000Z",
         notes: undefined,
@@ -44,6 +46,8 @@ describe("parseTickCsv", () => {
         grade: "5.10a",
         cragName: "The Narrows",
         location: "International > North America > Canada > Alberta > Bow Valley > Grotto Canyon > The Narrows",
+        area: "International > North America > Canada > Alberta > Bow Valley > Grotto Canyon > The Narrows",
+        routeType: "Sport",
         style: "onsight",
         date: "2026-07-24T00:00:00.000Z",
         notes: undefined,
@@ -53,6 +57,8 @@ describe("parseTickCsv", () => {
         grade: "5.13a",
         cragName: "Baffin",
         location: "International > Canada > Baffin",
+        area: "International > Canada > Baffin",
+        routeType: "Sport",
         style: "redpoint",
         date: "2026-07-20T00:00:00.000Z",
         notes: "crux is heady",
@@ -65,8 +71,22 @@ describe("parseTickCsv", () => {
     expect(parsed?.format).toBe("thecrag");
     expect(parsed?.errors).toEqual([]);
     expect(parsed?.ticks).toMatchObject([
-      { routeName: "Solar impulse (L1)", grade: "7b", cragName: "La Balme", style: "onsight" },
-      { routeName: "Globetrotter", grade: "7A", cragName: "Chironico", style: "redpoint" },
+      {
+        routeName: "Solar impulse (L1)",
+        grade: "7b",
+        cragName: "La Balme",
+        area: "La Balme - Cathédrale: Sector 5 & 6",
+        routeType: "Sport",
+        style: "onsight",
+      },
+      {
+        routeName: "Globetrotter",
+        grade: "7A",
+        cragName: "Chironico",
+        area: "Chironico - Boogalagga - Blocco 11",
+        routeType: "Boulder",
+        style: "redpoint",
+      },
     ]);
   });
 

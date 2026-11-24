@@ -2,7 +2,7 @@ import { browser, version } from "$app/env";
 import { apiUrl } from "../network/api-url";
 import type { DataJSON } from "@bloknote/climbing-data-gen";
 import type { AreaStats } from "#lib/types.js";
-import type { DbRequest, DbResponse, MapElementFeatureCollection, NearbyCandidate, OsmRefEntry, SearchFilters, TopLevelPoint } from "./types";
+import type { DbRequest, DbResponse, MapElementFeatureCollection, NearbyCandidate, OsmRefEntry, SearchFilters, TickRouteMatch, TopLevelPoint } from "./types";
 
 export type LocalDbStatus = "unknown" | "empty" | "downloading" | "ready" | "error";
 
@@ -218,11 +218,18 @@ class LocalDb {
     return (await this.send({ type: "getNearbyElements", lat, lon, radiusMeters }, "nearbyElements")).data;
   }
 
-  /** Route candidates matching each queried name, for the tick import (issue #154) */
-  async matchPlaceNames(queries: string[]): Promise<Record<string, { slug: string; data: DataJSON }[]>> {
+  /** Route candidates matching each queried name inside its area, for the tick import (issue #154) */
+  async matchTicks(queries: { name: string; area?: string }[]): Promise<TickRouteMatch[][]> {
     await this.init();
-    if (!this.ready || queries.length === 0) return {};
-    return (await this.send({ type: "matchPlaceNames", queries }, "placeNames")).data;
+    if (!this.ready || queries.length === 0) return [];
+    return (await this.send({ type: "matchTicks", queries }, "tickMatches")).data;
+  }
+
+  /** Area candidates matching each queried name, to pick a parent when adding a route to OSM */
+  async matchAreas(queries: string[]): Promise<{ slug: string; data: DataJSON }[][]> {
+    await this.init();
+    if (!this.ready || queries.length === 0) return [];
+    return (await this.send({ type: "matchAreas", queries }, "areaMatches")).data;
   }
 
   /** Streams the matching slugs to `onBatch`. `next()` runs for `budgetMs`, and resolves true when there are no more results. */

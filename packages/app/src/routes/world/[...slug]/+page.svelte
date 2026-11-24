@@ -39,6 +39,7 @@
   import RssFeedButton from "#components/rss-feed-button.svelte";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
   import { dataClient } from "#lib/data/network/data-client.js";
+  import { atproto } from "#lib/data/network/atproto.svelte.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
   import { findRoutePartPairs, isRouteBottom, isRouteTop, routeCompanionsBySlug } from "#lib/data/parse/route-parts.js";
 
@@ -278,6 +279,28 @@
   let clickedCoordinates = $state<{ lat: number; lon: number } | undefined>(undefined);
   let coordinatesCopied = $state(false);
 
+  // "Add to OSM" flow from the ticks list (issue #154): the tick is placed as a new route on the
+  // map of its crag, then linked to the created element
+  const addRouteTickId = $derived(page.url.searchParams.get("addRouteTick"));
+  const pendingTick = $derived(addRouteTickId ? atproto.findTick(addRouteTickId) : undefined);
+
+  function onTickRouteCreated(feature: OsmFeature) {
+    const tick = pendingTick;
+    if (!tick) return;
+    void atproto
+      .linkTick(tick, { type: feature.type, id: feature.id })
+      .catch((err) => console.error("Could not link the tick to the new route", err));
+    const url = new URL(location.href);
+    url.searchParams.delete("addRouteTick");
+    void goto(url, { state: page.state, shallow: true, replace: true });
+  }
+
+  $effect(() => {
+    if (!pendingTick || !appState.osmUser.loggedIn) return;
+    if (activeTab !== "map") onTabChange("map");
+    if (effectiveTab === "map" && placementMode !== "route") placementMode = "route";
+  });
+
   function copyCoordinates() {
     if (!coordinates) return;
     void navigator.clipboard.writeText(`${coordinates.lat}, ${coordinates.lon}`);
@@ -413,7 +436,18 @@
 
   <Tabs.Content value="map" class="flex flex-col gap-2">
     {#if effectiveTab === "map"}
-      {#if appState.osmUser.loggedIn && placementMode}
+      {#if pendingTick}
+        <div class="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+          <span aria-hidden="true" class="icon-[lucide--map-pin-plus] size-4 shrink-0"></span>
+          {#if appState.osmUser.loggedIn}
+            Adding "{pendingTick.name}" for your tick: click on the map to place the route.
+          {:else}
+            <span class="text-destructive">
+              Log in with OpenStreetMap to add "{pendingTick.name}" for your tick.
+            </span>
+          {/if}
+        </div>
+      {:else if appState.osmUser.loggedIn && placementMode}
         <div class="flex flex-wrap items-center gap-2">
           <span class="text-xs text-muted-foreground">Click on the map to place the new route.</span>
           <Button size="xs" variant="ghost" onclick={() => (placementMode = null)}>Cancel</Button>
@@ -445,6 +479,9 @@
         kind={addDialogKind}
         coordinates={clickedCoordinates}
         currentSlug={itemSlug}
+        prefillName={pendingTick?.name}
+        preferredParentSlug={pendingTick ? itemSlug : undefined}
+        onCreated={pendingTick ? onTickRouteCreated : undefined}
       />
     {/if}
   </Tabs.Content>

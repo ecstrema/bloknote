@@ -56,14 +56,23 @@ export type OsmSubjectRef = OsmElementRef;
  * Contains: subject (OSM element ref), core style, optional ascent qualifiers (ascentInfo),
  * climbedAt timestamp, creation timestamp, and comment.
  * Private ticks are stored in private ATProto Spaces.
+ * The subject is optional: ticks for routes that are not on OpenStreetMap (yet) carry the route
+ * name (and optionally grade and crag) instead, and can be linked to an element later (issue #154).
  */
 export interface TickRecord {
-  subject: OsmElementRef;
+  /** OSM element ref. Absent for routes that are not on OpenStreetMap (yet). */
+  subject?: OsmElementRef;
   style: AscentStyle;
   ascentInfo?: AscentInfo[];
   climbedAt: string;
   createdAt: string;
   comment?: string;
+  /** Route name, set for ticks without a subject */
+  name?: string;
+  /** Route grade as written in the source logbook, for ticks without a subject */
+  grade?: string;
+  /** Crag / area name, for ticks without a subject */
+  crag?: string;
 }
 
 /**

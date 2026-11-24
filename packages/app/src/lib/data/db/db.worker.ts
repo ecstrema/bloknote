@@ -3,6 +3,7 @@ import type { DataJSON } from "@bloknote/climbing-data-gen";
 import { featureToType, getName } from "#lib/data/parse/data.js";
 import { getParentSlug } from "#lib/helpers/slug.js";
 import { getCoordinates, getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
+import type { OsmFeature } from "osm-api";
 import { getColorFromGrade } from "#lib/data/network/grade.js";
 import {
   buildSectorContour,
@@ -10,7 +11,7 @@ import {
   FEATURE_COLORS,
   ROUTE_STYLE_COLORS,
 } from "#lib/data/parse/route-styles.js";
-import type { DbRequest, DbResponse, MapElementFeature, NearbyCandidate, OsmRefEntry, SearchFilters } from "./types";
+import type { DbRequest, DbResponse, MapElementFeature, NearbyCandidate, OsmRefEntry, SearchFilters, TickRouteMatch } from "./types";
 
 /** Bump when the tables change: the database is then downloaded again */
 const SCHEMA = 3;
@@ -181,6 +182,91 @@ function toMatchQuery(query: string): string | undefined {
 
 function tagPath(key: string): string {
   return `$.tags."${key.replaceAll('"', "")}"`;
+}
+
+/** Lowercases, strips diacritics and punctuation: used to compare route and area names (issue #154) */
+function normalizeName(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/** Name variants of a route query: the full name, and without a trailing pitch suffix like "(L1)" */
+function nameVariants(name: string): string[] {
+  const base = normalizeName(name);
+  const variants = new Set<string>(base ? [base] : []);
+  const withoutPitch = base.replace(/ (l|pitch) \d+$/, "").trim();
+  if (withoutPitch && withoutPitch !== base) variants.add(withoutPitch);
+  return [...variants];
+}
+
+/** Splits a hierarchical location ("> ", " - ", ": ") into segments, deepest first */
+function areaSegments(area: string): string[] {
+  return area
+    .split(/\s*>\s*|\s+-\s+|\s*:\s*/)
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .reverse()
+    .slice(0, 4);
+}
+
+/** Area candidates matching a name by FTS */
+function matchAreaCandidates(db: Database, query: string): { slug: string; data: DataJSON }[] {
+  const match = toMatchQuery(query);
+  if (!match) return [];
+  const rows = db.selectArrays(
+    `SELECT e.slug, e.data FROM places JOIN elements e ON e.slug = places.slug
+     WHERE places MATCH ? AND e.type = 'area' LIMIT 3`,
+    [match],
+  );
+  return rows.map(([slug, json]) => ({ slug: slug as string, data: JSON.parse(json as string) }));
+}
+
+/** How many areas may be scanned per tick query, to bound the subtree scans */
+const MATCH_TICK_MAX_AREAS = 2;
+/** How many route candidates are returned per tick query */
+const MATCH_TICK_MAX_ROUTES = 5;
+
+/**
+ * Finds routes named like the queried tick inside the areas given by the CSV (issue #154).
+ * The location hierarchy is tried deepest first (the wall is more specific than the country).
+ */
+function matchTickQuery(db: Database, query: { name: string; area?: string }): TickRouteMatch[] {
+  const variants = nameVariants(query.name);
+  if (variants.length === 0 || !query.area) return [];
+
+  const results: TickRouteMatch[] = [];
+  const seenSlugs = new Set<string>();
+  const visitedAreas = new Set<string>();
+
+  for (const segment of areaSegments(query.area)) {
+    if (results.length >= MATCH_TICK_MAX_ROUTES || visitedAreas.size >= MATCH_TICK_MAX_AREAS) break;
+    for (const area of matchAreaCandidates(db, segment)) {
+      if (results.length >= MATCH_TICK_MAX_ROUTES || visitedAreas.size >= MATCH_TICK_MAX_AREAS) break;
+      if (visitedAreas.has(area.slug)) continue;
+      visitedAreas.add(area.slug);
+
+      const prefix = `${area.slug}/`;
+      const rows = db.selectArrays(
+        `SELECT slug, parent_slug, data FROM elements
+         WHERE type = 'route' AND (slug = ? OR substr(slug, 1, ?) = ?) LIMIT 2000`,
+        [area.slug, prefix.length, prefix],
+      );
+      for (const [slug, parentSlug, json] of rows) {
+        if (results.length >= MATCH_TICK_MAX_ROUTES) break;
+        if (seenSlugs.has(slug as string)) continue;
+        const data = JSON.parse(json as string) as DataJSON;
+        const candidateBase = normalizeName((data as OsmFeature).tags?.name ?? "");
+        if (!candidateBase || !variants.includes(candidateBase)) continue;
+        seenSlugs.add(slug as string);
+        results.push({ slug: slug as string, parentSlug: parentSlug as string, data });
+      }
+    }
+  }
+  return results;
 }
 
 function buildFilterQuery(filters: SearchFilters): { sql: string; bind: (string | number)[] } | undefined {
@@ -518,23 +604,22 @@ async function handle(req: DbRequest): Promise<DbResponse> {
       }
       return { id: req.id, type: "osmRefs", data };
     }
-    case "matchPlaceNames": {
-      // FTS name matches for the tick import (issue #154): up to 5 route candidates per queried name
-      const data: Record<string, { slug: string; data: DataJSON }[]> = {};
+    case "matchTicks": {
+      // Area-scoped matching for the tick import (issue #154): the area from the CSV locates the
+      // crag/sector(s), then route names are matched inside their subtrees. Name-only matches are
+      // useless: without an area, no candidates are returned.
+      const data: TickRouteMatch[][] = [];
       for (const query of req.queries) {
-        const match = toMatchQuery(query);
-        if (!match) {
-          data[query] = [];
-          continue;
-        }
-        const rows = db.selectArrays(
-          `SELECT e.slug, e.data FROM places JOIN elements e ON e.slug = places.slug
-           WHERE places MATCH ? AND e.type = 'route' LIMIT 5`,
-          [match],
-        );
-        data[query] = rows.map(([slug, json]) => ({ slug: slug as string, data: JSON.parse(json as string) }));
+        data.push(matchTickQuery(db, query));
       }
-      return { id: req.id, type: "placeNames", data };
+      return { id: req.id, type: "tickMatches", data };
+    }
+    case "matchAreas": {
+      const data: { slug: string; data: DataJSON }[][] = [];
+      for (const query of req.queries) {
+        data.push(matchAreaCandidates(db, query));
+      }
+      return { id: req.id, type: "areaMatches", data };
     }
     case "getNearbyElements": {
       // Degrees per meter: 111320m per latitude degree, longitude shrinks with cos(latitude)

@@ -6,17 +6,24 @@
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { getGrade } from "#lib/data/parse/osm-tags.js";
+  import { extractRouteStyle, ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
   import { parseTickCsv, type ImportedTick, type TickImportFormat } from "#lib/data/parse/tick-import.js";
+  import type { TickRouteMatch } from "#lib/data/db/types.js";
   import type { OsmFeature } from "osm-api";
 
   /** Safety cap: very large exports are truncated instead of freezing the page */
   const MAX_ROWS = 1000;
-  const MATCH_BATCH = 100;
+  /** Area matching scans crag subtrees: keep the batches small */
+  const MATCH_BATCH = 20;
 
   interface ImportCandidate {
     slug: string;
+    /** Slug of the area (crag/sector) the candidate belongs to */
+    parentSlug: string;
     name: string;
     grade?: string;
+    /** Climbing style of the OSM route (sport, trad, boulder...) */
+    style?: string;
     feature: OsmFeature;
   }
 
@@ -44,18 +51,16 @@
     thecrag: "TheCrag",
   };
 
-  function chunk(items: string[], size: number): string[][] {
-    const chunks: string[][] = [];
-    for (let i = 0; i < items.length; i += size) chunks.push(items.slice(i, i + size));
-    return chunks;
-  }
-
-  function toCandidate(slug: string, data: OsmFeature): ImportCandidate {
+  function toCandidate(match: TickRouteMatch): ImportCandidate {
+    const tags = (match.data as OsmFeature).tags ?? {};
+    const style = extractRouteStyle(tags);
     return {
-      slug,
-      name: data.tags?.name ?? "Unnamed",
-      grade: getGrade(data.tags ?? {})?.v.v,
-      feature: data,
+      slug: match.slug,
+      parentSlug: match.parentSlug,
+      name: tags.name ?? "Unnamed",
+      grade: getGrade(tags)?.v.v,
+      style: style ? (ROUTE_STYLE_LABELS[style] ?? style) : undefined,
+      feature: match.data as OsmFeature,
     };
   }
 
@@ -90,18 +95,18 @@
     const importRows: ImportRow[] = parsed.ticks
       .slice(0, MAX_ROWS)
       .map((tick, id) => ({ id, tick, candidates: [], selectedSlug: "", alreadyLogged: false }));
-    const names = [...new Set(importRows.map((r) => r.tick.routeName))];
-    for (const batch of chunk(names, MATCH_BATCH)) {
-      const matches = await localDb.matchPlaceNames(batch);
-      for (const [name, found] of Object.entries(matches)) {
-        const candidates = found.map((entry) => toCandidate(entry.slug, entry.data as OsmFeature));
-        for (const row of importRows) {
-          if (row.tick.routeName !== name) continue;
-          row.candidates = candidates;
-          // Single match: preselect it
-          if (candidates.length === 1) row.selectedSlug = candidates[0]!.slug;
-        }
-      }
+    // Routes are only searched inside the area given by the export: the location from the CSV
+    // locates the crag(s), then route names are matched inside them (issue #154)
+    const queries = importRows.map((row) => ({ name: row.tick.routeName, area: row.tick.area }));
+    for (let start = 0; start < queries.length; start += MATCH_BATCH) {
+      const matches = await localDb.matchTicks(queries.slice(start, start + MATCH_BATCH));
+      matches.forEach((found, index) => {
+        const row = importRows[start + index];
+        if (!row) return;
+        row.candidates = found.map(toCandidate);
+        // Single match: preselect it
+        if (row.candidates.length === 1) row.selectedSlug = row.candidates[0]!.slug;
+      });
     }
     for (const row of importRows) {
       const selected = row.candidates.find((c) => c.slug === row.selectedSlug);
@@ -116,31 +121,61 @@
     const selected = row.candidates.find((c) => c.slug === slug);
     row.alreadyLogged = selected ? isLogged(selected.feature) : false;
   }
+
   const counts = $derived.by(() => {
     let matched = 0;
     let unmatched = 0;
     let alreadyLogged = 0;
     for (const row of rows) {
-      if (!row.selectedSlug) unmatched++;
-      else if (row.alreadyLogged) alreadyLogged++;
+      if (row.candidates.length === 0) unmatched++;
+      else if (row.selectedSlug && row.alreadyLogged) alreadyLogged++;
       else matched++;
     }
     return { matched, unmatched, alreadyLogged };
   });
 
+  /** Rows with at least one area-scoped candidate, shown in the review list */
+  const matchedRows = $derived(rows.filter((row) => row.candidates.length > 0));
+
+  function gradesDiffer(row: ImportRow, candidate: ImportCandidate): boolean {
+    return !!row.tick.grade && !!candidate.grade && row.tick.grade.toLowerCase() !== candidate.grade.toLowerCase();
+  }
+
+  function typesDiffer(row: ImportRow, candidate: ImportCandidate): boolean {
+    return (
+      !!row.tick.routeType && !!candidate.style && row.tick.routeType.toLowerCase() !== candidate.style.toLowerCase()
+    );
+  }
+
   async function importTicks() {
     phase = "importing";
     progress = 0;
     let imported = 0;
+    let alreadyLogged = 0;
+    let unmatched = 0;
     try {
       for (const row of rows) {
         const candidate = row.candidates.find((c) => c.slug === row.selectedSlug);
-        if (!candidate || row.alreadyLogged) continue;
-        await atproto.addTick(candidate.feature, row.tick.style, row.tick.notes, row.tick.date);
+        if (candidate && row.alreadyLogged) {
+          alreadyLogged++;
+          continue;
+        }
+        if (candidate) {
+          await atproto.addTick(candidate.feature, row.tick.style, row.tick.notes, row.tick.date);
+        } else {
+          // Route not on OSM (yet): the tick is stored without a subject and can be linked later
+          await atproto.addNameTick(
+            { name: row.tick.routeName, grade: row.tick.grade, crag: row.tick.cragName },
+            row.tick.style,
+            row.tick.notes,
+            row.tick.date,
+          );
+          unmatched++;
+        }
         imported++;
         progress++;
       }
-      result = { imported, unmatched: counts.unmatched, alreadyLogged: counts.alreadyLogged };
+      result = { imported, unmatched, alreadyLogged };
       rows = [];
       phase = "pick";
     } catch (err) {
@@ -168,8 +203,9 @@
       target="_blank"
       rel="noreferrer">TheCrag</a
     >
-    (dashboard, actions, logbook CSV), then import it here. Routes are matched by name against the
-    offline climbing data; routes that are not on OpenStreetMap yet cannot be imported.
+    (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag
+    given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be
+    added to OSM later from your ticks list.
   </p>
 
   {#if !atproto.configured}
@@ -187,7 +223,7 @@
   {#if result}
     <p class="text-xs text-emerald-600 dark:text-emerald-400">
       Imported {result.imported} tick{result.imported === 1 ? "" : "s"} ({result.alreadyLogged} already logged,
-      {result.unmatched} without a matching OSM route).
+      {result.unmatched} without an OSM route).
     </p>
   {/if}
 
@@ -201,43 +237,38 @@
   {#if phase === "matching"}
     <p class="flex items-center gap-2 text-xs text-muted-foreground">
       <span aria-hidden="true" class="icon-[lucide--loader-circle] size-4 animate-spin"></span>
-      Matching routes...
+      Matching routes in their crags...
     </p>
   {:else if phase === "importing"}
     <p class="flex items-center gap-2 text-xs text-muted-foreground">
       <span aria-hidden="true" class="icon-[lucide--loader-circle] size-4 animate-spin"></span>
-      Importing {progress}/{counts.matched} ticks...
+      Importing {progress}/{counts.matched + counts.unmatched} ticks...
     </p>
   {:else if phase === "review" && rows.length > 0}
     <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
       <span>
         {rows.length} tick{rows.length === 1 ? "" : "s"} from {formatters[format]}
-        {#if truncated}(truncated to {MAX_ROWS}){/if}: {counts.matched} ready, {counts.unmatched} unmatched,
-        {counts.alreadyLogged} already logged.
+        {#if truncated}(truncated to {MAX_ROWS}){/if}: {counts.matched} matched, {counts.alreadyLogged} already
+        logged.
       </span>
-      <Button size="xs" onclick={importTicks} disabled={counts.matched === 0}>
+      <Button size="xs" onclick={importTicks} disabled={rows.length === counts.alreadyLogged}>
         <span class="icon-[lucide--download] shrink-0 size-4"></span>
-        Import {counts.matched} tick{counts.matched === 1 ? "" : "s"}
+        Import {rows.length - counts.alreadyLogged} tick{rows.length - counts.alreadyLogged === 1 ? "" : "s"}
       </Button>
     </div>
 
-    <ul class="flex max-h-96 flex-col gap-1.5 overflow-y-auto rounded-md border p-2 text-sm">
-      {#each rows as row (row.id)}
+    <ul class="flex max-h-96 flex-col gap-2 overflow-y-auto rounded-md border p-2 text-sm">
+      {#each matchedRows as row (row.id)}
         {@const selected = row.candidates.find((c) => c.slug === row.selectedSlug)}
-        <li class="flex flex-wrap items-center gap-2 border-b pb-1.5 last:border-b-0">
-          <span class="min-w-40 flex-1 font-medium">{row.tick.routeName}</span>
-          {#if row.tick.grade}
-            <span class="text-xs text-muted-foreground">{row.tick.grade}</span>
-          {/if}
-          {#if row.tick.date}
-            <span class="text-xs text-muted-foreground">{new Date(row.tick.date).toLocaleDateString()}</span>
-          {/if}
-          <span class="rounded bg-muted px-1.5 py-0.5 text-[11px] capitalize text-muted-foreground"
-            >{row.tick.style}</span
-          >
-          {#if row.candidates.length === 0}
-            <span class="text-xs text-amber-600 dark:text-amber-400">Not found in OSM data</span>
-          {:else}
+        <li class="flex flex-col gap-1 border-b pb-2 last:border-b-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="min-w-40 flex-1 font-medium">{row.tick.routeName}</span>
+            {#if row.tick.date}
+              <span class="text-xs text-muted-foreground">{new Date(row.tick.date).toLocaleDateString()}</span>
+            {/if}
+            <span class="rounded bg-muted px-1.5 py-0.5 text-[11px] capitalize text-muted-foreground"
+              >{row.tick.style}</span
+            >
             <Select
               aria-label="Matching OSM route for {row.tick.routeName}"
               class="w-auto max-w-56"
@@ -246,27 +277,67 @@
             >
               <option value="">Pick a route...</option>
               {#each row.candidates as candidate (candidate.slug)}
-                <option value={candidate.slug}>
-                  {candidate.name}{candidate.grade ? ` (${candidate.grade})` : ""}
-                </option>
+                <option value={candidate.slug}>{candidate.name}</option>
               {/each}
             </Select>
             {#if row.alreadyLogged}
               <span class="text-xs text-muted-foreground">Already logged</span>
             {/if}
-          {/if}
-          {#if selected && row.selectedSlug && !row.alreadyLogged}
-            <a
-              href={`https://www.openstreetmap.org/${selected.feature.type}/${selected.feature.id}`}
-              target="_blank"
-              rel="noreferrer"
-              class="text-xs text-muted-foreground underline underline-offset-2"
+          </div>
+          {#if selected}
+            {@const mismatch = gradesDiffer(row, selected) || typesDiffer(row, selected)}
+            <div
+              class="flex flex-wrap items-center gap-x-3 gap-y-0.5 rounded bg-muted/40 px-2 py-1 text-xs text-muted-foreground"
             >
-              {selected.feature.type}/{selected.feature.id}
-            </a>
+              <span>
+                <span class="font-medium text-foreground">OSM:</span>
+                <span class:font-semibold={selected.name !== row.tick.routeName}>{selected.name}</span>
+              </span>
+              <span>
+                <span class="font-medium text-foreground">Location:</span>
+                {selected.parentSlug || selected.slug}
+              </span>
+              <span>
+                <span class="font-medium text-foreground">Grade:</span>
+                <span class:font-semibold={gradesDiffer(row, selected)}>{selected.grade ?? "—"}</span>
+                {#if gradesDiffer(row, selected)}
+                  <span class="text-amber-600 dark:text-amber-400">(logbook: {row.tick.grade})</span>
+                {/if}
+              </span>
+              <span>
+                <span class="font-medium text-foreground">Style:</span>
+                <span class:font-semibold={typesDiffer(row, selected)}>{selected.style ?? "—"}</span>
+                {#if typesDiffer(row, selected)}
+                  <span class="text-amber-600 dark:text-amber-400">(logbook: {row.tick.routeType})</span>
+                {/if}
+              </span>
+              <a
+                href={`https://www.openstreetmap.org/${selected.feature.type}/${selected.feature.id}`}
+                target="_blank"
+                rel="noreferrer"
+                class="underline underline-offset-2 hover:text-foreground"
+              >
+                {selected.feature.type}/{selected.feature.id}
+              </a>
+            </div>
+            {#if mismatch}
+              <p class="text-[11px] text-amber-600 dark:text-amber-400">
+                Some details differ from the logbook: check the preview before importing.
+              </p>
+            {/if}
           {/if}
         </li>
       {/each}
+      {#if counts.unmatched > 0}
+        <li class="flex flex-wrap items-center gap-2 pt-1 text-sm">
+          <span
+            aria-hidden="true"
+            class="icon-[lucide--map-pin-question-mark] size-4 shrink-0 text-muted-foreground"
+          ></span>
+          and {counts.unmatched} route{counts.unmatched === 1 ? "" : "s"} not found on OSM. Don't worry, you can add
+          them still.
+        </li>
+      {/if}
     </ul>
   {/if}
 </section>

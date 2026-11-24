@@ -16,17 +16,27 @@
   } from "#lib/data/region-locator.js";
   import { setFallbackCoordinates } from "#lib/data/route-location.js";
   import { untrack } from "svelte";
+  import type { OsmFeature } from "osm-api";
 
   let {
     open = $bindable(false),
     kind,
     coordinates,
     currentSlug = "",
+    prefillName,
+    preferredParentSlug,
+    onCreated,
   }: {
     open?: boolean;
     kind: "route" | "sector";
     coordinates: { lat: number; lon: number } | undefined;
     currentSlug?: string;
+    /** Name prefilled in the dialog (e.g. from a tick being added to OSM, issue #154) */
+    prefillName?: string;
+    /** Parent slug selected by default when it is among the options */
+    preferredParentSlug?: string;
+    /** Called with the created feature, to link a tick to it for instance */
+    onCreated?: (feature: OsmFeature) => void;
   } = $props();
 
   const appState = getAppState();
@@ -48,7 +58,7 @@
     regionSlug = undefined;
     parentOptions = [];
     selectedParentSlug = "";
-    name = "";
+    name = prefillName ?? "";
 
     let cancelled = false;
     (async () => {
@@ -81,7 +91,11 @@
 
       regionSlug = bestRegion;
       parentOptions = options;
-      selectedParentSlug = bestRegion;
+      // Prefer the parent the user navigated from (e.g. the crag of a tick being added to OSM)
+      selectedParentSlug =
+        preferredParentSlug && options.some((option) => option.slug === preferredParentSlug)
+          ? preferredParentSlug
+          : bestRegion;
       loading = false;
     })();
 
@@ -114,6 +128,7 @@
     const feature = parent.children?.[newSlug]?.feature;
     open = false;
     if (feature && feature.type !== "geographic") {
+      onCreated?.(feature as OsmFeature);
       void goto(getItemUrl(selectedParentSlug, feature));
     }
   }

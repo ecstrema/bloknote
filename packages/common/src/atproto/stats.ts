@@ -61,7 +61,7 @@ export function computeUserStats(
     }
 
     // Grade pyramid tracking from OSM route lookup
-    const grade = routeGradeLookup?.(tick.subject);
+    const grade = tick.subject ? routeGradeLookup?.(tick.subject) : undefined;
     if (grade?.scale && grade.value) {
       const key = `${grade.scale}:${grade.value}`;
       let entry = pyramidMap.get(key);

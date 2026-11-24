@@ -27,10 +27,11 @@
   /** Ticks and stars resolved against the local database: the route's slug, name, and grade */
   let resolvedRefs = $state<Record<string, ResolvedRef>>({});
 
+  /** Ticks pointing at an OSM element: subject-less ticks (routes not on OSM yet) are excluded */
+  const osmTicks = $derived(atproto.ticks.filter((t) => t.subject));
+
   const osmRefs = $derived([
-    ...new Set(
-      [...atproto.ticks, ...atproto.stars].map((entry) => `${entry.subject.type}-${entry.subject.id}`),
-    ),
+    ...new Set([...osmTicks, ...atproto.stars].map((entry) => `${entry.subject!.type}-${entry.subject!.id}`)),
   ]);
 
   $effect(() => {
@@ -97,14 +98,14 @@
       .sort((a, b) => a.month.localeCompare(b.month));
   });
   const sessionCount = $derived(sessionMonths.reduce((total, m) => total + m.sessions, 0));
-  const routeCount = $derived(new Set(atproto.ticks.map((t) => refKey(t.subject))).size);
+  const routeCount = $derived(new Set(osmTicks.map((t) => refKey(t.subject!))).size);
   const maxSessions = $derived(Math.max(1, ...sessionMonths.map((m) => m.sessions)));
 
   /** Best clean send grade for each month, as a reference number for comparison */
   const maxGradePerMonth = $derived.by(() => {
     const months = new Map<string, { ref: number; grade: Grade }>();
     for (const tick of atproto.ticks) {
-      if (!CLEAN_ASCENT_STYLES.has(tick.style) || !tick.climbedAt) continue;
+      if (!CLEAN_ASCENT_STYLES.has(tick.style) || !tick.climbedAt || !tick.subject) continue;
       const info = resolvedRefs[refKey(tick.subject)];
       if (info?.gradeRef === undefined || !info.grade || info.grade.scale === "unknown") continue;
       const month = tick.climbedAt.slice(0, 7);
@@ -120,8 +121,8 @@
   /** Tick count per route: the number of tries on each climbed route */
   const triesPerRoute = $derived.by(() => {
     const counts = new Map<string, { name: string; count: number }>();
-    for (const tick of atproto.ticks) {
-      const key = refKey(tick.subject);
+    for (const tick of osmTicks) {
+      const key = refKey(tick.subject!);
       const entry = counts.get(key) ?? { name: resolvedRefs[key]?.name ?? tick.label ?? key, count: 0 };
       entry.count += 1;
       counts.set(key, entry);
@@ -135,8 +136,8 @@
   const pyramidTypes = $derived([
     "all",
     ...new Set(
-      atproto.ticks
-        .map((t) => resolvedRefs[refKey(t.subject)]?.style)
+      osmTicks
+        .map((t) => resolvedRefs[refKey(t.subject!)]?.style)
         .filter((style): style is string => !!style),
     ),
   ]);
@@ -144,7 +145,7 @@
     computeUserStats(
       pyramidType === "all"
         ? atproto.ticks
-        : atproto.ticks.filter((t) => resolvedRefs[refKey(t.subject)]?.style === pyramidType),
+        : osmTicks.filter((t) => resolvedRefs[refKey(t.subject!)]?.style === pyramidType),
       gradeLookup,
     ),
   );
@@ -203,6 +204,7 @@
   }
 
   async function checkTick(tick: LocalTickEntry) {
+    if (!tick.subject) return;
     const key = refKey(tick.subject);
     if (!localDb.ready || tickChecks[key]?.status === "checking") return;
     tickChecks[key] = { status: "checking" };
@@ -248,7 +250,7 @@
 
   async function relinkTick(tick: LocalTickEntry, candidate: RecoveryCandidate) {
     await atproto.relinkTick(tick, relinkOsmElement(candidate.feature));
-    delete tickChecks[refKey(tick.subject)];
+    if (tick.subject) delete tickChecks[refKey(tick.subject)];
   }
 </script>
 
@@ -500,19 +502,27 @@
         <ul class="mt-1.5 space-y-1 text-xs">
           {#each atproto.ticks.slice(0, 10) as tick (tick)}
             <li class="flex flex-wrap items-baseline gap-2">
-              <a
-                href={refHref(tick.subject.type, tick.subject.id)}
-                class="font-medium underline underline-offset-2"
-              >
-                {resolvedRefs[`${tick.subject.type}-${tick.subject.id}`]?.name
-                  ?? tick.label
-                  ?? `${tick.subject.type}/${tick.subject.id}`}
-              </a>
-              {#if resolvedRefs[`${tick.subject.type}-${tick.subject.id}`]?.grade}
-                <HolyGrade
-                  class="text-xs font-semibold"
-                  grade={resolvedRefs[`${tick.subject.type}-${tick.subject.id}`]!.grade}
-                />
+              {#if tick.subject}
+                <a
+                  href={refHref(tick.subject.type, tick.subject.id)}
+                  class="font-medium underline underline-offset-2"
+                >
+                  {resolvedRefs[`${tick.subject.type}-${tick.subject.id}`]?.name
+                    ?? tick.label
+                    ?? `${tick.subject.type}/${tick.subject.id}`}
+                </a>
+                {#if resolvedRefs[`${tick.subject.type}-${tick.subject.id}`]?.grade}
+                  <HolyGrade
+                    class="text-xs font-semibold"
+                    grade={resolvedRefs[`${tick.subject.type}-${tick.subject.id}`]!.grade}
+                  />
+                {/if}
+              {:else}
+                <span class="font-medium">{tick.name ?? "Unnamed route"}</span>
+                {#if tick.grade}
+                  <span class="text-muted-foreground">{tick.grade}</span>
+                {/if}
+                <span class="rounded border px-1.5 py-0.5 text-[10px] text-muted-foreground">Not on OSM</span>
               {/if}
               <span class="rounded bg-muted px-1.5 py-0.5 capitalize">{tick.style}</span>
               <span class="text-muted-foreground">{new Date(tick.climbedAt).toLocaleDateString()}</span>
@@ -522,7 +532,7 @@
               {#if !tick.uri}
                 <PendingSyncBadge />
               {/if}
-              {#if localDb.ready && !resolvedRefs[refKey(tick.subject)]}
+              {#if tick.subject && localDb.ready && !resolvedRefs[refKey(tick.subject)]}
                 <button
                   type="button"
                   class="text-muted-foreground hover:text-foreground"

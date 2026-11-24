@@ -62,8 +62,10 @@ export type DbRequest =
   | { id: number; type: "getOsmRefs"; refs: string[] }
   /** Named elements within a bounding box, used to find replacements for deleted elements */
   | { id: number; type: "getNearbyElements"; lat: number; lon: number; radiusMeters: number }
-  /** FTS name matches for the given queries, used by the tick import (issue #154) */
-  | { id: number; type: "matchPlaceNames"; queries: string[] }
+  /** Area-scoped route name matches for the tick import (issue #154) */
+  | { id: number; type: "matchTicks"; queries: { name: string; area?: string }[] }
+  /** Area name matches, to pick a parent when adding a route to OSM from a tick (issue #154) */
+  | { id: number; type: "matchAreas"; queries: string[] }
   | { id: number; type: "filterStart"; searchId: number; filters: SearchFilters; budgetMs: number }
   /** Continues a search that paused after using its time budget */
   | { id: number; type: "filterMore"; searchId: number; budgetMs: number }
@@ -71,6 +73,14 @@ export type DbRequest =
 
 export interface OsmRefEntry {
   slug: string;
+  data: DataJSON;
+}
+
+/** A route inside a matched area, for the tick import (issue #154) */
+export interface TickRouteMatch {
+  slug: string;
+  /** Slug of the area the route belongs to */
+  parentSlug: string;
   data: DataJSON;
 }
 
@@ -96,6 +106,10 @@ export type DbResponse =
   | { id: number; type: "allMapElements"; data: MapElementFeatureCollection }
   /** For each query, up to a few route candidates matching by name */
   | { id: number; type: "placeNames"; data: Record<string, { slug: string; data: DataJSON }[]> }
+  /** For each query, the route candidates found inside the queried area (aligned with the queries) */
+  | { id: number; type: "tickMatches"; data: TickRouteMatch[][] }
+  /** For each query, the area candidates matching by name (aligned with the queries) */
+  | { id: number; type: "areaMatches"; data: { slug: string; data: DataJSON }[][] }
   /** Streamed while a search runs, without being a reply to a request */
   | { type: "matchBatch"; searchId: number; slugs: string[] }
   /** The search used its time budget (`exhausted` false) or has no more results */
