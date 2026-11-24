@@ -12,7 +12,7 @@
         "properties": {
           "subject": {
             "type": "ref",
-            "ref": "org.openstreetmap.core.defs#elementRef",
+            "ref": "org.bloknote.osm.defs#elementRef",
             "description": "The OpenStreetMap climbing route, pitch, or boulder being ticked"
           },
           "style": {
@@ -27,6 +27,11 @@
               "type": "ref",
               "ref": "#ascentInfo"
             }
+          },
+          "grade": {
+            "type": "ref",
+            "ref": "#gradeRef",
+            "description": "The climber's own grade opinion for the ascent, which may differ from the grade tagged in OpenStreetMap"
           },
           "comment": {
             "type": "string",
@@ -55,6 +60,42 @@
       "type": "string",
       "description": "Additional climbing style/ascent qualifier",
       "knownValues": ["clean", "toprope", "lead", "solo", "second", "aid", "pinkpoint", "hangdog"]
+    },
+    "gradeRef": {
+      "type": "object",
+      "description": "A grade in a given grading scale",
+      "required": ["scale", "value"],
+      "properties": {
+        "scale": {
+          "type": "string",
+          "knownValues": [
+            "French",
+            "YDS",
+            "UIAA",
+            "Saxon",
+            "UKTech",
+            "Scandinavian",
+            "Ewbank",
+            "Polish",
+            "FB",
+            "Hueco",
+            "WI",
+            "Mixed",
+            "DryTooling",
+            "Aid",
+            "UKAdj",
+            "YDSDanger",
+            "Huesler",
+            "Schall"
+          ],
+          "description": "Grading scale"
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "Grade in that scale, e.g. '6a+' (French) or '5.10b' (YDS)"
+        }
+      }
     }
   }
 }

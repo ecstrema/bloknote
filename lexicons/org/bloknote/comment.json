@@ -1,0 +1,32 @@
+{
+  "lexicon": 1,
+  "id": "org.bloknote.comment",
+  "description": "Standalone comment on an OpenStreetMap element (node, way, or relation)",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "text", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "org.bloknote.osm.defs#elementRef",
+            "description": "The OpenStreetMap element (node, way, or relation) being commented on"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 10000,
+            "description": "Comment text"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "ISO 8601 timestamp when the comment was created"
+          }
+        }
+      }
+    }
+  }
+}

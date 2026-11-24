@@ -1,4 +1,5 @@
 import { browser } from "$app/env";
+import { MAX_RATING, ratingFromStored } from "@bloknote/common";
 import type { AscentStyle, CommentRecord, OsmElementRef, RatingRecord, StarRecord, TickRecord } from "@bloknote/common";
 import {
   BrowserOAuthClient,
@@ -19,11 +20,13 @@ const RATINGS_STORAGE_KEY = "bloknote:atproto-ratings";
 const LEGACY_REVIEWS_STORAGE_KEY = "bloknote:atproto-reviews";
 
 const TICK_COLLECTION = "org.bloknote.logbook.tick";
-const STAR_COLLECTION = "org.openstreetmap.star";
+const STAR_COLLECTION = "org.bloknote.bookmark";
 const COMMENT_COLLECTION = "org.bloknote.comment";
 const RATING_COLLECTION = "org.bloknote.rating";
 /** Combined review collection used before #163: read-only, migrated into comments + ratings */
 const LEGACY_REVIEW_COLLECTION = "org.openstreetmap.review";
+/** Bookmark collection before the move to org.bloknote.*: read, and deleted on unstar, never written */
+const LEGACY_STAR_COLLECTION = "org.openstreetmap.star";
 
 /**
  * The `client_id` of the deployed app: it points to the client metadata hosted
@@ -33,13 +36,14 @@ const LEGACY_REVIEW_COLLECTION = "org.openstreetmap.review";
 const PRODUCTION_CLIENT_ID = "https://ecstrema.github.io/bloknote/client-metadata.json";
 /**
  * Minimal granular permissions: only create/delete records in the app's own
- * collections on the user's PDS (ticks, stars, comments, ratings). No broad repository
+ * collections on the user's PDS (ticks, stars, comments, ratings), plus deleting legacy stars.
+ * No broad repository
  * access, blobs, account, or identity permissions. Record listing
  * (com.atproto.repo.listRecords) is a public endpoint, so no read permission
  * is needed. Must stay in sync with static/client-metadata.json.
  */
 const OAUTH_SCOPE =
-  "atproto repo:org.bloknote.logbook.tick?action=create&action=delete repo:org.openstreetmap.star?action=create&action=delete repo:org.bloknote.comment?action=create&action=delete repo:org.bloknote.rating?action=create&action=delete";
+  "atproto repo:org.bloknote.logbook.tick?action=create&action=delete repo:org.bloknote.bookmark?action=create&action=delete repo:org.openstreetmap.star?action=delete repo:org.bloknote.comment?action=create&action=delete repo:org.bloknote.rating?action=create&action=delete";
 
 export interface AtProtoSession {
   did: string;
@@ -120,6 +124,14 @@ function migrateLegacyReviews<T extends LocalCommentEntry | LocalRatingEntry>(cu
   return migrated.length > 0 ? [...migrated, ...current] : current;
 }
 
+/** Converts pre-integer 0.0-1.0 ratings (local caches, legacy records) to the integer scale */
+function withStoredRating<T extends { rating: number }>(entry: T): T {
+  return { ...entry, rating: ratingFromStored(entry.rating) };
+}
+
+/** The collection of a record uri (at://did/collection/rkey), e.g. to delete legacy records */
+const collectionOf = (uri: string) => uri.split("/").at(-2) ?? "";
+
 export function sameElementRef(a: OsmElementRef, b: OsmElementRef): boolean {
   return a.type === b.type && a.id === b.id;
 }
@@ -159,7 +171,7 @@ class AtProtoClient {
     migrateLegacyReviews(readJson<LocalCommentEntry[]>(COMMENTS_STORAGE_KEY, []), "text"),
   );
   ratings = $state<LocalRatingEntry[]>(
-    migrateLegacyReviews(readJson<LocalRatingEntry[]>(RATINGS_STORAGE_KEY, []), "rating"),
+    migrateLegacyReviews(readJson<LocalRatingEntry[]>(RATINGS_STORAGE_KEY, []), "rating").map(withStoredRating),
   );
 
   #client?: BrowserOAuthClient;
@@ -272,9 +284,10 @@ class AtProtoClient {
     const session = this.#oauthSession;
     if (!session) return;
     try {
-      const [remoteTicks, remoteStars, remoteComments, remoteRatings, legacyReviews] = await Promise.all([
+      const [remoteTicks, remoteStars, legacyStars, remoteComments, remoteRatings, legacyReviews] = await Promise.all([
         this.#listRemote<LocalTickEntry>(TICK_COLLECTION),
         this.#listRemote<LocalStarEntry>(STAR_COLLECTION),
+        this.#listRemote<LocalStarEntry>(LEGACY_STAR_COLLECTION).catch(() => [] as LocalStarEntry[]),
         this.#listRemote<LocalCommentEntry>(COMMENT_COLLECTION),
         this.#listRemote<LocalRatingEntry>(RATING_COLLECTION),
         // Reviews stored before #163 combined the comment text and the rating in one record:
@@ -312,9 +325,10 @@ class AtProtoClient {
         .filter((r) => typeof r.rating === "number")
         .map((r) => ({ subject: r.subject, rating: r.rating!, createdAt: r.createdAt, uri: r.uri, label: r.label }));
       this.ticks = merge(this.ticks, remoteTicks as LocalTickEntry[]);
-      this.stars = merge(this.stars, remoteStars as LocalStarEntry[]);
+      this.stars = merge(this.stars, [...remoteStars, ...legacyStars]);
       this.comments = merge(this.comments, [...(remoteComments as LocalCommentEntry[]), ...legacyComments]);
-      this.ratings = merge(this.ratings, [...(remoteRatings as LocalRatingEntry[]), ...legacyRatings]);
+      const allRatings = [...(remoteRatings as LocalRatingEntry[]), ...legacyRatings];
+      this.ratings = merge(this.ratings, allRatings.map(withStoredRating));
       // Records logged offline were kept without a uri: push them to the PDS now that we are online
       await Promise.all([
         this.#uploadPending(TICK_COLLECTION, this.ticks),
@@ -450,7 +464,7 @@ class AtProtoClient {
     if (!this.session) throw new Error("ATProto is not configured");
     const now = new Date().toISOString();
     const record: LocalTickEntry = {
-      subject: { type: feature.type, id: feature.id },
+      subject: { type: feature.type, id: feature.id, ...(feature.version > 0 ? { version: feature.version } : {}) },
       style,
       climbedAt: now,
       createdAt: now,
@@ -508,6 +522,7 @@ class AtProtoClient {
         style: entry.style,
         climbedAt: entry.climbedAt,
         createdAt: entry.createdAt,
+        ...(entry.grade ? { grade: entry.grade } : {}),
         ...(entry.comment ? { comment: entry.comment } : {}),
       });
     } catch (error) {
@@ -528,7 +543,7 @@ class AtProtoClient {
     const ref: OsmElementRef = { type: feature.type, id: feature.id };
     const existing = this.stars.find((s) => sameElementRef(s.subject, ref));
     if (existing) {
-      if (existing.uri) await this.#deleteRemoteRecord(STAR_COLLECTION, existing.uri);
+      if (existing.uri) await this.#deleteRemoteRecord(collectionOf(existing.uri), existing.uri);
       this.stars = this.stars.filter((s) => !sameElementRef(s.subject, ref));
       this.#persistStars();
       return false;
@@ -583,7 +598,7 @@ class AtProtoClient {
 
   async addRating(feature: OsmFeature, rating: number): Promise<LocalRatingEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
-    if (!Number.isFinite(rating) || rating < 0 || rating > 1) throw new Error("Invalid rating");
+    if (!Number.isInteger(rating) || rating < 0 || rating > MAX_RATING) throw new Error("Invalid rating");
     const entry: LocalRatingEntry = {
       subject: { type: feature.type, id: feature.id },
       rating,
