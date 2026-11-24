@@ -15908,9 +15908,8 @@ msgstr "Filename <0/>"
 msgid "License <0/>"
 msgstr "License <0/>"
 
-#: src/lib/components/map-links.svelte
-msgid "<0/> Open in..."
-msgstr "<0/> Open in..."
+#~ msgid "<0/> Open in..."
+#~ msgstr "<0/> Open in..."
 
 #. 0: name
 #: src/lib/components/map-links.svelte
@@ -17370,3 +17369,7 @@ msgstr "Recent climbing changes"
 #: src/lib/components/rss-feed-button.svelte
 msgid "Subscribe to the RSS feed of recently added or edited climbs"
 msgstr "Subscribe to the RSS feed of recently added or edited climbs"
+
+#: src/lib/components/map-links.svelte
+msgid "<0/> Navigate..."
+msgstr "<0/> Navigate..."

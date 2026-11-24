@@ -26,7 +26,7 @@
     {#snippet child({ props })}
       <Button {...props} variant="outline" size="sm" class="self-start">
         <span aria-hidden="true"  class="icon-[lucide--map] shrink-0 size-4"></span>
-        Open in...
+        Navigate...
       </Button>
     {/snippet}
   </Sheet.Trigger>
