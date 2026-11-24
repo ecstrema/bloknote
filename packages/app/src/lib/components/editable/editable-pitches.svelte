@@ -28,11 +28,6 @@
     }
     appState.undoStack.endGroup();
   }
-
-  /** Converts the route to a multi-pitch: the pitch count input appears once the route is multi-pitch */
-  function convertToMultipitch() {
-    appState.setTag(featureSlug, "climbing:multipitch", "yes");
-  }
 </script>
 
 {#if rawPitches || isMultipitch}
@@ -59,13 +54,4 @@
       <span>{rawPitches === "1" ? "pitch" : "pitches"}</span>
     {/if}
   </span>
-{:else if appState.osmUser.loggedIn}
-  <button
-    type="button"
-    class="text-xs text-muted-foreground hover:text-foreground hover:underline"
-    title="Convert to a multi-pitch route"
-    onclick={convertToMultipitch}
-  >
-    + Multipitch
-  </button>
 {/if}

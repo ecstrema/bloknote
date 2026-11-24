@@ -28,8 +28,13 @@
   import EditableTags from "#components/editable/editable-tags.svelte";
   import * as Tabs from "#components/ui/tabs/index.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
-  import { getCoordinates, getClimbingStyles, getGrade, parseClimbingLength } from "#lib/data/parse/osm-tags.js";
-  import HolyGrade from "#components/grade/holy-grade.svelte";
+  import { getCoordinates, getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
+  import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
+  import TradCamIcon from "#components/trad-cam-icon.svelte";
+  import ClimbingStyles from "#components/climbing-styles.svelte";
+  import EditableGrade from "#components/editable/editable-grade.svelte";
+  import EditableLength from "#components/editable/editable-length.svelte";
+  import EditablePitches from "#components/editable/editable-pitches.svelte";
   import BookmarkButton from "#components/bookmark-button.svelte";
   import RssFeedButton from "#components/rss-feed-button.svelte";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
@@ -272,18 +277,17 @@
     <EditableName feature={item.feature} featureSlug={itemSlug} />
     {#if itemType === "route"}
       {@const routeTags = (item.feature as OsmFeature).tags ?? {}}
-      {@const grade = getGrade(routeTags)}
-      {#if grade}
-        <HolyGrade class="text-sm" grade={grade.v} />
+      {@const isProject = isProjectRoute(routeTags)}
+      <EditableGrade feature={item.feature} grade={getGrade(routeTags)} featureSlug={itemSlug} gradedProject={isProject} />
+      {#if isTradRoute(routeTags)}
+        <TradCamIcon class="self-center" />
       {/if}
-      {@const length = parseClimbingLength(routeTags["climbing:length"])?.meters}
-      {#if length !== undefined}
-        <span class="text-sm text-muted-foreground" title="Route length">{length} m</span>
+      {#if isIceRoute(routeTags)}
+        <span aria-label="Ice / dry-tooling route" class="icon-[lucide--snowflake] shrink-0 size-3.5 self-center text-cyan-500"></span>
       {/if}
-      {@const styles = getClimbingStyles(routeTags)}
-      {#if styles.length > 0}
-        <span class="text-sm text-muted-foreground" title="Climbing style">{styles.map((s) => s.label).join(", ")}</span>
-      {/if}
+      <EditableLength feature={item.feature} featureSlug={itemSlug} />
+      <EditablePitches feature={item.feature} featureSlug={itemSlug} />
+      <ClimbingStyles feature={item.feature} featureSlug={itemSlug} editable />
     {/if}
     <BookmarkButton class="ms-auto" feature={item.feature} />
   {/if}

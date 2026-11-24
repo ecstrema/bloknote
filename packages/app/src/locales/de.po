@@ -15055,7 +15055,6 @@ msgid "Add Grade"
 msgstr "Grad hinzufügen"
 
 #: src/lib/components/editable/editable-length.svelte
-#: src/routes/world/[...slug]/+page.svelte
 msgid "Route length"
 msgstr "Routenlänge"
 
@@ -16455,8 +16454,8 @@ msgid "Delete {0}"
 msgstr "{0} löschen"
 
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
+#: src/routes/world/[...slug]/+page.svelte
 #: src/routes/world/[...slug]/children-table.svelte
-#: src/routes/world/[...slug]/route-page.svelte
 msgid "Ice / dry-tooling route"
 msgstr "Eis-/Dry-Tooling-Route"
 
@@ -16913,7 +16912,6 @@ msgid "Connected as <0/> · records are stored in your ATProto repository (PDS) 
 msgstr ""
 
 #: src/lib/components/climbing-styles.svelte
-#: src/routes/world/[...slug]/+page.svelte
 msgid "Climbing style"
 msgstr ""
 
@@ -16921,13 +16919,11 @@ msgstr ""
 msgid "Style"
 msgstr ""
 
-#: src/lib/components/editable/editable-pitches.svelte
-msgid "Convert to a multi-pitch route"
-msgstr ""
+#~ msgid "Convert to a multi-pitch route"
+#~ msgstr ""
 
-#: src/lib/components/editable/editable-pitches.svelte
-msgid "+ Multipitch"
-msgstr ""
+#~ msgid "+ Multipitch"
+#~ msgstr ""
 
 #: src/lib/components/pending-sync-badge.svelte
 msgid "Saved offline — will sync to your Atmosphere account when back online"
@@ -17020,10 +17016,8 @@ msgstr ""
 msgid "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
 msgstr ""
 
-#. 0: length
-#: src/routes/world/[...slug]/+page.svelte
-msgid "{0} m"
-msgstr ""
+#~ msgid "{0} m"
+#~ msgstr ""
 
 #: src/lib/components/bookmark-button.svelte
 #: src/lib/components/bookmark-button.svelte
@@ -17372,4 +17366,4 @@ msgstr ""
 
 #: src/lib/components/map-links.svelte
 msgid "<0/> Navigate..."
-msgstr "<0/> Navigieren..."
+msgstr ""

@@ -15055,7 +15055,6 @@ msgid "Add Grade"
 msgstr "Add Grade"
 
 #: src/lib/components/editable/editable-length.svelte
-#: src/routes/world/[...slug]/+page.svelte
 msgid "Route length"
 msgstr "Route length"
 
@@ -16455,8 +16454,8 @@ msgid "Delete {0}"
 msgstr "Delete {0}"
 
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
+#: src/routes/world/[...slug]/+page.svelte
 #: src/routes/world/[...slug]/children-table.svelte
-#: src/routes/world/[...slug]/route-page.svelte
 msgid "Ice / dry-tooling route"
 msgstr "Ice / dry-tooling route"
 
@@ -16913,7 +16912,6 @@ msgid "Connected as <0/> · records are stored in your ATProto repository (PDS) 
 msgstr "Connected as <0/> · records are stored in your ATProto repository (PDS) · <1>browse your data on pds.ls</1>"
 
 #: src/lib/components/climbing-styles.svelte
-#: src/routes/world/[...slug]/+page.svelte
 msgid "Climbing style"
 msgstr "Climbing style"
 
@@ -16921,13 +16919,11 @@ msgstr "Climbing style"
 msgid "Style"
 msgstr "Style"
 
-#: src/lib/components/editable/editable-pitches.svelte
-msgid "Convert to a multi-pitch route"
-msgstr "Convert to a multi-pitch route"
+#~ msgid "Convert to a multi-pitch route"
+#~ msgstr "Convert to a multi-pitch route"
 
-#: src/lib/components/editable/editable-pitches.svelte
-msgid "+ Multipitch"
-msgstr "+ Multipitch"
+#~ msgid "+ Multipitch"
+#~ msgstr "+ Multipitch"
 
 #: src/lib/components/pending-sync-badge.svelte
 msgid "Saved offline — will sync to your Atmosphere account when back online"
@@ -17020,10 +17016,8 @@ msgstr "Bookmark"
 msgid "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
 msgstr "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
 
-#. 0: length
-#: src/routes/world/[...slug]/+page.svelte
-msgid "{0} m"
-msgstr "{0} m"
+#~ msgid "{0} m"
+#~ msgstr "{0} m"
 
 #: src/lib/components/bookmark-button.svelte
 #: src/lib/components/bookmark-button.svelte

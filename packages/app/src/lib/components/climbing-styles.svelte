@@ -43,6 +43,11 @@
     const remove = STYLE_OPTIONS.map(([key]) => `climbing:${key}` as Key).filter(
       (key) => key !== `climbing:${styleKey}` && feature.tags?.[key] !== undefined,
     );
+    // Boulders are never multi-pitch: drop the flag and the pitch count when switching to boulder
+    if (styleKey === "boulder") {
+      if (feature.tags?.["climbing:multipitch"] !== undefined) remove.push("climbing:multipitch");
+      if (feature.tags?.["climbing:pitches"] !== undefined) remove.push("climbing:pitches");
+    }
     if (remove.length > 0) patch.remove = remove;
     appState.applyTagPatch(featureSlug, patch);
   }
@@ -73,7 +78,7 @@
   <Popover.Root>
     <Popover.Trigger
       class={cn(
-        "cursor-pointer rounded-sm text-sm hover:outline-1 hover:outline-offset-2 hover:outline-ring/50 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "cursor-pointer rounded-sm text-sm hover:bg-accent focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ring",
         styles.length === 0 && "text-muted-foreground",
       )}
       aria-label="Climbing style"
