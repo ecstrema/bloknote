@@ -43,6 +43,8 @@
   let cameraTargetKey: string | undefined;
 
   let activeHighlightSlug = "";
+  /** Companion lookup (slug -> bottom/top slug) for the routes of the current page */
+  let companionLookup: Record<string, string> = {};
   /** Set while a lasso drag just finished, so the click that follows does not navigate */
   let suppressNextClick = false;
   let allElementsLoaded = $state(false);
@@ -142,6 +144,12 @@
         tolerance: 0.5,
       });
     }
+    if (!map.getSource("route-line")) {
+      map.addSource("route-line", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      });
+    }
 
     for (const layer of CLIMBING_LAYERS) {
       if (!map.getLayer(layer.id)) {
@@ -235,6 +243,13 @@
 
   function applyHighlightFilters(map: MapLibreMap, slug: string) {
     const cleanSlug = slug.replace(/^world\//, "");
+    const companion = companionLookup[cleanSlug] ?? companionLookup[slug] ?? "";
+    const slugLiterals = [slug, cleanSlug, `world/${cleanSlug}`];
+    if (companion) slugLiterals.push(companion);
+    const selectionLiterals = activeSelectionSlugs.flatMap((s) => {
+      const parts = [s, companionLookup[s]];
+      return parts.filter((p): p is string => !!p);
+    });
     if (map.getLayer("selected-ring")) {
       map.setFilter("selected-ring", [
         "all",
@@ -242,8 +257,8 @@
         ["!=", ["get", "elementType"], "sector"],
         [
           "any",
-          ["in", ["get", "slug"], ["literal", [slug, cleanSlug, `world/${cleanSlug}`]]],
-          ["in", ["get", "slug"], ["literal", activeSelectionSlugs]],
+          ["in", ["get", "slug"], ["literal", slugLiterals]],
+          ["in", ["get", "slug"], ["literal", selectionLiterals]],
         ],
       ]);
     }
@@ -619,6 +634,7 @@
     class: className = "",
     onmove,
     onmapclick,
+    companionSlugs = {},
   }: {
     currentSlug?: string;
     currentFeature?: OsmFeature | GeographicFolderElement | undefined;
@@ -633,6 +649,8 @@
     class?: string;
     onmove?: (position: { lat: number; lon: number }) => void;
     onmapclick?: (position: { lat: number; lon: number }) => void;
+    /** Map of route slug -> companion (bottom/top of the same route) slug, highlighted together (issue #135) */
+    companionSlugs?: Record<string, string>;
   } = $props();
 
   let host: HTMLDivElement;
@@ -858,6 +876,38 @@
   // found nothing (issue #150). Retry as soon as the database becomes ready.
   $effect(() => {
     if (localDb.ready && !allElementsLoaded && shared?.map) void loadMapElements(shared.map);
+  });
+
+  // Bottom/top companions of the current page's routes are highlighted and joined together (issue #135)
+  $effect(() => {
+    companionLookup = companionSlugs ?? {};
+    if (attached && shared?.map) applyHighlightFilters(shared.map, currentSlug);
+  });
+
+  // Draws a line between the bottom and top points of the currently open route (issue #135)
+  $effect(() => {
+    const map = shared?.map;
+    const source = map?.getSource<GeoJSONSource>("route-line");
+    if (!attached || !map || !source) return;
+    const cleanSlug = currentSlug.replace(/^world\//, "");
+    const companion = companionLookup[cleanSlug] ?? companionLookup[currentSlug];
+    const other = companion ? cachedCollection.features.find((f) => f.properties.slug === companion) : undefined;
+    const otherCoords =
+      other && other.geometry.type === "Point" ? (other.geometry.coordinates as [number, number]) : undefined;
+    if (!coordinates || !otherCoords) {
+      source.setData({ type: "FeatureCollection", features: [] });
+      return;
+    }
+    source.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: { type: "LineString", coordinates: [[coordinates.lon, coordinates.lat], otherCoords] },
+          properties: { slug: currentSlug, elementType: "route-line" },
+        },
+      ],
+    });
   });
 
   // Highlight lasso/selected routes on the map when the sidebar selection changes

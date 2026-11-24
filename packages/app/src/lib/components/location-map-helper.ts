@@ -408,4 +408,16 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "text-halo-width": 1.5,
     },
   },
+  {
+    // Line joining the bottom and top points of the currently open multipitch route (issue #135)
+    id: "selected-route-line",
+    type: "line",
+    source: "route-line",
+    filter: ["==", ["geometry-type"], "LineString"],
+    paint: {
+      "line-color": "#2563eb",
+      "line-width": 2.5,
+      "line-dasharray": [2, 2],
+    },
+  },
 ];

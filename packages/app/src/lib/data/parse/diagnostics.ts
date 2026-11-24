@@ -10,6 +10,7 @@ import {
   parseClimbingLength,
   scaleIdToTag,
 } from "./osm-tags.js";
+import { findDuplicatedRoutePartNames } from "./route-parts.js";
 
 export type DiagnosticSeverity = "error" | "warning";
 
@@ -232,6 +233,21 @@ export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature
       tags: ["climbing"],
       fixes: [{ label: "Change to climbing=area", patch: { set: { climbing: "area" } } }],
     });
+  }
+
+  // A multipitch route mapped with a bottom and a top point must only reference one of them in the
+  // parent relation (see issue #135)
+  if (children) {
+    for (const name of findDuplicatedRoutePartNames(children)) {
+      diagnostics.push({
+        id: `duplicate:route-parts:${name.trim().toLowerCase().replace(/\s+/g, "-")}`,
+        severity: "warning",
+        title: `Route "${name}" has both a bottom and a top point`,
+        description:
+          'Two points of the same route (climbing=route_bottom and climbing=route_top) are referenced here. Only one of them (usually the bottom) should be a member of this relation: group the bottom and top points in a separate climbing=route relation instead, or leave the top point out of this relation.',
+        tags: ["climbing"],
+      });
+    }
   }
 
   return diagnostics;

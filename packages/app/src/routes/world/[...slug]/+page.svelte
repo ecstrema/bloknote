@@ -38,7 +38,10 @@
   import BookmarkButton from "#components/bookmark-button.svelte";
   import RssFeedButton from "#components/rss-feed-button.svelte";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
-                
+  import { dataClient } from "#lib/data/network/data-client.js";
+  import { getParentSlug } from "#lib/helpers/slug.js";
+  import { findRoutePartPairs, isRouteBottom, isRouteTop, routeCompanionsBySlug } from "#lib/data/parse/route-parts.js";
+
   type PageTab = "overview" | "map" | "osm" | "diagnostics" | "pulse";
   function parseTab(value: string | null): PageTab | undefined {
     return value === "overview" || value === "map" || value === "osm" || value === "diagnostics" || value === "pulse"
@@ -185,6 +188,52 @@
   const editable = $derived(appState.osmUser.loggedIn && item.feature.type === "node" && isRoute);
   const fallbackCoordinates = $derived(coordinates ? undefined : getFallbackCoordinates(itemSlug));
   const isAreaLike = $derived(item.feature.type === "geographic" || itemType === "area");
+
+  // A multipitch route can be mapped with a bottom and a top point (issue #135)
+  const isNodeRoutePart = $derived(
+    isRoute &&
+      item.feature.type === "node" &&
+      (isRouteBottom(item.feature as OsmFeature) || isRouteTop(item.feature as OsmFeature)),
+  );
+
+  // Siblings of the parent sector, fetched to find the bottom/top companion of the current route
+  let parentChildren = $state<Record<string, DataJSON>>({});
+  $effect(() => {
+    if (building || !isNodeRoutePart) {
+      parentChildren = {};
+      return;
+    }
+    const parentSlug = getParentSlug(itemSlug);
+    if (!parentSlug) {
+      parentChildren = {};
+      return;
+    }
+    let cancelled = false;
+    dataClient
+      .getChildren(parentSlug)
+      .then((children) => {
+        if (!cancelled) parentChildren = children ?? {};
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  });
+
+  const companionSlugs = $derived.by(() => {
+    const children = isNodeRoutePart
+      ? parentChildren
+      : Object.fromEntries(Object.entries(item.children ?? {}).map(([slug, child]) => [slug, child.feature]));
+    return Object.fromEntries(routeCompanionsBySlug(findRoutePartPairs(children)));
+  });
+
+  const routeCompanion = $derived.by(() => {
+    if (!isNodeRoutePart) return undefined;
+    const companionSlug = companionSlugs[itemSlug];
+    const feature = companionSlug ? parentChildren[companionSlug] : undefined;
+    if (!feature || feature.type === "geographic") return undefined;
+    return { slug: companionSlug!, feature };
+  });
   let diagDbElements = $state.raw<Record<string, DataJSON>>({});
   let diagDbTruncated = $state(false);
   let loadingDiagnostics = $state(false);
@@ -353,6 +402,7 @@
         slug={itemSlug}
         // Routes without their own position (mapped as ways) fall back to the parent crag's position
         coordinates={coordinates ?? fallbackCoordinates}
+        companion={routeCompanion}
       />
     {:else if itemType === "gym"}
       <GymPage bind:item={item as DataTree<OsmFeature>} slug={itemSlug} />
@@ -384,6 +434,7 @@
           onmapclick={onMapPlacementClick}
           draggable={editable}
           onmove={editable ? (pos) => appState.setCoordinates(itemSlug, pos) : undefined}
+          {companionSlugs}
         />
       {/await}
       {#if editable && coordinates}

@@ -421,19 +421,32 @@ async function handle(req: DbRequest): Promise<DbResponse> {
               fillColor = getColorFromGrade(gradeObj.v, gradeObj.scale);
             }
           }
+          const properties = {
+            slug,
+            name: tags.name ?? "Unnamed",
+            elementType: "route" as const,
+            routeStyle,
+            grade: gradeStr,
+            fillColor,
+            strokeColor,
+            href: "",
+          };
+          // Routes mapped as ways are drawn along their nodes, like cliffs (issue #135)
+          if (item.type === "way" && Array.isArray(item.nodes)) {
+            const coords = item.nodes.map((id: number) => nodeCoords.get(id)).filter(Boolean) as [number, number][];
+            if (coords.length >= 2) {
+              features.push({
+                type: "Feature",
+                geometry: { type: "LineString", coordinates: coords },
+                properties,
+              });
+              continue;
+            }
+          }
           features.push({
             type: "Feature",
             geometry: { type: "Point", coordinates: [lon, lat] },
-            properties: {
-              slug,
-              name: tags.name ?? "Unnamed",
-              elementType: "route",
-              routeStyle,
-              grade: gradeStr,
-              fillColor,
-              strokeColor,
-              href: "",
-            },
+            properties,
           });
           continue;
         }

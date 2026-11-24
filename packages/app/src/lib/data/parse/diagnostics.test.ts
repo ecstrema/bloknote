@@ -97,4 +97,35 @@ describe("getFeatureDiagnostics", () => {
     expect(diag).toBeDefined();
     expect(diag!.fixes?.[0]?.patch).toEqual({ set: { climbing: "area" } });
   });
+
+  it("flags routes referencing both a bottom and a top point in the same parent (issue #135)", () => {
+    const crag = {
+      type: "relation",
+      id: 10,
+      members: [],
+      tags: { sport: "climbing", climbing: "area", name: "Crag" },
+    } as unknown as OsmFeature;
+    const bottom = {
+      type: "node",
+      id: 11,
+      lat: 0,
+      lon: 0,
+      tags: { sport: "climbing", climbing: "route_bottom", name: "Transit" },
+    } as unknown as OsmFeature;
+    const top = {
+      type: "node",
+      id: 12,
+      lat: 1,
+      lon: 1,
+      tags: { sport: "climbing", climbing: "route_top", name: "Transit" },
+    } as unknown as OsmFeature;
+
+    const both = getFeatureDiagnostics(crag, [bottom, top]);
+    const diag = both.find((d) => d.id === "duplicate:route-parts:transit");
+    expect(diag).toBeDefined();
+    expect(diag!.severity).toBe("warning");
+
+    // Only the bottom is referenced: no diagnostic
+    expect(getFeatureDiagnostics(crag, [bottom]).some((d) => d.id.startsWith("duplicate:route-parts"))).toBe(false);
+  });
 });

@@ -14866,13 +14866,18 @@ msgstr "Opening hours: {0}"
 
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
 msgid "FeatureCollection"
 msgstr "FeatureCollection"
 
 #: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
 msgid "Feature"
 msgstr "Feature"
 
+#: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
@@ -14885,6 +14890,7 @@ msgstr "Point"
 #: src/lib/components/diagnostics-panel.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/pulse-panel.svelte
+#: src/routes/world/[...slug]/route-page.svelte
 msgid "Unnamed"
 msgstr "Unnamed"
 
@@ -15526,6 +15532,7 @@ msgstr "Clear selection"
 msgid "Apply"
 msgstr "Apply"
 
+#: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 msgid "LineString"
@@ -17400,3 +17407,16 @@ msgstr "<0/> Sector"
 #: src/lib/components/shell/sidebar/app-sidebar-children.svelte
 msgid "<0/> Route"
 msgstr "<0/> Route"
+
+#: src/routes/world/[...slug]/route-page.svelte
+msgid "This route is mapped with two points:"
+msgstr "This route is mapped with two points:"
+
+#: src/routes/world/[...slug]/route-page.svelte
+msgid "Points of the route"
+msgstr "Points of the route"
+
+#. 0: wayChildren.length
+#: src/routes/world/[...slug]/route-page.svelte
+msgid "Points ({0})"
+msgstr "Points ({0})"
