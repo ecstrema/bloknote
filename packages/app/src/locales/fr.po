@@ -17371,30 +17371,30 @@ msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete tick"
-msgstr ""
+msgstr "Impossible de supprimer le tick"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete comment"
-msgstr ""
+msgstr "Impossible de supprimer le commentaire"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete rating"
-msgstr ""
+msgstr "Impossible de supprimer la note"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Remove your rating"
-msgstr ""
+msgstr "Supprimer votre note"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Delete tick"
-msgstr ""
+msgstr "Supprimer le tick"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Delete comment"
-msgstr ""
+msgstr "Supprimer le commentaire"
 
 #: src/lib/components/shell/sidebar/app-sidebar-children.svelte
 msgid "<0/> Sector"

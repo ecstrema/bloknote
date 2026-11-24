@@ -17371,30 +17371,30 @@ msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete tick"
-msgstr ""
+msgstr "Não foi possível excluir o registro de ascensão"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete comment"
-msgstr ""
+msgstr "Não foi possível excluir o comentário"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete rating"
-msgstr ""
+msgstr "Não foi possível excluir a avaliação"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Remove your rating"
-msgstr ""
+msgstr "Remover sua avaliação"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Delete tick"
-msgstr ""
+msgstr "Excluir registro de ascensão"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Delete comment"
-msgstr ""
+msgstr "Excluir comentário"
 
 #: src/lib/components/shell/sidebar/app-sidebar-children.svelte
 msgid "<0/> Sector"
