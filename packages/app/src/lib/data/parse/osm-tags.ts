@@ -282,7 +282,7 @@ export type WithSourceTag<T> = { v: T; source: Key };
 
 export type OSMClimbingFeatureType = "route" | "area" | "gym";
 
-const routeClimbingValues = new Set([
+export const routeClimbingValues = new Set([
   "route_bottom",
   "route_top",
   "route",
@@ -293,7 +293,7 @@ const routeClimbingValues = new Set([
   "drytooling",
   "via_ferrata",
 ]);
-const areaClimbingValues = new Set(["area", "crag", "boulder", "bouldering"]);
+export const areaClimbingValues = new Set(["area", "crag", "boulder", "bouldering"]);
 const gymClimbingValues = new Set(["indoor_wall", "artificial_wall", "wall", "gym"]);
 const gymLeisureValues = new Set(["sports_centre", "sports_hall", "fitness_centre", "sport_centre"]);
 
@@ -323,14 +323,82 @@ export function featureToTypeOSM(feature: OsmFeature): OSMClimbingFeatureType | 
   if (tags.sport === "climbing") return "area";
 }
 
+/** Lengths, counts and degrees: plain numbers */
+const numericTag = lengthValidator;
+
+/** Yes/no boolean style tags */
+const yesNoTag = allowMultipleValues(new Set(["yes", "no"]));
+
+/** Grade range tags (`:min`/`:max`/`:mean` suffixes) carry plain grades of the same scale */
+const gradeRangeTags: ProcessedTags = Object.fromEntries(
+  gradeTags.flatMap(([key, scale]) =>
+    [":min", ":max", ":mean"].map((suffix) => [`${key}${suffix}`, allowFromNormalize(getScale(scale)!.normalize)]),
+  ),
+) as ProcessedTags;
+
+/**
+ * Recognized climbing tags that the app understands (or tolerates) but does not act on yet.
+ * See https://wiki.openstreetmap.org/wiki/Climbing and the key list in packages/common/src/index.d.ts.
+ */
+const recognizedClimbingTags: ProcessedTags = {
+  "climbing:multipitch": yesNoTag,
+  "climbing:bolts": numericTag,
+  "climbing:bolt": numericTag,
+  "climbing:bolted": yesNoTag,
+  "climbing:boulder:indoor": yesNoTag,
+  "climbing:chains": yesNoTag,
+  "climbing:routes": numericTag,
+  "climbing:rock": allowAll,
+  "climbing:orientation": allowAll,
+  "climbing:quality": allowAll,
+  "climbing:chipped": yesNoTag,
+  "climbing:summit_log": yesNoTag,
+  "climbing:restriction": yesNoTag,
+  "climbing:restriction:time_description": allowAll,
+  "climbing:family_friendly": yesNoTag,
+  "climbing:beginner_friendly": yesNoTag,
+  "climbing:length:min": numericTag,
+  "climbing:length:max": numericTag,
+};
+
 export const sharedProcessedTags: ProcessedTags = {
   name: allowAll,
   description: allowAll,
+  official_name: allowAll,
+  alt_name: allowAll,
   sport: allowSingleValue("climbing"),
+  access: allowAll,
+  club: allowAll,
+  federation: allowAll,
   ele: deprecated(
     "`ele` is discouraged on standalone climbing elements on OpenStreetMap; remove it unless this element represents a peak or landform.",
   ),
   ...Object.fromEntries(climbingStyleLabels.map(([key]) => [`climbing:${key}`, allowAll])),
+  // Contact and metadata
+  website: allowAll,
+  url: allowAll,
+  "contact:website": allowAll,
+  phone: allowAll,
+  "contact:phone": allowAll,
+  wikimedia_commons: allowAll,
+  "wikimedia_commons:path": allowAll,
+  author: allowAll,
+  opening_hours: isValidOpeningHours,
+  fee: yesNoTag,
+  membership: yesNoTag,
+  // Physical properties
+  height: numericTag,
+  direction: allowAll,
+  covered: yesNoTag,
+  indoor: yesNoTag,
+  outdoor: yesNoTag,
+  natural: allowAll,
+  amenity: allowAll,
+  building: allowAll,
+  "tower:type": allowAll,
+  path: allowAll,
+  ...recognizedClimbingTags,
+  ...gradeRangeTags,
 };
 
 export const processedTags: Record<OSMClimbingFeatureType, ProcessedTags> = {
@@ -342,25 +410,18 @@ export const processedTags: Record<OSMClimbingFeatureType, ProcessedTags> = {
     ),
     "climbing:length": lengthValidator,
     "climbing:pitches": (v: string) => /^[1-9]\d*$/.test(v.trim()),
-    climbing: allowMultipleValues(new Set(["route_bottom", "route_top", "via_ferrata"])),
+    climbing: allowMultipleValues(routeClimbingValues),
     highway: allowSingleValue("via_ferrata"),
   },
   area: {
     ...sharedProcessedTags,
-    climbing: allowMultipleValues(new Set(["crag", "area"])),
+    climbing: allowMultipleValues(areaClimbingValues),
     type: allowSingleValue("site"),
   },
   gym: {
     ...sharedProcessedTags,
     leisure: allowMultipleValues(gymLeisureValues),
     climbing: allowMultipleValues(gymClimbingValues),
-    phone: allowAll,
-    "contact:phone": allowAll,
-    website: allowAll,
-    "contact:website": allowAll,
-    url: allowAll,
-    opening_hours: isValidOpeningHours,
-    fee: allowMultipleValues(new Set(["yes", "no"])),
     charge: allowAll,
   },
 };
@@ -370,12 +431,23 @@ const tagPrefixes: [prefix: string, targetKey: Key][] = [
   ["description:", "description"],
 ];
 
+/** Prefix families that are recognized for every key they qualify (localized names, external links, hazards, ...) */
+const tagPrefixRules: [prefix: string, rule: TagRule][] = [
+  ["name:", allowAll],
+  ["alt_name:", allowAll],
+  ["addr:", allowAll],
+  ["climbing:url:", allowAll],
+  ["climbing:hazard:", yesNoTag],
+  ["climbing:inclination:", numericTag],
+];
+
 export function getTagRule(featureType: OSMClimbingFeatureType | undefined, key: Key): TagRule | undefined {
   if (!featureType) return undefined;
   const rules = processedTags[featureType];
   if (rules[key]) return rules[key];
   const alias = tagPrefixes.find(([prefix]) => key.startsWith(prefix))?.[1];
-  return alias ? rules[alias] : undefined;
+  if (alias) return rules[alias];
+  return tagPrefixRules.find(([prefix]) => key.startsWith(prefix))?.[1];
 }
 
 export function getGradeReference(tags: Tags): number | undefined {

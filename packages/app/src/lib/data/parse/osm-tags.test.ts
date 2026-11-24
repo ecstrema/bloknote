@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { OsmFeature } from "osm-api";
 import {
+  areaClimbingValues,
   featureToTypeOSM,
   getClimbingStyles,
   getGrade,
@@ -10,11 +11,17 @@ import {
   getTagRule,
   isProjectRoute,
   parseClimbingLength,
+  routeClimbingValues,
   scaleIdToTag,
 } from "./osm-tags";
 
 function feature(tags: Record<string, string>): OsmFeature {
   return { type: "node", id: 1, lat: 0, lon: 0, tags } as OsmFeature;
+}
+
+/** Applies a value to a tag rule, skipping the deprecated-tag entries which are not callable */
+function callRule(rule: ReturnType<typeof getTagRule>, value: string): boolean | undefined {
+  return typeof rule === "function" ? rule(value) : undefined;
 }
 
 describe("featureToTypeOSM", () => {
@@ -157,6 +164,41 @@ describe("deprecated tags in processedTags / getTagRule", () => {
     expect(typeof getTagRule("route", "climbing:length")).toBe("function");
     expect(getTagRule("route", "element" as any)).toBeUndefined();
     expect(getTagRule(undefined, "ele")).toBeUndefined();
+  });
+
+  it("marks recognized climbing tags as known on every feature type", () => {
+    for (const featureType of ["route", "area", "gym"] as const) {
+      expect(typeof getTagRule(featureType, "climbing:multipitch")).toBe("function");
+      expect(typeof getTagRule(featureType, "climbing:rock")).toBe("function");
+      expect(typeof getTagRule(featureType, "access")).toBe("function");
+      expect(typeof getTagRule(featureType, "wikimedia_commons")).toBe("function");
+    }
+    // yes/no tags only accept those values
+    expect(callRule(getTagRule("area", "climbing:summit_log"), "yes")).toBe(true);
+    expect(callRule(getTagRule("area", "climbing:summit_log"), "sometimes")).toBe(false);
+    // numeric tags only accept numbers
+    expect(callRule(getTagRule("route", "climbing:bolts"), "12")).toBe(true);
+    expect(callRule(getTagRule("route", "climbing:bolts"), "many")).toBe(false);
+    // grade ranges carry plain grades of the same scale
+    expect(callRule(getTagRule("route", "climbing:grade:french:min"), "6a")).toBe(true);
+  });
+
+  it("marks recognized tag prefix families as known", () => {
+    expect(typeof getTagRule("area", "name:en")).toBe("function");
+    expect(typeof getTagRule("area", "name:oc")).toBe("function");
+    expect(typeof getTagRule("route", "climbing:url:thecrag")).toBe("function");
+    expect(typeof getTagRule("area", "climbing:hazard:loose_rock")).toBe("function");
+    expect(callRule(getTagRule("area", "climbing:hazard:loose_rock"), "no")).toBe(true);
+    expect(typeof getTagRule("route", "climbing:inclination:slab")).toBe("function");
+  });
+
+  it("recognizes every climbing value used to type features", () => {
+    for (const value of routeClimbingValues) {
+      expect(callRule(getTagRule("route", "climbing"), value)).toBe(true);
+    }
+    for (const value of areaClimbingValues) {
+      expect(callRule(getTagRule("area", "climbing"), value)).toBe(true);
+    }
   });
 
   it("offers grading scales matching the climbing style", () => {
