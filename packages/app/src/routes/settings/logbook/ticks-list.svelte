@@ -6,40 +6,69 @@
   import { Select } from "#components/ui/select/index.js";
   import { atproto, type LocalTickEntry } from "#lib/data/network/atproto.svelte.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
-  import { getGrade } from "#lib/data/parse/osm-tags.js";
+  import { getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
+  import { extractRouteStyle, ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
+  import HolyGrade from "#components/grade/holy-grade.svelte";
+  import type { Grade } from "#lib/types.js";
   import type { AscentStyle } from "@bloknote/common";
-  import type { OsmFeature } from "osm-api";
+  import type { OsmFeature, Tags } from "osm-api";
+
+  type SortMode = "recent" | "name" | "grade";
+  const sortModes: { value: SortMode; label: string }[] = [
+    { value: "recent", label: "Recent" },
+    { value: "name", label: "Name" },
+    { value: "grade", label: "Grade" },
+  ];
+  let sortMode = $state<SortMode>("recent");
+
+  /** Distinct color per ascent style */
+  const STYLE_BADGE_CLASSES: Record<AscentStyle, string> = {
+    onsight: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+    flash: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300",
+    redpoint: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+    attempt: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  };
+
+  /** Ticks pointing at an OSM element: subject-less ticks (routes not on OSM yet) are excluded */
+  const osmTicks = $derived(atproto.ticks.filter((t) => t.subject));
+
+  /** Ticks and stars resolved against the local database: the route's slug, name, grade, style */
+  interface ResolvedRef {
+    name?: string;
+    grade?: Grade;
+    gradeRef?: number;
+    style?: string;
+  }
+  let resolved = $state<Record<string, ResolvedRef>>({});
 
   /** Route candidates found again in the OSM data for subject-less ticks, by local tick id */
-  interface TickMatches {
-    candidates: { slug: string; name: string; grade?: string; feature: OsmFeature }[];
-  }
-  let rematch = $state<Record<string, TickMatches>>({});
+  let rematch = $state<Record<string, { candidates: { slug: string; name: string; grade?: string; feature: OsmFeature }[] }>>({});
 
-  /** Resolved route names for tick subjects, by `type-id` ref */
-  let resolvedNames = $state<Record<string, string>>({});
-
-  let editingLocalId = $state<string>();
-  let editStyle = $state<AscentStyle>("redpoint");
-  let editDate = $state("");
-  let editComment = $state("");
   let busy = $state(false);
   let error = $state<string>();
 
-  const sortedTicks = $derived(
-    [...atproto.ticks].sort((a, b) => (b.climbedAt ?? "").localeCompare(a.climbedAt ?? "")),
-  );
-
   $effect(() => {
-    // Resolve the name of every tick subject from the offline data (tick.label is the fallback)
-    const refs = [...new Set(atproto.ticks.filter((t) => t.subject).map((t) => `${t.subject!.type}-${t.subject!.id}`))];
-    const missing = refs.filter((ref) => resolvedNames[ref] === undefined);
+    const refs = [
+      ...new Set([
+        ...osmTicks.map((t) => `${t.subject!.type}-${t.subject!.id}`),
+        ...atproto.stars.map((s) => `${s.subject.type}-${s.subject.id}`),
+      ]),
+    ];
+    const missing = refs.filter((ref) => resolved[ref] === undefined);
     if (missing.length === 0 || !localDb.ready) return;
-    localDb.getByOsmRefs(missing).then((found) => {
-      resolvedNames = { ...resolvedNames };
-      for (const ref of refs) {
-        resolvedNames[ref] = (found[ref]?.data as OsmFeature | undefined)?.tags?.name ?? "";
+    localDb.getByOsmRefs(missing).then((entries) => {
+      const next = { ...resolved };
+      for (const ref of missing) {
+        const entry = entries[ref];
+        const tags = (entry?.data as OsmFeature | undefined)?.tags ?? {};
+        next[ref] = {
+          name: tags.name,
+          grade: getGrade(tags)?.v,
+          gradeRef: getGradeReference(tags),
+          style: extractRouteStyle(tags),
+        };
       }
+      resolved = next;
     });
   });
 
@@ -77,39 +106,74 @@
     if (tick.subject) {
       return (
         tick.label ||
-        resolvedNames[`${tick.subject.type}-${tick.subject.id}`] ||
+        resolved[`${tick.subject.type}-${tick.subject.id}`]?.name ||
         `${tick.subject.type}/${tick.subject.id}`
       );
     }
     return tick.name ?? "Unnamed route";
   }
 
-  function startEdit(tick: LocalTickEntry) {
-    editingLocalId = tick.localId;
-    editStyle = tick.style;
-    editDate = tick.climbedAt ? tick.climbedAt.slice(0, 10) : "";
-    editComment = tick.comment ?? "";
-    error = undefined;
+  /** Grade reference used by the "Grade" sort: OSM data first, else the logbook grade string */
+  function gradeRefFor(tick: LocalTickEntry): number {
+    if (tick.subject) {
+      return resolved[`${tick.subject.type}-${tick.subject.id}`]?.gradeRef ?? 0;
+    }
+    if (!tick.grade) return 0;
+    return getGradeReference({ "climbing:grade": tick.grade } as Tags) ?? 0;
   }
 
-  async function saveEdit(tick: LocalTickEntry) {
-    busy = true;
-    error = undefined;
-    try {
-      await atproto.updateTick(tick, {
-        style: editStyle,
-        climbedAt: editDate ? new Date(`${editDate}T12:00:00Z`).toISOString() : undefined,
-        comment: editComment,
-      });
-      editingLocalId = undefined;
-    } catch (err) {
-      error = err instanceof Error ? err.message : "Could not save the tick.";
-    } finally {
-      busy = false;
+  const sortedTicks = $derived.by(() => {
+    const ticks = [...atproto.ticks];
+    switch (sortMode) {
+      case "name":
+        return ticks.sort((a, b) => labelFor(a).localeCompare(labelFor(b)));
+      case "grade":
+        return ticks.sort((a, b) => gradeRefFor(b) - gradeRefFor(a));
+      default:
+        return ticks.sort((a, b) => (b.climbedAt ?? "").localeCompare(a.climbedAt ?? ""));
     }
+  });
+
+  /** Inline edits are pushed to the PDS after a short delay, so typing stays smooth */
+  const SAVE_DELAY_MS = 2500;
+  const saveTimers: Record<string, ReturnType<typeof setTimeout>> = {};
+  let saving = $state<Record<string, boolean>>({});
+
+  function scheduleSave(tick: LocalTickEntry) {
+    const id = tick.localId!;
+    clearTimeout(saveTimers[id]);
+    saving = { ...saving, [id]: true };
+    saveTimers[id] = setTimeout(() => {
+      delete saveTimers[id];
+      atproto
+        .pushTick(tick)
+        .catch((err) => (error = err instanceof Error ? err.message : "Could not save the tick."))
+        .finally(() => {
+          saving = { ...saving, [id]: false };
+        });
+    }, SAVE_DELAY_MS);
+  }
+
+  function setStyle(tick: LocalTickEntry, style: AscentStyle) {
+    tick.style = style;
+    scheduleSave(tick);
+  }
+
+  function setDate(tick: LocalTickEntry, value: string) {
+    if (!value) return;
+    tick.climbedAt = new Date(`${value}T12:00:00Z`).toISOString();
+    scheduleSave(tick);
+  }
+
+  function setComment(tick: LocalTickEntry, value: string) {
+    const trimmed = value.trim();
+    if (trimmed) tick.comment = trimmed;
+    else delete tick.comment;
+    scheduleSave(tick);
   }
 
   async function onDelete(tick: LocalTickEntry) {
+    clearTimeout(saveTimers[tick.localId!]);
     busy = true;
     error = undefined;
     try {
@@ -168,6 +232,11 @@
 <section class="flex flex-col gap-3 rounded-md border p-3.5" aria-label="Your ticks">
   <div class="flex flex-wrap items-center justify-between gap-2">
     <h2 class="text-sm font-semibold">Your ticks ({sortedTicks.length})</h2>
+    <Select aria-label="Sort ticks" class="w-auto" bind:value={sortMode}>
+      {#each sortModes as mode (mode.value)}
+        <option value={mode.value}>{mode.label}</option>
+      {/each}
+    </Select>
   </div>
 
   {#if error}
@@ -177,9 +246,10 @@
   {#if sortedTicks.length === 0}
     <p class="text-xs text-muted-foreground">No ticks yet. Log them on a route page, or import a logbook above.</p>
   {:else}
-    <ul class="flex max-h-[32rem] flex-col gap-2 overflow-y-auto text-sm">
+    <ul class="flex flex-col gap-2 text-sm">
       {#each sortedTicks as tick (tick.localId)}
         {@const linked = rematch[tick.localId!]?.candidates ?? []}
+        {@const info = tick.subject ? resolved[`${tick.subject.type}-${tick.subject.id}`] : undefined}
         <li class="flex flex-col gap-1 rounded border p-2">
           <div class="flex flex-wrap items-center gap-2">
             {#if tick.subject}
@@ -194,17 +264,47 @@
             {:else}
               <span class="font-medium">{labelFor(tick)}</span>
             {/if}
-            <span class="rounded bg-muted px-1.5 py-0.5 text-[11px] capitalize text-muted-foreground"
-              >{tick.style}</span
-            >
-            <span class="text-xs text-muted-foreground">{new Date(tick.climbedAt).toLocaleDateString()}</span>
-            {#if !tick.uri}
-              <span class="rounded border px-1.5 py-0.5 text-[11px] text-muted-foreground">Pending sync</span>
+            {#if info?.grade}
+              <HolyGrade class="text-xs font-semibold" grade={info.grade} />
+            {:else if tick.grade}
+              <span class="text-xs text-muted-foreground">{tick.grade}</span>
             {/if}
-            <div class="ms-auto flex items-center gap-1">
-              <Button size="icon-xs" variant="ghost" title="Edit tick" aria-label="Edit tick" onclick={() => startEdit(tick)}>
-                <span aria-hidden="true" class="icon-[lucide--pencil] size-3.5"></span>
-              </Button>
+            {#if info?.style}
+              <span class="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
+                {ROUTE_STYLE_LABELS[info.style] ?? info.style}
+              </span>
+            {/if}
+            <span class="ms-auto flex flex-wrap items-center gap-2">
+              {#if saving[tick.localId!]}
+                <span class="text-[11px] text-muted-foreground">Saving…</span>
+              {:else if !tick.uri}
+                <span class="rounded border px-1.5 py-0.5 text-[11px] text-muted-foreground">Pending sync</span>
+              {/if}
+              <Select
+                aria-label="Ascent style of {labelFor(tick)}"
+                class={`w-auto rounded px-1.5 py-0.5 text-[11px] font-medium capitalize ${STYLE_BADGE_CLASSES[tick.style]}`}
+                value={tick.style}
+                onchange={(e) => setStyle(tick, (e.target as HTMLSelectElement).value as AscentStyle)}
+              >
+                <option value="onsight">Onsight</option>
+                <option value="flash">Flash</option>
+                <option value="redpoint">Redpoint</option>
+                <option value="attempt">Attempt</option>
+              </Select>
+              <Input
+                type="date"
+                class="w-auto text-xs"
+                value={tick.climbedAt.slice(0, 10)}
+                aria-label="Ascent date of {labelFor(tick)}"
+                onchange={(e) => setDate(tick, (e.target as HTMLInputElement).value)}
+              />
+              <Input
+                class="min-w-40 flex-1 text-xs"
+                value={tick.comment ?? ""}
+                placeholder="Comment"
+                aria-label="Comment on {labelFor(tick)}"
+                oninput={(e) => setComment(tick, (e.target as HTMLInputElement).value)}
+              />
               <Button
                 size="icon-xs"
                 variant="ghost"
@@ -215,12 +315,12 @@
               >
                 <span aria-hidden="true" class="icon-[lucide--trash-2] size-3.5"></span>
               </Button>
-            </div>
+            </span>
           </div>
 
           {#if !tick.subject}
             <p class="text-xs text-muted-foreground">
-              Not on OpenStreetMap{tick.grade ? ` · ${tick.grade}` : ""}{tick.crag ? ` · ${tick.crag}` : ""}
+              Not on OpenStreetMap{tick.crag ? ` · ${tick.crag}` : ""}
             </p>
 
             {#if linked.length > 0}
@@ -267,31 +367,6 @@
                 {/if}
               </div>
             {/if}
-          {/if}
-
-          {#if editingLocalId === tick.localId}
-            <form
-              class="flex flex-wrap items-center gap-2 rounded bg-muted/40 p-2"
-              onsubmit={(e) => {
-                e.preventDefault();
-                void saveEdit(tick);
-              }}
-            >
-              <Select aria-label="Ascent style" class="w-auto" bind:value={editStyle}>
-                <option value="onsight">Onsight</option>
-                <option value="flash">Flash</option>
-                <option value="redpoint">Redpoint</option>
-                <option value="attempt">Attempt</option>
-              </Select>
-              <Input type="date" class="w-auto" bind:value={editDate} aria-label="Ascent date" />
-              <Input class="min-w-40 flex-1" bind:value={editComment} placeholder="Comment (optional)" />
-              <Button size="xs" type="submit" disabled={busy}>Save</Button>
-              <Button size="xs" type="button" variant="outline" onclick={() => (editingLocalId = undefined)}>
-                Cancel
-              </Button>
-            </form>
-          {:else if tick.comment}
-            <p class="text-xs">{tick.comment}</p>
           {/if}
         </li>
       {/each}

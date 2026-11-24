@@ -15,7 +15,7 @@
       tab to keep your ticks, bookmarks, and comments.
     </p>
   {/if}
-  <UserStatsPanel />
-  <TicksList />
   <TickImport />
+  <TicksList />
+  <UserStatsPanel />
 </Tabs.Content>

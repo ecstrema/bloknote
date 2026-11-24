@@ -612,6 +612,20 @@ class AtProtoClient {
     return this.ticks.find((t) => t.localId === localId);
   }
 
+  /**
+   * Pushes the current local state of a tick to the PDS. The entry is mutated in place first:
+   * inline edits (debounced for a few seconds by the caller) land here (issue #154).
+   * Uri-less entries (never uploaded) are pushed by #uploadPending on the next sync instead.
+   */
+  async pushTick(entry: LocalTickEntry): Promise<LocalTickEntry> {
+    if (!this.session) throw new Error("ATProto is not configured");
+    if (entry.uri) {
+      await this.#putRemoteRecord(TICK_COLLECTION, entry.uri, remoteTickRecord(entry));
+    }
+    this.#persistTicks();
+    return entry;
+  }
+
   /** Edits a tick (style, ascent date, comment) locally and in the PDS when synced */
   async updateTick(
     entry: LocalTickEntry,

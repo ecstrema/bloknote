@@ -3,6 +3,7 @@
   import { Button } from "#components/ui/button/index.js";
   import { Select } from "#components/ui/select/index.js";
   import { Input } from "#components/ui/input/index.js";
+  import * as Collapsible from "#components/ui/collapsible/index.js";
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { getGrade } from "#lib/data/parse/osm-tags.js";
@@ -38,6 +39,7 @@
   }
 
   let fileName = $state("");
+  let open = $state(false);
   let rows = $state<ImportRow[]>([]);
   let truncated = $state(false);
   let format = $state<TickImportFormat>("mountainproject");
@@ -185,10 +187,21 @@
   }
 </script>
 
-<section class="flex flex-col gap-3 rounded-md border p-3.5" aria-label="Import ticks from other platforms">
-  <h2 class="text-sm font-semibold">Import ticks</h2>
+<Collapsible.Root class="flex flex-col gap-3 rounded-md border p-3.5" aria-label="Import ticks from other platforms">
+  <Collapsible.Trigger
+    class="flex w-fit items-center gap-1.5 rounded text-sm font-semibold hover:text-foreground"
+    aria-expanded={open}
+  >
+    <span
+      aria-hidden="true"
+      class="icon-[lucide--chevron-right] size-4 shrink-0 transition-transform"
+      class:rotate-90={open}
+    ></span>
+    Import ticks
+  </Collapsible.Trigger>
 
-  <p class="text-xs text-muted-foreground">
+  <Collapsible.Content class="flex flex-col gap-3">
+    <p class="text-xs text-muted-foreground">
     Export your logbook from
     <a
       class="underline underline-offset-2"
@@ -340,4 +353,5 @@
       {/if}
     </ul>
   {/if}
-</section>
+  </Collapsible.Content>
+</Collapsible.Root>

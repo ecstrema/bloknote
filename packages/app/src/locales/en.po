@@ -15166,7 +15166,6 @@ msgstr "Add"
 #: src/lib/components/shell/osm-changes.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 #: src/lib/components/topo/topo-viewer.svelte
-#: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Cancel"
 msgstr "Cancel"
@@ -15220,7 +15219,6 @@ msgstr "Leave a comment"
 
 #: src/lib/components/shell/osm-changes.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Comment (optional)"
 msgstr "Comment (optional)"
 
@@ -15671,6 +15669,7 @@ msgstr "Both"
 
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/map-legend.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Grade"
 msgstr "Grade"
 
@@ -16256,7 +16255,6 @@ msgstr "Log a tick for {0} selected items."
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Ascent style"
 msgstr "Ascent style"
 
@@ -16710,9 +16708,8 @@ msgstr "Your climbing stats"
 #~ msgid "Starred climbs"
 #~ msgstr "Starred climbs"
 
-#: src/routes/settings/logbook/user-stats-panel.svelte
-msgid "Recent ticks"
-msgstr "Recent ticks"
+#~ msgid "Recent ticks"
+#~ msgstr "Recent ticks"
 
 #~ msgid "Connected as <0/> ({0}{1})"
 #~ msgstr "Connected as <0/> ({0}{1})"
@@ -16884,6 +16881,7 @@ msgid "Description"
 msgstr "Description"
 
 #: src/lib/components/editable/editable-name.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Name"
 msgstr "Name"
 
@@ -17208,7 +17206,6 @@ msgid "Review pending edits and save them to OpenStreetMap"
 msgstr "Review pending edits and save them to OpenStreetMap"
 
 #: src/lib/components/shell/osm-changes.svelte
-#: src/routes/settings/logbook/ticks-list.svelte
 msgid "Save"
 msgstr "Save"
 
@@ -17263,26 +17260,20 @@ msgstr "Climbing sessions per month"
 msgid "Tries per route"
 msgstr "Tries per route"
 
-#: src/routes/settings/logbook/user-stats-panel.svelte
-msgid "Check what happened to this route on OpenStreetMap"
-msgstr "Check what happened to this route on OpenStreetMap"
+#~ msgid "Check what happened to this route on OpenStreetMap"
+#~ msgstr "Check what happened to this route on OpenStreetMap"
 
-#: src/routes/settings/logbook/user-stats-panel.svelte
-msgid "Checking OpenStreetMap…"
-msgstr "Checking OpenStreetMap…"
+#~ msgid "Checking OpenStreetMap…"
+#~ msgstr "Checking OpenStreetMap…"
 
-#: src/routes/settings/logbook/user-stats-panel.svelte
-msgid "The route still exists on OpenStreetMap but is missing from the climbing data."
-msgstr "The route still exists on OpenStreetMap but is missing from the climbing data."
+#~ msgid "The route still exists on OpenStreetMap but is missing from the climbing data."
+#~ msgstr "The route still exists on OpenStreetMap but is missing from the climbing data."
 
-#: src/routes/settings/logbook/user-stats-panel.svelte
-msgid "The route was deleted from OpenStreetMap and no replacement was found nearby."
-msgstr "The route was deleted from OpenStreetMap and no replacement was found nearby."
+#~ msgid "The route was deleted from OpenStreetMap and no replacement was found nearby."
+#~ msgstr "The route was deleted from OpenStreetMap and no replacement was found nearby."
 
-#. 0: check.candidate.feature.name ?? `${check.candidate.feature.type}/${check.candidate.feature.id}`; 1: Math.round(check.candidate.confidence * 100)
-#: src/routes/settings/logbook/user-stats-panel.svelte
-msgid "Replacement found: {0} ({1}% match) <0>Relink tick</0>"
-msgstr "Replacement found: {0} ({1}% match) <0>Relink tick</0>"
+#~ msgid "Replacement found: {0} ({1}% match) <0>Relink tick</0>"
+#~ msgstr "Replacement found: {0} ({1}% match) <0>Relink tick</0>"
 
 #: src/lib/components/shell/edit-nudge.svelte
 msgid "Everything here is editable"
@@ -17505,9 +17496,8 @@ msgstr "Pick a route..."
 msgid "Already logged"
 msgstr "Already logged"
 
-#: src/routes/settings/logbook/tick-import.svelte
-msgid "Import ticks"
-msgstr "Import ticks"
+#~ msgid "Import ticks"
+#~ msgstr "Import ticks"
 
 #~ msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are matched by name against the offline climbing data; routes that are not on OpenStreetMap yet cannot be imported."
 #~ msgstr "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are matched by name against the offline climbing data; routes that are not on OpenStreetMap yet cannot be imported."
@@ -17563,7 +17553,6 @@ msgid "<0/> and {0} route{1} not found on OSM. Don't worry, you can add them sti
 msgstr "<0/> and {0} route{1} not found on OSM. Don't worry, you can add them still."
 
 #: src/routes/settings/logbook/ticks-list.svelte
-#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Unnamed route"
 msgstr "Unnamed route"
 
@@ -17596,10 +17585,8 @@ msgstr "No ticks yet. Log them on a route page, or import a logbook above."
 msgid "Pending sync"
 msgstr "Pending sync"
 
-#: src/routes/settings/logbook/ticks-list.svelte
-#: src/routes/settings/logbook/ticks-list.svelte
-msgid "Edit tick"
-msgstr "Edit tick"
+#~ msgid "Edit tick"
+#~ msgstr "Edit tick"
 
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Found in the OSM data:"
@@ -17623,14 +17610,11 @@ msgstr "<0/> Add to OSM"
 msgid "You will place the route on the crag's map."
 msgstr "You will place the route on the crag's map."
 
-#. 0: tick.grade ? ` · ${tick.grade}` \\: ""; 1: tick.crag ? ` · ${tick.crag}` \\: ""
-#: src/routes/settings/logbook/ticks-list.svelte
-msgid "Not on OpenStreetMap{0}{1}"
-msgstr "Not on OpenStreetMap{0}{1}"
+#~ msgid "Not on OpenStreetMap{0}{1}"
+#~ msgstr "Not on OpenStreetMap{0}{1}"
 
-#: src/routes/settings/logbook/ticks-list.svelte
-msgid "Ascent date"
-msgstr "Ascent date"
+#~ msgid "Ascent date"
+#~ msgstr "Ascent date"
 
 #. 0: pendingTick.name
 #: src/routes/world/[...slug]/+page.svelte
@@ -17642,6 +17626,45 @@ msgstr "Adding \"{0}\" for your tick: click on the map to place the route."
 msgid "Log in with OpenStreetMap to add \"{0}\" for your tick."
 msgstr "Log in with OpenStreetMap to add \"{0}\" for your tick."
 
-#: src/routes/settings/logbook/user-stats-panel.svelte
-msgid "Not on OSM"
-msgstr "Not on OSM"
+#~ msgid "Not on OSM"
+#~ msgstr "Not on OSM"
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Recent"
+msgstr "Recent"
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Sort ticks"
+msgstr "Sort ticks"
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Saving…"
+msgstr "Saving…"
+
+#. 0: labelFor(tick)
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Ascent style of {0}"
+msgstr "Ascent style of {0}"
+
+#. 0: labelFor(tick)
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Ascent date of {0}"
+msgstr "Ascent date of {0}"
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Comment"
+msgstr "Comment"
+
+#. 0: labelFor(tick)
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Comment on {0}"
+msgstr "Comment on {0}"
+
+#. 0: tick.crag ? ` · ${tick.crag}` \\: ""
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Not on OpenStreetMap{0}"
+msgstr "Not on OpenStreetMap{0}"
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "<0/> Import ticks"
+msgstr "<0/> Import ticks"
