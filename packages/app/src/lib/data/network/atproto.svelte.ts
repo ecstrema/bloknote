@@ -39,7 +39,7 @@ const PRODUCTION_CLIENT_ID = "https://ecstrema.github.io/bloknote/client-metadat
  * is needed. Must stay in sync with static/client-metadata.json.
  */
 const OAUTH_SCOPE =
-  "atproto repo:org.bloknote.logbook.tick?action=create&action=delete repo:org.openstreetmap.star?action=create&action=delete repo:org.bloknote.comment?action=create&action=delete repo:org.bloknote.rating?action=create&action=delete";
+  "atproto repo:org.bloknote.logbook.tick?action=create&action=update&action=delete repo:org.openstreetmap.star?action=create&action=delete repo:org.bloknote.comment?action=create&action=delete repo:org.bloknote.rating?action=create&action=delete";
 
 export interface AtProtoSession {
   did: string;

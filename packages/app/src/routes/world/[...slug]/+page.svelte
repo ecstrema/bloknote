@@ -13,6 +13,7 @@
   import { getStaticIdentifier } from "@bloknote/common";
   import { getAppState } from "#lib/data/app-state.js";
   import { afterNavigate, goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
   import { building } from "$app/env";
   import { page } from "$app/state";
   import { untrack } from "svelte";
@@ -289,10 +290,11 @@
     if (!tick) return;
     void atproto
       .linkTick(tick, { type: feature.type, id: feature.id })
-      .catch((err) => console.error("Could not link the tick to the new route", err));
-    const url = new URL(location.href);
-    url.searchParams.delete("addRouteTick");
-    void goto(url, { state: page.state, shallow: true, replace: true });
+      .catch((err) => console.error("Could not link the tick to the new route", err))
+      .finally(() => {
+        // Back to the ticks list, where the tick now shows its route
+        void goto(resolve("/settings/logbook"), { replace: true });
+      });
   }
 
   $effect(() => {

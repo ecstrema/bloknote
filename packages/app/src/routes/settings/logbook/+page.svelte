@@ -7,7 +7,7 @@
   import TicksList from "./ticks-list.svelte";
 </script>
 
-<Tabs.Content value="logbook">
+<Tabs.Content value="logbook" class="flex flex-col gap-4">
   {#if !atproto.configured}
     <p class="border-t py-6 text-sm text-muted-foreground">
       Connect your Atmosphere account in the
@@ -16,6 +16,6 @@
     </p>
   {/if}
   <TickImport />
-  <TicksList />
   <UserStatsPanel />
+  <TicksList />
 </Tabs.Content>

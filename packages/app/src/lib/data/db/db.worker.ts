@@ -217,54 +217,97 @@ function areaSegments(area: string): string[] {
 function matchAreaCandidates(db: Database, query: string): { slug: string; data: DataJSON }[] {
   const match = toMatchQuery(query);
   if (!match) return [];
-  const rows = db.selectArrays(
+  const areas = db.selectArrays(
     `SELECT e.slug, e.data FROM places JOIN elements e ON e.slug = places.slug
-     WHERE places MATCH ? AND e.type = 'area' LIMIT 3`,
+     WHERE places MATCH ? AND e.type = 'area' LIMIT 5`,
     [match],
   );
-  return rows.map(([slug, json]) => ({ slug: slug as string, data: JSON.parse(json as string) }));
+  // Areas whose name is exactly the queried segment first: FTS prefixes otherwise match loosely
+  // ("Sector 5 & 6" would match "sector-5-boulder-6" before the crag actually meant)
+  const target = normalizeName(query);
+  return areas
+    .map(([slug, json]) => ({ slug: slug as string, data: JSON.parse(json as string) }))
+    .sort(
+      (a, b) =>
+        ((normalizeName((b.data as OsmFeature).tags?.name ?? "") === target ? 1 : 0) -
+          (normalizeName((a.data as OsmFeature).tags?.name ?? "") === target ? 1 : 0)),
+    );
 }
 
 /** How many areas may be scanned per tick query, to bound the subtree scans */
-const MATCH_TICK_MAX_AREAS = 2;
+const MATCH_TICK_MAX_AREAS = 4;
 /** How many route candidates are returned per tick query */
 const MATCH_TICK_MAX_ROUTES = 5;
+
+function scanAreaSubtree(
+  db: Database,
+  areaSlug: string,
+  variants: string[],
+  results: TickRouteMatch[],
+  seenSlugs: Set<string>,
+) {
+  const prefix = `${areaSlug}/`;
+  const rows = db.selectArrays(
+    `SELECT slug, parent_slug, data FROM elements
+     WHERE type = 'route' AND (slug = ? OR substr(slug, 1, ?) = ?) LIMIT 2000`,
+    [areaSlug, prefix.length, prefix],
+  );
+  for (const [slug, parentSlug, json] of rows) {
+    if (results.length >= MATCH_TICK_MAX_ROUTES) return;
+    if (seenSlugs.has(slug as string)) continue;
+    const data = JSON.parse(json as string) as DataJSON;
+    const base = normalizeName((data as OsmFeature).tags?.name ?? "");
+    if (!base || !variants.includes(base)) continue;
+    seenSlugs.add(slug as string);
+    results.push({ slug: slug as string, parentSlug: parentSlug as string, data });
+  }
+}
 
 /**
  * Finds routes named like the queried tick inside the areas given by the CSV (issue #154).
  * The location hierarchy is tried deepest first (the wall is more specific than the country).
+ * A fallback matches the route name globally, but only when the slug path mentions one of the
+ * area segments: routes sometimes sit directly under a region while the logbook names its crag.
  */
 function matchTickQuery(db: Database, query: { name: string; area?: string }): TickRouteMatch[] {
   const variants = nameVariants(query.name);
   if (variants.length === 0 || !query.area) return [];
 
+  const segments = areaSegments(query.area);
   const results: TickRouteMatch[] = [];
   const seenSlugs = new Set<string>();
   const visitedAreas = new Set<string>();
 
-  for (const segment of areaSegments(query.area)) {
+  for (const segment of segments) {
     if (results.length >= MATCH_TICK_MAX_ROUTES || visitedAreas.size >= MATCH_TICK_MAX_AREAS) break;
     for (const area of matchAreaCandidates(db, segment)) {
       if (results.length >= MATCH_TICK_MAX_ROUTES || visitedAreas.size >= MATCH_TICK_MAX_AREAS) break;
       if (visitedAreas.has(area.slug)) continue;
       visitedAreas.add(area.slug);
-
-      const prefix = `${area.slug}/`;
-      const rows = db.selectArrays(
-        `SELECT slug, parent_slug, data FROM elements
-         WHERE type = 'route' AND (slug = ? OR substr(slug, 1, ?) = ?) LIMIT 2000`,
-        [area.slug, prefix.length, prefix],
-      );
-      for (const [slug, parentSlug, json] of rows) {
-        if (results.length >= MATCH_TICK_MAX_ROUTES) break;
-        if (seenSlugs.has(slug as string)) continue;
-        const data = JSON.parse(json as string) as DataJSON;
-        const candidateBase = normalizeName((data as OsmFeature).tags?.name ?? "");
-        if (!candidateBase || !variants.includes(candidateBase)) continue;
-        seenSlugs.add(slug as string);
-        results.push({ slug: slug as string, parentSlug: parentSlug as string, data });
-      }
+      scanAreaSubtree(db, area.slug, variants, results, seenSlugs);
     }
+  }
+  if (results.length > 0) return results;
+
+  const match = toMatchQuery(query.name);
+  if (!match) return [];
+  const rows = db.selectArrays(
+    `SELECT e.slug, e.data FROM places JOIN elements e ON e.slug = places.slug
+     WHERE places MATCH ? AND e.type = 'route' LIMIT 20`,
+    [match],
+  );
+  const segmentBases = segments.map(normalizeName);
+  for (const [slug, json] of rows) {
+    if (results.length >= MATCH_TICK_MAX_ROUTES) break;
+    if (seenSlugs.has(slug as string)) continue;
+    const data = JSON.parse(json as string) as DataJSON;
+    const base = normalizeName((data as OsmFeature).tags?.name ?? "");
+    if (!base || !variants.includes(base)) continue;
+    // The slug path must mention one of the CSV's area segments (slugified names)
+    const components = (slug as string).split("/").map((c) => normalizeName(c.replaceAll("-", " ")));
+    if (!components.some((c) => segmentBases.includes(c))) continue;
+    const parentSlug = (slug as string).split("/").slice(0, -1).join("/");
+    results.push({ slug: slug as string, parentSlug, data });
   }
   return results;
 }
