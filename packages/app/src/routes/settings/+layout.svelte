@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { goto } from "$app/navigation";
+  import { afterNavigate, goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
   import { onMount } from "svelte";
@@ -32,6 +32,31 @@
     hasPreviousPage = window.history.length > 1;
   });
 
+  // Remember the last page visited outside of the settings tabs, so the back
+  // button always returns to the routes instead of walking back through the
+  // profile tab history.
+  const RETURN_STORAGE_KEY = "bloknote:settings-return";
+  afterNavigate((navigation) => {
+    const from = navigation.from?.url;
+    if (from && !from.pathname.startsWith(resolve("/settings"))) {
+      try {
+        sessionStorage.setItem(RETURN_STORAGE_KEY, from.pathname + from.search);
+      } catch {
+        // Session storage unavailable: the back button falls back to the map
+      }
+    }
+  });
+
+  function goBack() {
+    let target: string | null = null;
+    try {
+      target = sessionStorage.getItem(RETURN_STORAGE_KEY);
+    } catch {
+      // Session storage unavailable: fall back to the map
+    }
+    void goto(target ?? resolve("world"));
+  }
+
   // Legacy links and in-flight OAuth logins still point to /settings?tab=account
   $effect(() => {
     if (activeTab === "settings" && ["account", "accounts"].includes(page.url.searchParams.get("tab") ?? "")) {
@@ -57,7 +82,7 @@
             Docs
           </a>
           {#if hasPreviousPage}
-            <Button variant="ghost" onclick={() => window.history.back()}>
+            <Button variant="ghost" onclick={goBack}>
               <span class="icon-[lucide--arrow-left] shrink-0 size-4"></span>
               Back
             </Button>
