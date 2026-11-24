@@ -17370,27 +17370,27 @@ msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete tick"
-msgstr ""
+msgstr "Tick konnte nicht gelöscht werden"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete comment"
-msgstr ""
+msgstr "Kommentar konnte nicht gelöscht werden"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not delete rating"
-msgstr ""
+msgstr "Bewertung konnte nicht gelöscht werden"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Remove your rating"
-msgstr ""
+msgstr "Bewertung entfernen"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Delete tick"
-msgstr ""
+msgstr "Tick löschen"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
 msgid "Delete comment"
-msgstr ""
+msgstr "Kommentar löschen"
