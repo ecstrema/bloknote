@@ -81,6 +81,56 @@ export function computePulseStats(features: OsmFeature[], now: number = Date.now
   };
 }
 
+export interface ItemTagChange {
+  key: string;
+  /** Previous value, `undefined` when the tag was added */
+  from: string | undefined;
+  /** New value, `undefined` when the tag was removed */
+  to: string | undefined;
+}
+
+export interface ItemVersion {
+  version: number;
+  timestamp: number | undefined;
+  user: string | undefined;
+  changeset: number | undefined;
+  /** Tag changes relative to the previous version; empty for the first version */
+  tagChanges: ItemTagChange[];
+}
+
+/**
+ * Turns an OSM feature history (all versions of one element, as returned by the OSM API
+ * `/history` endpoint) into a newest-first version timeline with the tags that changed at each
+ * version (issue #217).
+ */
+export function historyVersions(history: OsmFeature[]): ItemVersion[] {
+  const sorted = [...history].sort((a, b) => a.version - b.version);
+  const versions: ItemVersion[] = [];
+  let previous: OsmFeature | undefined;
+  for (const feature of sorted) {
+    const tagChanges: ItemTagChange[] = [];
+    if (previous) {
+      const keys = new Set([...Object.keys(previous.tags ?? {}), ...Object.keys(feature.tags ?? {})]);
+      for (const key of keys) {
+        const from = previous.tags?.[key];
+        const to = feature.tags?.[key];
+        if (from !== to) tagChanges.push({ key, from, to });
+      }
+      tagChanges.sort((a, b) => a.key.localeCompare(b.key));
+    }
+    const ts = Date.parse(feature.timestamp);
+    versions.unshift({
+      version: feature.version,
+      timestamp: Number.isFinite(ts) ? ts : undefined,
+      user: feature.user,
+      changeset: feature.changeset,
+      tagChanges,
+    });
+    previous = feature;
+  }
+  return versions;
+}
+
 function unit(value: number, singular: string, plural: string): string {
   return `${value} ${value === 1 ? singular : plural}`;
 }

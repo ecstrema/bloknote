@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { OsmFeature } from "osm-api";
-import { computePulseStats, formatAge } from "./pulse.js";
+import { computePulseStats, formatAge, historyVersions } from "./pulse.js";
 
 function feature(timestamp?: string): OsmFeature {
   return {
@@ -87,5 +87,52 @@ describe("formatAge", () => {
   it("uses singular forms", () => {
     expect(formatAge(60_000)).toBe("1 minute ago");
     expect(formatAge(86_400_000)).toBe("1 day ago");
+  });
+});
+
+describe("historyVersions", () => {
+  function versioned(version: number, tags: Record<string, string>, timestamp: string): OsmFeature {
+    return { ...feature(timestamp), version, tags };
+  }
+
+  it("builds a newest-first timeline with per-version tag changes", () => {
+    const history = [
+      versioned(1, { climbing: "route", name: "Old name" }, "2024-01-01T00:00:00Z"),
+      versioned(2, { climbing: "route", name: "New name" }, "2025-06-15T00:00:00Z"),
+      versioned(3, { climbing: "route", name: "New name", "climbing:grade:french": "6a" }, "2026-02-20T00:00:00Z"),
+    ];
+    expect(historyVersions(history)).toEqual([
+      {
+        version: 3,
+        timestamp: Date.parse("2026-02-20T00:00:00Z"),
+        user: "tester",
+        changeset: 1,
+        tagChanges: [{ key: "climbing:grade:french", from: undefined, to: "6a" }],
+      },
+      {
+        version: 2,
+        timestamp: Date.parse("2025-06-15T00:00:00Z"),
+        user: "tester",
+        changeset: 1,
+        tagChanges: [{ key: "name", from: "Old name", to: "New name" }],
+      },
+      { version: 1, timestamp: Date.parse("2024-01-01T00:00:00Z"), user: "tester", changeset: 1, tagChanges: [] },
+    ]);
+  });
+
+  it("reports removed tags", () => {
+    const history = [
+      versioned(1, { climbing: "boulder", note: "temp" }, "2024-01-01T00:00:00Z"),
+      versioned(2, { climbing: "boulder" }, "2025-01-01T00:00:00Z"),
+    ];
+    const [latest] = historyVersions(history);
+    expect(latest!.tagChanges).toEqual([{ key: "note", from: "temp", to: undefined }]);
+  });
+
+  it("tolerates a single version and missing timestamps", () => {
+    expect(historyVersions([versioned(1, { climbing: "route" }, "")])).toEqual([
+      { version: 1, timestamp: undefined, user: "tester", changeset: 1, tagChanges: [] },
+    ]);
+    expect(historyVersions([])).toEqual([]);
   });
 });

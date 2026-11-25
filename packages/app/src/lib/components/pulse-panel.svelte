@@ -3,11 +3,12 @@
   import { Chart, Layer, Axis, Rect, Text } from "layerchart/svg";
   import { scaleBand, scaleLinear } from "d3-scale";
   import type { DataJSON } from "@bloknote/climbing-data-gen";
-  import type { OsmFeature } from "osm-api";
+  import type { OsmFeature, OsmFeatureType } from "osm-api";
+  import { getFeatureHistory } from "osm-api";
   import { getAppState } from "#lib/data/app-state.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { collectLoadedOsmNodes } from "#lib/data/parse/diagnostics.js";
-  import { computePulseStats, formatAge, type RecencyBucket } from "#lib/data/parse/pulse.js";
+  import { computePulseStats, formatAge, historyVersions, type ItemVersion, type RecencyBucket } from "#lib/data/parse/pulse.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
   import { getItemUrl } from "#components/shell/sidebar/utils.js";
@@ -87,6 +88,45 @@
     return Number.isFinite(ts) ? ts : undefined;
   });
 
+  /**
+   * Single item with a real OSM id: load its full version history from the OSM API to show how it
+   * evolved over time (issue #217). Locally created items (negative id) have no history yet.
+   */
+  const historyTarget = $derived.by(() => {
+    if (!isSingleItem) return undefined;
+    const feature = entries[0]?.feature;
+    if (!feature || feature.id <= 0) return undefined;
+    return { type: feature.type as OsmFeatureType, id: feature.id };
+  });
+
+  let itemHistory = $state.raw<ItemVersion[] | undefined>(undefined);
+  let historyState = $state<"idle" | "loading" | "ready" | "error">("idle");
+
+  $effect(() => {
+    const target = historyTarget;
+    if (building || !target) {
+      itemHistory = undefined;
+      historyState = "idle";
+      return;
+    }
+    let cancelled = false;
+    historyState = "loading";
+    itemHistory = undefined;
+    getFeatureHistory(target.type, target.id)
+      .then((versions) => {
+        if (cancelled) return;
+        itemHistory = historyVersions(versions);
+        historyState = "ready";
+      })
+      .catch((error) => {
+        console.error("Could not load the item history from OSM:", error);
+        if (!cancelled) historyState = "error";
+      });
+    return () => {
+      cancelled = true;
+    };
+  });
+
   const maxYearCount = $derived(Math.max(1, ...stats.editsPerYear.map((e) => e.count)));
   const maxBucketCount = $derived(Math.max(1, ...stats.recencyDistribution.map((b) => b.count)));
 
@@ -125,7 +165,7 @@
       </span>
     </div>
   {:else if isSingleItem}
-    <div class="flex flex-col gap-1.5 rounded-md border p-3.5 text-sm" aria-label="Edit info">
+    <div class="flex flex-col gap-2 rounded-md border p-3.5 text-sm" aria-label="Edit info">
       {#if selfTs === undefined}
         <div class="flex items-center gap-2 text-muted-foreground">
           <span class="icon-[lucide--activity] shrink-0 size-4" aria-hidden="true"></span>
@@ -136,6 +176,50 @@
           <span class="icon-[lucide--activity] shrink-0 size-4" aria-hidden="true"></span>
           <span>Last edited <span class="font-medium">{formatAge(now - selfTs)}</span></span>
           <span class="text-xs text-muted-foreground">{formatDate(selfTs)}</span>
+        </div>
+      {/if}
+
+      {#if historyState !== "idle"}
+        <div class="flex flex-col gap-1.5 border-t pt-2" aria-label="Version history">
+          <p class="text-xs font-medium text-muted-foreground">Version history</p>
+          {#if historyState === "loading"}
+            <p class="flex items-center gap-2 text-muted-foreground">
+              <span class="icon-[lucide--loader-circle] size-4 animate-spin" aria-hidden="true"></span>
+              Loading the history from OpenStreetMap…
+            </p>
+          {:else if historyState === "error"}
+            <p class="text-muted-foreground">Could not load the edit history from OpenStreetMap.</p>
+          {:else if itemHistory && itemHistory.length > 1}
+            <ol class="flex flex-col gap-2">
+              {#each itemHistory as entry (entry.version)}
+                <li class="flex flex-col gap-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="font-medium">v{entry.version}</span>
+                    {#if entry.timestamp !== undefined}
+                      <span class="text-xs text-muted-foreground">
+                        {formatDate(entry.timestamp)} · {formatAge(now - entry.timestamp)}
+                      </span>
+                    {/if}
+                    {#if entry.user}
+                      <span class="text-xs text-muted-foreground">by {entry.user}</span>
+                    {/if}
+                  </div>
+                  {#if entry.tagChanges.length > 0}
+                    <ul class="flex flex-col gap-0.5 pl-4 text-xs text-muted-foreground">
+                      {#each entry.tagChanges as change (change.key)}
+                        <li class="font-mono">
+                          <span class="text-foreground">{change.key}</span>:
+                          {change.from ?? "(added)"} → {change.to ?? "(removed)"}
+                        </li>
+                      {/each}
+                    </ul>
+                  {/if}
+                </li>
+              {/each}
+            </ol>
+          {:else if itemHistory}
+            <p class="text-muted-foreground">Only one version so far: this item has not been edited since its creation.</p>
+          {/if}
         </div>
       {/if}
     </div>
