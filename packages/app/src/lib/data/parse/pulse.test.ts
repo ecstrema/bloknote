@@ -107,16 +107,28 @@ describe("historyVersions", () => {
         timestamp: Date.parse("2026-02-20T00:00:00Z"),
         user: "tester",
         changeset: 1,
+        visible: true,
         tagChanges: [{ key: "climbing:grade:french", from: undefined, to: "6a" }],
+        geometryChange: undefined,
       },
       {
         version: 2,
         timestamp: Date.parse("2025-06-15T00:00:00Z"),
         user: "tester",
         changeset: 1,
+        visible: true,
         tagChanges: [{ key: "name", from: "Old name", to: "New name" }],
+        geometryChange: undefined,
       },
-      { version: 1, timestamp: Date.parse("2024-01-01T00:00:00Z"), user: "tester", changeset: 1, tagChanges: [] },
+      {
+        version: 1,
+        timestamp: Date.parse("2024-01-01T00:00:00Z"),
+        user: "tester",
+        changeset: 1,
+        visible: true,
+        tagChanges: [],
+        geometryChange: undefined,
+      },
     ]);
   });
 
@@ -129,9 +141,61 @@ describe("historyVersions", () => {
     expect(latest!.tagChanges).toEqual([{ key: "note", from: "temp", to: undefined }]);
   });
 
+  it("reports node position moves", () => {
+    const moved = { ...feature("2025-01-01T00:00:00Z"), version: 2, lat: 48.401, lon: 2.601 };
+    const [latest] = historyVersions([feature("2024-01-01T00:00:00Z"), moved]);
+    expect(latest!.geometryChange).toMatch(/^moved \d+ m$/);
+  });
+
+  it("ignores sub-decimeter node moves", () => {
+    const moved = { ...feature("2025-01-01T00:00:00Z"), version: 2, lon: 2.6000000001 };
+    const [latest] = historyVersions([feature("2024-01-01T00:00:00Z"), moved]);
+    expect(latest!.geometryChange).toBeUndefined();
+  });
+
+  it("reports way node list and relation member changes", () => {
+    const wayV1: OsmFeature = { ...feature("2024-01-01T00:00:00Z"), type: "way", id: 2, version: 1, nodes: [1, 2, 3] };
+    const wayV2: OsmFeature = { ...wayV1, version: 2, nodes: [1, 2, 4] };
+    const relationV1: OsmFeature = {
+      ...feature("2024-01-01T00:00:00Z"),
+      type: "relation",
+      id: 3,
+      version: 1,
+      members: [{ type: "way", ref: 2, role: "outer" }],
+    };
+    const relationV2: OsmFeature = {
+      ...relationV1,
+      version: 2,
+      members: [
+        { type: "way", ref: 2, role: "outer" },
+        { type: "node", ref: 1, role: "entrance" },
+      ],
+    };
+    const [latestWay] = historyVersions([wayV1, wayV2]);
+    const [latestRelation] = historyVersions([relationV1, relationV2]);
+    expect(latestWay!.geometryChange).toBe("node list changed");
+    expect(latestRelation!.geometryChange).toBe("member list changed");
+  });
+
+  it("marks deleted versions", () => {
+    const deleted: OsmFeature = { ...feature("2025-01-01T00:00:00Z"), version: 2, visible: false, tags: {} };
+    const [latest] = historyVersions([feature("2024-01-01T00:00:00Z"), deleted]);
+    expect(latest!.version).toBe(2);
+    expect(latest!.visible).toBe(false);
+    expect(latest!.tagChanges).toEqual([{ key: "climbing", from: "route", to: undefined }]);
+  });
+
   it("tolerates a single version and missing timestamps", () => {
     expect(historyVersions([versioned(1, { climbing: "route" }, "")])).toEqual([
-      { version: 1, timestamp: undefined, user: "tester", changeset: 1, tagChanges: [] },
+      {
+        version: 1,
+        timestamp: undefined,
+        user: "tester",
+        changeset: 1,
+        visible: true,
+        tagChanges: [],
+        geometryChange: undefined,
+      },
     ]);
     expect(historyVersions([])).toEqual([]);
   });

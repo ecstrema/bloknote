@@ -101,6 +101,8 @@
 
   let itemHistory = $state.raw<ItemVersion[] | undefined>(undefined);
   let historyState = $state<"idle" | "loading" | "ready" | "error">("idle");
+  /** Version whose full tag diff is expanded (long diffs show the first 5 changes by default) */
+  let expandedVersion = $state<number | undefined>(undefined);
 
   $effect(() => {
     const target = historyTarget;
@@ -192,6 +194,8 @@
           {:else if itemHistory && itemHistory.length > 1}
             <ol class="flex flex-col gap-2">
               {#each itemHistory as entry (entry.version)}
+                {@const changes =
+                  expandedVersion === entry.version ? entry.tagChanges : entry.tagChanges.slice(0, 5)}
                 <li class="flex flex-col gap-1">
                   <div class="flex flex-wrap items-center gap-2">
                     <span class="font-medium">v{entry.version}</span>
@@ -203,16 +207,48 @@
                     {#if entry.user}
                       <span class="text-xs text-muted-foreground">by {entry.user}</span>
                     {/if}
+                    {#if !entry.visible}
+                      <span class="rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+                        Deleted
+                      </span>
+                    {/if}
                   </div>
+                  {#if entry.geometryChange}
+                    <p class="flex items-center gap-1 pl-4 text-xs text-muted-foreground">
+                      <span class="icon-[lucide--move] size-3.5 shrink-0" aria-hidden="true"></span>
+                      {entry.geometryChange}
+                    </p>
+                  {/if}
                   {#if entry.tagChanges.length > 0}
                     <ul class="flex flex-col gap-0.5 pl-4 text-xs text-muted-foreground">
-                      {#each entry.tagChanges as change (change.key)}
+                      {#each changes as change (change.key)}
                         <li class="font-mono">
                           <span class="text-foreground">{change.key}</span>:
                           {change.from ?? "(added)"} → {change.to ?? "(removed)"}
                         </li>
                       {/each}
                     </ul>
+                    {#if entry.tagChanges.length > 5}
+                      <button
+                        type="button"
+                        class="w-fit pl-4 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                        onclick={() => (expandedVersion = expandedVersion === entry.version ? undefined : entry.version)}
+                      >
+                        {expandedVersion === entry.version
+                          ? "Show fewer changes"
+                          : `Show all ${entry.tagChanges.length} changes`}
+                      </button>
+                    {/if}
+                  {/if}
+                  {#if entry.changeset !== undefined}
+                    <a
+                      class="w-fit pl-4 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                      href="https://www.openstreetmap.org/changeset/{entry.changeset}"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Changeset {entry.changeset}
+                    </a>
                   {/if}
                 </li>
               {/each}

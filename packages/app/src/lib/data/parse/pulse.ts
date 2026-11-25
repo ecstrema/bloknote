@@ -94,8 +94,40 @@ export interface ItemVersion {
   timestamp: number | undefined;
   user: string | undefined;
   changeset: number | undefined;
+  /** False when this version deleted the element */
+  visible: boolean;
   /** Tag changes relative to the previous version; empty for the first version */
   tagChanges: ItemTagChange[];
+  /** Human-readable geometry change relative to the previous version (issue #218) */
+  geometryChange: string | undefined;
+}
+
+function haversineMeters(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLon = toRad(b.lon - a.lon);
+  const h =
+    Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
+}
+
+function formatDistance(meters: number): string {
+  return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`;
+}
+
+/** Geometry change description between two versions, `undefined` when unchanged */
+function geometryChange(previous: OsmFeature, feature: OsmFeature): string | undefined {
+  if (feature.type === "node" && previous.type === "node") {
+    const moved = haversineMeters(previous, feature);
+    return moved >= 0.1 ? `moved ${formatDistance(moved)}` : undefined;
+  }
+  if (feature.type === "way" && previous.type === "way") {
+    return JSON.stringify(previous.nodes) === JSON.stringify(feature.nodes) ? undefined : "node list changed";
+  }
+  if (feature.type === "relation" && previous.type === "relation") {
+    return JSON.stringify(previous.members) === JSON.stringify(feature.members) ? undefined : "member list changed";
+  }
+  return undefined;
 }
 
 /**
@@ -124,7 +156,9 @@ export function historyVersions(history: OsmFeature[]): ItemVersion[] {
       timestamp: Number.isFinite(ts) ? ts : undefined,
       user: feature.user,
       changeset: feature.changeset,
+      visible: feature.visible !== false,
       tagChanges,
+      geometryChange: previous ? geometryChange(previous, feature) : undefined,
     });
     previous = feature;
   }
