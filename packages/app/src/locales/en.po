@@ -17743,3 +17743,30 @@ msgstr "Tries per grade"
 #: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "<0/> Explore this data"
 msgstr "<0/> Explore this data"
+
+#: src/lib/components/pulse-panel.svelte
+#: src/lib/components/pulse-panel.svelte
+msgid "Version history"
+msgstr "Version history"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "<0/> Loading the history from OpenStreetMap…"
+msgstr "<0/> Loading the history from OpenStreetMap…"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Could not load the edit history from OpenStreetMap."
+msgstr "Could not load the edit history from OpenStreetMap."
+
+#. 0: entry.user
+#: src/lib/components/pulse-panel.svelte
+msgid "by {0}"
+msgstr "by {0}"
+
+#. 0: entry.version
+#: src/lib/components/pulse-panel.svelte
+msgid "v{0}"
+msgstr "v{0}"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Only one version so far: this item has not been edited since its creation."
+msgstr "Only one version so far: this item has not been edited since its creation."
