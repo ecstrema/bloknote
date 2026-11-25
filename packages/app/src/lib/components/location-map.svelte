@@ -610,8 +610,9 @@
           popup.remove();
           return;
         }
+        // Dimmed features (excluded by the active search filters) are non-interactive: no popup (issue #219)
         const features = map.queryRenderedFeatures(e.point, { layers: interactiveLayers });
-        const feature = features[0];
+        const feature = features.find((f) => !f.properties?.dimmed);
         if (!feature) {
           map.getCanvas().style.cursor = "";
           popup.remove();
@@ -638,8 +639,9 @@
         }
         // A plain click on the map dismisses the active selection
         if (activeSelectionSlugs.length > 0) clearSidebarSelection?.();
+        // Dimmed features (excluded by the active search filters) are non-interactive: no navigation (issue #219)
         const features = map.queryRenderedFeatures(e.point, { layers: interactiveLayers });
-        const feature = features[0];
+        const feature = features.find((f) => !f.properties?.dimmed);
         if (!feature) return;
 
         if (feature.geometry.type === "Point") {
