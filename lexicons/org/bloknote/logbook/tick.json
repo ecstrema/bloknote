@@ -36,7 +36,7 @@
           },
           "ascentInfo": {
             "type": "array",
-            "description": "Additional climbing style qualifiers (toprope, solo, second, aid). Lead is implied when unspecified: these are only set to say the ascent was not a lead, or had another exceptional style.",
+            "description": "Additional climbing style qualifiers (toprope, solo, second, aid). A clean send is implied when unspecified: these are only set to say the ascent was not clean, or had another exceptional style.",
             "items": {
               "type": "ref",
               "ref": "#ascentInfo"
@@ -58,9 +58,13 @@
             "description": "Route grade as written in the source logbook, for ticks without a subject"
           },
           "locationHint": {
-            "type": "string",
-            "maxLength": 1000,
-            "description": "Full hierarchical location of the crag (e.g. 'France > Vercors > La Balme'), for ticks without a subject"
+            "type": "array",
+            "maxLength": 50,
+            "description": "Hierarchical location of the crag, shallowest first (e.g. ['France', 'Vercors', 'La Balme']), for ticks without a subject",
+            "items": {
+              "type": "string",
+              "maxLength": 300
+            }
           },
           "climbedAt": {
             "type": "string",
@@ -95,9 +99,9 @@
     },
     "attemptStyle": {
       "type": "string",
-      "description": "Style of an attempted climb (hangdog by default, or bailed)",
+      "description": "Style of an attempted climb (to top or bailed)",
       "knownValues": [
-        "hangdog",
+        "to top",
         "bailed"
       ]
     },
@@ -107,8 +111,7 @@
       "knownValues": [
         "toprope",
         "solo",
-        "second",
-        "aid"
+        "dab"
       ]
     }
   }

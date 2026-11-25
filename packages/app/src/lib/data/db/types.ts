@@ -74,7 +74,7 @@ export type DbRequest =
   /** Named elements within a bounding box, used to find replacements for deleted elements */
   | { id: number; type: "getNearbyElements"; lat: number; lon: number; radiusMeters: number }
   /** Area-scoped route name matches for the tick import (issue #154) */
-  | { id: number; type: "matchTicks"; queries: { name: string; area?: string }[] }
+  | { id: number; type: "matchTicks"; queries: { name: string; area?: string | string[] }[] }
   /** Area name matches, to pick a parent when adding a route to OSM from a tick (issue #154) */
   | { id: number; type: "matchAreas"; queries: string[] }
   /** Walks a hierarchical location hint shallowest-first, constraining each segment to the previous match */

@@ -9,7 +9,7 @@
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { getGrade } from "#lib/data/parse/osm-tags.js";
   import { extractRouteStyle, ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
-  import { parseTickCsv, type ImportedTick, type TickImportFormat } from "#lib/data/parse/tick-import.js";
+  import { parseTickCsv, locationSegments, type ImportedTick, type TickImportFormat } from "#lib/data/parse/tick-import.js";
   import type { TickRouteMatch } from "#lib/data/db/types.js";
   import type { OsmFeature } from "osm-api";
 
@@ -177,7 +177,7 @@
             {
               name: row.tick.routeName,
               grade: row.tick.grade,
-              locationHint: row.tick.location ?? row.tick.area ?? row.tick.cragName,
+              locationHint: locationSegments(row.tick.location ?? row.tick.area ?? row.tick.cragName),
             },
             ascentFromStyle(row.tick.style),
             row.tick.notes,

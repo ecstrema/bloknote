@@ -146,10 +146,7 @@
         }
         return;
       }
-      const parts = (tick.locationHint ?? "")
-        .split(">")
-        .map((part) => part.trim())
-        .filter(Boolean);
+      const parts = (tick.locationHint ?? []).filter(Boolean);
       if (parts.length === 0) {
         if (!cancelled) {
           error = `No location is known for "${tick.name}". Open the place that should hold it and use "Add route" on the map instead.`;

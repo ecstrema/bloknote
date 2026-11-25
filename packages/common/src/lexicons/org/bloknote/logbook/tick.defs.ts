@@ -39,7 +39,7 @@ type Main = { $type: "org.bloknote.logbook.tick";
   "hangs"?:number;
 
   /**
-   * Additional climbing style qualifiers (toprope, solo, second, aid). Lead is implied when unspecified: these are only set to say the ascent was not a lead, or had another exceptional style.
+   * Additional climbing style qualifiers (toprope, solo, second, aid). A clean send is implied when unspecified: these are only set to say the ascent was not clean, or had another exceptional style.
    */
   "ascentInfo"?:(AscentInfo)[];
 
@@ -59,9 +59,9 @@ type Main = { $type: "org.bloknote.logbook.tick";
   "grade"?:string;
 
   /**
-   * Full hierarchical location of the crag (e.g. 'France > Vercors > La Balme'), for ticks without a subject
+   * Hierarchical location of the crag, shallowest first (e.g. ['France', 'Vercors', 'La Balme']), for ticks without a subject
    */
-  "locationHint"?:string;
+  "locationHint"?:(string)[];
 
   /**
    * ISO 8601 timestamp of when the climb occurred. Optional for minimal ticks.
@@ -75,7 +75,7 @@ type Main = { $type: "org.bloknote.logbook.tick";
 
 export type { Main };
 
-const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"subject":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any)),"outcome":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<AscentOutcome>((() => ascentOutcome) as any)),"sendStyle":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<SendStyle>((() => sendStyle) as any)),"attemptStyle":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<AttemptStyle>((() => attemptStyle) as any)),"hangs":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({"minimum":1})),"ascentInfo":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<AscentInfo>((() => ascentInfo) as any), )),"comment":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":3000})),"name":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":300})),"grade":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":40})),"locationHint":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":1000})),"climbedAt":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"datetime"})),"createdAt":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"datetime"}))}));
+const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"subject":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any)),"outcome":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<AscentOutcome>((() => ascentOutcome) as any)),"sendStyle":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<SendStyle>((() => sendStyle) as any)),"attemptStyle":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<AttemptStyle>((() => attemptStyle) as any)),"hangs":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({"minimum":1})),"ascentInfo":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<AscentInfo>((() => ascentInfo) as any), )),"comment":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":3000})),"name":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":300})),"grade":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":40})),"locationHint":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.string({"maxLength":300}), {"maxLength":50})),"climbedAt":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"datetime"})),"createdAt":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"datetime"}))}));
 
 export { main };
 
@@ -117,22 +117,22 @@ const sendStyle = /*#__PURE__*/ l.string<{"knownValues":["redpoint","onsight","f
 
 export { sendStyle };
 
-/** Style of an attempted climb (hangdog by default, or bailed) */
-type AttemptStyle = "hangdog" | "bailed" | l.UnknownString;
+/** Style of an attempted climb (to top or bailed) */
+type AttemptStyle = "to top" | "bailed" | l.UnknownString;
 
 export type { AttemptStyle };
 
-/** Style of an attempted climb (hangdog by default, or bailed) */
-const attemptStyle = /*#__PURE__*/ l.string<{"knownValues":["hangdog","bailed"]}>();
+/** Style of an attempted climb (to top or bailed) */
+const attemptStyle = /*#__PURE__*/ l.string<{"knownValues":["to top","bailed"]}>();
 
 export { attemptStyle };
 
 /** Additional climbing style/ascent qualifier. Lead is implied when unspecified. */
-type AscentInfo = "toprope" | "solo" | "second" | "aid" | l.UnknownString;
+type AscentInfo = "toprope" | "solo" | "dab" | l.UnknownString;
 
 export type { AscentInfo };
 
 /** Additional climbing style/ascent qualifier. Lead is implied when unspecified. */
-const ascentInfo = /*#__PURE__*/ l.string<{"knownValues":["toprope","solo","second","aid"]}>();
+const ascentInfo = /*#__PURE__*/ l.string<{"knownValues":["toprope","solo","dab"]}>();
 
 export { ascentInfo };

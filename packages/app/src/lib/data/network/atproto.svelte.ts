@@ -144,11 +144,21 @@ function remoteTickRecord(entry: LocalTickEntry): TickRecord {
   };
 }
 
-/** Ticks written before the location hint (record field "crag", a single name) are migrated on read */
+/**
+ * Ticks written before the location hint became an array are migrated on read: the very first
+ * version stored a single crag name (record field "crag"), then a "> "-joined string.
+ */
 function normalizeTick(entry: LocalTickEntry): LocalTickEntry {
-  if (!("crag" in entry)) return entry;
-  const { crag, ...rest } = entry as LocalTickEntry & { crag?: string };
-  return crag && !rest.locationHint ? { ...rest, locationHint: crag } : rest;
+  const migrated =
+    "crag" in entry
+      ? (() => {
+          const { crag, ...rest } = entry as LocalTickEntry & { crag?: string };
+          return crag && !rest.locationHint ? { ...rest, locationHint: [crag] } : rest;
+        })()
+      : entry;
+  return typeof migrated.locationHint === "string"
+    ? { ...migrated, locationHint: [migrated.locationHint] }
+    : migrated;
 }
 
 function createOAuthClient(): Promise<BrowserOAuthClient> {
@@ -557,7 +567,7 @@ class AtProtoClient {
    * list lets the user add the route to OSM later, or link the tick when the route appears in the data.
    */
   async addNameTick(
-    tick: { name: string; grade?: string; locationHint?: string },
+    tick: { name: string; grade?: string; locationHint?: string[] },
     ascent: TickAscent,
     comment?: string,
     climbedAt?: string,

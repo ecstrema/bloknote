@@ -203,10 +203,10 @@ function nameVariants(name: string): string[] {
   return [...variants];
 }
 
-/** Splits a hierarchical location ("> ", " - ", ": ") into segments, deepest first */
-function areaSegments(area: string): string[] {
-  return area
-    .split(/\s*>\s*|\s+-\s+|\s*:\s*/)
+/** Normalizes a hierarchical location — an array of segments (shallowest first) or a raw string
+ * using "> ", " - ", or ": " separators (CSV exports) — into segments, deepest first */
+function areaSegments(area?: string | string[]): string[] {
+  return (Array.isArray(area) ? area : (area ?? "").split(/\s*>\s*|\s+-\s+|\s*:\s*/))
     .map((segment) => segment.trim())
     .filter(Boolean)
     .reverse()
@@ -363,7 +363,7 @@ function scanAreaSubtree(
  * A fallback matches the route name globally, but only when the slug path mentions one of the
  * area segments: routes sometimes sit directly under a region while the logbook names its crag.
  */
-function matchTickQuery(db: Database, query: { name: string; area?: string }): TickRouteMatch[] {
+function matchTickQuery(db: Database, query: { name: string; area?: string | string[] }): TickRouteMatch[] {
   const variants = nameVariants(query.name);
   if (variants.length === 0 || !query.area) return [];
 

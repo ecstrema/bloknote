@@ -232,7 +232,7 @@ class LocalDb {
   }
 
   /** Route candidates matching each queried name inside its area, for the tick import (issue #154) */
-  async matchTicks(queries: { name: string; area?: string }[]): Promise<TickRouteMatch[][]> {
+  async matchTicks(queries: { name: string; area?: string | string[] }[]): Promise<TickRouteMatch[][]> {
     await this.init();
     if (!this.ready || queries.length === 0) return [];
     return (await this.send({ type: "matchTicks", queries }, "tickMatches")).data;

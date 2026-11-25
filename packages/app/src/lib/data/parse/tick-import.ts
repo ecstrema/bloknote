@@ -102,6 +102,15 @@ function lastLocationSegment(location: string | undefined): string | undefined {
   return clean(location?.split(">").at(-1));
 }
 
+/** Full hierarchical location split into segments: "International > Canada > Hemingway Wall" -> ["International", ...] */
+export function locationSegments(location: string | undefined): string[] | undefined {
+  const segments = (location ?? "")
+    .split(">")
+    .map(clean)
+    .filter((segment): segment is string => !!segment);
+  return segments.length > 0 ? segments : undefined;
+}
+
 function normalizeDate(value: string | undefined): string | undefined {
   const trimmed = clean(value);
   if (!trimmed) return undefined;

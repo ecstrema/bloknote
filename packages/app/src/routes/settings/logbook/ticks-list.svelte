@@ -31,7 +31,7 @@
     onsight: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
     flash: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300",
     pinkpoint: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
-    hangdog: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+    "to top": "bg-amber-500/15 text-amber-700 dark:text-amber-300",
     bailed: "bg-red-500/15 text-red-700 dark:text-red-300",
   };
 
@@ -498,7 +498,7 @@
 
           {#if !tick.subject}
             <p class="text-xs text-muted-foreground">
-              Not on OpenStreetMap{tick.locationHint ? ` · ${tick.locationHint}` : ""}
+              Not on OpenStreetMap{tick.locationHint?.length ? ` · ${tick.locationHint.join(" > ")}` : ""}
             </p>
 
             {#if linked.length > 0}
