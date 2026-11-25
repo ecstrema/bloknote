@@ -228,7 +228,7 @@
     if (!next) onClose();
   }}
 >
-  <Dialog.Content class="max-w-3xl">
+  <Dialog.Content class="max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)]">
     <Dialog.Header>
       <Dialog.Title class="flex items-center gap-2">
         <span aria-hidden="true" class="icon-[lucide--map-pin-plus] size-4 shrink-0"></span>

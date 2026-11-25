@@ -55,6 +55,42 @@ export function logoutOsm() {
 }
 
 export type Diff<T> = { initial: T; final: T };
+
+/**
+ * Orders created elements so that placeholder references are defined before the elements
+ * referencing them: the OSM API resolves placeholder ids only forwards in the diff document, and
+ * rejects the whole changeset with "Placeholder relation not found for reference ..." when an
+ * element referencing a freshly created one is uploaded before it (issue #201). Elements are kept
+ * in insertion order otherwise; cycles are impossible in valid OSM data, leftovers are appended.
+ */
+export function orderCreatedForDiffUpload(features: OsmFeature[]): OsmFeature[] {
+  const identifier = (feature: OsmFeature) => getStaticIdentifier(feature.type, feature.id);
+  const defined = new Set(features.map(identifier));
+  const emitted = new Set<string>();
+  /** True when the feature references a placeholder that is defined but not emitted yet */
+  const blocked = (feature: OsmFeature) =>
+    feature.type === "relation" &&
+    feature.members.some((m) => {
+      if (m.ref >= 0) return false;
+      const ref = getStaticIdentifier(m.type, m.ref);
+      return defined.has(ref) && !emitted.has(ref);
+    });
+
+  const result: OsmFeature[] = [];
+  const pending = [...features];
+  while (pending.length > 0) {
+    // One pass emits every element whose references are satisfied, then repeats for the rest
+    const ready = pending.filter((f) => !blocked(f));
+    if (ready.length === 0) break;
+    for (const feature of ready) {
+      result.push(feature);
+      emitted.add(identifier(feature));
+      pending.splice(pending.indexOf(feature), 1);
+    }
+  }
+  return [...result, ...pending];
+}
+
 export type FeatureDiff =
   | "deleted"
   | "created"
@@ -276,6 +312,12 @@ export class OsmUser {
     };
     changeset.create = changeset.create.map(dropStaleMembers);
     changeset.modify = changeset.modify.map(dropStaleMembers);
+
+    // The OSM API resolves placeholder ids only forwards in the diff document: an element
+    // referencing a placeholder must be defined before it ("Placeholder relation not found for
+    // reference ..." otherwise). Creations sit in the changes map in the order they were made —
+    // e.g. a crag relation before the sector created inside it — so they are sorted topologically.
+    changeset.create = orderCreatedForDiffUpload(changeset.create);
 
     return {
       changeset,
