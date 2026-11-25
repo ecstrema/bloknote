@@ -83,20 +83,23 @@
    * edit of the item itself is shown (issue #195).
    */
   const isSingleItem = $derived(entries.length <= 1);
+
+  /** The page item's own OSM feature, `undefined` when not loaded */
+  const selfFeature = $derived(entries.find((entry) => entry.slug === slug)?.feature);
+
   const selfTs = $derived.by(() => {
-    const ts = entries[0]?.feature.timestamp ? Date.parse(entries[0].feature.timestamp) : NaN;
+    const ts = selfFeature?.timestamp ? Date.parse(selfFeature.timestamp) : NaN;
     return Number.isFinite(ts) ? ts : undefined;
   });
 
   /**
-   * Single item with a real OSM id: load its full version history from the OSM API to show how it
-   * evolved over time (issue #217). Locally created items (negative id) have no history yet.
+   * The page item itself has a real OSM id: load its full version history from the OSM API to show
+   * how it evolved over time (issue #217). This works for single items and for areas on top of the
+   * subtree statistics (issue #221). Locally created items (negative id) have no history yet.
    */
   const historyTarget = $derived.by(() => {
-    if (!isSingleItem) return undefined;
-    const feature = entries[0]?.feature;
-    if (!feature || feature.id <= 0) return undefined;
-    return { type: feature.type as OsmFeatureType, id: feature.id };
+    if (!selfFeature || selfFeature.id <= 0) return undefined;
+    return { type: selfFeature.type as OsmFeatureType, id: selfFeature.id };
   });
 
   let itemHistory = $state.raw<ItemVersion[] | undefined>(undefined);
@@ -149,6 +152,89 @@
   const padding = { top: 14, right: 10, bottom: 28, left: 30 };
 </script>
 
+<!--
+  Version history of the page item itself, shared between the single-item layout (issue #217) and
+  the area layout where it complements the subtree statistics (issue #221).
+-->
+{#snippet versionHistory()}
+  {#if historyState !== "idle"}
+    <div class="flex flex-col gap-1.5 border-t pt-2" aria-label="Version history">
+      <p class="text-xs font-medium text-muted-foreground">Version history</p>
+      {#if historyState === "loading"}
+        <p class="flex items-center gap-2 text-muted-foreground">
+          <span class="icon-[lucide--loader-circle] size-4 animate-spin" aria-hidden="true"></span>
+          Loading the history from OpenStreetMap…
+        </p>
+      {:else if historyState === "error"}
+        <p class="text-muted-foreground">Could not load the edit history from OpenStreetMap.</p>
+      {:else if itemHistory && itemHistory.length > 1}
+        <ol class="flex flex-col gap-2">
+          {#each itemHistory as entry (entry.version)}
+            {@const changes = expandedVersion === entry.version ? entry.tagChanges : entry.tagChanges.slice(0, 5)}
+            <li class="flex flex-col gap-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-medium">v{entry.version}</span>
+                {#if entry.timestamp !== undefined}
+                  <span class="text-xs text-muted-foreground">
+                    {formatDate(entry.timestamp)} · {formatAge(now - entry.timestamp)}
+                  </span>
+                {/if}
+                {#if entry.user}
+                  <span class="text-xs text-muted-foreground">by {entry.user}</span>
+                {/if}
+                {#if !entry.visible}
+                  <span class="rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+                    Deleted
+                  </span>
+                {/if}
+              </div>
+              {#if entry.geometryChange}
+                <p class="flex items-center gap-1 pl-4 text-xs text-muted-foreground">
+                  <span class="icon-[lucide--move] size-3.5 shrink-0" aria-hidden="true"></span>
+                  {entry.geometryChange}
+                </p>
+              {/if}
+              {#if entry.tagChanges.length > 0}
+                <ul class="flex flex-col gap-0.5 pl-4 text-xs text-muted-foreground">
+                  {#each changes as change (change.key)}
+                    <li class="font-mono">
+                      <span class="text-foreground">{change.key}</span>:
+                      {change.from ?? "(added)"} → {change.to ?? "(removed)"}
+                    </li>
+                  {/each}
+                </ul>
+                {#if entry.tagChanges.length > 5}
+                  <button
+                    type="button"
+                    class="w-fit pl-4 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                    onclick={() => (expandedVersion = expandedVersion === entry.version ? undefined : entry.version)}
+                  >
+                    {expandedVersion === entry.version
+                      ? "Show fewer changes"
+                      : `Show all ${entry.tagChanges.length} changes`}
+                  </button>
+                {/if}
+              {/if}
+              {#if entry.changeset !== undefined}
+                <a
+                  class="w-fit pl-4 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                  href="https://www.openstreetmap.org/changeset/{entry.changeset}"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Changeset {entry.changeset}
+                </a>
+              {/if}
+            </li>
+          {/each}
+        </ol>
+      {:else if itemHistory}
+        <p class="text-muted-foreground">Only one version so far: this item has not been edited since its creation.</p>
+      {/if}
+    </div>
+  {/if}
+{/snippet}
+
 <div class="flex flex-col gap-4">
   {#if loadingSubtree}
     <div class="flex items-center gap-2 rounded-md border p-4 text-sm text-muted-foreground">
@@ -181,83 +267,7 @@
         </div>
       {/if}
 
-      {#if historyState !== "idle"}
-        <div class="flex flex-col gap-1.5 border-t pt-2" aria-label="Version history">
-          <p class="text-xs font-medium text-muted-foreground">Version history</p>
-          {#if historyState === "loading"}
-            <p class="flex items-center gap-2 text-muted-foreground">
-              <span class="icon-[lucide--loader-circle] size-4 animate-spin" aria-hidden="true"></span>
-              Loading the history from OpenStreetMap…
-            </p>
-          {:else if historyState === "error"}
-            <p class="text-muted-foreground">Could not load the edit history from OpenStreetMap.</p>
-          {:else if itemHistory && itemHistory.length > 1}
-            <ol class="flex flex-col gap-2">
-              {#each itemHistory as entry (entry.version)}
-                {@const changes =
-                  expandedVersion === entry.version ? entry.tagChanges : entry.tagChanges.slice(0, 5)}
-                <li class="flex flex-col gap-1">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span class="font-medium">v{entry.version}</span>
-                    {#if entry.timestamp !== undefined}
-                      <span class="text-xs text-muted-foreground">
-                        {formatDate(entry.timestamp)} · {formatAge(now - entry.timestamp)}
-                      </span>
-                    {/if}
-                    {#if entry.user}
-                      <span class="text-xs text-muted-foreground">by {entry.user}</span>
-                    {/if}
-                    {#if !entry.visible}
-                      <span class="rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
-                        Deleted
-                      </span>
-                    {/if}
-                  </div>
-                  {#if entry.geometryChange}
-                    <p class="flex items-center gap-1 pl-4 text-xs text-muted-foreground">
-                      <span class="icon-[lucide--move] size-3.5 shrink-0" aria-hidden="true"></span>
-                      {entry.geometryChange}
-                    </p>
-                  {/if}
-                  {#if entry.tagChanges.length > 0}
-                    <ul class="flex flex-col gap-0.5 pl-4 text-xs text-muted-foreground">
-                      {#each changes as change (change.key)}
-                        <li class="font-mono">
-                          <span class="text-foreground">{change.key}</span>:
-                          {change.from ?? "(added)"} → {change.to ?? "(removed)"}
-                        </li>
-                      {/each}
-                    </ul>
-                    {#if entry.tagChanges.length > 5}
-                      <button
-                        type="button"
-                        class="w-fit pl-4 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-                        onclick={() => (expandedVersion = expandedVersion === entry.version ? undefined : entry.version)}
-                      >
-                        {expandedVersion === entry.version
-                          ? "Show fewer changes"
-                          : `Show all ${entry.tagChanges.length} changes`}
-                      </button>
-                    {/if}
-                  {/if}
-                  {#if entry.changeset !== undefined}
-                    <a
-                      class="w-fit pl-4 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-                      href="https://www.openstreetmap.org/changeset/{entry.changeset}"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Changeset {entry.changeset}
-                    </a>
-                  {/if}
-                </li>
-              {/each}
-            </ol>
-          {:else if itemHistory}
-            <p class="text-muted-foreground">Only one version so far: this item has not been edited since its creation.</p>
-          {/if}
-        </div>
-      {/if}
+      {@render versionHistory()}
     </div>
   {:else}
     <section class="flex flex-col gap-3 rounded-md border p-3.5" aria-label="Edit statistics">
@@ -385,6 +395,13 @@
             </li>
           {/each}
         </ul>
+      </section>
+    {/if}
+
+    {#if historyTarget}
+      <section class="flex flex-col gap-2 rounded-md border p-3.5" aria-label="Item history">
+        <p class="text-xs font-medium text-muted-foreground">History of this item</p>
+        {@render versionHistory()}
       </section>
     {/if}
   {/if}
