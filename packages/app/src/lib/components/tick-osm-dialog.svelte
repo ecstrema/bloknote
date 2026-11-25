@@ -7,7 +7,10 @@
   import { getAppState } from "#lib/data/app-state.js";
   import { dataClient } from "#lib/data/network/data-client.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
-  import { atproto, type LocalTickEntry } from "#lib/data/network/atproto.svelte.js";
+  import {
+    atproto,
+    type LocalTickEntry,
+  } from "#lib/data/network/atproto.svelte.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getCoordinates } from "#lib/data/parse/osm-tags.js";
   import { setFallbackCoordinates } from "#lib/data/route-location.js";
@@ -56,7 +59,9 @@
   // svelte-ignore state_referenced_locally: the component instance is created per open dialog
   let routeName = $state(tick.name ?? "");
 
-  const checkedIndices = $derived([...checkedCreate].filter((i) => chain[i] === null).sort((a, b) => a - b));
+  const checkedIndices = $derived(
+    [...checkedCreate].filter((i) => chain[i] === null).sort((a, b) => a - b),
+  );
   const firstChecked = $derived(checkedIndices[0]);
   const lastChecked = $derived(checkedIndices.at(-1));
   /**
@@ -64,21 +69,29 @@
    * the first creation, or the picked existing level when nothing is created.
    */
   const baseIndex = $derived.by(() => {
-    const limit = firstChecked ?? (selectedIndex !== undefined ? selectedIndex + 1 : 0);
+    const limit =
+      firstChecked ?? (selectedIndex !== undefined ? selectedIndex + 1 : 0);
     for (let i = limit - 1; i >= 0; i--) {
       if (chain[i]) return i;
     }
     return -1;
   });
-  const base = $derived(baseIndex >= 0 ? (chain[baseIndex] as ChainEntry) : undefined);
-  const baseName = $derived(base ? (getLocalizedName(base.data) ?? base.slug) : "");
+  const base = $derived(
+    baseIndex >= 0 ? (chain[baseIndex] as ChainEntry) : undefined,
+  );
+  const baseName = $derived(
+    base ? (getLocalizedName(base.data) ?? base.slug) : "",
+  );
   /** The route parent: the lowest down selection, created or existing (issue #201) */
   const parentIndex = $derived.by(() => {
     const lowest = lastChecked ?? -1;
-    if (selectedIndex !== undefined && selectedIndex > lowest) return selectedIndex;
+    if (selectedIndex !== undefined && selectedIndex > lowest)
+      return selectedIndex;
     return lowest;
   });
-  const parentIsCreated = $derived(parentIndex >= 0 && chain[parentIndex] === null);
+  const parentIsCreated = $derived(
+    parentIndex >= 0 && chain[parentIndex] === null,
+  );
   const parentName = $derived.by(() => {
     if (parentIndex < 0) return "";
     const entry = chain[parentIndex];
@@ -88,9 +101,13 @@
   const createNames = $derived(checkedIndices.map((i) => segments[i]!));
   const trimmedName = $derived(routeName.trim());
   const mapCoordinates = $derived(
-    base && base.data.type !== "geographic" ? getCoordinates(base.data as OsmFeature) : undefined,
+    base && base.data.type !== "geographic"
+      ? getCoordinates(base.data as OsmFeature)
+      : undefined,
   );
-  const mapBounds = $derived(base?.data.type === "geographic" ? base.data.bbox : undefined);
+  const mapBounds = $derived(
+    base?.data.type === "geographic" ? base.data.bbox : undefined,
+  );
 
   $effect(() => {
     let cancelled = false;
@@ -105,7 +122,8 @@
       // re-downloading (another tab holds the OPFS pool): wait instead of failing right away
       if (!(await dataClient.waitUntilLocalReady())) {
         if (!cancelled) {
-          error = "The offline map data is not available: open the map once to download it, then try again.";
+          error =
+            "The offline map data is not available: open the map once to download it, then try again.";
           loading = false;
         }
         return;
@@ -164,20 +182,26 @@
   }
 
   async function save() {
-    if (!pickedCoordinates || baseIndex < 0 || parentIndex < 0 || saving) return;
+    if (!pickedCoordinates || baseIndex < 0 || parentIndex < 0 || saving)
+      return;
     saving = true;
     error = undefined;
     try {
       const baseEntry = chain[baseIndex] as ChainEntry;
       let routeParent = await ensureNodeInTree(baseEntry.slug);
-      if (!routeParent) throw new Error(`Could not load "${baseName}" from the map data.`);
+      if (!routeParent)
+        throw new Error(`Could not load "${baseName}" from the map data.`);
       let routeParentSlug = baseEntry.slug;
 
       // The missing levels and the route form a single undo step, like the other multi-part edits
       appState.undoStack.beginGroup();
       try {
         for (const i of checkedIndices) {
-          const slug = appState.createArea(routeParent, routeParentSlug, segments[i]);
+          const slug = appState.createArea(
+            routeParent,
+            routeParentSlug,
+            segments[i],
+          );
           setFallbackCoordinates(slug, pickedCoordinates);
           routeParent = appState.tree.getReactiveNode(slug)!;
           routeParentSlug = slug;
@@ -187,7 +211,10 @@
           const parentEntry = chain[parentIndex] as ChainEntry;
           if (parentEntry.slug !== routeParentSlug) {
             routeParent = await ensureNodeInTree(parentEntry.slug);
-            if (!routeParent) throw new Error(`Could not load "${parentName}" from the map data.`);
+            if (!routeParent)
+              throw new Error(
+                `Could not load "${parentName}" from the map data.`,
+              );
             routeParentSlug = parentEntry.slug;
           }
         }
@@ -198,12 +225,19 @@
           trimmedName || undefined,
         );
         const routeFeature = routeParent.children?.[routeSlug]?.feature;
-        if (!routeFeature || routeFeature.type === "geographic") throw new Error("The route could not be created.");
+        if (!routeFeature || routeFeature.type === "geographic")
+          throw new Error("The route could not be created.");
 
         // The subject points at the temporary id until the changeset is pushed (see remapTickSubjects)
         void atproto
-          .linkTick(tick, { type: routeFeature.type, id: routeFeature.id }, trimmedName || tick.name)
-          .catch((err) => console.error("Could not link the tick to the new route", err));
+          .linkTick(
+            tick,
+            { type: routeFeature.type, id: routeFeature.id },
+            trimmedName || tick.name,
+          )
+          .catch((err) =>
+            console.error("Could not link the tick to the new route", err),
+          );
 
         // Stay on the ticks page: the tick row shows its route right away (resolved from memory),
         // and the pending changes are kept in the shared app state, ready to be pushed (issue #203)
@@ -213,25 +247,27 @@
         appState.undoStack.endGroup();
       }
     } catch (err) {
-      error = err instanceof Error ? err.message : "Could not create the route.";
+      error =
+        err instanceof Error ? err.message : "Could not create the route.";
       saving = false;
     }
   }
-
 </script>
 
-
 <Dialog.Root
-  open={open}
+  {open}
   onOpenChange={(next) => {
     open = next;
     if (!next) onClose();
   }}
 >
-  <Dialog.Content class="max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)]">
+  <Dialog.Content class="max-w-[calc(100vw-2rem)]">
     <Dialog.Header>
       <Dialog.Title class="flex items-center gap-2">
-        <span aria-hidden="true" class="icon-[lucide--map-pin-plus] size-4 shrink-0"></span>
+        <span
+          aria-hidden="true"
+          class="icon-[lucide--map-pin-plus] size-4 shrink-0"
+        ></span>
         Add "{tick.name}" to OpenStreetMap
       </Dialog.Title>
       <Dialog.Description>
@@ -240,16 +276,23 @@
           : `Pick the location of the route on the map of ${baseName}, then save. The route is created as a pending change you can undo and push to OpenStreetMap.`}
       </Dialog.Description>
       <ol class="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <li class={step === 1 ? "font-medium text-foreground" : ""}>1 · Parent</li>
+        <li class={step === 1 ? "font-medium text-foreground" : ""}>
+          1 · Parent
+        </li>
         <li aria-hidden="true">›</li>
-        <li class={step === 2 ? "font-medium text-foreground" : ""}>2 · Location</li>
+        <li class={step === 2 ? "font-medium text-foreground" : ""}>
+          2 · Location
+        </li>
       </ol>
     </Dialog.Header>
 
     {#if step === 1}
       {#if loading}
         <p class="flex items-center gap-2 text-sm text-muted-foreground">
-          <span aria-hidden="true" class="icon-[lucide--loader-circle] size-4 animate-spin"></span>
+          <span
+            aria-hidden="true"
+            class="icon-[lucide--loader-circle] size-4 animate-spin"
+          ></span>
           Matching the location in the map data...
         </p>
       {:else if error}
@@ -267,15 +310,21 @@
                 >
                   <span
                     aria-hidden="true"
-                    class="icon-[lucide--check] size-3.5 shrink-0 {selectedIndex === i
+                    class="icon-[lucide--check] size-3.5 shrink-0 {selectedIndex ===
+                    i
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-muted-foreground/50'}"
                   ></span>
-                  <span class:selected={selectedIndex === i} class:text-muted-foreground={selectedIndex !== i}>
+                  <span
+                    class:selected={selectedIndex === i}
+                    class:text-muted-foreground={selectedIndex !== i}
+                  >
                     {getLocalizedName(entry.data) ?? segment}
                   </span>
                   {#if selectedIndex === i && !parentIsCreated}
-                    <span class="ms-auto text-xs text-muted-foreground">parent</span>
+                    <span class="ms-auto text-xs text-muted-foreground"
+                      >parent</span
+                    >
                   {/if}
                 </button>
               {:else if canCreate(i)}
@@ -301,12 +350,19 @@
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-muted-foreground'}"
                   >
-                    {checkedCreate.has(i) ? "will be created" : "not in the map data — click to create"}
+                    {checkedCreate.has(i)
+                      ? "will be created"
+                      : "not in the map data — click to create"}
                   </span>
                 </button>
               {:else}
-                <span class="flex items-center gap-2 px-1 py-0.5 text-muted-foreground/60">
-                  <span aria-hidden="true" class="icon-[lucide--circle-dashed] size-3.5 shrink-0"></span>
+                <span
+                  class="flex items-center gap-2 px-1 py-0.5 text-muted-foreground/60"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="icon-[lucide--circle-dashed] size-3.5 shrink-0"
+                  ></span>
                   <span>{segment}</span>
                   <span class="text-xs">not in the map data</span>
                 </span>
@@ -322,17 +378,24 @@
             <Button {...props} type="button" variant="outline">Cancel</Button>
           {/snippet}
         </Dialog.Close>
-        <Button disabled={loading || !!error || parentIndex < 0} onclick={() => (step = 2)}>Next: choose the location</Button>
+        <Button
+          disabled={loading || !!error || parentIndex < 0}
+          onclick={() => (step = 2)}>Next: choose the location</Button
+        >
       </Dialog.Footer>
-
     {:else}
       {#if !appState.osmUser.loggedIn}
         <div
           class="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs"
         >
           <span>Log in with OpenStreetMap to add "{tick.name}".</span>
-          <Button size="xs" variant="outline" onclick={() => appState.osmUser.login()}>
-            <span aria-hidden="true" class="icon-[lucide--log-in] size-3.5"></span>
+          <Button
+            size="xs"
+            variant="outline"
+            onclick={() => appState.osmUser.login()}
+          >
+            <span aria-hidden="true" class="icon-[lucide--log-in] size-3.5"
+            ></span>
             Log in
           </Button>
         </div>
@@ -359,7 +422,9 @@
 
       <p class="text-xs text-muted-foreground">
         {#if pickedCoordinates}
-          Location: {pickedCoordinates.lat.toFixed(5)}, {pickedCoordinates.lon.toFixed(5)} — click again to adjust.
+          Location: {pickedCoordinates.lat.toFixed(5)}, {pickedCoordinates.lon.toFixed(
+            5,
+          )} — click again to adjust.
         {:else}
           Click on the map to pick the location.
         {/if}
@@ -375,7 +440,10 @@
 
       <Dialog.Footer>
         <Button variant="outline" onclick={() => (step = 1)}>Back</Button>
-        <Button onclick={save} disabled={!appState.osmUser.loggedIn || !pickedCoordinates || saving}>
+        <Button
+          onclick={save}
+          disabled={!appState.osmUser.loggedIn || !pickedCoordinates || saving}
+        >
           {saving ? "Creating..." : "Save"}
         </Button>
       </Dialog.Footer>
