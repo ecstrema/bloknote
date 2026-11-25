@@ -15316,6 +15316,7 @@ msgstr "Download all data to search everywhere"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 #: src/lib/components/shell/sidebar/search-dialog.svelte
+#: src/routes/explore/+page.svelte
 msgid "No results"
 msgstr "No results"
 
@@ -16286,7 +16287,7 @@ msgstr "{0} ice"
 #. 0: stats.ungraded
 #. 0: stats.ungraded
 #: src/lib/components/sector-stats.svelte
-#: src/lib/components/shell/sidebar/search-dialog.svelte
+#: src/routes/explore/+page.svelte
 msgid "{0} ungraded"
 msgstr "{0} ungraded"
 
@@ -16564,6 +16565,7 @@ msgstr "New climbing data is available"
 msgid "Your offline data is from {0}"
 msgstr "Your offline data is from {0}"
 
+#: src/lib/components/pulse-panel.svelte
 #: src/lib/components/pulse-panel.svelte
 msgid "This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap)."
 msgstr "This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap)."
@@ -17000,9 +17002,8 @@ msgstr "Max grade climbed per month"
 msgid "Climbing sessions per month"
 msgstr "Climbing sessions per month"
 
-#: src/routes/settings/logbook/user-stats-panel.svelte
-msgid "Tries per route"
-msgstr "Tries per route"
+#~ msgid "Tries per route"
+#~ msgstr "Tries per route"
 
 #: src/lib/components/shell/edit-nudge.svelte
 msgid "Everything here is editable"
@@ -17519,10 +17520,12 @@ msgid "Type a name or pick a filter to search."
 msgstr "Type a name or pick a filter to search."
 
 #: src/lib/components/shell/sidebar/search-dialog.svelte
+#: src/routes/explore/+page.svelte
 msgid "Searching everywhere needs all the data. Open an area first, or download everything in the sidebar."
 msgstr "Searching everywhere needs all the data. Open an area first, or download everything in the sidebar."
 
 #: src/lib/components/shell/sidebar/search-dialog.svelte
+#: src/routes/explore/+page.svelte
 msgid "Searching..."
 msgstr "Searching..."
 
@@ -17531,12 +17534,14 @@ msgid "Load more"
 msgstr "Load more"
 
 #. 0: searchState.result.matches.size
+#. 0: searchState.result.matches.size
 #: src/lib/components/shell/sidebar/search-dialog.svelte
+#: src/routes/explore/+page.svelte
 msgid "{0} matches"
 msgstr "{0} matches"
 
 #. 0: OVERVIEW_LIMIT
-#: src/lib/components/shell/sidebar/search-dialog.svelte
+#: src/routes/explore/+page.svelte
 msgid "Charts cover the first {0} matches."
 msgstr "Charts cover the first {0} matches."
 
@@ -17693,3 +17698,48 @@ msgstr "Grading scales"
 #: src/routes/settings/+page.svelte
 msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
 msgstr "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
+
+#: src/lib/components/location-map.svelte
+msgid "Toggle 3D terrain. With terrain on, drag with the right mouse button (or two fingers on a trackpad) to rotate the view."
+msgstr "Toggle 3D terrain. With terrain on, drag with the right mouse button (or two fingers on a trackpad) to rotate the view."
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Edit info"
+msgstr "Edit info"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Last edited <0/>"
+msgstr "Last edited <0/>"
+
+#: src/routes/explore/+page.svelte
+msgid "Overview plots of the current search results."
+msgstr "Overview plots of the current search results."
+
+#: src/routes/explore/+page.svelte
+#: src/routes/explore/+page.svelte
+msgid "Explore search results"
+msgstr "Explore search results"
+
+#: src/routes/explore/+page.svelte
+msgid "No search is active. Set a search or filters from the sidebar first."
+msgstr "No search is active. Set a search or filters from the sidebar first."
+
+#: src/routes/explore/+page.svelte
+msgid "Paused — continue from the sidebar to load more."
+msgstr "Paused — continue from the sidebar to load more."
+
+#: src/routes/explore/+page.svelte
+msgid "Difficulty distribution"
+msgstr "Difficulty distribution"
+
+#: src/routes/explore/+page.svelte
+msgid "No climbing elements among the matches."
+msgstr "No climbing elements among the matches."
+
+#: src/routes/settings/logbook/user-stats-panel.svelte
+msgid "Tries per grade"
+msgstr "Tries per grade"
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "<0/> Explore this data"
+msgstr "<0/> Explore this data"
