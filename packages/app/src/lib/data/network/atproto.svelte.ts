@@ -374,9 +374,23 @@ class AtProtoClient {
       const legacyRatings = legacyReviews
         .filter((r) => typeof r.rating === "number")
         .map((r) => ({ subject: r.subject, rating: r.rating!, createdAt: r.createdAt, uri: r.uri, label: r.label }));
+      const mergedTicks = merge(this.ticks, remoteTicks as LocalTickEntry[]);
+      // linkTick can attach a tick to a locally created element, which only has a temporary id
+      // until the changeset is pushed (issue #154): the PDS record is deliberately left without
+      // a subject in the meantime and updated by remapTickSubjects after the push. A re-sync
+      // before the push must therefore not drop the locally assigned subject, otherwise the
+      // tick falls back into the "Not in the map data" bucket and leaves the places hierarchy.
+      const localSubjects = new Map(
+        this.ticks.filter((e) => e.uri && e.subject).map((e) => [e.uri!, e.subject!]),
+      );
+      for (const entry of mergedTicks) {
+        if (!entry.subject && entry.uri && localSubjects.has(entry.uri)) {
+          entry.subject = localSubjects.get(entry.uri)!;
+        }
+      }
       // Local ids are assigned before the assignment: the ticks list keys its each blocks by
       // localId, and a render with pending (undefined) ids between the awaits would crash it
-      this.ticks = ensureTickLocalIds(merge(this.ticks, remoteTicks as LocalTickEntry[]));
+      this.ticks = ensureTickLocalIds(mergedTicks);
       this.stars = merge(this.stars, remoteStars as LocalStarEntry[]);
       this.comments = merge(this.comments, [...(remoteComments as LocalCommentEntry[]), ...legacyComments]);
       this.ratings = merge(this.ratings, [...(remoteRatings as LocalRatingEntry[]), ...legacyRatings]);

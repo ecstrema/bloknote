@@ -1,5 +1,6 @@
 <script lang="ts">
   import { SvelteSet } from "svelte/reactivity";
+  import { parseGrade } from "@bloknote/holy-grade";
   import { Button } from "#components/ui/button/index.js";
   import * as Dialog from "#components/ui/dialog/index.js";
   import { Input } from "#components/ui/input/index.js";
@@ -7,16 +8,16 @@
   import { getAppState } from "#lib/data/app-state.js";
   import { dataClient } from "#lib/data/network/data-client.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
+  import { getCoordinates, scaleIdToTag } from "#lib/data/parse/osm-tags.js";
   import {
     atproto,
     type LocalTickEntry,
   } from "#lib/data/network/atproto.svelte.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
-  import { getCoordinates } from "#lib/data/parse/osm-tags.js";
   import { setFallbackCoordinates } from "#lib/data/route-location.js";
   import type { DataJSON } from "@bloknote/climbing-data-gen";
   import type { DataTree } from "#lib/types.js";
-  import type { OsmFeature } from "osm-api";
+  import type { Key, OsmFeature } from "osm-api";
 
   /**
    * "Add to OSM" flow for a logbook tick (issues #154 and #201), rendered over the ticks list, so
@@ -25,8 +26,9 @@
    *    picked as the parent, and any missing level can be individually selected for creation
    *    under the deepest existing one — the lowest down selection becomes the route parent;
    * 2. the shared map is embedded in the dialog: the user picks the location and saves, which
-   *    creates the missing levels and the route through the undoable app state actions, links the
-   *    tick to it, and leaves the pending changes in the shared app state (upload button, undo).
+   *    creates the missing levels and the route through the undoable app state actions (the
+   *    tick's grade is imported onto the route), links the tick to it, and leaves the pending
+   *    changes in the shared app state (upload button, undo).
    */
   let {
     tick,
@@ -100,6 +102,22 @@
   });
   const createNames = $derived(checkedIndices.map((i) => segments[i]!));
   const trimmedName = $derived(routeName.trim());
+  /**
+   * Grade tag(s) imported from the tick: the specific OSM grade tag(s) when the scale is
+   * recognized (including danger ratings like "5.10a R" or "E1 5b"), the generic
+   * `climbing:grade` tag with the raw value otherwise.
+   */
+  const tickGradeTags = $derived.by(() => {
+    const grade = tick.grade?.trim();
+    if (!grade) return [] as { key: Key; value: string }[];
+    const parsed = parseGrade(grade);
+    const tags = [parsed?.primary, parsed?.danger].flatMap((part) =>
+      part
+        ? [{ key: scaleIdToTag(part.scale) ?? ("climbing:grade" as Key), value: part.grade }]
+        : [],
+    );
+    return tags.length > 0 ? tags : [{ key: "climbing:grade" as Key, value: grade }];
+  });
   const mapCoordinates = $derived(
     base && base.data.type !== "geographic"
       ? getCoordinates(base.data as OsmFeature)
@@ -224,6 +242,10 @@
           pickedCoordinates,
           trimmedName || undefined,
         );
+        // The grade from the tick lands on the new route as part of the same undo step
+        for (const { key, value } of tickGradeTags) {
+          appState.setTag(routeSlug, key, value);
+        }
         const routeFeature = routeParent.children?.[routeSlug]?.feature;
         if (!routeFeature || routeFeature.type === "geographic")
           throw new Error("The route could not be created.");
@@ -261,8 +283,15 @@
     if (!next) onClose();
   }}
 >
-  <Dialog.Content class="max-w-[calc(100vw-2rem)]">
-    <Dialog.Header>
+  <Dialog.Content
+    class={step === 2
+      ? // Map step: fill the page so the embedded map gets as much room as possible.
+        // sm:max-w-[calc(100vw-2rem)] is required to beat the base sm:max-w-md (a plain
+        // max-w-* loses against the sm: variant of the base styles on desktop)
+        "flex h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden sm:max-w-[calc(100vw-2rem)]"
+      : ""}
+  >
+    <Dialog.Header class={step === 2 ? "shrink-0" : ""}>
       <Dialog.Title class="flex items-center gap-2">
         <span
           aria-hidden="true"
@@ -384,61 +413,66 @@
         >
       </Dialog.Footer>
     {:else}
-      {#if !appState.osmUser.loggedIn}
-        <div
-          class="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs"
-        >
-          <span>Log in with OpenStreetMap to add "{tick.name}".</span>
-          <Button
-            size="xs"
-            variant="outline"
-            onclick={() => appState.osmUser.login()}
+      <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+        {#if !appState.osmUser.loggedIn}
+          <div
+            class="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs"
           >
-            <span aria-hidden="true" class="icon-[lucide--log-in] size-3.5"
-            ></span>
-            Log in
-          </Button>
-        </div>
-      {/if}
-
-      {#await import("#lib/components/location-map.svelte")}
-        <Loader class="h-96 shrink-0" />
-      {:then { default: LocationMap }}
-        <LocationMap
-          class="h-96 shrink-0"
-          currentSlug={base?.slug}
-          currentFeature={base?.data}
-          coordinates={mapCoordinates}
-          bounds={mapBounds}
-          placementMode="route"
-          onmapclick={(coords) => (pickedCoordinates = coords)}
-        />
-      {/await}
-
-      <label class="flex flex-col gap-1 text-sm">
-        <span class="font-medium">Route name</span>
-        <Input bind:value={routeName} placeholder="Route name" />
-      </label>
-
-      <p class="text-xs text-muted-foreground">
-        {#if pickedCoordinates}
-          Location: {pickedCoordinates.lat.toFixed(5)}, {pickedCoordinates.lon.toFixed(
-            5,
-          )} — click again to adjust.
-        {:else}
-          Click on the map to pick the location.
+            <span>Log in with OpenStreetMap to add "{tick.name}".</span>
+            <Button
+              size="xs"
+              variant="outline"
+              onclick={() => appState.osmUser.login()}
+            >
+              <span aria-hidden="true" class="icon-[lucide--log-in] size-3.5"
+              ></span>
+              Log in
+            </Button>
+          </div>
         {/if}
-        {#if createNames.length > 0}
-          {createNames.join(" › ")} will be created under {baseName}.
+
+        {#await import("#lib/components/location-map.svelte")}
+          <Loader class="h-96 shrink-0" />
+        {:then { default: LocationMap }}
+          <LocationMap
+            class="min-h-96 flex-1 shrink-0"
+            currentSlug={base?.slug}
+            currentFeature={base?.data}
+            coordinates={mapCoordinates}
+            bounds={mapBounds}
+            placementMode="route"
+            onmapclick={(coords) => (pickedCoordinates = coords)}
+          />
+        {/await}
+
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-medium">Route name</span>
+          <Input bind:value={routeName} placeholder="Route name" />
+        </label>
+
+        <p class="text-xs text-muted-foreground">
+          {#if pickedCoordinates}
+            Location: {pickedCoordinates.lat.toFixed(5)}, {pickedCoordinates.lon.toFixed(
+              5,
+            )} — click again to adjust.
+          {:else}
+            Click on the map to pick the location.
+          {/if}
+          {#if createNames.length > 0}
+            {createNames.join(" › ")} will be created under {baseName}.
+          {/if}
+          The route will be added to {parentName}.
+          {#if tickGradeTags.length > 0}
+            The grade {tick.grade} is imported from the tick.
+          {/if}
+        </p>
+
+        {#if error}
+          <p class="text-sm text-destructive">{error}</p>
         {/if}
-        The route will be added to {parentName}.
-      </p>
+      </div>
 
-      {#if error}
-        <p class="text-sm text-destructive">{error}</p>
-      {/if}
-
-      <Dialog.Footer>
+      <Dialog.Footer class="shrink-0">
         <Button variant="outline" onclick={() => (step = 1)}>Back</Button>
         <Button
           onclick={save}

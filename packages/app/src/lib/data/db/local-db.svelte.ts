@@ -53,7 +53,11 @@ class LocalDb {
     const id = this.nextId++;
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve: resolve as (r: DbResponse) => void, reject });
-      this.worker!.postMessage({ ...req, id });
+      // Requests can carry reactive proxies straight from the app tree (e.g. upsertElement
+      // mirroring a locally created route): proxies cannot be structured-cloned into the
+      // worker, so they are deep-unwrapped here first, otherwise postMessage throws
+      // "Proxy object could not be cloned" and the element never reaches the database
+      this.worker!.postMessage($state.snapshot({ ...req, id }));
     });
   }
 

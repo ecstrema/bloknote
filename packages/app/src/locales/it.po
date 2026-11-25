@@ -17827,10 +17827,8 @@ msgstr ""
 msgid "Location: {0}, {1} — click again to adjust."
 msgstr ""
 
-#. 0: parentName
-#: src/lib/components/tick-osm-dialog.svelte
-msgid "<0/> <1/> The route will be added to {0}."
-msgstr ""
+#~ msgid "<0/> <1/> The route will be added to {0}."
+#~ msgstr ""
 
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Open in OSM"
@@ -17839,4 +17837,14 @@ msgstr ""
 #. 0: labelFor(tick)
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Open {0} in OSM"
+msgstr ""
+
+#. 0: tick.grade
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "The grade {0} is imported from the tick."
+msgstr ""
+
+#. 0: parentName
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "<0/> <1/> The route will be added to {0}. <2/>"
 msgstr ""

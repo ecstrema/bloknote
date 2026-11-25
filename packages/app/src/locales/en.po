@@ -17824,10 +17824,8 @@ msgstr "The location from the logbook is matched against the map data, level by 
 msgid "Location: {0}, {1} — click again to adjust."
 msgstr "Location: {0}, {1} — click again to adjust."
 
-#. 0: parentName
-#: src/lib/components/tick-osm-dialog.svelte
-msgid "<0/> <1/> The route will be added to {0}."
-msgstr "<0/> <1/> The route will be added to {0}."
+#~ msgid "<0/> <1/> The route will be added to {0}."
+#~ msgstr "<0/> <1/> The route will be added to {0}."
 
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Open in OSM"
@@ -17837,3 +17835,13 @@ msgstr "Open in OSM"
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Open {0} in OSM"
 msgstr "Open {0} in OSM"
+
+#. 0: tick.grade
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "The grade {0} is imported from the tick."
+msgstr "The grade {0} is imported from the tick."
+
+#. 0: parentName
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "<0/> <1/> The route will be added to {0}. <2/>"
+msgstr "<0/> <1/> The route will be added to {0}. <2/>"
