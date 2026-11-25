@@ -25,10 +25,20 @@ export function getItemUrl(parentSlug: string, feature: OsmFeature): string {
   return `${resolve("/world/[...slug]", { slug: pathSlug })}?id=${feature.type}-${feature.id}`;
 }
 
+/**
+ * The URL currently shown in the address bar. Shallow gotos — used to sync `?id=` and `?tab=`
+ * without reloading — only update `page.shallow.url`, not `page.url`: reading `page.url`
+ * directly sees a stale `id` param and the add route/sector chips disappear after a local
+ * navigation, only coming back after a page refresh (issue #197).
+ */
+export function getBrowserUrl(): { searchParams: URLSearchParams } & URL {
+  return (page.shallow?.url ?? page.url) as URL;
+}
+
 export function addRouteFromSidebar(appState: AppState, parent: DataTree, parentSlug: string) {
   const currentFeature = appState.currentNode.current.feature;
   const currentSlug = appState.breadcrumbs.slugs.at(-1) ?? "";
-  const id = page.url.searchParams.get("id");
+  const id = getBrowserUrl().searchParams.get("id");
   const queried =
     id && (currentFeature.type === "geographic" || `${currentFeature.type}-${currentFeature.id}` !== id)
       ? appState.findOsmItemById(id)

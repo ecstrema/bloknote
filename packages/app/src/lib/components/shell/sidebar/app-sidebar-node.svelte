@@ -25,6 +25,7 @@
     dropSidebarChild,
     endSidebarDrag,
     getItemUrl,
+    getBrowserUrl,
     getSidebarDraggedSlugs,
     getSidebarDropPosition,
     getSearchFilter,
@@ -57,7 +58,7 @@
   const isCurrentPage = $derived(
     (page.params.slug ?? "") === slug ||
       (item.feature.type !== "geographic" &&
-        page.url.searchParams.get("id") === `${item.feature.type}-${item.feature.id}`),
+        getBrowserUrl().searchParams.get("id") === `${item.feature.type}-${item.feature.id}`),
   );
   // Check if this specific node is part of the active path being viewed
   const isActivePath = $derived(isCurrentPage || breadcrumbSlugs.some((s) => s === slug));

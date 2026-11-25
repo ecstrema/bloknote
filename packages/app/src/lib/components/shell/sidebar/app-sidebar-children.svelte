@@ -2,7 +2,7 @@
   import type { DataTree } from "#lib/types.js";
 
   import AppSidebarNode from "./app-sidebar-node.svelte";
-  import { addRouteFromSidebar, getItemUrl, getSearchFilter, getSidebarChildren } from "./utils";
+  import { addRouteFromSidebar, getBrowserUrl, getItemUrl, getSearchFilter, getSidebarChildren } from "./utils";
   import type { OsmRelation, OsmWay } from "osm-api";
   import { featureToType } from "#lib/data/parse/data.js";
   import { getAppState } from "#lib/data/app-state.js";
@@ -29,7 +29,7 @@
   const isActivePath = $derived(
     appState.breadcrumbs.slugs.some((s) => s === slug) ||
       (item.feature.type !== "geographic" &&
-        page.url.searchParams.get("id") === `${item.feature.type}-${item.feature.id}`),
+        getBrowserUrl().searchParams.get("id") === `${item.feature.type}-${item.feature.id}`),
   );
 
   const searchFilter = getSearchFilter();
