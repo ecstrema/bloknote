@@ -217,7 +217,7 @@
             (e.g. a grade opinion for <code>climbing:grade:french</code>), usable for any field.
           </li>
           <li>
-            <code>org.bloknote.actor.profile</code> — User preferences such as preferred route and boulder grading scales.
+            <code>org.bloknote.actor.settings</code> — User preferences such as preferred route and boulder grading scales, theme and language.
           </li>
         </ul>
       {/if}

@@ -7,7 +7,7 @@
  * This module only re-exports the generated types under the app's historical names,
  * and keeps the few helpers that are not part of the lexicon schemas.
  */
-import type * as ActorProfile from "../lexicons/org/bloknote/actor/profile.defs.ts";
+import type * as ActorSettings from "../lexicons/org/bloknote/actor/settings.defs.ts";
 import type {
   AscentInfo,
   AscentOutcome,
@@ -52,8 +52,8 @@ export type StarRecord = AppRecord<BookmarkLex.Main, "createdAt">;
 /** An opinion about the value of a specific OSM field (org.bloknote.osm.opinion) */
 export type OpinionRecord = AppRecord<OpinionLex.Main, "createdAt">;
 
-/** Record corresponding to org.bloknote.actor.profile: the user's preferred grading scales */
-export type ProfileRecord = AppRecord<ActorProfile.Main>;
+/** Record corresponding to org.bloknote.actor.settings: the user's synced preferences (grading scales, theme, language) */
+export type SettingsRecord = AppRecord<ActorSettings.Main>;
 
 export type { AscentOutcome, SendStyle, AttemptStyle, AscentInfo };
 

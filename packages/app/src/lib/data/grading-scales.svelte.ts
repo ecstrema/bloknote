@@ -4,7 +4,7 @@ import type { BoulderScaleId, GradeType, RouteScaleId, ViaFerrataScaleId } from 
 /**
  * Grading comprehension preferences (issue #188): the scales the user understands stay as-is in
  * the UI, everything else is translated to the preferred scale. Preferences are stored locally
- * and mirrored in the org.bloknote.actor.profile lexicon shape (known and preferred scale fields).
+ * and mirrored in the org.bloknote.actor.settings lexicon shape (known and preferred scale fields).
  */
 
 export type GradingScaleType = Extract<GradeType, "route" | "boulder" | "viaFerrata">;

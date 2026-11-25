@@ -1,7 +1,7 @@
 {
   "lexicon": 1,
-  "id": "org.bloknote.actor.profile",
-  "description": "Climber preferences and default grading scales stored on the user's repository",
+  "id": "org.bloknote.actor.settings",
+  "description": "Climber preferences stored on the user's repository: grading scales, appearance and language",
   "defs": {
     "main": {
       "type": "record",
@@ -50,6 +50,16 @@
             "type": "ref",
             "ref": "org.bloknote.defs#viaFerrataScale",
             "description": "Via ferrata scale used wherever a single scale is needed (aggregated charts, plots). Unset to infer from the user's location, falling back to Hüsler"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["light", "dark", "system"],
+            "description": "Interface theme: light, dark, or following the system preference"
+          },
+          "locale": {
+            "type": "string",
+            "maxLength": 8,
+            "description": "Language of the interface and of the names of the regions (BCP 47 code, e.g. en, fr)"
           }
         }
       }

@@ -1,6 +1,6 @@
 import { browser } from "$app/env";
 import { MAX_RATING } from "@bloknote/common";
-import type { CommentRecord, OsmElementRef, RatingRecord, StarRecord, TickAscent, TickRecord } from "@bloknote/common";
+import type { CommentRecord, OsmElementRef, RatingRecord, SettingsRecord, StarRecord, TickAscent, TickRecord } from "@bloknote/common";
 import {
   BrowserOAuthClient,
   TokenInvalidError,
@@ -21,7 +21,7 @@ const TICK_COLLECTION = "org.bloknote.logbook.tick";
 const STAR_COLLECTION = "org.bloknote.osm.bookmark";
 const COMMENT_COLLECTION = "org.bloknote.osm.comment";
 const RATING_COLLECTION = "org.bloknote.osm.rating";
-const SETTINGS_COLLECTION = "org.bloknote.settings";
+const SETTINGS_COLLECTION = "org.bloknote.actor.settings";
 /** All synced preferences live in a single fixed-rkey record per account (issue #187) */
 const SETTINGS_RKEY = "self";
 
@@ -39,7 +39,7 @@ const PRODUCTION_CLIENT_ID = "https://ecstrema.github.io/bloknote/client-metadat
  * permission is needed. Must stay in sync with static/client-metadata.json.
  */
 const OAUTH_SCOPE =
-  "atproto repo:org.bloknote.logbook.tick?action=create&action=update&action=delete repo:org.bloknote.osm.bookmark?action=create&action=delete repo:org.bloknote.osm.comment?action=create&action=delete repo:org.bloknote.osm.rating?action=create&action=delete repo:org.bloknote.settings?action=create&action=update";
+  "atproto repo:org.bloknote.logbook.tick?action=create&action=update&action=delete repo:org.bloknote.osm.bookmark?action=create&action=delete repo:org.bloknote.osm.comment?action=create&action=delete repo:org.bloknote.osm.rating?action=create&action=delete repo:org.bloknote.actor.settings?action=create&action=update";
 
 export interface AtProtoSession {
   did: string;
@@ -69,15 +69,8 @@ export interface LocalRatingEntry extends RatingRecord {
   label?: string;
 }
 
-/** Appearance and language preferences synced through the user's ATProto account (issue #187) */
-export interface RemoteSettings {
-  mode?: "light" | "dark" | "system";
-  locale?: string;
-  updatedAt?: string;
-}
-
 /** Current local appearance and language, used to seed the account settings on first sync */
-function localSettings(): RemoteSettings {
+function localSettings(): SettingsRecord {
   if (!browser) return {};
   const mode = localStorage.getItem("bloknote:mode");
   const locale = localStorage.getItem("bloknote:locale");
@@ -216,7 +209,7 @@ class AtProtoClient {
   comments = $state<LocalCommentEntry[]>(readJson<LocalCommentEntry[]>(COMMENTS_STORAGE_KEY, []));
   ratings = $state<LocalRatingEntry[]>(readJson<LocalRatingEntry[]>(RATINGS_STORAGE_KEY, []));
   /** Appearance and language synced from the ATProto account, applied by the root layout (issue #187) */
-  settings = $state<RemoteSettings | undefined>(undefined);
+  settings = $state<SettingsRecord | undefined>(undefined);
 
   #client?: BrowserOAuthClient;
   #oauthSession?: OAuthSession;
@@ -418,9 +411,9 @@ class AtProtoClient {
   }
 
   /**
-   * Reads the synced appearance/language settings from the account (issue #187). When no record
-   * exists yet, it is seeded with the current local preferences. Failures never break the
-   * records hydration: settings sync is a nice-to-have.
+   * Reads the synced appearance/language settings (org.bloknote.actor.settings, issue #187). When
+   * no record exists yet, it is seeded with the current local preferences. Failures never break
+   * the records hydration: settings sync is a nice-to-have.
    */
   async #fetchRemoteSettings() {
     try {
@@ -429,7 +422,7 @@ class AtProtoClient {
       const query = new URLSearchParams({ repo: session.did, collection: SETTINGS_COLLECTION, rkey: SETTINGS_RKEY });
       const res = await this.#xrpc(`/xrpc/com.atproto.repo.getRecord?${query}`);
       if (res.ok) {
-        const data = (await res.json()) as { value?: RemoteSettings };
+        const data = (await res.json()) as { value?: SettingsRecord };
         this.settings = data.value ?? undefined;
       } else {
         // No record yet (HTTP 400/404): create one from the current local preferences
@@ -445,9 +438,9 @@ class AtProtoClient {
    * Called when the user changes a synced setting; remote changes are applied without pushing
    * back, so this only ever runs for explicit user edits.
    */
-  async saveSettings(patch: RemoteSettings) {
+  async saveSettings(patch: SettingsRecord) {
     if (!this.session || this.#settingsWriteFailed) return;
-    const record: RemoteSettings = { ...this.settings, ...patch, updatedAt: new Date().toISOString() };
+    const record: SettingsRecord = { ...this.settings, ...patch };
     delete (record as { $type?: string }).$type;
     this.settings = record;
     try {
