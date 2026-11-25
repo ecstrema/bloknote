@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { describeClimbingFeature, escapeXml, recentItemXml, renderRssFeed, RSS_MAX_ITEMS } from "./rss.ts";
+import { describeClimbingFeature, describeGeometryChange, describeTagChanges, escapeXml, isRecentItem, recentItemXml, renderRssFeed, RSS_MAX_ITEMS } from "./rss.ts";
 import type { OsmFeature } from "osm-api";
 
 const NOW = Date.parse("2026-11-23T12:00:00Z");
@@ -180,5 +180,75 @@ describe("rss", () => {
 
   it("caps the number of items per feed", () => {
     expect(RSS_MAX_ITEMS).toBeGreaterThan(0);
+  });
+
+  it("summarizes tag changes between two versions (issue #222)", () => {
+    expect(
+      describeTagChanges(
+        feature({ id: 1, tags: { name: "Old Name", "climbing:grade:french": "6a" } }),
+        feature({ id: 1, tags: { name: "New Name", "climbing:grade:french": "6a" } }),
+      ),
+    ).toBe(`changed name from “Old Name” to “New Name”`);
+    expect(
+      describeTagChanges(
+        feature({ id: 1, tags: { name: "X" } }),
+        feature({ id: 1, tags: { name: "X", "climbing:grade:french": "7a", description: "Nice" } }),
+      ),
+    ).toBe(`set climbing:grade:french to “7a”, set description to “Nice”`);
+    expect(
+      describeTagChanges(
+        feature({ id: 1, tags: { name: "X", description: "Old" } }),
+        feature({ id: 1, tags: { name: "X" } }),
+      ),
+    ).toBe("removed description");
+    expect(describeTagChanges(feature({ id: 1, tags: { name: "X" } }), feature({ id: 1, tags: { name: "X" } }))).toBe(
+      undefined,
+    );
+    // More than four changes are truncated
+    expect(
+      describeTagChanges(
+        feature({ id: 1, tags: {} }),
+        feature({ id: 1, tags: { a: "1", b: "2", c: "3", d: "4", e: "5" } as unknown as OsmFeature["tags"] }),
+      ),
+    ).toBe(`set a to “1”, set b to “2”, set c to “3”, set d to “4”, and 1 more tags`);
+  });
+
+  it("summarizes geometry changes between two versions (issue #222)", () => {
+    expect(describeGeometryChange(feature({ id: 1, lat: 48.4, lon: 2.6 }), feature({ id: 1, lat: 48.4001, lon: 2.6 }))).toBe(
+      "moved 11 m",
+    );
+    expect(describeGeometryChange(feature({ id: 1, lat: 48.4, lon: 2.6 }), feature({ id: 1, lat: 48.4, lon: 2.6 }))).toBe(
+      undefined,
+    );
+    expect(
+      describeGeometryChange(
+        { type: "way", id: 1, nodes: [1, 2, 3] } as OsmFeature,
+        { type: "way", id: 1, nodes: [1, 2, 4] } as OsmFeature,
+      ),
+    ).toBe("node list changed");
+  });
+
+  it("includes a Changes paragraph when the previous version is given (issue #222)", () => {
+    const edited = recentItemXml(
+      feature({ id: 1, version: 2, timestamp: "2026-11-20T10:00:00Z", tags: { name: "New" } }),
+      "world/x",
+      NOW,
+      feature({ id: 1, version: 1, timestamp: "2026-11-01T10:00:00Z", tags: { name: "Old" } }),
+    )!;
+    expect(edited.xml).toContain(`Changes: changed name from “Old” to “New”`);
+    // First-version elements and edits without a previous version get no Changes paragraph
+    const created = recentItemXml(
+      feature({ id: 1, version: 1, timestamp: "2026-11-20T10:00:00Z", tags: { name: "X" } }),
+      "world/x",
+      NOW,
+      feature({ id: 1, version: 0, timestamp: "2026-11-01T10:00:00Z", tags: { name: "X" } }),
+    )!;
+    expect(created.xml).not.toContain("Changes:");
+    const unknown = recentItemXml(
+      feature({ id: 1, version: 2, timestamp: "2026-11-20T10:00:00Z", tags: { name: "X" } }),
+      "world/x",
+      NOW,
+    )!;
+    expect(unknown.xml).not.toContain("Changes:");
   });
 });

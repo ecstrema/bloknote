@@ -36,7 +36,7 @@ if (existsSync(OUT_DIR)) {
   await rm(OUT_DIR, { recursive: true, force: true });
 }
 
-generateStaticAPI({
+await generateStaticAPI({
   geoIndexFile: HIERARCHY_INDEX,
   osmDataFiles: [climbingDataFile],
   outApiDirectory: OUT_DIR,

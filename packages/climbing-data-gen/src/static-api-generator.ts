@@ -3,10 +3,19 @@ import { join, dirname } from "path";
 
 import { ReverseGeolocator } from "./reverse-geolocation.ts";
 import type { Coordinates, DataJSON, GeographicFolderElement, OverpassRequest } from "./types.ts";
-import { ensureDirExists, slugify } from "@bloknote/reverse-geocoding-data";
+import { ensureDirExists, slugify, USER_AGENT } from "@bloknote/reverse-geocoding-data";
 import type { OsmFeature } from "osm-api";
 import { getStaticIdentifier, osmIndexFile } from "@bloknote/common";
-import { RSS_MAX_ITEMS, recentItemXml, renderRssFeed, type RecentItem } from "./rss.ts";
+import {
+  isRecentItem,
+  OSM_BASE_URL,
+  recentItemXml,
+  renderRssFeed,
+  RSS_CHANGES_FETCH_DELAY_MS,
+  RSS_CHANGES_FETCH_LIMIT,
+  type RecentItem,
+  RSS_MAX_ITEMS,
+} from "./rss.ts";
 
 export type StaticApiGeneratorOptions = {
   outApiDirectory: string;
@@ -17,7 +26,7 @@ export type StaticApiGeneratorOptions = {
   maxCacheSize?: number;
 };
 
-export function generateStaticAPI(options: StaticApiGeneratorOptions) {
+export async function generateStaticAPI(options: StaticApiGeneratorOptions) {
   ensureDirExists(options.outApiDirectory);
 
   console.info("Processing OSM Climbing Data...");
@@ -25,7 +34,7 @@ export function generateStaticAPI(options: StaticApiGeneratorOptions) {
   const rootNodes = getRootOsmDataNodes(allElements);
 
   console.info("Writing static API endpoints");
-  writeStaticApi(options, allElements, rootNodes);
+  await writeStaticApi(options, allElements, rootNodes);
 }
 
 function readOsmData(osmDataFiles: string[]): Map<string, OsmFeature> {
@@ -162,7 +171,7 @@ function writeDataJson(options: StaticApiGeneratorOptions, path: string, el: Osm
   writeFileSync(targetPath, JSON.stringify(el));
 }
 
-function writeStaticApi(
+async function writeStaticApi(
   options: StaticApiGeneratorOptions,
   allElements: Map<string, OsmFeature>,
   rootNodes: OsmFeature[],
@@ -265,7 +274,7 @@ function writeStaticApi(
   writeChildrenDataToGeoTree([options.outApiDirectory], geographicTree, geolocator);
 
   console.info("Writing static child, download, and stats endpoints");
-  writeStaticApiMetadata(join(options.outApiDirectory, "world"));
+  await writeStaticApiMetadata(join(options.outApiDirectory, "world"));
 }
 
 function writeChildrenDataToGeoTree(path: string[], mapTree: MapTree, geolocator: ReverseGeolocator) {
@@ -313,7 +322,54 @@ function isRoute(data: DataJSON | undefined): boolean {
   return data.tags.climbing.split(";").some((value) => routeClimbingValues.has(value.trim()));
 }
 
-function writeStaticApiMetadata(worldDirectory: string) {
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Gathers every recent OSM feature of the built tree, newest edits first */
+function collectRecentFeatures(directory: string, features: OsmFeature[] = []): OsmFeature[] {
+  const dataPath = join(directory, "data.json");
+  if (existsSync(dataPath)) {
+    const data = JSON.parse(readFileSync(dataPath, "utf8")) as DataJSON;
+    if (data.type !== "geographic" && isRecentItem(data as OsmFeature)) features.push(data as OsmFeature);
+  }
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (entry.isDirectory()) collectRecentFeatures(join(directory, entry.name), features);
+  }
+  return features;
+}
+
+/**
+ * Fetches the previous version of the most recent edited elements (issue #222): the change
+ * summaries are built by diffing the two versions, instead of querying changesets. Only the
+ * elements that can make it into a feed are fetched (capped at RSS_CHANGES_FETCH_LIMIT), with
+ * a delay between requests to stay polite with the OSM API. Failures are skipped: items simply
+ * get no "Changes" paragraph.
+ */
+async function fetchPreviousVersions(features: OsmFeature[]): Promise<Map<string, OsmFeature>> {
+  const previous = new Map<string, OsmFeature>();
+  for (const feature of features.slice(0, RSS_CHANGES_FETCH_LIMIT)) {
+    const version = feature.version ?? 1;
+    if (version <= 1) continue;
+    try {
+      const url = `${OSM_BASE_URL}/api/0.6/${feature.type}/${feature.id}/${version - 1}.json`;
+      const response = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      const element = ((await response.json()) as { elements: OsmFeature[] }).elements.find(
+        (e) => e.type === feature.type && e.id === feature.id,
+      );
+      if (element) previous.set(`${feature.type}/${feature.id}`, element);
+    } catch (error) {
+      console.info(`Skipping change summary for ${feature.type}/${feature.id}: ${error}`);
+    }
+    await sleep(RSS_CHANGES_FETCH_DELAY_MS);
+  }
+  return previous;
+}
+
+async function writeStaticApiMetadata(worldDirectory: string) {
+  const recentFeatures = collectRecentFeatures(worldDirectory).sort(
+    (a, b) => Date.parse(b.timestamp!) - Date.parse(a.timestamp!),
+  );
+  const previousVersions = await fetchPreviousVersions(recentFeatures);
   /** Every node of the world, written once at the root for the app to download */
   const download: DataJSONRecord = {};
 
@@ -340,7 +396,8 @@ function writeStaticApiMetadata(worldDirectory: string) {
     // RSS feed of the recently added or edited features in this subtree (see issue #142)
     const recent: RecentItem[] = [];
     if (data && data.type !== "geographic") {
-      const item = recentItemXml(data, slug);
+      const feature = data as OsmFeature;
+      const item = recentItemXml(feature, slug, Date.now(), previousVersions.get(`${feature.type}/${feature.id}`));
       if (item) recent.push(item);
     }
     for (const { result } of childResults) {

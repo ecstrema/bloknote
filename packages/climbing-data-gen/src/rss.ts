@@ -13,6 +13,10 @@ export const COMMONS_FILE_URL = "https://commons.wikimedia.org/wiki/Special:File
 export const RSS_RECENT_DAYS = 30;
 /** Maximum number of items in a single feed */
 export const RSS_MAX_ITEMS = 100;
+/** Maximum number of previous versions fetched at build time to describe changes (issue #222) */
+export const RSS_CHANGES_FETCH_LIMIT = 100;
+/** Delay between two previous-version fetches, to stay polite with the OSM API */
+export const RSS_CHANGES_FETCH_DELAY_MS = 150;
 
 /** A recently added or edited climbing feature, ready to be rendered into the region feeds */
 export interface RecentItem {
@@ -44,6 +48,64 @@ export function describeClimbingFeature(el: OsmFeature): string {
   if (tags.leisure === "sports_centre" || tags.leisure === "pitch") return "Gym";
   if (tags.sport === "climbing") return "Climbing feature";
   return "Climbing feature";
+}
+
+/** Whether the element is named and recent enough to be rendered into the feeds */
+export function isRecentItem(el: OsmFeature, now: number = Date.now()): boolean {
+  if (!el.tags?.name || !el.timestamp) return false;
+  const timestamp = Date.parse(el.timestamp);
+  return Number.isFinite(timestamp) && now - timestamp <= RSS_RECENT_DAYS * 24 * 60 * 60 * 1000;
+}
+
+/** Human-readable summary of the tag changes between two versions of an element */
+export function describeTagChanges(previous: OsmFeature, el: OsmFeature): string | undefined {
+  const before = (previous.tags ?? {}) as Record<string, string | undefined>;
+  const after = (el.tags ?? {}) as Record<string, string | undefined>;
+  const changes: string[] = [];
+  for (const key of [...new Set([...Object.keys(before), ...Object.keys(after)])].sort()) {
+    const from = before[key];
+    const to = after[key];
+    if (from === to) continue;
+    // Typographic quotes: the whole description is escaped again, straight quotes would double-escape
+    if (from === undefined) changes.push(`set ${key} to “${to}”`);
+    else if (to === undefined) changes.push(`removed ${key}`);
+    else changes.push(`changed ${key} from “${from}” to “${to}”`);
+  }
+  if (changes.length === 0) return undefined;
+  const shown = changes.slice(0, 4).join(", ");
+  return changes.length > 4 ? `${shown}, and ${changes.length - 4} more tags` : shown;
+}
+
+/** Human-readable summary of the geometry change between two versions of an element */
+export function describeGeometryChange(previous: OsmFeature, el: OsmFeature): string | undefined {
+  if (el.type === "node" && previous.type === "node") {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const dLat = toRad(el.lat - previous.lat);
+    const dLon = toRad(el.lon - previous.lon);
+    const meters =
+      2 *
+      6_371_000 *
+      Math.asin(
+        Math.sqrt(
+          Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(previous.lat)) * Math.cos(toRad(el.lat)) * Math.sin(dLon / 2) ** 2,
+        ),
+      );
+    return meters >= 0.1 ? `moved ${meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`}` : undefined;
+  }
+  if (el.type === "way" && previous.type === "way") {
+    return JSON.stringify(previous.nodes) === JSON.stringify(el.nodes) ? undefined : "node list changed";
+  }
+  if (el.type === "relation" && previous.type === "relation") {
+    return JSON.stringify(previous.members) === JSON.stringify(el.members) ? undefined : "member list changed";
+  }
+  return undefined;
+}
+
+/** The "Changes: …" sentence describing what the edit actually did (issue #222) */
+function changesParagraph(previous: OsmFeature, el: OsmFeature): string | undefined {
+  const changes = describeTagChanges(previous, el) ?? describeGeometryChange(previous, el);
+  return changes ? `<p>Changes: ${escapeXml(changes)}</p>` : undefined;
 }
 
 const GRADE_TAG_PREFIX = "climbing:grade:";
@@ -89,13 +151,13 @@ function linksParagraph(el: OsmFeature, bloknoteLink: string): string {
  * (last edit older than RSS_RECENT_DAYS), unnamed, or carries no last-edit timestamp.
  * The Overpass data does not need any diffing against a previous build: each element carries
  * the date of its last edit, and newly created elements simply have a recent one.
- * The description is escaped HTML: contributor credit, Commons photos, and provider links.
+ * The description is escaped HTML: contributor credit, a summary of what changed when the
+ * previous version is available (issue #222), Commons photos, and provider links.
  */
-export function recentItemXml(el: OsmFeature, slug: string, now: number = Date.now()): RecentItem | undefined {
+export function recentItemXml(el: OsmFeature, slug: string, now: number = Date.now(), previous?: OsmFeature): RecentItem | undefined {
   const name = el.tags?.name;
-  if (!name || !el.timestamp) return undefined;
+  if (!name || !el.timestamp || !isRecentItem(el, now)) return undefined;
   const timestamp = Date.parse(el.timestamp);
-  if (!Number.isFinite(timestamp) || now - timestamp > RSS_RECENT_DAYS * 24 * 60 * 60 * 1000) return undefined;
 
   const kind = describeClimbingFeature(el);
   const gradeEntry = Object.entries(el.tags ?? {}).find(([key]) => key.startsWith(GRADE_TAG_PREFIX));
@@ -106,6 +168,10 @@ export function recentItemXml(el: OsmFeature, slug: string, now: number = Date.n
   const guid = `osm-${el.type}-${el.id}-v${el.version ?? 0}`;
 
   const paragraphs = [`<p>${authorParagraph(summary, el.user, (el.version ?? 1) === 1)}</p>`];
+  if (previous && (el.version ?? 1) > 1) {
+    const changes = changesParagraph(previous, el);
+    if (changes) paragraphs.push(changes);
+  }
   for (const { page, image } of commonsFiles(el.tags?.wikimedia_commons)) {
     paragraphs.push(
       `<p><a href="${escapeXml(page)}"><img src="${escapeXml(image)}" alt="${escapeXml(`Photo of ${name}`)}" width="480"/></a></p>`,
