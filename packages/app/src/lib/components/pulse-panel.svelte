@@ -77,6 +77,16 @@
       .slice(0, 6),
   );
 
+  /**
+   * A single item (no children): the subtree recency charts make no sense there, only the last
+   * edit of the item itself is shown (issue #195).
+   */
+  const isSingleItem = $derived(entries.length <= 1);
+  const selfTs = $derived.by(() => {
+    const ts = entries[0]?.feature.timestamp ? Date.parse(entries[0].feature.timestamp) : NaN;
+    return Number.isFinite(ts) ? ts : undefined;
+  });
+
   const maxYearCount = $derived(Math.max(1, ...stats.editsPerYear.map((e) => e.count)));
   const maxBucketCount = $derived(Math.max(1, ...stats.recencyDistribution.map((b) => b.count)));
 
@@ -113,6 +123,21 @@
           No OSM edit timestamps available.
         {/if}
       </span>
+    </div>
+  {:else if isSingleItem}
+    <div class="flex flex-col gap-1.5 rounded-md border p-3.5 text-sm" aria-label="Edit info">
+      {#if selfTs === undefined}
+        <div class="flex items-center gap-2 text-muted-foreground">
+          <span class="icon-[lucide--activity] shrink-0 size-4" aria-hidden="true"></span>
+          <span>This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap).</span>
+        </div>
+      {:else}
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="icon-[lucide--activity] shrink-0 size-4" aria-hidden="true"></span>
+          <span>Last edited <span class="font-medium">{formatAge(now - selfTs)}</span></span>
+          <span class="text-xs text-muted-foreground">{formatDate(selfTs)}</span>
+        </div>
+      {/if}
     </div>
   {:else}
     <section class="flex flex-col gap-3 rounded-md border p-3.5" aria-label="Edit statistics">
