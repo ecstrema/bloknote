@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { Chart, Layer, Axis, Rect, Text } from "layerchart/svg";
-  import { scaleBand, scaleLinear } from "d3-scale";
-  import type { DataJSON } from "@bloknote/climbing-data-gen";
-  import type { OsmFeature } from "osm-api";
+  import { goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
   import * as Dialog from "#components/ui/dialog/index.js";
   import * as DropdownMenu from "#components/ui/dropdown-menu/index.js";
   import { Button } from "#components/ui/button/index.js";
@@ -11,13 +9,6 @@
   import { gradeTextToReference } from "#lib/data/db/grade-text.js";
   import { searchState, type PremadeFilterKind } from "./search-state.svelte.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
-  import {
-    computeSectorStats,
-    STAT_STYLE_COLORS,
-    STAT_STYLE_ORDER,
-  } from "#lib/data/parse/sector-stats.js";
-  import { gradingScales } from "#lib/data/grading-scales.svelte.js";
-  import type { BoulderScaleId, RouteScaleId } from "@bloknote/holy-grade";
 
   let { open = $bindable(false), onShowResults }: { open?: boolean; onShowResults: () => void } = $props();
 
@@ -40,9 +31,6 @@
     ["aid", "Aid"],
     ["deepwater", "Deep-water solo"],
   ] as const;
-
-  /** How many matched elements are loaded for the results overview charts */
-  const OVERVIEW_LIMIT = 500;
 
   /** The premade "from your logbook" filters the user can toggle (issue #166) */
   const PREMADE_FILTERS = [
@@ -101,41 +89,11 @@
     tagValue = "";
   }
 
-  /** Matched elements loaded for the overview charts: refreshed (debounced) while the search streams */
-  let overview = $state.raw<Record<string, DataJSON>>({});
-  $effect(() => {
-    const matches = searchState.result?.matches;
-    if (!localDb.ready || !matches || matches.size === 0) {
-      overview = {};
-      return;
-    }
-    const slugs = [...matches].slice(0, OVERVIEW_LIMIT);
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      localDb
-        .getElements(slugs)
-        .then((res) => {
-          if (!cancelled) overview = res;
-        })
-        .catch(() => {});
-    }, 200);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  });
-
-  const stats = $derived(
-    computeSectorStats(
-      Object.values(overview).filter((f): f is OsmFeature => f.type !== "geographic"),
-      {
-        routeScale: gradingScales.effective("route") as RouteScaleId,
-        boulderScale: gradingScales.effective("boulder") as BoulderScaleId,
-      },
-    ),
-  );
-  const maxGradeCount = $derived(Math.max(1, ...stats.gradeDistribution.map((b) => b.total)));
-  const chartPadding = { top: 14, right: 10, bottom: 28, left: 30 };
+  /** Opens the overview plots of the current results in a full page (issue #214) */
+  function exploreResults() {
+    open = false;
+    void goto(resolve("/explore"));
+  }
 </script>
 
 <Dialog.Root bind:open>
@@ -291,74 +249,10 @@
             {/if}
           </div>
 
-          {#if stats.total > 0}
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-              {#each stats.typeDistribution as entry (entry.style)}
-                <span class="inline-flex items-center gap-1.5">
-                  <span class="size-2.5 rounded-xs" style:background-color={entry.color}></span>
-                  <span class="text-muted-foreground">{entry.label}:</span>
-                  <span class="font-medium">{entry.count}</span>
-                </span>
-              {/each}
-              {#if stats.ungraded > 0}
-                <span class="text-muted-foreground">{stats.ungraded} ungraded</span>
-              {/if}
-            </div>
-
-            {#if stats.gradeDistribution.length > 0}
-              <div class="h-[170px] w-full overflow-x-auto">
-                <div class="h-full" style:min-width="{Math.max(260, stats.gradeDistribution.length * 28)}px">
-                  <Chart
-                    data={stats.gradeDistribution}
-                    height={170}
-                    x="grade"
-                    y="total"
-                    xScale={scaleBand().padding(0.22)}
-                    yScale={scaleLinear()}
-                    yDomain={[0, maxGradeCount]}
-                    padding={chartPadding}
-                  >
-                    {#snippet children({ context })}
-                      <Layer>
-                        <Axis placement="left" ticks={Math.min(4, maxGradeCount)} grid rule />
-                        <Axis placement="bottom" rule />
-                        {#each stats.gradeDistribution as bucket (bucket.grade)}
-                          {@const x = context.xScale(bucket.grade) ?? 0}
-                          {@const bw = context.xScale.bandwidth?.() ?? 16}
-                          {#each STAT_STYLE_ORDER as style (style)}
-                            {@const count = bucket.byStyle[style] ?? 0}
-                            {#if count > 0}
-                              {@const y1 = context.yScale(bucket.total)}
-                              {@const y0 = context.yScale(bucket.total - count)}
-                              <Rect
-                                {x}
-                                y={y0}
-                                width={bw}
-                                height={Math.max(1, y1 - y0)}
-                                fill={STAT_STYLE_COLORS[style]}
-                                rx={1}
-                              />
-                            {/if}
-                          {/each}
-                          <Text
-                            x={x + bw / 2}
-                            y={context.yScale(bucket.total) - 4}
-                            textAnchor="middle"
-                            fontSize={10}
-                            value={String(bucket.total)}
-                            class="fill-muted-foreground"
-                          />
-                        {/each}
-                      </Layer>
-                    {/snippet}
-                  </Chart>
-                </div>
-              </div>
-            {/if}
-            {#if searchState.result.matches.size > OVERVIEW_LIMIT}
-              <p class="text-xs text-muted-foreground">Charts cover the first {OVERVIEW_LIMIT} matches.</p>
-            {/if}
-          {/if}
+          <Button variant="outline" onclick={exploreResults}>
+            <span class="icon-[lucide--chart-column] shrink-0 size-3.5"></span>
+            Explore this data
+          </Button>
         {/if}
       </section>
     </div>
