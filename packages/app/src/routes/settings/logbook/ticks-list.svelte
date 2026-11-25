@@ -7,7 +7,8 @@
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { dataClient } from "#lib/data/network/data-client.js";
   import { getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
-  import { getName } from "#lib/data/parse/data.js";
+  import { getLocalizedName } from "#lib/data/parse/localized-name.js";
+  import { getParentSlug } from "#lib/helpers/slug.js";
   import { extractRouteStyle, ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import type { Grade } from "#lib/types.js";
@@ -235,9 +236,15 @@
     const ensure = (slug: string): PlaceNode => {
       const existing = nodes.get(slug);
       if (existing) return existing;
+      // Locally created elements are only mirrored in memory until their changeset is pushed,
+      // and their slug holds a random id: without this the tree would show that id (issue #202)
+      const local = dataClient.getLocalNodeBySlug(slug);
       const node: PlaceNode = {
         slug,
-        name: placeNames[slug] ?? slug.split("/").at(-1)!.replaceAll("-", " "),
+        name:
+          placeNames[slug] ??
+          (local ? getLocalizedName(local.feature) : undefined) ??
+          slug.split("/").at(-1)!.replaceAll("-", " "),
         children: [],
         ticks: [],
         total: 0,
@@ -249,7 +256,9 @@
     for (const tick of sortedTicks) {
       const info = tick.subject ? resolved[`${tick.subject.type}-${tick.subject.id}`] : undefined;
       if (info?.slug) {
-        ensure(info.slug).ticks.push(tick);
+        // Ticks hang under the place holding their route, not under the route itself: otherwise
+        // every tick is its own parent and ticks of the same crag are not grouped (issue #202)
+        ensure(getParentSlug(info.slug) ?? "").ticks.push(tick);
         continue;
       }
       // Ticks without a place in the tree. Both kinds belong to the same bucket: subject-less
@@ -283,11 +292,20 @@
     };
     walk(placeTree!);
     if (slugs.size === 0) return;
-    Promise.all([...slugs].map(async (slug) => [slug, await localDb.getNode(slug)] as const)).then((entries) => {
-      // Geographic places keep their name at the top level, OSM elements in their tags (see getName)
+    Promise.all(
+      [...slugs].map(async (slug) => {
+        const node = await localDb.getNode(slug);
+        if (node) return [slug, getLocalizedName(node)] as const;
+        // Locally created elements are only mirrored in memory until their changeset is pushed
+        const local = dataClient.getLocalNodeBySlug(slug)?.feature;
+        return [slug, local ? getLocalizedName(local) : undefined] as const;
+      }),
+    ).then((entries) => {
+      // Unresolved slugs are left out (the element may reach the database later), and the merge
+      // keeps the resolutions of later effect runs that raced with this one
       placeNames = {
         ...placeNames,
-        ...Object.fromEntries(entries.map(([slug, node]) => [slug, (node && getName(node)) || slug])),
+        ...Object.fromEntries(entries.filter((entry): entry is [string, string] => entry[1] !== undefined)),
       };
     });
   });
@@ -380,19 +398,29 @@
   {#snippet tickRow(tick: LocalTickEntry)}
         {@const linked = rematch[tick.localId!]?.candidates ?? []}
         {@const info = tick.subject ? resolved[`${tick.subject.type}-${tick.subject.id}`] : undefined}
-        <li class="flex flex-col gap-1 rounded border p-2">
+        <li class="flex flex-col gap-1 rounded border p-2 [content-visibility:auto] [contain-intrinsic-size:auto_4.5rem]">
           <div class="flex flex-wrap items-center gap-2">
             {#if tick.subject}
-              <a
-                href={info?.slug
-                  ? resolve("/world/[...slug]", { slug: info.slug })
-                  : `https://www.openstreetmap.org/${tick.subject.type}/${tick.subject.id}`}
-                target={info?.slug ? undefined : "_blank"}
-                rel="noreferrer"
-                class="font-medium underline underline-offset-2"
-              >
-                {labelFor(tick)}
-              </a>
+              {#if info?.slug}
+                <a
+                  href={resolve("/world/[...slug]", { slug: info.slug })}
+                  class="font-medium underline underline-offset-2"
+                >
+                  {labelFor(tick)}
+                </a>
+              {:else}
+                <span class="font-medium">{labelFor(tick)}</span>
+                <a
+                  href={`https://www.openstreetmap.org/${tick.subject.type}/${tick.subject.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  class="inline-flex items-center rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  title="Open in OSM"
+                  aria-label="Open {labelFor(tick)} in OSM"
+                >
+                  <span aria-hidden="true" class="icon-[lucide--external-link] size-3.5"></span>
+                </a>
+              {/if}
             {:else}
               <span class="font-medium">{labelFor(tick)}</span>
             {/if}
@@ -485,7 +513,7 @@
   {/snippet}
 
   {#snippet placeNode(node: PlaceNode)}
-    <li>
+    <li class="[content-visibility:auto] [contain-intrinsic-size:auto_2rem]">
       <details open>
         <summary class="cursor-pointer select-none text-xs font-medium text-muted-foreground">
           {node.name} ({node.total})

@@ -273,6 +273,7 @@ export class OsmUser {
   #buildOsmChangeset(): {
     changeset: OsmChange;
     mapIdToCreatedFeature: Record<string, OsmFeature>;
+    mapIdToModifiedFeature: Record<string, OsmFeature>;
   } {
     const changeset: OsmChange = {
       create: [],
@@ -281,6 +282,7 @@ export class OsmUser {
     };
 
     const mapIdToCreatedFeature: Record<string, OsmFeature> = {};
+    const mapIdToModifiedFeature: Record<string, OsmFeature> = {};
 
     for (const { initial, final } of this.changes.values()) {
       if (final === undefined) {
@@ -295,8 +297,9 @@ export class OsmUser {
       } else if (final.id < 0) {
         changeset.create.push(final);
         mapIdToCreatedFeature[getStaticIdentifier(final.type, final.id)] = final;
-      } else {
+      } else if (final.id > 0) {
         changeset.modify.push(final);
+        mapIdToModifiedFeature[getStaticIdentifier(final.type, final.id)] = final;
       }
     }
 
@@ -322,6 +325,7 @@ export class OsmUser {
     return {
       changeset,
       mapIdToCreatedFeature,
+      mapIdToModifiedFeature,
     };
   }
 
@@ -331,7 +335,7 @@ export class OsmUser {
     }
 
     this.submitting = { phase: "creating_changeset", step: 0, total: 1 };
-    const { changeset, mapIdToCreatedFeature } = this.#buildOsmChangeset();
+    const { changeset, mapIdToCreatedFeature, mapIdToModifiedFeature } = this.#buildOsmChangeset();
 
     try {
       console.log("Submitting changeset to OSM", changeset);
@@ -350,14 +354,16 @@ export class OsmUser {
         const changesetDiff: UploadResult[0] = result[changesetId]!;
         for (const [featureType, featureDiff] of Object.entries(changesetDiff.diffResult)) {
           for (const oldId in featureDiff) {
+            // The diff result keys are strings (XML attributes): the temporary id for created
+            // elements, and the real id for modified or deleted ones
+            const from = Number(oldId);
+            if (!Number.isInteger(from)) continue;
             const { newId, newVersion } = featureDiff[oldId]!;
-            if (Number.isInteger(oldId)) {
-              const identifier = getStaticIdentifier(featureType as OsmFeatureType, oldId as unknown as number);
-              const feature = mapIdToCreatedFeature[identifier];
+            if (from < 0) {
+              const feature = mapIdToCreatedFeature[getStaticIdentifier(featureType as OsmFeatureType, from)];
               if (!feature) {
                 console.warn(
-                  "Could not find uploaded feaure to update with new id and version. This should not happen.",
-                  identifier,
+                  "Could not find uploaded feature to update with new id and version. This should not happen.",
                   featureType,
                   oldId,
                   newId,
@@ -365,13 +371,14 @@ export class OsmUser {
                 );
                 continue;
               }
-              if (!feature) {
-                console.warn("Received an id for a deleted feature during upload to osm", feature);
-                return;
-              }
               feature.id = newId;
               feature.version = newVersion;
-              idRemaps.push({ type: featureType as OsmFeatureType, from: oldId as unknown as number, to: newId });
+              idRemaps.push({ type: featureType as OsmFeatureType, from, to: newId });
+            } else if (Number.isInteger(newVersion) && newVersion > 0) {
+              // Modified elements keep their id: only the version moves forward, so subsequent
+              // edits of the same feature are uploaded with the right version (issue #207)
+              const feature = mapIdToModifiedFeature[getStaticIdentifier(featureType as OsmFeatureType, from)];
+              if (feature) feature.version = newVersion;
             }
           }
         }

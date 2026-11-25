@@ -61,6 +61,11 @@ class DataClient {
     }
   }
 
+  /** The locally created element with this slug (e.g. to resolve its name before it reaches the database) */
+  getLocalNodeBySlug(slug: string): DataTree | undefined {
+    return this.#localNodes.get(slug);
+  }
+
   private async localReady(): Promise<boolean> {
     if (!browser) return false;
     if (localDb.status === "ready") return true;
