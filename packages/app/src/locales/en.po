@@ -17785,3 +17785,11 @@ msgstr "Show all {0} changes"
 #: src/lib/components/pulse-panel.svelte
 msgid "Changeset {0}"
 msgstr "Changeset {0}"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Item history"
+msgstr "Item history"
+
+#: src/lib/components/pulse-panel.svelte
+msgid "History of this item"
+msgstr "History of this item"
