@@ -14947,6 +14947,7 @@ msgstr "Ripristina le modifiche di trascinamento"
 
 #: src/routes/grade-comparison/GradeComparisonChart.svelte
 #: src/routes/grade-comparison/GradeComparisonChart.svelte
+#: src/routes/settings/+page.svelte
 msgid "Scale"
 msgstr "Scala"
 
@@ -15428,8 +15429,9 @@ msgstr "Modificato"
 msgid "Delete"
 msgstr "Elimina"
 
-#~ msgid "Compare route grades"
-#~ msgstr "Confronta i gradi delle vie"
+#: src/routes/settings/+page.svelte
+msgid "Compare route grades"
+msgstr "Confronta i gradi delle vie"
 
 #: src/lib/components/pulse-panel.svelte
 #: src/lib/components/shell/osm-changes.svelte
@@ -15549,8 +15551,9 @@ msgstr "Sfoglia le zone di arrampicata per regione."
 msgid "Regions"
 msgstr "Regioni"
 
-#~ msgid "Compare boulder grades"
-#~ msgstr "Confronta i gradi dei boulder"
+#: src/routes/settings/+page.svelte
+msgid "Compare boulder grades"
+msgstr "Confronta i gradi dei boulder"
 
 #: src/routes/world/+error.svelte
 msgid "Page not found | Bloknote"
@@ -16521,9 +16524,8 @@ msgstr "Bloknote usa Wikimedia Commons OAuth2 PKCE direttamente dal browser per 
 msgid "<0/> — Canonical reference to an OSM element (<1/> + numeric <2/>), resilient to OSM name/slug changes."
 msgstr "<0/> — Riferimento canonico a un elemento OSM (<1/> + <2/> numerico), resistente ai cambiamenti di nome/slug OSM."
 
-#: src/routes/docs/+page.svelte
-msgid "<0/> — User preferences such as preferred route and boulder grading scales."
-msgstr "<0/> — Preferenze utente come le scale di graduazione preferite per vie e boulder."
+#~ msgid "<0/> — User preferences such as preferred route and boulder grading scales."
+#~ msgstr "<0/> — Preferenze utente come le scale di graduazione preferite per vie e boulder."
 
 #: src/routes/docs/+page.svelte
 msgid "Atmosphere (ATProto) Lexicons"
@@ -17691,17 +17693,15 @@ msgstr ""
 msgid "Understand the {0} scale"
 msgstr ""
 
-#: src/routes/settings/+page.svelte
-msgid "Compare grades"
-msgstr ""
+#~ msgid "Compare grades"
+#~ msgstr ""
 
 #: src/routes/settings/+page.svelte
 msgid "Grading scales"
 msgstr ""
 
-#: src/routes/settings/+page.svelte
-msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
-msgstr ""
+#~ msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
+#~ msgstr ""
 
 #: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "<0/> Explore this data"
@@ -17795,4 +17795,21 @@ msgstr ""
 
 #: src/lib/components/pulse-panel.svelte
 msgid "History of this item"
+msgstr ""
+
+#. 0: scale.name
+#: src/routes/settings/+page.svelte
+msgid "About the {0} scale"
+msgstr "Informazioni sulla scala {0}"
+
+#: src/routes/settings/+page.svelte
+msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau. Hover a scale to learn more about it."
+msgstr "Spunta le scale che conosci: i loro gradi vengono mostrati così come sono. Gli altri vengono tradotti nella scala preferita della loro disciplina, usata anche ovunque sia necessaria una sola scala (grafici, confronti). Senza preferenze viene usata la scala della tua posizione, con ripiego su francese e Fontainebleau. Passa il mouse su una scala per saperne di più."
+
+#: src/routes/settings/+page.svelte
+msgid "Compare via ferrata grades"
+msgstr "Confronta i gradi delle vie ferrate"
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — User preferences such as preferred route and boulder grading scales, theme and language."
 msgstr ""

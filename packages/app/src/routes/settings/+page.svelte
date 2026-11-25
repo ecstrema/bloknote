@@ -20,61 +20,112 @@
   import { settings } from "#lib/data/settings.svelte.js";
   import { gradingScales, type GradingScaleType, type PreferredScaleId } from "#lib/data/grading-scales.svelte.js";
   import { i18n, locales, localeNames, setLocale } from "#lib/i18n.svelte.js";
+  import * as Popover from "#components/ui/popover/index.js";
+  import * as Table from "#components/ui/table/index.js";
 
-  const routeExamples = $derived(
-    ["6a", "7a", "8a"].map((grade) => convertGrade(grade, french, getScale(gradingScales.effective("route"))!)).join(", "),
-  );
-  const boulderExamples = $derived(
-    ["5A", "6A", "7A"].map((grade) => convertGrade(grade, fb, getScale(gradingScales.effective("boulder"))!)).join(", "),
-  );
-  const viaFerrataExamples = $derived(
-    ["K2", "K4", "K5"].map((grade) => convertGrade(grade, husler, getScale(gradingScales.effective("viaFerrata"))!)).join(", "),
+  // Reference grades of each discipline, converted into every scale to build the examples (issue #223)
+  const REFERENCE_GRADES: Record<GradingScaleType, { from: Scale; grades: string[] }> = {
+    route: { from: french, grades: ["6a", "7a", "8a"] },
+    boulder: { from: fb, grades: ["5A", "6A", "7A"] },
+    viaFerrata: { from: husler, grades: ["K2", "K4", "K5"] },
+  } as const;
+
+  function scaleExamples(scale: Scale): string {
+    const reference = REFERENCE_GRADES[scale.gradeType as GradingScaleType];
+    return reference.grades
+      .map((grade) => convertGrade(grade, reference.from, scale))
+      .filter((grade): grade is string => grade !== undefined)
+      .join(", ");
+  }
+
+  interface ScaleInfo {
+    title: string;
+    description: string;
+    examples: string;
+  }
+
+  function scaleInfo(scale: Scale): ScaleInfo {
+    const where = scale.usedIn ? ` · ${scale.usedIn}` : "";
+    return { title: `${scale.name}${where}`, description: scale.description, examples: scaleExamples(scale) };
+  }
+
+  /** Scale hovered in the tables, shown on the left; falls back to the effective scales */
+  let inspected = $state<ScaleInfo>();
+  const defaultDetails = $derived(
+    (["route", "boulder", "viaFerrata"] as const)
+      .map((type) => getScale(gradingScales.effective(type)))
+      .filter((scale): scale is Scale => scale !== undefined)
+      .map((scale) => scaleInfo(scale)),
   );
 </script>
 
-{#snippet scaleList(id: string, type: GradingScaleType, scales: Scale[], compareHref: string, examples: string)}
-  <div class="space-y-1">
-    <div class="flex items-center gap-3 text-xs text-muted-foreground">
-      <span class="size-4 shrink-0" aria-hidden="true"></span>
-      <span>Preferred</span>
-      <span class="size-4 shrink-0" aria-hidden="true"></span>
-      <span>Understood</span>
-    </div>
-    {#each scales as scale (scale.id)}
-      <label class="flex min-h-8 items-center gap-3 text-sm">
-        <input
-          type="radio"
-          name={`preferred-${id}`}
-          class="size-4 accent-primary"
-          checked={gradingScales.preferred(type) === scale.id}
-          onclick={() =>
-            gradingScales.setPreferred(
-              type,
-              gradingScales.preferred(type) === scale.id ? undefined : (scale.id as PreferredScaleId),
-            )}
-          aria-label={`Preferred ${scale.name} scale`}
-        />
-        <input
-          type="checkbox"
-          class="size-4 accent-primary"
-          checked={gradingScales.known(type).includes(scale.id as never)}
-          onchange={() => gradingScales.toggleKnown(scale.id as never)}
-          aria-label={`Understand the ${scale.name} scale`}
-        />
-        <span class="flex-1">
-          {scale.name}
-          {#if scale.usedIn}<span class="text-muted-foreground"> · {scale.usedIn}</span>{/if}
-        </span>
-      </label>
-    {/each}
-    <p class="text-sm text-muted-foreground">
-      {getScale(gradingScales.effective(type))?.description}
-      <span class="mt-1 block"
-        ><span class="font-medium text-foreground">Examples:</span> {examples}</span
-      >
-    </p>
-    <a href={compareHref} class="text-sm text-primary hover:underline">Compare grades</a>
+{#snippet scaleInfoCard(info: ScaleInfo)}
+  <div class="text-sm">
+    <p class="font-medium">{info.title}</p>
+    <p class="mt-1 text-muted-foreground">{info.description}</p>
+    <p class="mt-1"><span class="font-medium text-foreground">Examples:</span> {info.examples}</p>
   </div>
+{/snippet}
+
+{#snippet scaleTable(id: string, type: GradingScaleType, scales: Scale[], compareLabel: string, compareHref: string)}
+  <div class="overflow-hidden rounded-xl border bg-muted/50">
+    <Table.Root onmouseleave={() => (inspected = undefined)}>
+      <Table.Header>
+        <Table.Row>
+          <Table.Head class="h-8 py-1 text-xs">Preferred</Table.Head>
+          <Table.Head class="h-8 py-1 text-xs">Understood</Table.Head>
+          <Table.Head class="h-8 py-1 text-xs">Scale</Table.Head>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        {#each scales as scale (scale.id)}
+          <Table.Row class="cursor-default" onmouseenter={() => (inspected = scaleInfo(scale))}>
+            <Table.Cell class="py-1">
+              <input
+                type="radio"
+                name={`preferred-${id}`}
+                class="size-4 accent-primary"
+                checked={gradingScales.preferred(type) === scale.id}
+                onclick={() =>
+                  gradingScales.setPreferred(
+                    type,
+                    gradingScales.preferred(type) === scale.id ? undefined : (scale.id as PreferredScaleId),
+                  )}
+                aria-label={`Preferred ${scale.name} scale`}
+              />
+            </Table.Cell>
+            <Table.Cell class="py-1">
+              <input
+                type="checkbox"
+                class="size-4 accent-primary"
+                checked={gradingScales.known(type).includes(scale.id as never)}
+                onchange={() => gradingScales.toggleKnown(scale.id as never)}
+                aria-label={`Understand the ${scale.name} scale`}
+              />
+            </Table.Cell>
+            <Table.Cell class="py-1">
+              <span>
+                {scale.name}
+                {#if scale.usedIn}<span class="text-muted-foreground"> · {scale.usedIn}</span>{/if}
+              </span>
+              <Popover.Root>
+                <Popover.Trigger
+                  aria-label={`About the ${scale.name} scale`}
+                  class="ml-1 inline-flex items-center rounded-sm align-middle text-muted-foreground hover:text-foreground sm:hidden"
+                >
+                  <span class="icon-[lucide--info] size-3.5"></span>
+                </Popover.Trigger>
+                <Popover.Content class="w-64 text-sm" side="top">
+                  {@render scaleInfoCard(scaleInfo(scale))}
+                </Popover.Content>
+              </Popover.Root>
+            </Table.Cell>
+          </Table.Row>
+        {/each}
+      </Table.Body>
+    </Table.Root>
+  </div>
+  <a href={compareHref} class="text-sm text-primary hover:underline">{compareLabel}</a>
 {/snippet}
 
 <Tabs.Content value="settings">
@@ -136,13 +187,24 @@
               Tick the scales you understand: grades in them are shown as written. Grades in the others are translated
               to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts,
               comparisons). Without any preference, the scale of your location is used, falling back to French and
-              Fontainebleau.
+              Fontainebleau. Hover a scale to learn more about it.
             </p>
+            <div class="mt-4 hidden sm:block">
+              {#if inspected}
+                {@render scaleInfoCard(inspected)}
+              {:else}
+                <div class="grid gap-4">
+                  {#each defaultDetails as detail (detail.title)}
+                    {@render scaleInfoCard(detail)}
+                  {/each}
+                </div>
+              {/if}
+            </div>
           </div>
           <div class="space-y-6">
-            {@render scaleList("route", "route", allRouteScales, resolve("/grade-comparison/route"), routeExamples)}
-            {@render scaleList("boulder", "boulder", allBoulderScales, resolve("/grade-comparison/boulder"), boulderExamples)}
-            {@render scaleList("via-ferrata", "viaFerrata", allViaFerrataScales, resolve("/grade-comparison/via-ferrata"), viaFerrataExamples)}
+            {@render scaleTable("route", "route", allRouteScales, "Compare route grades", resolve("/grade-comparison/route"))}
+            {@render scaleTable("boulder", "boulder", allBoulderScales, "Compare boulder grades", resolve("/grade-comparison/boulder"))}
+            {@render scaleTable("via-ferrata", "viaFerrata", allViaFerrataScales, "Compare via ferrata grades", resolve("/grade-comparison/via-ferrata"))}
           </div>
         </section>
 

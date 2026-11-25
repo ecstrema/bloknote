@@ -14947,6 +14947,7 @@ msgstr "Reset drag edits"
 
 #: src/routes/grade-comparison/GradeComparisonChart.svelte
 #: src/routes/grade-comparison/GradeComparisonChart.svelte
+#: src/routes/settings/+page.svelte
 msgid "Scale"
 msgstr "Scale"
 
@@ -15428,8 +15429,9 @@ msgstr "Modified"
 msgid "Delete"
 msgstr "Delete"
 
-#~ msgid "Compare route grades"
-#~ msgstr "Compare route grades"
+#: src/routes/settings/+page.svelte
+msgid "Compare route grades"
+msgstr "Compare route grades"
 
 #: src/lib/components/pulse-panel.svelte
 #: src/lib/components/shell/osm-changes.svelte
@@ -15549,8 +15551,9 @@ msgstr "Browse climbing areas by region."
 msgid "Regions"
 msgstr "Regions"
 
-#~ msgid "Compare boulder grades"
-#~ msgstr "Compare boulder grades"
+#: src/routes/settings/+page.svelte
+msgid "Compare boulder grades"
+msgstr "Compare boulder grades"
 
 #: src/routes/world/+error.svelte
 msgid "Page not found | Bloknote"
@@ -16521,9 +16524,8 @@ msgstr "Bloknote uses Wikimedia Commons OAuth2 PKCE directly from your browser t
 msgid "<0/> — Canonical reference to an OSM element (<1/> + numeric <2/>), resilient to OSM name/slug changes."
 msgstr "<0/> — Canonical reference to an OSM element (<1/> + numeric <2/>), resilient to OSM name/slug changes."
 
-#: src/routes/docs/+page.svelte
-msgid "<0/> — User preferences such as preferred route and boulder grading scales."
-msgstr "<0/> — User preferences such as preferred route and boulder grading scales."
+#~ msgid "<0/> — User preferences such as preferred route and boulder grading scales."
+#~ msgstr "<0/> — User preferences such as preferred route and boulder grading scales."
 
 #: src/routes/docs/+page.svelte
 msgid "Atmosphere (ATProto) Lexicons"
@@ -17688,17 +17690,15 @@ msgstr "Preferred {0} scale"
 msgid "Understand the {0} scale"
 msgstr "Understand the {0} scale"
 
-#: src/routes/settings/+page.svelte
-msgid "Compare grades"
-msgstr "Compare grades"
+#~ msgid "Compare grades"
+#~ msgstr "Compare grades"
 
 #: src/routes/settings/+page.svelte
 msgid "Grading scales"
 msgstr "Grading scales"
 
-#: src/routes/settings/+page.svelte
-msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
-msgstr "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
+#~ msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
+#~ msgstr "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
 
 #: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "<0/> Explore this data"
@@ -17793,3 +17793,20 @@ msgstr "Item history"
 #: src/lib/components/pulse-panel.svelte
 msgid "History of this item"
 msgstr "History of this item"
+
+#. 0: scale.name
+#: src/routes/settings/+page.svelte
+msgid "About the {0} scale"
+msgstr "About the {0} scale"
+
+#: src/routes/settings/+page.svelte
+msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau. Hover a scale to learn more about it."
+msgstr "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau. Hover a scale to learn more about it."
+
+#: src/routes/settings/+page.svelte
+msgid "Compare via ferrata grades"
+msgstr "Compare via ferrata grades"
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — User preferences such as preferred route and boulder grading scales, theme and language."
+msgstr "<0/> — User preferences such as preferred route and boulder grading scales, theme and language."

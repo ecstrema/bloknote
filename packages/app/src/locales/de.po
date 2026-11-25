@@ -14947,6 +14947,7 @@ msgstr "Verschiebungen zurücksetzen"
 
 #: src/routes/grade-comparison/GradeComparisonChart.svelte
 #: src/routes/grade-comparison/GradeComparisonChart.svelte
+#: src/routes/settings/+page.svelte
 msgid "Scale"
 msgstr "Skala"
 
@@ -15428,8 +15429,9 @@ msgstr "Geändert"
 msgid "Delete"
 msgstr "Löschen"
 
-#~ msgid "Compare route grades"
-#~ msgstr "Routen-Grade vergleichen"
+#: src/routes/settings/+page.svelte
+msgid "Compare route grades"
+msgstr "Routen-Grade vergleichen"
 
 #: src/lib/components/pulse-panel.svelte
 #: src/lib/components/shell/osm-changes.svelte
@@ -15549,8 +15551,9 @@ msgstr "Klettergebiete nach Region durchsuchen."
 msgid "Regions"
 msgstr "Regionen"
 
-#~ msgid "Compare boulder grades"
-#~ msgstr "Boulder-Grade vergleichen"
+#: src/routes/settings/+page.svelte
+msgid "Compare boulder grades"
+msgstr "Boulder-Grade vergleichen"
 
 #: src/routes/world/+error.svelte
 msgid "Page not found | Bloknote"
@@ -16521,9 +16524,8 @@ msgstr "Bloknote nutzt Wikimedia Commons OAuth2 PKCE direkt aus deinem Browser, 
 msgid "<0/> — Canonical reference to an OSM element (<1/> + numeric <2/>), resilient to OSM name/slug changes."
 msgstr "<0/> — Kanonische Referenz auf ein OSM-Element (<1/> + numerische <2/>), robust gegenüber Änderungen von OSM-Namen/Slugs."
 
-#: src/routes/docs/+page.svelte
-msgid "<0/> — User preferences such as preferred route and boulder grading scales."
-msgstr "<0/> — Benutzereinstellungen wie bevorzugte Routen- und Boulder-Bewertungsskalen."
+#~ msgid "<0/> — User preferences such as preferred route and boulder grading scales."
+#~ msgstr "<0/> — Benutzereinstellungen wie bevorzugte Routen- und Boulder-Bewertungsskalen."
 
 #: src/routes/docs/+page.svelte
 msgid "Atmosphere (ATProto) Lexicons"
@@ -17688,17 +17690,15 @@ msgstr ""
 msgid "Understand the {0} scale"
 msgstr ""
 
-#: src/routes/settings/+page.svelte
-msgid "Compare grades"
-msgstr ""
+#~ msgid "Compare grades"
+#~ msgstr ""
 
 #: src/routes/settings/+page.svelte
 msgid "Grading scales"
 msgstr ""
 
-#: src/routes/settings/+page.svelte
-msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
-msgstr ""
+#~ msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
+#~ msgstr ""
 
 #: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "<0/> Explore this data"
@@ -17792,4 +17792,21 @@ msgstr ""
 
 #: src/lib/components/pulse-panel.svelte
 msgid "History of this item"
+msgstr ""
+
+#. 0: scale.name
+#: src/routes/settings/+page.svelte
+msgid "About the {0} scale"
+msgstr "Über die Skala {0}"
+
+#: src/routes/settings/+page.svelte
+msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau. Hover a scale to learn more about it."
+msgstr "Markieren Sie die Skalen, die Sie verstehen: deren Grade werden unverändert angezeigt. Alle anderen werden in die bevorzugte Skala ihrer Disziplin übersetzt, die auch überall dort verwendet wird, wo nur eine einzige Skala benötigt wird (Diagramme, Vergleiche). Ohne Präferenz wird die Skala Ihres Standorts verwendet, andernfalls Französisch und Fontainebleau. Fahren Sie mit der Maus über eine Skala, um mehr über sie zu erfahren."
+
+#: src/routes/settings/+page.svelte
+msgid "Compare via ferrata grades"
+msgstr "Via-ferrata-Grade vergleichen"
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — User preferences such as preferred route and boulder grading scales, theme and language."
 msgstr ""
