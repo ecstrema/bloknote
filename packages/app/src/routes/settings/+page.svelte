@@ -16,6 +16,7 @@
     type Scale,
   } from "@bloknote/holy-grade";
   import { setMode, userPrefersMode } from "mode-watcher";
+  import { atproto } from "#lib/data/network/atproto.svelte.js";
   import { settings } from "#lib/data/settings.svelte.js";
   import { gradingScales, type GradingScaleType, type PreferredScaleId } from "#lib/data/grading-scales.svelte.js";
   import { i18n, locales, localeNames, setLocale } from "#lib/i18n.svelte.js";
@@ -82,7 +83,10 @@
             <h2 class="font-medium">Appearance</h2>
             <p class="mt-1 text-sm text-muted-foreground">Theme</p>
           </div>
-          <Select aria-label="Theme" bind:value={() => userPrefersMode.current, setMode}>
+          <Select
+            aria-label="Theme"
+            bind:value={() => userPrefersMode.current, (mode) => { setMode(mode); void atproto.saveSettings({ mode }); }}
+          >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
             <option value="system">System</option>
@@ -95,7 +99,10 @@
             <p class="mt-1 text-sm text-muted-foreground">Language of the interface and of the names of the regions</p>
           </div>
           <div class="space-y-2">
-            <Select aria-label="Language" bind:value={() => i18n.locale, setLocale}>
+            <Select
+              aria-label="Language"
+              bind:value={() => i18n.locale, (locale) => { void setLocale(locale); void atproto.saveSettings({ locale }); }}
+            >
               {#each locales as locale (locale)}
                 <option value={locale}>{localeNames[locale]}</option>
               {/each}

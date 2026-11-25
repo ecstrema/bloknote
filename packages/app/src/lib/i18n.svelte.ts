@@ -17,7 +17,7 @@ export const localeNames: Record<Locale, string> = {
 };
 
 const STORAGE_KEY = "bloknote:locale";
-const isLocale = (value: string | null | undefined): value is Locale => locales.includes(value as Locale);
+export const isLocale = (value: string | null | undefined): value is Locale => locales.includes(value as Locale);
 
 export const i18n = $state<{ locale: Locale }>({ locale: "en" });
 

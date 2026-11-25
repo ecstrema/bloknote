@@ -21,6 +21,9 @@ const TICK_COLLECTION = "org.bloknote.logbook.tick";
 const STAR_COLLECTION = "org.bloknote.osm.bookmark";
 const COMMENT_COLLECTION = "org.bloknote.osm.comment";
 const RATING_COLLECTION = "org.bloknote.osm.rating";
+const SETTINGS_COLLECTION = "org.bloknote.settings";
+/** All synced preferences live in a single fixed-rkey record per account (issue #187) */
+const SETTINGS_RKEY = "self";
 
 /**
  * The `client_id` of the deployed app: it points to the client metadata hosted
@@ -30,13 +33,13 @@ const RATING_COLLECTION = "org.bloknote.osm.rating";
 const PRODUCTION_CLIENT_ID = "https://ecstrema.github.io/bloknote/client-metadata.json";
 /**
  * Minimal granular permissions: only create/delete records in the app's own
- * collections on the user's PDS (ticks, bookmarks, comments, ratings). No broad repository
- * access, blobs, account, or identity permissions. Record listing
- * (com.atproto.repo.listRecords) is a public endpoint, so no read permission
- * is needed. Must stay in sync with static/client-metadata.json.
+ * collections on the user's PDS (ticks, bookmarks, comments, ratings, synced
+ * settings). No broad repository access, blobs, account, or identity permissions.
+ * Record listing (com.atproto.repo.listRecords) is a public endpoint, so no read
+ * permission is needed. Must stay in sync with static/client-metadata.json.
  */
 const OAUTH_SCOPE =
-  "atproto repo:org.bloknote.logbook.tick?action=create&action=update&action=delete repo:org.bloknote.osm.bookmark?action=create&action=delete repo:org.bloknote.osm.comment?action=create&action=delete repo:org.bloknote.osm.rating?action=create&action=delete";
+  "atproto repo:org.bloknote.logbook.tick?action=create&action=update&action=delete repo:org.bloknote.osm.bookmark?action=create&action=delete repo:org.bloknote.osm.comment?action=create&action=delete repo:org.bloknote.osm.rating?action=create&action=delete repo:org.bloknote.settings?action=create&action=update";
 
 export interface AtProtoSession {
   did: string;
@@ -64,6 +67,24 @@ export interface LocalCommentEntry extends CommentRecord {
 export interface LocalRatingEntry extends RatingRecord {
   uri?: string;
   label?: string;
+}
+
+/** Appearance and language preferences synced through the user's ATProto account (issue #187) */
+export interface RemoteSettings {
+  mode?: "light" | "dark" | "system";
+  locale?: string;
+  updatedAt?: string;
+}
+
+/** Current local appearance and language, used to seed the account settings on first sync */
+function localSettings(): RemoteSettings {
+  if (!browser) return {};
+  const mode = localStorage.getItem("bloknote:mode");
+  const locale = localStorage.getItem("bloknote:locale");
+  return {
+    ...(mode === "light" || mode === "dark" || mode === "system" ? { mode } : {}),
+    ...(locale ? { locale } : {}),
+  };
 }
 
 function readJson<T>(key: string, fallback: T): T {
@@ -194,6 +215,8 @@ class AtProtoClient {
   stars = $state<LocalStarEntry[]>(readJson<LocalStarEntry[]>(STARS_STORAGE_KEY, []));
   comments = $state<LocalCommentEntry[]>(readJson<LocalCommentEntry[]>(COMMENTS_STORAGE_KEY, []));
   ratings = $state<LocalRatingEntry[]>(readJson<LocalRatingEntry[]>(RATINGS_STORAGE_KEY, []));
+  /** Appearance and language synced from the ATProto account, applied by the root layout (issue #187) */
+  settings = $state<RemoteSettings | undefined>(undefined);
 
   #client?: BrowserOAuthClient;
   #oauthSession?: OAuthSession;
@@ -201,6 +224,8 @@ class AtProtoClient {
   /** Last successful #hydrate, used to rate-limit the background re-syncs */
   #lastHydrateAt = 0;
   #syncing?: Promise<void>;
+  /** Set after a settings write fails (e.g. a session authorized before the settings permission existed) */
+  #settingsWriteFailed = false;
 
   constructor() {
     if (browser) {
@@ -308,6 +333,7 @@ class AtProtoClient {
         this.#listRemote<LocalCommentEntry>(COMMENT_COLLECTION),
         this.#listRemote<LocalRatingEntry>(RATING_COLLECTION),
       ]);
+      await this.#fetchRemoteSettings();
       // Keep the cached labels and the local-only entries (never uploaded), then let the PDS win.
       // Local entries carrying a uri that the PDS does not return anymore were deleted upstream
       // (e.g. from pds.ls) and are dropped: the PDS is the source of truth.
@@ -391,6 +417,48 @@ class AtProtoClient {
     );
   }
 
+  /**
+   * Reads the synced appearance/language settings from the account (issue #187). When no record
+   * exists yet, it is seeded with the current local preferences. Failures never break the
+   * records hydration: settings sync is a nice-to-have.
+   */
+  async #fetchRemoteSettings() {
+    try {
+      const session = this.#oauthSession;
+      if (!session) return;
+      const query = new URLSearchParams({ repo: session.did, collection: SETTINGS_COLLECTION, rkey: SETTINGS_RKEY });
+      const res = await this.#xrpc(`/xrpc/com.atproto.repo.getRecord?${query}`);
+      if (res.ok) {
+        const data = (await res.json()) as { value?: RemoteSettings };
+        this.settings = data.value ?? undefined;
+      } else {
+        // No record yet (HTTP 400/404): create one from the current local preferences
+        await this.saveSettings(localSettings());
+      }
+    } catch (error) {
+      console.warn("Could not load the settings from the ATProto account", error);
+    }
+  }
+
+  /**
+   * Saves the synced appearance and language preferences to the ATProto account (issue #187).
+   * Called when the user changes a synced setting; remote changes are applied without pushing
+   * back, so this only ever runs for explicit user edits.
+   */
+  async saveSettings(patch: RemoteSettings) {
+    if (!this.session || this.#settingsWriteFailed) return;
+    const record: RemoteSettings = { ...this.settings, ...patch, updatedAt: new Date().toISOString() };
+    delete (record as { $type?: string }).$type;
+    this.settings = record;
+    try {
+      await this.#putRemoteRecord(SETTINGS_COLLECTION, SETTINGS_RKEY, record);
+    } catch (error) {
+      // Sessions authorized before the settings permission existed cannot write until re-login
+      console.warn("Could not save the settings to the ATProto account", error);
+      this.#settingsWriteFailed = true;
+    }
+  }
+
   async #listRemote<T extends { uri?: string }>(collection: string): Promise<T[]> {
     const session = this.#oauthSession;
     if (!session) throw new Error("ATProto is not configured");
@@ -427,6 +495,8 @@ class AtProtoClient {
     this.session = undefined;
     localStorage.removeItem(SESSION_STORAGE_KEY);
     this.#clearLocalData();
+    this.settings = undefined;
+    this.#settingsWriteFailed = false;
     if (session) await session.signOut().catch(() => {});
   }
 

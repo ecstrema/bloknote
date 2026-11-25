@@ -23,9 +23,10 @@
 
   import "./layout.css";
 
-  import { ModeWatcher } from "mode-watcher";
+  import { ModeWatcher, setMode, userPrefersMode } from "mode-watcher";
   import { onMount, untrack } from "svelte";
-  import { initLocale } from "#lib/i18n.svelte.js";
+  import { i18n, initLocale, isLocale, setLocale } from "#lib/i18n.svelte.js";
+  import { atproto } from "#lib/data/network/atproto.svelte.js";
   import EditNudge from "#lib/components/shell/edit-nudge.svelte";
   import PreAlphaWarning from "#lib/components/shell/pre-alpha-warning.svelte";
   const { children } = $props();
@@ -91,6 +92,18 @@
     void checkForDataUpdate();
     const interval = setInterval(checkForDataUpdate, DATA_REFRESH_INTERVAL);
     return () => clearInterval(interval);
+  });
+
+  // Apply the appearance and language synced from the ATProto account when they change on it
+  // (issue #187). Only differing values are applied, so a synced change never pushes back: the
+  // pushes happen in the settings page when the user edits the settings themselves.
+  $effect(() => {
+    const remote = atproto.settings;
+    if (!atproto.session || !remote) return;
+    untrack(() => {
+      if (remote.mode && remote.mode !== userPrefersMode.current) setMode(remote.mode);
+      if (remote.locale && isLocale(remote.locale) && remote.locale !== i18n.locale) void setLocale(remote.locale);
+    });
   });
 </script>
 
