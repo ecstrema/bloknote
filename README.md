@@ -1,5 +1,10 @@
 # Bloknote
 
+> [!WARNING]
+> **Bloknote is pre-alpha software.** It is under heavy development and may break at any time:
+> data can be incomplete or wrong, features can disappear, and the site or its APIs can change
+> without notice. Do not rely on it for anything important.
+
 Bloknote is a static climbing directory organized by geographic region, with grade-comparison
 tools and an editor for the worldwide boundary data.
 

@@ -27,6 +27,7 @@
   import { onMount, untrack } from "svelte";
   import { initLocale } from "#lib/i18n.svelte.js";
   import EditNudge from "#lib/components/shell/edit-nudge.svelte";
+  import PreAlphaWarning from "#lib/components/shell/pre-alpha-warning.svelte";
   const { children } = $props();
 
   const DATA_REFRESH_INTERVAL = 6 * 60 * 60 * 1000;
@@ -145,6 +146,8 @@
 {/if}
 
 <EditNudge />
+
+<PreAlphaWarning />
 
 <style>
   .loader-bar {
