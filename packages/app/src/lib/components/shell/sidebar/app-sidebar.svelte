@@ -2,7 +2,7 @@
   import * as Sidebar from "#components/ui/sidebar/index.js";
   import type { ComponentProps } from "svelte";
   import { onMount } from "svelte";
-  import { afterNavigate, replaceState } from "$app/navigation";
+  import { afterNavigate, goto } from "$app/navigation";
   import { gradeTextToReference } from "#lib/data/db/grade-text.js";
   import { featureToType, getName } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
@@ -74,17 +74,13 @@
   });
 
   // Keep the URL in sync with the current search query so it can be copied and shared.
-  // replaceState is used to avoid flooding the history on every keystroke. The router-aware
-  // helper from $app/navigation is used: raw history.replaceState conflicts with SvelteKit.
-  // The URL is read from window.location: reading getBrowserUrl() here would subscribe this
-  // effect to page.shallow, and every replaceState re-triggers it even for an identical URL,
-  // looping forever.
+  // A replacing shallow goto avoids flooding the history on every keystroke.
   $effect(() => {
     const text = searchState.filters.text;
     const url = new URL(window.location.href);
     if (text.trim() !== "") url.searchParams.set("q", text);
     else url.searchParams.delete("q");
-    replaceState(url, history.state);
+    void goto(url, { state: history.state, replace: true, shallow: true });
   });
 
   // Grade inputs accept text like "6b" or "7A": they are converted to reference numbers here.

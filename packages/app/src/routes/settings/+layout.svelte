@@ -74,7 +74,7 @@
   // Legacy links and in-flight OAuth logins still point to /settings?tab=account
   $effect(() => {
     if (activeTab === "settings" && ["account", "accounts"].includes(page.url.searchParams.get("tab") ?? "")) {
-      void goto(resolve("/settings/account"), { replaceState: true });
+      void goto(resolve("/settings/account"), { replace: true });
     }
   });
 </script>

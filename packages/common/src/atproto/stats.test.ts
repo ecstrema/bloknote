@@ -7,30 +7,33 @@ describe("computeUserStats", () => {
     const ticks: TickRecord[] = [
       {
         subject: { type: "node", id: 101 },
-        style: "redpoint",
-        ascentInfo: ["lead", "clean"],
+        outcome: "send",
+        sendStyle: "redpoint",
+        ascentInfo: ["toprope"],
         comment: "Epic send after many days",
         climbedAt: "2026-05-10T14:30:00Z",
         createdAt: "2026-05-10T18:00:00Z",
       },
       {
         subject: { type: "node", id: 102 },
-        style: "onsight",
-        ascentInfo: ["lead"],
+        outcome: "send",
+        sendStyle: "onsight",
         climbedAt: "2026-06-12T11:00:00Z",
         createdAt: "2026-06-12T12:00:00Z",
       },
       {
         subject: { type: "way", id: 201 },
-        style: "flash",
-        ascentInfo: ["solo", "clean"],
+        outcome: "send",
+        sendStyle: "flash",
+        ascentInfo: ["solo"],
         climbedAt: "2026-04-01T10:00:00Z",
         createdAt: "2026-04-01T11:00:00Z",
       },
       {
         subject: { type: "node", id: 301 },
-        style: "attempt",
-        ascentInfo: ["lead", "pinkpoint"],
+        outcome: "attempt",
+        attemptStyle: "hangdog",
+        hangs: 3,
         comment: "Crux move still feels impossible",
         climbedAt: "2026-07-01T15:00:00Z",
         createdAt: "2026-07-01T16:00:00Z",
@@ -50,17 +53,15 @@ describe("computeUserStats", () => {
 
     expect(stats.totalTicks).toBe(4);
     expect(stats.totalSends).toBe(3); // redpoint, onsight, flash
-    expect(stats.totalAttempts).toBe(1); // attempt
+    expect(stats.totalAttempts).toBe(1); // hangdog
 
     expect(stats.byStyle.redpoint).toBe(1);
     expect(stats.byStyle.onsight).toBe(1);
     expect(stats.byStyle.flash).toBe(1);
-    expect(stats.byStyle.attempt).toBe(1);
+    expect(stats.byStyle.hangdog).toBe(1);
 
-    expect(stats.byAscentInfo.lead).toBe(3);
-    expect(stats.byAscentInfo.clean).toBe(2);
+    expect(stats.byAscentInfo.toprope).toBe(1);
     expect(stats.byAscentInfo.solo).toBe(1);
-    expect(stats.byAscentInfo.pinkpoint).toBe(1);
 
     expect(stats.lastClimbedAt).toBe("2026-07-01T15:00:00Z");
 
@@ -75,6 +76,16 @@ describe("computeUserStats", () => {
     expect(french9c?.total).toBe(1);
     expect(french9c?.sends).toBe(0);
     expect(french9c?.attempts).toBe(1);
+  });
+
+  test("treats minimal ticks without outcome or climbedAt as sends", () => {
+    const stats = computeUserStats([{ subject: { type: "node", id: 401 }, createdAt: "2026-08-01T10:00:00Z" }]);
+    expect(stats.totalTicks).toBe(1);
+    expect(stats.totalSends).toBe(1);
+    expect(stats.totalAttempts).toBe(0);
+    // Absent outcome defaults to the redpoint send style
+    expect(stats.byStyle.redpoint).toBe(1);
+    expect(stats.lastClimbedAt).toBeUndefined();
   });
 
   test("handles empty ticks gracefully", () => {

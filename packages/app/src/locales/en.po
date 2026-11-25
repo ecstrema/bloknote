@@ -14897,12 +14897,6 @@ msgstr "Point"
 msgid "Unnamed"
 msgstr "Unnamed"
 
-#~ msgid "Resize the map"
-#~ msgstr "Resize the map"
-
-#~ msgid "Drag to resize the map"
-#~ msgstr "Drag to resize the map"
-
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Route"
 msgstr "Route"
@@ -15056,9 +15050,6 @@ msgstr "Log out of OpenStreetMap"
 msgid "Log in with OpenStreetMap"
 msgstr "Log in with OpenStreetMap"
 
-#~ msgid "Enter description..."
-#~ msgstr "Enter description..."
-
 #: src/lib/components/editable/editable-grade-value.svelte
 msgid "Add Grade"
 msgstr "Add Grade"
@@ -15087,15 +15078,6 @@ msgstr "Feet are not an officially supported length unit."
 #: src/lib/components/editable/editable-length.svelte
 msgid "Rewrite as meters"
 msgstr "Rewrite as meters"
-
-#~ msgid "Enter Name..."
-#~ msgstr "Enter Name..."
-
-#~ msgid "Opening hours"
-#~ msgstr "Opening hours"
-
-#~ msgid "Mo-Fr 10:00-22:00; Sa-Su 10:00-18:00"
-#~ msgstr "Mo-Fr 10:00-22:00; Sa-Su 10:00-18:00"
 
 #: src/lib/components/editable/editable-tags.svelte
 msgid "Keys are limited to 255 characters"
@@ -15172,9 +15154,6 @@ msgstr "Add"
 msgid "Cancel"
 msgstr "Cancel"
 
-#~ msgid "<0>Log in with OSM</0> to edit"
-#~ msgstr "<0>Log in with OSM</0> to edit"
-
 #. 0: isDev ? "[DEV] " \\: ""; 1: name ? ` - ${name}` \\: ""
 #: src/lib/components/shell/head.svelte
 msgid "{0}Bloknote{1}"
@@ -15199,12 +15178,6 @@ msgstr "{0} features modified"
 msgid "Could not submit changes"
 msgstr "Could not submit changes"
 
-#~ msgid "Review pending OpenStreetMap changes to submit them"
-#~ msgstr "Review pending OpenStreetMap changes to submit them"
-
-#~ msgid "OpenStreetMap changes"
-#~ msgstr "OpenStreetMap changes"
-
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Unnamed feature"
 msgstr "Unnamed feature"
@@ -15212,12 +15185,6 @@ msgstr "Unnamed feature"
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Leave a comment"
 msgstr "Leave a comment"
-
-#~ msgid "Submitting..."
-#~ msgstr "Submitting..."
-
-#~ msgid "Submit changes"
-#~ msgstr "Submit changes"
 
 #: src/lib/components/shell/osm-changes.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
@@ -15267,12 +15234,6 @@ msgstr "No children"
 msgid "Areas"
 msgstr "Areas"
 
-#~ msgid "Not listed"
-#~ msgstr "Not listed"
-
-#~ msgid "Phone"
-#~ msgstr "Phone"
-
 #: src/routes/world/[...slug]/gym-page.svelte
 msgid "Fee"
 msgstr "Fee"
@@ -15305,12 +15266,6 @@ msgstr "{0}Bloknote - Danger Grade Comparison"
 #: src/routes/grade-comparison/route/+page.svelte
 msgid "{0}Bloknote - Route Grade Comparison"
 msgstr "{0}Bloknote - Route Grade Comparison"
-
-#~ msgid "Add Route"
-#~ msgstr "Add Route"
-
-#~ msgid "Add Sector"
-#~ msgstr "Add Sector"
 
 #: src/lib/components/shell/app-top-navigation.svelte
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
@@ -15461,9 +15416,6 @@ msgstr "Max grade"
 msgid "Tag, e.g. climbing:rock"
 msgstr "Tag, e.g. climbing:rock"
 
-#~ msgid "Clear filters"
-#~ msgstr "Clear filters"
-
 #: src/lib/components/map-legend.svelte
 msgid "French"
 msgstr "French"
@@ -15611,9 +15563,6 @@ msgstr "Regions"
 msgid "Compare boulder grades"
 msgstr "Compare boulder grades"
 
-#~ msgid "New climbing data is available. Download it in the background?"
-#~ msgstr "New climbing data is available. Download it in the background?"
-
 #: src/routes/world/+error.svelte
 msgid "Page not found | Bloknote"
 msgstr "Page not found | Bloknote"
@@ -15697,12 +15646,6 @@ msgstr "Type (stroke)"
 msgid "Gym"
 msgstr "Gym"
 
-#~ msgid "Graded project warning"
-#~ msgstr "Graded project warning"
-
-#~ msgid "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
-#~ msgstr "This route is named \"{0}\" but has a grade assigned ({1}). Projects are typically unclimbed and ungraded."
-
 #: src/lib/components/opening-hours.svelte
 #: src/lib/components/opening-hours.svelte
 msgid "None"
@@ -15724,15 +15667,6 @@ msgstr "Deprecated tags"
 msgid "No OpenStreetMap tags."
 msgstr "No OpenStreetMap tags."
 
-#~ msgid "<0/> OSM Data"
-#~ msgstr "<0/> OSM Data"
-
-#~ msgid "<0/> Overview"
-#~ msgstr "<0/> Overview"
-
-#~ msgid "<0/> Map"
-#~ msgstr "<0/> Map"
-
 #: src/routes/world/[...slug]/+page.svelte
 msgid "View on OpenStreetMap <0/>"
 msgstr "View on OpenStreetMap <0/>"
@@ -15753,18 +15687,9 @@ msgstr "Clear {0}"
 msgid "This opening_hours syntax could not be parsed."
 msgstr "This opening_hours syntax could not be parsed."
 
-#~ msgid "Complex rules can be edited in the text field above."
-#~ msgstr "Complex rules can be edited in the text field above."
-
 #: src/lib/components/editable/editable-length.svelte
 msgid "Boulder height"
 msgstr "Boulder height"
-
-#~ msgid "Enter height..."
-#~ msgstr "Enter height..."
-
-#~ msgid "Enter length..."
-#~ msgstr "Enter length..."
 
 #: src/lib/components/editable/editable-length.svelte
 msgid "m"
@@ -15918,9 +15843,6 @@ msgstr "Filename <0/>"
 msgid "License <0/>"
 msgstr "License <0/>"
 
-#~ msgid "<0/> Open in..."
-#~ msgstr "<0/> Open in..."
-
 #. 0: name
 #: src/lib/components/map-links.svelte
 msgid "Choose a maps provider for {0}."
@@ -16002,15 +15924,6 @@ msgstr "Sector name (optional)"
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Create & move"
 msgstr "Create & move"
-
-#~ msgid "Click on the map to place the new {0}."
-#~ msgstr "Click on the map to place the new {0}."
-
-#~ msgid "<0/> Add route"
-#~ msgstr "<0/> Add route"
-
-#~ msgid "<0/> Add sector"
-#~ msgstr "<0/> Add sector"
 
 #: src/lib/components/map-add-dialog.svelte
 msgid "Could not load the region hierarchy index."
@@ -16287,7 +16200,6 @@ msgstr "Redpoint"
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
-#: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Attempt"
 msgstr "Attempt"
 
@@ -16308,9 +16220,6 @@ msgstr "Could not load \"{0}\" to apply this fix."
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Could not apply fix."
 msgstr "Could not apply fix."
-
-#~ msgid "Drag to reorder or move"
-#~ msgstr "Drag to reorder or move"
 
 #: src/lib/components/shell/app-settings-menu.svelte
 msgid "Profile & settings"
@@ -16336,9 +16245,6 @@ msgstr "Stores the shared climbing directory—routes, sectors, crags, gyms, gra
 #: src/routes/settings/account/accounts-tab.svelte
 msgid "Atmosphere"
 msgstr "Atmosphere"
-
-#~ msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and starred climbs—in your own data repository, separate from OpenStreetMap."
-#~ msgstr "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and starred climbs—in your own data repository, separate from OpenStreetMap."
 
 #: src/routes/settings/account/accounts-tab.svelte
 msgid "Disconnect Atmosphere"
@@ -16418,12 +16324,6 @@ msgstr "<0/> Stacked"
 msgid "<0/> Double"
 msgstr "<0/> Double"
 
-#~ msgid "Grade distribution"
-#~ msgstr "Grade distribution"
-
-#~ msgid "Type distribution"
-#~ msgstr "Type distribution"
-
 #. 0: name || 'folder'
 #: src/lib/components/shell/app-top-navigation.svelte
 msgid "Select child of {0}"
@@ -16482,9 +16382,6 @@ msgstr "Ice / dry-tooling route"
 msgid "Number of pitches"
 msgstr "Number of pitches"
 
-#~ msgid "Pitches..."
-#~ msgstr "Pitches..."
-
 #: src/routes/world/[...slug]/geographic-page.svelte
 msgid "Local grading schemes: <0/> (routes) · <1/> (boulders)"
 msgstr "Local grading schemes: <0/> (routes) · <1/> (boulders)"
@@ -16492,12 +16389,6 @@ msgstr "Local grading schemes: <0/> (routes) · <1/> (boulders)"
 #: src/routes/world/[...slug]/+layout.svelte
 msgid "Bloknote home"
 msgstr "Bloknote home"
-
-#~ msgid "<0/> Export Typst"
-#~ msgstr "<0/> Export Typst"
-
-#~ msgid "Could not update star"
-#~ msgstr "Could not update star"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Could not log tick"
@@ -16510,12 +16401,6 @@ msgstr "Could not post comment"
 #: src/lib/components/route-logbook.svelte
 msgid "Logbook and comments"
 msgstr "Logbook and comments"
-
-#~ msgid "Starred"
-#~ msgstr "Starred"
-
-#~ msgid "Star"
-#~ msgstr "Star"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Connect Atmosphere to log ticks & comments"
@@ -16532,9 +16417,6 @@ msgstr "Ascent note (optional)"
 #: src/lib/components/route-logbook.svelte
 msgid "<0/> Log tick"
 msgstr "<0/> Log tick"
-
-#~ msgid "{0} star{1}"
-#~ msgstr "{0} star{1}"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Rating:"
@@ -16564,9 +16446,6 @@ msgstr "Climber"
 msgid "Comments ({0})"
 msgstr "Comments ({0})"
 
-#~ msgid "Diagnostics"
-#~ msgstr "Diagnostics"
-
 #: src/routes/+page.svelte
 #: src/routes/settings/+layout.svelte
 msgid "Docs"
@@ -16588,33 +16467,6 @@ msgstr "ATProto Lexicons"
 #: src/routes/docs/+page.svelte
 msgid "Documentation | Bloknote"
 msgstr "Documentation | Bloknote"
-
-#~ msgid "Documentation"
-#~ msgstr "Documentation"
-
-#~ msgid "<0>Map & route edits go to OpenStreetMap</0> under the Open Database License (ODbL), benefiting every open climbing app and mapper, not just Bloknote."
-#~ msgstr "<0>Map & route edits go to OpenStreetMap</0> under the Open Database License (ODbL), benefiting every open climbing app and mapper, not just Bloknote."
-
-#~ msgid "<0>Topo photos go to Wikimedia Commons</0> under a free Creative Commons license (CC BY-SA 4.0, CC BY 4.0, or CC0), so anyone can reuse and attribute them."
-#~ msgstr "<0>Topo photos go to Wikimedia Commons</0> under a free Creative Commons license (CC BY-SA 4.0, CC BY 4.0, or CC0), so anyone can reuse and attribute them."
-
-#~ msgid "<0>Personal activity stays yours</0>: ascents, stars, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
-#~ msgstr "<0>Personal activity stays yours</0>: ascents, stars, and comments are modeled as AT Protocol records stored in your personal data server (PDS)."
-
-#~ msgid "How Bloknote works & Contributing"
-#~ msgstr "How Bloknote works & Contributing"
-
-#~ msgid "Bloknote is a static, offline-capable climbing directory built entirely on open data. There is no proprietary central database: routes, crags, sectors, and gyms live on <0>OpenStreetMap</0>, topo photos live on <1>Wikimedia Commons</1>, and personal ticks or reviews belong to your own <2>Atmosphere (AT Protocol)</2> repository."
-#~ msgstr "Bloknote is a static, offline-capable climbing directory built entirely on open data. There is no proprietary central database: routes, crags, sectors, and gyms live on <0>OpenStreetMap</0>, topo photos live on <1>Wikimedia Commons</1>, and personal ticks or reviews belong to your own <2>Atmosphere (AT Protocol)</2> repository."
-
-#~ msgid "Static builds & offline SQLite cache"
-#~ msgstr "Static builds & offline SQLite cache"
-
-#~ msgid "A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static JSON endpoints. In your browser, Bloknote downloads this snapshot into a local WebAssembly SQLite database so tree browsing, filtering, and diagnostics work instantaneously—even offline."
-#~ msgstr "A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static JSON endpoints. In your browser, Bloknote downloads this snapshot into a local WebAssembly SQLite database so tree browsing, filtering, and diagnostics work instantaneously—even offline."
-
-#~ msgid "What contributing means"
-#~ msgstr "What contributing means"
 
 #: src/routes/docs/+page.svelte
 msgid "<0/> — Multi-sector climbing areas or regions containing crags or sub-areas."
@@ -16681,25 +16533,12 @@ msgid "<0/> — Canonical reference to an OSM element (<1/> + numeric <2/>), res
 msgstr "<0/> — Canonical reference to an OSM element (<1/> + numeric <2/>), resilient to OSM name/slug changes."
 
 #: src/routes/docs/+page.svelte
-msgid "<0/> — Personal ascent or attempt record (<1/>, <2/>, <3/>, <4/>, optional qualifiers, timestamp, and notes)."
-msgstr "<0/> — Personal ascent or attempt record (<1/>, <2/>, <3/>, <4/>, optional qualifiers, timestamp, and notes)."
-
-#~ msgid "<0/> — Route or crag review text, normalized rating (<1/>), and optional proposed OSM tag corrections."
-#~ msgstr "<0/> — Route or crag review text, normalized rating (<1/>), and optional proposed OSM tag corrections."
-
-#~ msgid "<0/> — Bookmarked/starred climbing features."
-#~ msgstr "<0/> — Bookmarked/starred climbing features."
-
-#: src/routes/docs/+page.svelte
 msgid "<0/> — User preferences such as preferred route and boulder grading scales."
 msgstr "<0/> — User preferences such as preferred route and boulder grading scales."
 
 #: src/routes/docs/+page.svelte
 msgid "Atmosphere (ATProto) Lexicons"
 msgstr "Atmosphere (ATProto) Lexicons"
-
-#~ msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and reviews are portable across apps."
-#~ msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and reviews are portable across apps."
 
 #: src/routes/docs/+page.svelte
 msgid "Core schemas"
@@ -16709,48 +16548,15 @@ msgstr "Core schemas"
 msgid "Your climbing stats"
 msgstr "Your climbing stats"
 
-#~ msgid "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
-#~ msgstr "{0} ticks ({1} sends, {2} attempts) · {3} starred · {4} comments"
-
-#~ msgid "Starred climbs"
-#~ msgstr "Starred climbs"
-
-#~ msgid "Recent ticks"
-#~ msgstr "Recent ticks"
-
-#~ msgid "Connected as <0/> ({0}{1})"
-#~ msgstr "Connected as <0/> ({0}{1})"
-
 #: src/routes/settings/account/accounts-tab.svelte
 msgid "Handle (e.g. alice.bsky.social)"
 msgstr "Handle (e.g. alice.bsky.social)"
-
-#~ msgid "App password (optional for PDS sync)"
-#~ msgstr "App password (optional for PDS sync)"
-
-#~ msgid "Connecting..."
-#~ msgstr "Connecting..."
-
-#~ msgid "Connect Atmosphere"
-#~ msgstr "Connect Atmosphere"
 
 #: src/lib/components/shell/osm-changes.svelte
 msgid "# feature modified"
 msgid_plural "# features modified"
 msgstr[0] "# feature modified"
 msgstr[1] "# features modified"
-
-#~ msgid "qathet"
-#~ msgstr "qathet"
-
-#~ msgid "victoria island"
-#~ msgstr "victoria island"
-
-#~ msgid "'Asir Province"
-#~ msgstr "'Asir Province"
-
-#~ msgid "'Amran Governorate"
-#~ msgstr "'Amran Governorate"
 
 #. 0: days
 #: src/routes/+layout.svelte
@@ -16770,9 +16576,6 @@ msgstr "New climbing data is available"
 #: src/routes/+layout.svelte
 msgid "Your offline data is from {0}"
 msgstr "Your offline data is from {0}"
-
-#~ msgid "Pulse"
-#~ msgstr "Pulse"
 
 #: src/lib/components/pulse-panel.svelte
 msgid "This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap)."
@@ -16832,9 +16635,6 @@ msgstr "Add crag"
 msgid "Copy coordinates"
 msgstr "Copy coordinates"
 
-#~ msgid "Copied!"
-#~ msgstr "Copied!"
-
 #. 0: grade.v.v
 #: src/lib/components/editable/editable-grade-value.svelte
 msgid "This route is named as a project but has a grade assigned ({0}). Projects are typically unclimbed and ungraded."
@@ -16851,9 +16651,6 @@ msgstr "User navigated back"
 #: src/routes/settings/account/accounts-tab.svelte
 msgid "Login cancelled"
 msgstr "Login cancelled"
-
-#~ msgid "Connected as <0/> · records are stored in your ATProto repository (PDS)"
-#~ msgstr "Connected as <0/> · records are stored in your ATProto repository (PDS)"
 
 #: src/routes/settings/account/accounts-tab.svelte
 msgid "Redirecting..."
@@ -16897,15 +16694,9 @@ msgstr "Name"
 msgid "Pitches"
 msgstr "Pitches"
 
-#~ msgid "Downloading climbing data {0}%"
-#~ msgstr "Downloading climbing data {0}%"
-
 #: src/lib/components/location-map.svelte
 msgid "Loading climbing data..."
 msgstr "Loading climbing data..."
-
-#~ msgid "Map style"
-#~ msgstr "Map style"
 
 #: src/routes/+layout.svelte
 msgid "Parsing data"
@@ -16940,12 +16731,6 @@ msgstr "Climbing style"
 msgid "Style"
 msgstr "Style"
 
-#~ msgid "Convert to a multi-pitch route"
-#~ msgstr "Convert to a multi-pitch route"
-
-#~ msgid "+ Multipitch"
-#~ msgstr "+ Multipitch"
-
 #: src/lib/components/pending-sync-badge.svelte
 msgid "Saved offline — will sync to your Atmosphere account when back online"
 msgstr "Saved offline — will sync to your Atmosphere account when back online"
@@ -16978,9 +16763,6 @@ msgstr "Fee: {0}"
 msgid "Click on the map to place the new route."
 msgstr "Click on the map to place the new route."
 
-#~ msgid "theCrag"
-#~ msgstr "theCrag"
-
 #: src/lib/components/climbing-provider-links.svelte
 msgid "Search on theCrag"
 msgstr "Search on theCrag"
@@ -17008,15 +16790,6 @@ msgstr[1] "# routes have no position yet"
 msgid "{0}. Drag their marker on the map or the topo image to a real location before submitting — "
 msgstr "{0}. Drag their marker on the map or the topo image to a real location before submitting — "
 
-#~ msgid "Zoom in"
-#~ msgstr "Zoom in"
-
-#~ msgid "Zoom out"
-#~ msgstr "Zoom out"
-
-#~ msgid "Show the current location"
-#~ msgstr "Show the current location"
-
 #: src/lib/components/location-map.svelte
 msgid "MultiLineString"
 msgstr "MultiLineString"
@@ -17037,9 +16810,6 @@ msgstr "Bookmark"
 #: src/lib/components/route-logbook.svelte
 msgid "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
 msgstr "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
-
-#~ msgid "{0} m"
-#~ msgstr "{0} m"
 
 #: src/lib/components/bookmark-button.svelte
 #: src/lib/components/bookmark-button.svelte
@@ -17133,16 +16903,6 @@ msgstr "In your browser, Bloknote downloads this snapshot into a local WebAssemb
 msgid "Service worker caches"
 msgstr "Service worker caches"
 
-#: src/routes/docs/+page.svelte
-msgid "<0/> — Bookmarked climbing features."
-msgstr "<0/> — Bookmarked climbing features."
-
-#~ msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
-#~ msgstr "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, route reviews, ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
-
-#~ msgid "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
-#~ msgstr "{0} ticks ({1} sends, {2} attempts) · {3} bookmarked · {4} comments"
-
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Bookmarked climbs"
 msgstr "Bookmarked climbs"
@@ -17158,15 +16918,6 @@ msgstr "View in climbing apps"
 #: src/lib/components/climbing-provider-links.svelte
 msgid "Choose a climbing data provider."
 msgstr "Choose a climbing data provider."
-
-#~ msgid "Overview"
-#~ msgstr "Overview"
-
-#~ msgid "Map"
-#~ msgstr "Map"
-
-#~ msgid "OSM Data"
-#~ msgstr "OSM Data"
 
 #: src/routes/world/[...slug]/+page.svelte
 msgctxt "Tab label: overview of the climbing item (route, crag, area or gym)"
@@ -17246,9 +16997,6 @@ msgstr "Number of pitches <0/>"
 msgid "Not a multipitch"
 msgstr "Not a multipitch"
 
-#~ msgid "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments"
-#~ msgstr "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments"
-
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Grade pyramid"
 msgstr "Grade pyramid"
@@ -17268,21 +17016,6 @@ msgstr "Climbing sessions per month"
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Tries per route"
 msgstr "Tries per route"
-
-#~ msgid "Check what happened to this route on OpenStreetMap"
-#~ msgstr "Check what happened to this route on OpenStreetMap"
-
-#~ msgid "Checking OpenStreetMap…"
-#~ msgstr "Checking OpenStreetMap…"
-
-#~ msgid "The route still exists on OpenStreetMap but is missing from the climbing data."
-#~ msgstr "The route still exists on OpenStreetMap but is missing from the climbing data."
-
-#~ msgid "The route was deleted from OpenStreetMap and no replacement was found nearby."
-#~ msgstr "The route was deleted from OpenStreetMap and no replacement was found nearby."
-
-#~ msgid "Replacement found: {0} ({1}% match) <0>Relink tick</0>"
-#~ msgstr "Replacement found: {0} ({1}% match) <0>Relink tick</0>"
 
 #: src/lib/components/shell/edit-nudge.svelte
 msgid "Everything here is editable"
@@ -17338,18 +17071,6 @@ msgstr "Stores your personal climbing activity on the AT Protocol—logbook tick
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments · {7} ratings"
 msgstr "{0} ticks ({1} sends, {2} attempts) · {3} routes · {4} sessions · {5} bookmarked · {6} comments · {7} ratings"
-
-#: src/routes/docs/+page.svelte
-msgid "<0/> — Standalone comment text on a route or crag, independent of ratings so each can be created and deleted separately."
-msgstr "<0/> — Standalone comment text on a route or crag, independent of ratings so each can be created and deleted separately."
-
-#: src/routes/docs/+page.svelte
-msgid "<0/> — Standalone normalized rating (<1/>) for a route or crag."
-msgstr "<0/> — Standalone normalized rating (<1/>) for a route or crag."
-
-#: src/routes/docs/+page.svelte
-msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and comments are portable across apps."
-msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> and reusable <1/> namespaces so personal climbing logs and comments are portable across apps."
 
 #: src/lib/components/map-legend.svelte
 msgid "Areas / Crags"
@@ -17463,12 +17184,6 @@ msgstr "Import ticks from other platforms"
 msgid "Connect your Atmosphere account in the <0>Account</0> tab to import ticks."
 msgstr "Connect your Atmosphere account in the <0>Account</0> tab to import ticks."
 
-#~ msgid "Imported {0} tick{1} ({2} already logged, {3} without a matching OSM route)."
-#~ msgstr "Imported {0} tick{1} ({2} already logged, {3} without a matching OSM route)."
-
-#~ msgid "<0/> Matching routes..."
-#~ msgstr "<0/> Matching routes..."
-
 #. 0: progress; 1: counts.matched + counts.unmatched
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "<0/> Importing {0}/{1} ticks..."
@@ -17479,16 +17194,10 @@ msgstr "<0/> Importing {0}/{1} ticks..."
 msgid "(truncated to {0})"
 msgstr "(truncated to {0})"
 
-#~ msgid "{0} tick{1} from {2} <0/>: {3} ready, {4} unmatched, {5} already logged."
-#~ msgstr "{0} tick{1} from {2} <0/>: {3} ready, {4} unmatched, {5} already logged."
-
 #. 0: rows.length - counts.alreadyLogged; 1: rows.length - counts.alreadyLogged === 1 ? "" \\: "s"
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "<0/> Import {0} tick{1}"
 msgstr "<0/> Import {0} tick{1}"
-
-#~ msgid "Not found in OSM data"
-#~ msgstr "Not found in OSM data"
 
 #. 0: row.tick.routeName
 #. 0: labelFor(tick)
@@ -17505,19 +17214,10 @@ msgstr "Pick a route..."
 msgid "Already logged"
 msgstr "Already logged"
 
-#~ msgid "Import ticks"
-#~ msgstr "Import ticks"
-
-#~ msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are matched by name against the offline climbing data; routes that are not on OpenStreetMap yet cannot be imported."
-#~ msgstr "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are matched by name against the offline climbing data; routes that are not on OpenStreetMap yet cannot be imported."
-
 #. 0: result.imported; 1: result.imported === 1 ? "" \\: "s"; 2: result.alreadyLogged; 3: result.unmatched
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "Imported {0} tick{1} ({2} already logged, {3} without an OSM route)."
 msgstr "Imported {0} tick{1} ({2} already logged, {3} without an OSM route)."
-
-#~ msgid "<0/> Matching routes in their crags..."
-#~ msgstr "<0/> Matching routes in their crags..."
 
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
@@ -17576,9 +17276,6 @@ msgstr "Could not delete the tick."
 msgid "Could not link the tick."
 msgstr "Could not link the tick."
 
-#~ msgid "No crag known for \"{0}\": open its crag page and use \"Add route\" on the map instead."
-#~ msgstr "No crag known for \"{0}\": open its crag page and use \"Add route\" on the map instead."
-
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Your ticks"
 msgstr "Your ticks"
@@ -17591,9 +17288,6 @@ msgstr "No ticks yet. Log them on a route page, or import a logbook above."
 msgid "Pending sync"
 msgstr "Pending sync"
 
-#~ msgid "Edit tick"
-#~ msgstr "Edit tick"
-
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Found in the OSM data:"
 msgstr "Found in the OSM data:"
@@ -17602,30 +17296,9 @@ msgstr "Found in the OSM data:"
 msgid "Changing the route links the tick to it."
 msgstr "Changing the route links the tick to it."
 
-#~ msgid "Parent crag for {0}"
-#~ msgstr "Parent crag for {0}"
-
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "<0/> Add to OSM"
 msgstr "<0/> Add to OSM"
-
-#~ msgid "You will place the route on the crag's map."
-#~ msgstr "You will place the route on the crag's map."
-
-#~ msgid "Not on OpenStreetMap{0}{1}"
-#~ msgstr "Not on OpenStreetMap{0}{1}"
-
-#~ msgid "Ascent date"
-#~ msgstr "Ascent date"
-
-#~ msgid "Adding \"{0}\" for your tick: click on the map to place the route."
-#~ msgstr "Adding \"{0}\" for your tick: click on the map to place the route."
-
-#~ msgid "Log in with OpenStreetMap to add \"{0}\" for your tick."
-#~ msgstr "Log in with OpenStreetMap to add \"{0}\" for your tick."
-
-#~ msgid "Not on OSM"
-#~ msgstr "Not on OSM"
 
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Recent"
@@ -17667,31 +17340,13 @@ msgstr "Not on OpenStreetMap{0}"
 msgid "<0/> Import ticks"
 msgstr "<0/> Import ticks"
 
-#~ msgid "The offline map data is not loaded yet: download it once, then try again."
-#~ msgstr "The offline map data is not loaded yet: download it once, then try again."
-
-#~ msgid "No crag matching \"{0}\" was found in the map data: open its page and use \"Add route\" on the map instead."
-#~ msgstr "No crag matching \"{0}\" was found in the map data: open its page and use \"Add route\" on the map instead."
-
-#~ msgid "Could not look up the crag in the map data."
-#~ msgstr "Could not look up the crag in the map data."
-
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Places"
 msgstr "Places"
 
-#~ msgid "Not on OpenStreetMap"
-#~ msgstr "Not on OpenStreetMap"
-
-#~ msgid "Low data mode is on: turn it off (or download the map data from the sidebar) to add routes to OSM."
-#~ msgstr "Low data mode is on: turn it off (or download the map data from the sidebar) to add routes to OSM."
-
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "The offline map data is not available: open the map once to download it, then try again."
 msgstr "The offline map data is not available: open the map once to download it, then try again."
-
-#~ msgid "No location known for \"{0}\": open its crag page and use \"Add route\" on the map instead."
-#~ msgstr "No location known for \"{0}\": open its crag page and use \"Add route\" on the map instead."
 
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Not in the map data"
@@ -17724,9 +17379,6 @@ msgstr "No location is known for \"{0}\". Open the place that should hold it and
 msgid "<0/> Add \"{0}\" to OpenStreetMap"
 msgstr "<0/> Add \"{0}\" to OpenStreetMap"
 
-#~ msgid "The location from the logbook is matched against the map data, level by level. The deepest match becomes the parent of the new route."
-#~ msgstr "The location from the logbook is matched against the map data, level by level. The deepest match becomes the parent of the new route."
-
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "<0/> Matching the location in the map data..."
 msgstr "<0/> Matching the location in the map data..."
@@ -17735,43 +17387,13 @@ msgstr "<0/> Matching the location in the map data..."
 msgid "not in the map data"
 msgstr "not in the map data"
 
-#~ msgid "Place the route on the map"
-#~ msgstr "Place the route on the map"
-
-#~ msgid "The whole location exists: place the route on the map of {0}."
-#~ msgstr "The whole location exists: place the route on the map of {0}."
-
-#~ msgid "Place the route directly under {0}"
-#~ msgstr "Place the route directly under {0}"
-
-#~ msgid "Add \"{0}\" to OSM"
-#~ msgstr "Add \"{0}\" to OSM"
-
-#~ msgid "The crag \"{0}\" is not in the map data. It can be added under {1}, then the route placed inside it."
-#~ msgstr "The crag \"{0}\" is not in the map data. It can be added under {1}, then the route placed inside it."
-
-#~ msgid "None of the locations were found in the map data. Open the place that should hold the route and use \"Add route\" on the map instead."
-#~ msgstr "None of the locations were found in the map data. Open the place that should hold the route and use \"Add route\" on the map instead."
-
-#~ msgid "The crag exists in the map data: place the route on the map of {0}."
-#~ msgstr "The crag exists in the map data: place the route on the map of {0}."
-
-#~ msgid "The crag \"{0}\" from your tick is not in the map data: click on the map to add it, then the route will be placed inside it."
-#~ msgstr "The crag \"{0}\" from your tick is not in the map data: click on the map to add it, then the route will be placed inside it."
-
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "parent"
 msgstr "parent"
 
-#~ msgid "The location from the logbook is matched against the map data, level by level. Click a level to choose the parent of the new route; the deepest match is selected by default."
-#~ msgstr "The location from the logbook is matched against the map data, level by level. Click a level to choose the parent of the new route; the deepest match is selected by default."
-
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "Could not create the route."
 msgstr "Could not create the route."
-
-#~ msgid "The location from the logbook is matched against the map data, level by level. Click a level to place the route inside it; missing levels are created on the fly."
-#~ msgstr "The location from the logbook is matched against the map data, level by level. Click a level to place the route inside it; missing levels are created on the fly."
 
 #. 0: baseName
 #: src/lib/components/tick-osm-dialog.svelte
@@ -17804,9 +17426,6 @@ msgstr "<0/> Log in"
 msgid "{0} will be created under {1}."
 msgstr "{0} will be created under {1}."
 
-#~ msgid "Location: {0}, {1} — click again to adjust. <0/>"
-#~ msgstr "Location: {0}, {1} — click again to adjust. <0/>"
-
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "Click on the map to pick the location."
 msgstr "Click on the map to pick the location."
@@ -17827,9 +17446,6 @@ msgstr "The location from the logbook is matched against the map data, level by 
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "Location: {0}, {1} — click again to adjust."
 msgstr "Location: {0}, {1} — click again to adjust."
-
-#~ msgid "<0/> <1/> The route will be added to {0}."
-#~ msgstr "<0/> <1/> The route will be added to {0}."
 
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Open in OSM"
@@ -17962,3 +17578,62 @@ msgstr "{0} results"
 #: src/routes/world/[...slug]/+layout.svelte
 msgid "Clear the active search"
 msgstr "Clear the active search"
+
+#: src/lib/components/route-logbook.svelte
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Send"
+msgstr "Send"
+
+#: src/lib/components/route-logbook.svelte
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
+msgid "Pinkpoint"
+msgstr "Pinkpoint"
+
+#: src/lib/components/route-logbook.svelte
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
+msgid "Hangdog"
+msgstr "Hangdog"
+
+#: src/lib/components/route-logbook.svelte
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/routes/settings/logbook/ticks-list.svelte
+#: src/routes/settings/logbook/user-stats-panel.svelte
+msgid "Bailed"
+msgstr "Bailed"
+
+#: src/lib/components/route-logbook.svelte
+msgid "Number of hangs"
+msgstr "Number of hangs"
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — Personal ascent or attempt record (send: <1/>, <2/>, <3/>, <4/>; attempt: <5/> with hang count or <6/>; optional qualifiers, timestamp, and notes)."
+msgstr "<0/> — Personal ascent or attempt record (send: <1/>, <2/>, <3/>, <4/>; attempt: <5/> with hang count or <6/>; optional qualifiers, timestamp, and notes)."
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — Standalone comment text on an OSM element, independent of ratings so each can be created and deleted separately."
+msgstr "<0/> — Standalone comment text on an OSM element, independent of ratings so each can be created and deleted separately."
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — Standalone integer rating (<1/>) for an OSM element."
+msgstr "<0/> — Standalone integer rating (<1/>) for an OSM element."
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — Bookmarked OSM elements."
+msgstr "<0/> — Bookmarked OSM elements."
+
+#: src/routes/docs/+page.svelte
+msgid "<0/> — An opinion about the value of a specific OSM tag on an element (e.g. a grade opinion for <1/>), usable for any field."
+msgstr "<0/> — An opinion about the value of a specific OSM tag on an element (e.g. a grade opinion for <1/>), usable for any field."
+
+#: src/routes/docs/+page.svelte
+msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> so personal climbing logs and comments are portable across apps."
+msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> so personal climbing logs and comments are portable across apps."
+
+
+
+

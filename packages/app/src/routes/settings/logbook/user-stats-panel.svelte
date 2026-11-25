@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
-  import { CLEAN_ASCENT_STYLES, computeUserStats, type ClimbingGradeRef, type OsmElementRef } from "@bloknote/common";
+  import { computeUserStats, type ClimbingGradeRef, type OsmElementRef } from "@bloknote/common";
   import type { OsmFeature } from "osm-api";
   import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
   import { Chart, Layer, Axis, Rect, Text } from "layerchart/svg";
@@ -69,7 +69,9 @@
     { label: "Onsight", count: stats.byStyle.onsight ?? 0, color: "#10b981" },
     { label: "Flash", count: stats.byStyle.flash ?? 0, color: "#06b6d4" },
     { label: "Redpoint", count: stats.byStyle.redpoint ?? 0, color: "#3b82f6" },
-    { label: "Attempt", count: stats.byStyle.attempt ?? 0, color: "#f59e0b" },
+    { label: "Pinkpoint", count: stats.byStyle.pinkpoint ?? 0, color: "#6366f1" },
+    { label: "Hangdog", count: stats.byStyle.hangdog ?? 0, color: "#f59e0b" },
+    { label: "Bailed", count: stats.byStyle.bailed ?? 0, color: "#ef4444" },
   ]);
 
   const maxStyleCount = $derived(Math.max(1, ...styleBars.map((b) => b.count)));
@@ -96,7 +98,7 @@
   const maxGradePerMonth = $derived.by(() => {
     const months = new Map<string, { ref: number; grade: Grade }>();
     for (const tick of atproto.ticks) {
-      if (!CLEAN_ASCENT_STYLES.has(tick.style) || !tick.climbedAt || !tick.subject) continue;
+      if (tick.outcome === "attempt" || !tick.climbedAt || !tick.subject) continue;
       const info = resolvedRefs[refKey(tick.subject)];
       if (info?.gradeRef === undefined || !info.grade || info.grade.scale === "unknown") continue;
       const month = tick.climbedAt.slice(0, 7);

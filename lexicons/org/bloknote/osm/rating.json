@@ -1,0 +1,33 @@
+{
+  "lexicon": 1,
+  "id": "org.bloknote.osm.rating",
+  "description": "Standalone star rating of an OpenStreetMap element (node, way, or relation)",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "rating", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "org.bloknote.osm.defs#elementRef",
+            "description": "The OpenStreetMap element (node, way, or relation) being rated"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 120,
+            "description": "Rating from 0 (no stars) to 120 (full rating). 120 is divisible by 3, 4, 5, 6, 8, and 10, so it adapts to those star systems without rounding."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "ISO 8601 timestamp when the rating was created"
+          }
+        }
+      }
+    }
+  }
+}

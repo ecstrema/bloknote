@@ -1,5 +1,6 @@
 import { browser } from "$app/env";
-import type { AscentStyle, CommentRecord, OsmElementRef, RatingRecord, StarRecord, TickRecord } from "@bloknote/common";
+import { MAX_RATING } from "@bloknote/common";
+import type { CommentRecord, OsmElementRef, RatingRecord, StarRecord, TickAscent, TickRecord } from "@bloknote/common";
 import {
   BrowserOAuthClient,
   TokenInvalidError,
@@ -15,15 +16,11 @@ const TICKS_STORAGE_KEY = "bloknote:atproto-ticks";
 const STARS_STORAGE_KEY = "bloknote:atproto-stars";
 const COMMENTS_STORAGE_KEY = "bloknote:atproto-comments";
 const RATINGS_STORAGE_KEY = "bloknote:atproto-ratings";
-/** Pre-#163 combined review records, kept only to migrate old local caches */
-const LEGACY_REVIEWS_STORAGE_KEY = "bloknote:atproto-reviews";
 
 const TICK_COLLECTION = "org.bloknote.logbook.tick";
-const STAR_COLLECTION = "org.openstreetmap.star";
-const COMMENT_COLLECTION = "org.bloknote.comment";
-const RATING_COLLECTION = "org.bloknote.rating";
-/** Combined review collection used before #163: read-only, migrated into comments + ratings */
-const LEGACY_REVIEW_COLLECTION = "org.openstreetmap.review";
+const STAR_COLLECTION = "org.bloknote.osm.bookmark";
+const COMMENT_COLLECTION = "org.bloknote.osm.comment";
+const RATING_COLLECTION = "org.bloknote.osm.rating";
 
 /**
  * The `client_id` of the deployed app: it points to the client metadata hosted
@@ -33,13 +30,13 @@ const LEGACY_REVIEW_COLLECTION = "org.openstreetmap.review";
 const PRODUCTION_CLIENT_ID = "https://ecstrema.github.io/bloknote/client-metadata.json";
 /**
  * Minimal granular permissions: only create/delete records in the app's own
- * collections on the user's PDS (ticks, stars, comments, ratings). No broad repository
+ * collections on the user's PDS (ticks, bookmarks, comments, ratings). No broad repository
  * access, blobs, account, or identity permissions. Record listing
  * (com.atproto.repo.listRecords) is a public endpoint, so no read permission
  * is needed. Must stay in sync with static/client-metadata.json.
  */
 const OAUTH_SCOPE =
-  "atproto repo:org.bloknote.logbook.tick?action=create&action=update&action=delete repo:org.openstreetmap.star?action=create&action=delete repo:org.bloknote.comment?action=create&action=delete repo:org.bloknote.rating?action=create&action=delete";
+  "atproto repo:org.bloknote.logbook.tick?action=create&action=update&action=delete repo:org.bloknote.osm.bookmark?action=create&action=delete repo:org.bloknote.osm.comment?action=create&action=delete repo:org.bloknote.osm.rating?action=create&action=delete";
 
 export interface AtProtoSession {
   did: string;
@@ -85,43 +82,6 @@ function loadSession(): AtProtoSession | undefined {
   return undefined;
 }
 
-/** Pre-#163 combined review record shape, used to migrate old local caches */
-interface LegacyReviewEntry {
-  subject: OsmElementRef;
-  text?: string;
-  rating?: number;
-  createdAt: string;
-  uri?: string;
-  author?: string;
-  label?: string;
-}
-
-function legacySignature(e: LegacyReviewEntry): string {
-  return JSON.stringify({ subject: e.subject, text: e.text, rating: e.rating, createdAt: e.createdAt });
-}
-
-/**
- * One-time migration of the pre-#163 combined review caches (stars and comment shared a single
- * org.openstreetmap.review record) into the split comments and ratings stores. Each cached
- * review becomes a comment entry (when it has text) and/or a rating entry (when it has a
- * rating). Deduplicates against entries already migrated by a previous run.
- */
-function migrateLegacyReviews<T extends LocalCommentEntry | LocalRatingEntry>(current: T[], part: "text" | "rating"): T[] {
-  if (!browser) return current;
-  const legacy = readJson<LegacyReviewEntry[]>(LEGACY_REVIEWS_STORAGE_KEY, []);
-  if (legacy.length === 0) return current;
-  const existing = new Set(current.map((e) => legacySignature(e)));
-  const migrated = legacy
-    .filter((r) => (part === "text" ? !!r.text : r.rating !== undefined))
-    .map((r) =>
-      part === "text"
-        ? ({ subject: r.subject, text: r.text!, createdAt: r.createdAt, uri: r.uri, author: r.author, label: r.label } as T)
-        : ({ subject: r.subject, rating: r.rating!, createdAt: r.createdAt, uri: r.uri, label: r.label } as T),
-    )
-    .filter((e) => !existing.has(legacySignature(e)));
-  return migrated.length > 0 ? [...migrated, ...current] : current;
-}
-
 export function sameElementRef(a: OsmElementRef | undefined, b: OsmElementRef | undefined): boolean {
   if (!a || !b) return false;
   return a.type === b.type && a.id === b.id;
@@ -132,7 +92,10 @@ function tickLocalId(entry: LocalTickEntry | TickRecord): string {
   const signature = JSON.stringify({
     subject: entry.subject ?? null,
     name: entry.name ?? null,
-    style: entry.style,
+    outcome: entry.outcome ?? null,
+    sendStyle: entry.sendStyle ?? null,
+    attemptStyle: entry.attemptStyle ?? null,
+    hangs: entry.hangs ?? null,
     climbedAt: entry.climbedAt,
     createdAt: entry.createdAt,
   });
@@ -168,7 +131,11 @@ function ensureTickLocalIds(ticks: LocalTickEntry[]): LocalTickEntry[] {
 function remoteTickRecord(entry: LocalTickEntry): TickRecord {
   return {
     ...(entry.subject ? { subject: entry.subject } : {}),
-    style: entry.style,
+    ...(entry.outcome ? { outcome: entry.outcome } : {}),
+    ...(entry.sendStyle ? { sendStyle: entry.sendStyle } : {}),
+    ...(entry.attemptStyle ? { attemptStyle: entry.attemptStyle } : {}),
+    ...(entry.hangs ? { hangs: entry.hangs } : {}),
+    ...(entry.ascentInfo ? { ascentInfo: entry.ascentInfo } : {}),
     climbedAt: entry.climbedAt,
     createdAt: entry.createdAt,
     ...(entry.comment ? { comment: entry.comment } : {}),
@@ -216,12 +183,8 @@ class AtProtoClient {
   session = $state<AtProtoSession | undefined>(loadSession());
   ticks = $state<LocalTickEntry[]>(ensureTickLocalIds(readJson<LocalTickEntry[]>(TICKS_STORAGE_KEY, []).map(normalizeTick)));
   stars = $state<LocalStarEntry[]>(readJson<LocalStarEntry[]>(STARS_STORAGE_KEY, []));
-  comments = $state<LocalCommentEntry[]>(
-    migrateLegacyReviews(readJson<LocalCommentEntry[]>(COMMENTS_STORAGE_KEY, []), "text"),
-  );
-  ratings = $state<LocalRatingEntry[]>(
-    migrateLegacyReviews(readJson<LocalRatingEntry[]>(RATINGS_STORAGE_KEY, []), "rating"),
-  );
+  comments = $state<LocalCommentEntry[]>(readJson<LocalCommentEntry[]>(COMMENTS_STORAGE_KEY, []));
+  ratings = $state<LocalRatingEntry[]>(readJson<LocalRatingEntry[]>(RATINGS_STORAGE_KEY, []));
 
   #client?: BrowserOAuthClient;
   #oauthSession?: OAuthSession;
@@ -236,9 +199,6 @@ class AtProtoClient {
       // OAuth flow and no longer uses credentials stored in localStorage
       const legacy = localStorage.getItem(SESSION_STORAGE_KEY);
       if (legacy && legacy.includes("accessJwt")) localStorage.removeItem(SESSION_STORAGE_KEY);
-      // The pre-#163 combined review cache has been split into the comments and ratings
-      // stores by the field initializers above: the legacy key is now inert
-      localStorage.removeItem(LEGACY_REVIEWS_STORAGE_KEY);
       this.#start();
       // Keep the local copies in sync with the PDS: records deleted upstream (e.g. from pds.ls)
       // must disappear from the app without requiring a manual reload.
@@ -333,15 +293,11 @@ class AtProtoClient {
     const session = this.#oauthSession;
     if (!session) return;
     try {
-      const [remoteTicks, remoteStars, remoteComments, remoteRatings, legacyReviews] = await Promise.all([
+      const [remoteTicks, remoteStars, remoteComments, remoteRatings] = await Promise.all([
         this.#listRemote<LocalTickEntry>(TICK_COLLECTION).then((ticks) => ticks.map(normalizeTick)),
         this.#listRemote<LocalStarEntry>(STAR_COLLECTION),
         this.#listRemote<LocalCommentEntry>(COMMENT_COLLECTION),
         this.#listRemote<LocalRatingEntry>(RATING_COLLECTION),
-        // Reviews stored before #163 combined the comment text and the rating in one record:
-        // they are kept visible by splitting them into comment and rating entries, pointing at
-        // the legacy record uri. New records only go to the split collections.
-        this.#listRemote<LegacyReviewEntry>(LEGACY_REVIEW_COLLECTION).catch(() => [] as LegacyReviewEntry[]),
       ]);
       // Keep the cached labels and the local-only entries (never uploaded), then let the PDS win.
       // Local entries carrying a uri that the PDS does not return anymore were deleted upstream
@@ -368,12 +324,6 @@ class AtProtoClient {
           localId: e.localId ?? (e.uri ? localIds.get(e.uri) : undefined),
         })) as T[];
       };
-      const legacyComments = legacyReviews
-        .filter((r) => typeof r.text === "string")
-        .map((r) => ({ subject: r.subject, text: r.text!, createdAt: r.createdAt, uri: r.uri, label: r.label }));
-      const legacyRatings = legacyReviews
-        .filter((r) => typeof r.rating === "number")
-        .map((r) => ({ subject: r.subject, rating: r.rating!, createdAt: r.createdAt, uri: r.uri, label: r.label }));
       const mergedTicks = merge(this.ticks, remoteTicks as LocalTickEntry[]);
       // linkTick can attach a tick to a locally created element, which only has a temporary id
       // until the changeset is pushed (issue #154): the PDS record is deliberately left without
@@ -392,8 +342,8 @@ class AtProtoClient {
       // localId, and a render with pending (undefined) ids between the awaits would crash it
       this.ticks = ensureTickLocalIds(mergedTicks);
       this.stars = merge(this.stars, remoteStars as LocalStarEntry[]);
-      this.comments = merge(this.comments, [...(remoteComments as LocalCommentEntry[]), ...legacyComments]);
-      this.ratings = merge(this.ratings, [...(remoteRatings as LocalRatingEntry[]), ...legacyRatings]);
+      this.comments = merge(this.comments, remoteComments as LocalCommentEntry[]);
+      this.ratings = merge(this.ratings, remoteRatings as LocalRatingEntry[]);
       // Records logged offline were kept without a uri: push them to the PDS now that we are online
       await Promise.all([
         this.#uploadPending(TICK_COLLECTION, this.ticks),
@@ -572,7 +522,7 @@ class AtProtoClient {
 
   async addTick(
     feature: OsmFeature,
-    style: AscentStyle,
+    ascent: TickAscent,
     comment?: string,
     climbedAt?: string,
   ): Promise<LocalTickEntry> {
@@ -582,7 +532,7 @@ class AtProtoClient {
     const climbed = climbedAt ?? now;
     const record: LocalTickEntry = {
       subject: { type: feature.type, id: feature.id },
-      style,
+      ...ascent,
       climbedAt: climbed,
       createdAt: now,
       label: feature.tags?.name,
@@ -610,14 +560,14 @@ class AtProtoClient {
    */
   async addNameTick(
     tick: { name: string; grade?: string; locationHint?: string },
-    style: AscentStyle,
+    ascent: TickAscent,
     comment?: string,
     climbedAt?: string,
   ): Promise<LocalTickEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
     const now = new Date().toISOString();
     const record: LocalTickEntry = {
-      style,
+      ...ascent,
       climbedAt: climbedAt ?? now,
       createdAt: now,
       name: tick.name,
@@ -657,13 +607,18 @@ class AtProtoClient {
     return entry;
   }
 
-  /** Edits a tick (style, ascent date, comment) locally and in the PDS when synced */
+  /** Edits a tick (ascent, date, comment) locally and in the PDS when synced */
   async updateTick(
     entry: LocalTickEntry,
-    patch: { style?: AscentStyle; climbedAt?: string; comment?: string },
+    patch: { ascent?: TickAscent; climbedAt?: string; comment?: string },
   ): Promise<LocalTickEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
-    if (patch.style !== undefined) entry.style = patch.style;
+    if (patch.ascent !== undefined) {
+      delete entry.sendStyle;
+      delete entry.attemptStyle;
+      delete entry.hangs;
+      Object.assign(entry, patch.ascent);
+    }
     if (patch.climbedAt !== undefined) entry.climbedAt = patch.climbedAt;
     if (patch.comment !== undefined) {
       const trimmed = patch.comment.trim();
@@ -724,11 +679,11 @@ class AtProtoClient {
     if (changed) this.#persistTicks();
   }
 
-  async addBulkTicks(features: OsmFeature[], style: AscentStyle, comment?: string): Promise<TickRecord[]> {
+  async addBulkTicks(features: OsmFeature[], ascent: TickAscent, comment?: string): Promise<TickRecord[]> {
     if (!this.session) throw new Error("ATProto is not configured");
     const created: LocalTickEntry[] = [];
     for (const feature of features.filter((f) => f.id > 0)) {
-      created.push(await this.addTick(feature, style, comment));
+      created.push(await this.addTick(feature, ascent, comment));
     }
     return created;
   }
@@ -750,13 +705,7 @@ class AtProtoClient {
       subject: replacement,
     };
     try {
-      entry.uri = await this.#createRemoteRecord(TICK_COLLECTION, {
-        subject: entry.subject,
-        style: entry.style,
-        climbedAt: entry.climbedAt,
-        createdAt: entry.createdAt,
-        ...(entry.comment ? { comment: entry.comment } : {}),
-      });
+      entry.uri = await this.#createRemoteRecord(TICK_COLLECTION, remoteTickRecord(entry));
     } catch (error) {
       // Offline: keep the relinked tick locally, #hydrate pushes pending records once back online.
       if (!this.#oauthSession) throw error;
@@ -854,7 +803,7 @@ class AtProtoClient {
 
   async addRating(feature: OsmFeature, rating: number): Promise<LocalRatingEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
-    if (!Number.isFinite(rating) || rating < 0 || rating > 1) throw new Error("Invalid rating");
+    if (!Number.isInteger(rating) || rating < 0 || rating > MAX_RATING) throw new Error("Invalid rating");
     const entry: LocalRatingEntry = {
       subject: { type: feature.type, id: feature.id },
       rating,
