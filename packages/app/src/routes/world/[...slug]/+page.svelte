@@ -13,12 +13,11 @@
   import { getStaticIdentifier } from "@bloknote/common";
   import { getAppState } from "#lib/data/app-state.js";
   import { afterNavigate, goto } from "$app/navigation";
-  import { resolve } from "$app/paths";
   import { building } from "$app/env";
   import { page } from "$app/state";
   import { untrack } from "svelte";
   import MapAddDialog from "#lib/components/map-add-dialog.svelte";
-  import { getItemUrl } from "#components/shell/sidebar/utils.js";
+  import TickOsmDialog from "#lib/components/tick-osm-dialog.svelte";
   import DiagnosticsPanel from "#lib/components/diagnostics-panel.svelte";
   import { collectSubtreeDiagnostics } from "#lib/data/parse/diagnostics.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
@@ -281,37 +280,18 @@
   let clickedCoordinates = $state<{ lat: number; lon: number } | undefined>(undefined);
   let coordinatesCopied = $state(false);
 
-  // "Add to OSM" flow from the ticks list (issue #154): the tick is placed as a new route on the
-  // map of its crag, then linked to the created element. When the crag itself is missing from the
-  // map data (addSector param), it is created first and the route placement continues inside it.
+  // "Add to OSM" flow from the ticks list (issues #154 and #201): the TickOsmDialog matches the
+  // tick's location against the map data, lets the user pick (or create) the parent crag and the
+  // location on the embedded map, then creates everything through the undoable app state actions
+  // so the changes land in the pending OSM changes.
   const addRouteTickId = $derived(page.url.searchParams.get("addRouteTick"));
-  const addSectorName = $derived(page.url.searchParams.get("addSector"));
   const pendingTick = $derived(addRouteTickId ? atproto.findTick(addRouteTickId) : undefined);
 
-  function onTickRouteCreated(feature: OsmFeature) {
-    const tick = pendingTick;
-    if (!tick) return undefined;
-    void atproto.linkTick(tick, { type: feature.type, id: feature.id }, feature.tags?.name).catch((err) =>
-      console.error("Could not link the tick to the new route", err),
-    );
-    // Back to the ticks list, where the tick now shows its route
-    return resolve("/settings/logbook");
+  function closeTickFlow() {
+    const url = new URL(location.href);
+    url.searchParams.delete("addRouteTick");
+    void goto(url, { state: page.state, shallow: true, replace: true });
   }
-
-  function onTickSectorCreated(feature: OsmFeature) {
-    // The missing crag exists now: continue the tick flow by placing its route inside it
-    const tick = pendingTick;
-    if (!tick) return undefined;
-    return `${getItemUrl(itemSlug, feature)}&addRouteTick=${tick.localId}`;
-  }
-
-  const tickPlacementKind = $derived(addSectorName ? "sector" : "route");
-
-  $effect(() => {
-    if (!pendingTick || !appState.osmUser.loggedIn) return;
-    if (activeTab !== "map") onTabChange("map");
-    if (effectiveTab === "map" && placementMode !== tickPlacementKind) placementMode = tickPlacementKind;
-  });
 
   function copyCoordinates() {
     if (!coordinates) return;
@@ -448,23 +428,7 @@
 
   <Tabs.Content value="map" class="flex flex-col gap-2">
     {#if effectiveTab === "map"}
-      {#if pendingTick}
-        <div class="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
-          <span aria-hidden="true" class="icon-[lucide--map-pin-plus] size-4 shrink-0"></span>
-          {#if appState.osmUser.loggedIn}
-            {#if addSectorName}
-              The crag "{addSectorName}" from your tick is not in the map data: click on the map to
-              add it, then the route will be placed inside it.
-            {:else}
-              Adding "{pendingTick.name}" for your tick: click on the map to place the route.
-            {/if}
-          {:else}
-            <span class="text-destructive">
-              Log in with OpenStreetMap to add "{pendingTick.name}" for your tick.
-            </span>
-          {/if}
-        </div>
-      {:else if appState.osmUser.loggedIn && placementMode}
+      {#if appState.osmUser.loggedIn && placementMode}
         <div class="flex flex-wrap items-center gap-2">
           <span class="text-xs text-muted-foreground">Click on the map to place the new route.</span>
           <Button size="xs" variant="ghost" onclick={() => (placementMode = null)}>Cancel</Button>
@@ -491,15 +455,7 @@
       {#if editable && coordinates}
         <p class="text-xs text-muted-foreground">Drag the marker on the map to move the route.</p>
       {/if}
-      <MapAddDialog
-        bind:open={addDialogOpen}
-        kind={addDialogKind}
-        coordinates={clickedCoordinates}
-        currentSlug={itemSlug}
-        prefillName={addSectorName ?? pendingTick?.name}
-        preferredParentSlug={pendingTick ? itemSlug : undefined}
-        onCreated={pendingTick ? (addSectorName ? onTickSectorCreated : onTickRouteCreated) : undefined}
-      />
+      <MapAddDialog bind:open={addDialogOpen} kind={addDialogKind} coordinates={clickedCoordinates} currentSlug={itemSlug} />
     {/if}
   </Tabs.Content>
 
@@ -556,3 +512,7 @@
     {/if}
   </Tabs.Content>
 </Tabs.Root>
+
+{#if pendingTick}
+  <TickOsmDialog tick={pendingTick} onClose={closeTickFlow} />
+{/if}

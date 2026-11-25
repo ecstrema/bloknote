@@ -23,23 +23,11 @@
     kind,
     coordinates,
     currentSlug = "",
-    prefillName,
-    preferredParentSlug,
-    onCreated,
   }: {
     open?: boolean;
     kind: "route" | "sector";
     coordinates: { lat: number; lon: number } | undefined;
     currentSlug?: string;
-    /** Name prefilled in the dialog (e.g. from a tick being added to OSM, issue #154) */
-    prefillName?: string;
-    /** Parent slug selected by default when it is among the options */
-    preferredParentSlug?: string;
-    /**
-     * Called with the created feature, to link a tick to it for instance. May return the URL to
-     * navigate to instead of the default (the created feature's page), e.g. to continue a flow.
-     */
-    onCreated?: (feature: OsmFeature) => void | string;
   } = $props();
 
   const appState = getAppState();
@@ -61,7 +49,7 @@
     regionSlug = undefined;
     parentOptions = [];
     selectedParentSlug = "";
-    name = prefillName ?? "";
+    name = "";
 
     let cancelled = false;
     (async () => {
@@ -94,11 +82,7 @@
 
       regionSlug = bestRegion;
       parentOptions = options;
-      // Prefer the parent the user navigated from (e.g. the crag of a tick being added to OSM)
-      selectedParentSlug =
-        preferredParentSlug && options.some((option) => option.slug === preferredParentSlug)
-          ? preferredParentSlug
-          : bestRegion;
+      selectedParentSlug = bestRegion;
       loading = false;
     })();
 
@@ -131,10 +115,7 @@
     const feature = parent.children?.[newSlug]?.feature;
     open = false;
     if (feature && feature.type !== "geographic") {
-      // The callback may redirect (e.g. back to the logbook after linking a tick, or to the
-      // freshly created crag to continue placing a tick's route inside it)
-      const target = onCreated?.(feature as OsmFeature);
-      void goto(typeof target === "string" ? target : getItemUrl(selectedParentSlug, feature));
+      void goto(getItemUrl(selectedParentSlug, feature as OsmFeature));
     }
   }
 </script>

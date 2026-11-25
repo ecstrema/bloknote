@@ -14,7 +14,6 @@
   import type { Grade } from "#lib/types.js";
   import type { AscentStyle } from "@bloknote/common";
   import { getFeature, type OsmFeature, type Tags } from "osm-api";
-  import AddToOsmDialog from "./add-to-osm-dialog.svelte";
 
   type SortMode = "places" | "recent" | "name" | "grade";
   const sortModes: { value: SortMode; label: string }[] = [
@@ -360,8 +359,11 @@
     }
   }
 
-  /** The tick currently going through the "Add to OSM" dialog */
-  let addOsmTick = $state<LocalTickEntry | undefined>();
+  /** Opens the "Add to OSM" stepper on the map, where the app state (undo, pending changes) lives */
+  function addToOsm(tick: LocalTickEntry) {
+    if (!tick.localId) return;
+    void goto(`${resolve("/world/[...slug]", { slug: "" })}?addRouteTick=${tick.localId}`);
+  }
 </script>
 
 <section class="flex flex-col gap-3 rounded-md border p-3.5" aria-label="Your ticks">
@@ -475,7 +477,7 @@
               </div>
             {:else}
               <div class="flex flex-wrap items-center gap-2">
-                <Button size="xs" variant="outline" onclick={() => (addOsmTick = tick)}>
+                <Button size="xs" variant="outline" onclick={() => addToOsm(tick)}>
                   <span class="icon-[lucide--map-pin-plus] shrink-0 size-4"></span>
                   Add to OSM
                 </Button>
@@ -519,7 +521,3 @@
     </ul>
   {/if}
 </section>
-
-{#if addOsmTick}
-  <AddToOsmDialog tick={addOsmTick} onClose={() => (addOsmTick = undefined)} />
-{/if}

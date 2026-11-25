@@ -15165,8 +15165,8 @@ msgstr "Add"
 #: src/lib/components/map-add-dialog.svelte
 #: src/lib/components/shell/osm-changes.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/tick-osm-dialog.svelte
 #: src/lib/components/topo/topo-viewer.svelte
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Cancel"
 msgstr "Cancel"
@@ -16042,6 +16042,8 @@ msgid "Detecting region and loading areas..."
 msgstr "Detecting region and loading areas..."
 
 #: src/lib/components/map-add-dialog.svelte
+#: src/lib/components/tick-osm-dialog.svelte
+#: src/lib/components/tick-osm-dialog.svelte
 msgid "Route name"
 msgstr "Route name"
 
@@ -17207,6 +17209,7 @@ msgid "Review pending edits and save them to OpenStreetMap"
 msgstr "Review pending edits and save them to OpenStreetMap"
 
 #: src/lib/components/shell/osm-changes.svelte
+#: src/lib/components/tick-osm-dialog.svelte
 msgid "Save"
 msgstr "Save"
 
@@ -17610,15 +17613,11 @@ msgstr "<0/> Add to OSM"
 #~ msgid "Ascent date"
 #~ msgstr "Ascent date"
 
-#. 0: pendingTick.name
-#: src/routes/world/[...slug]/+page.svelte
-msgid "Adding \"{0}\" for your tick: click on the map to place the route."
-msgstr "Adding \"{0}\" for your tick: click on the map to place the route."
+#~ msgid "Adding \"{0}\" for your tick: click on the map to place the route."
+#~ msgstr "Adding \"{0}\" for your tick: click on the map to place the route."
 
-#. 0: pendingTick.name
-#: src/routes/world/[...slug]/+page.svelte
-msgid "Log in with OpenStreetMap to add \"{0}\" for your tick."
-msgstr "Log in with OpenStreetMap to add \"{0}\" for your tick."
+#~ msgid "Log in with OpenStreetMap to add \"{0}\" for your tick."
+#~ msgstr "Log in with OpenStreetMap to add \"{0}\" for your tick."
 
 #~ msgid "Not on OSM"
 #~ msgstr "Not on OSM"
@@ -17682,7 +17681,7 @@ msgstr "Places"
 #~ msgid "Low data mode is on: turn it off (or download the map data from the sidebar) to add routes to OSM."
 #~ msgstr "Low data mode is on: turn it off (or download the map data from the sidebar) to add routes to OSM."
 
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+#: src/lib/components/tick-osm-dialog.svelte
 msgid "The offline map data is not available: open the map once to download it, then try again."
 msgstr "The offline map data is not available: open the map once to download it, then try again."
 
@@ -17711,66 +17710,109 @@ msgid "<0/> Matching routes in their crags... {0}/{1}"
 msgstr "<0/> Matching routes in their crags... {0}/{1}"
 
 #. 0: tick.name
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+#: src/lib/components/tick-osm-dialog.svelte
 msgid "No location is known for \"{0}\". Open the place that should hold it and use \"Add route\" on the map instead."
 msgstr "No location is known for \"{0}\". Open the place that should hold it and use \"Add route\" on the map instead."
 
 #. 0: tick.name
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+#: src/lib/components/tick-osm-dialog.svelte
 msgid "<0/> Add \"{0}\" to OpenStreetMap"
 msgstr "<0/> Add \"{0}\" to OpenStreetMap"
 
 #~ msgid "The location from the logbook is matched against the map data, level by level. The deepest match becomes the parent of the new route."
 #~ msgstr "The location from the logbook is matched against the map data, level by level. The deepest match becomes the parent of the new route."
 
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+#: src/lib/components/tick-osm-dialog.svelte
 msgid "<0/> Matching the location in the map data..."
 msgstr "<0/> Matching the location in the map data..."
 
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+#: src/lib/components/tick-osm-dialog.svelte
 msgid "not in the map data"
 msgstr "not in the map data"
 
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
-msgid "Place the route on the map"
-msgstr "Place the route on the map"
+#~ msgid "Place the route on the map"
+#~ msgstr "Place the route on the map"
 
 #~ msgid "The whole location exists: place the route on the map of {0}."
 #~ msgstr "The whole location exists: place the route on the map of {0}."
 
-#. 0: parentName
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
-msgid "Place the route directly under {0}"
-msgstr "Place the route directly under {0}"
+#~ msgid "Place the route directly under {0}"
+#~ msgstr "Place the route directly under {0}"
 
-#. 0: missingCrag
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
-msgid "Add \"{0}\" to OSM"
-msgstr "Add \"{0}\" to OSM"
+#~ msgid "Add \"{0}\" to OSM"
+#~ msgstr "Add \"{0}\" to OSM"
 
-#. 0: missingCrag; 1: parentName
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
-msgid "The crag \"{0}\" is not in the map data. It can be added under {1}, then the route placed inside it."
-msgstr "The crag \"{0}\" is not in the map data. It can be added under {1}, then the route placed inside it."
+#~ msgid "The crag \"{0}\" is not in the map data. It can be added under {1}, then the route placed inside it."
+#~ msgstr "The crag \"{0}\" is not in the map data. It can be added under {1}, then the route placed inside it."
 
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
-msgid "None of the locations were found in the map data. Open the place that should hold the route and use \"Add route\" on the map instead."
-msgstr "None of the locations were found in the map data. Open the place that should hold the route and use \"Add route\" on the map instead."
+#~ msgid "None of the locations were found in the map data. Open the place that should hold the route and use \"Add route\" on the map instead."
+#~ msgstr "None of the locations were found in the map data. Open the place that should hold the route and use \"Add route\" on the map instead."
 
-#. 0: parentName
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
-msgid "The crag exists in the map data: place the route on the map of {0}."
-msgstr "The crag exists in the map data: place the route on the map of {0}."
+#~ msgid "The crag \"{0}\" from your tick is not in the map data: click on the map to add it, then the route will be placed inside it."
+#~ msgstr "The crag \"{0}\" from your tick is not in the map data: click on the map to add it, then the route will be placed inside it."
 
-#. 0: addSectorName
-#: src/routes/world/[...slug]/+page.svelte
-msgid "The crag \"{0}\" from your tick is not in the map data: click on the map to add it, then the route will be placed inside it."
-msgstr "The crag \"{0}\" from your tick is not in the map data: click on the map to add it, then the route will be placed inside it."
+#~ msgid "The crag exists in the map data: place the route on the map of {0}."
+#~ msgstr "The crag exists in the map data: place the route on the map of {0}."
 
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+#: src/lib/components/tick-osm-dialog.svelte
 msgid "parent"
 msgstr "parent"
 
-#: src/routes/settings/logbook/add-to-osm-dialog.svelte
-msgid "The location from the logbook is matched against the map data, level by level. Click a level to choose the parent of the new route; the deepest match is selected by default."
-msgstr "The location from the logbook is matched against the map data, level by level. Click a level to choose the parent of the new route; the deepest match is selected by default."
+#~ msgid "The location from the logbook is matched against the map data, level by level. Click a level to choose the parent of the new route; the deepest match is selected by default."
+#~ msgstr "The location from the logbook is matched against the map data, level by level. Click a level to choose the parent of the new route; the deepest match is selected by default."
+
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "Could not create the route."
+msgstr "Could not create the route."
+
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "The location from the logbook is matched against the map data, level by level. Click a level to place the route inside it; missing levels are created on the fly."
+msgstr "The location from the logbook is matched against the map data, level by level. Click a level to place the route inside it; missing levels are created on the fly."
+
+#. 0: foundParentName
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "Pick the location of the route on the map of {0}, then save. The route is created as a pending change you can undo and push to OpenStreetMap."
+msgstr "Pick the location of the route on the map of {0}, then save. The route is created as a pending change you can undo and push to OpenStreetMap."
+
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "1 · Parent"
+msgstr "1 · Parent"
+
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "2 · Location"
+msgstr "2 · Location"
+
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "Next: choose the location"
+msgstr "Next: choose the location"
+
+#. 0: tick.name
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "Log in with OpenStreetMap to add \"{0}\"."
+msgstr "Log in with OpenStreetMap to add \"{0}\"."
+
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "<0/> Log in"
+msgstr "<0/> Log in"
+
+#. 0: createNames.join(" › "); 1: foundParentName
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "{0} will be created under {1}."
+msgstr "{0} will be created under {1}."
+
+#. 0: pickedCoordinates.lat.toFixed(5); 1: pickedCoordinates.lon.toFixed(5)
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "Location: {0}, {1} — click again to adjust. <0/>"
+msgstr "Location: {0}, {1} — click again to adjust. <0/>"
+
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "Click on the map to pick the location."
+msgstr "Click on the map to pick the location."
+
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "Creating..."
+msgstr "Creating..."
+
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "Back"
+msgstr "Back"
