@@ -8,12 +8,12 @@
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["subject", "style", "climbedAt", "createdAt"],
+        "required": ["style", "climbedAt", "createdAt"],
         "properties": {
           "subject": {
             "type": "ref",
             "ref": "org.openstreetmap.core.defs#elementRef",
-            "description": "The OpenStreetMap climbing route, pitch, or boulder being ticked"
+            "description": "The OpenStreetMap climbing route, pitch, or boulder being ticked. Absent for routes that are not on OpenStreetMap (yet)"
           },
           "style": {
             "type": "ref",
@@ -32,6 +32,21 @@
             "type": "string",
             "maxLength": 3000,
             "description": "Personal comment or notes on the ascent"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "Route name, set for ticks without a subject"
+          },
+          "grade": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Route grade as written in the source logbook, for ticks without a subject"
+          },
+          "locationHint": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Full hierarchical location of the crag (e.g. 'France > Vercors > La Balme'), for ticks without a subject"
           },
           "climbedAt": {
             "type": "string",

@@ -57,7 +57,7 @@ export type OsmSubjectRef = OsmElementRef;
  * climbedAt timestamp, creation timestamp, and comment.
  * Private ticks are stored in private ATProto Spaces.
  * The subject is optional: ticks for routes that are not on OpenStreetMap (yet) carry the route
- * name (and optionally grade and crag) instead, and can be linked to an element later (issue #154).
+ * name (and optionally grade and location hint) instead, and can be linked to an element later (issue #154).
  */
 export interface TickRecord {
   /** OSM element ref. Absent for routes that are not on OpenStreetMap (yet). */
@@ -71,8 +71,11 @@ export interface TickRecord {
   name?: string;
   /** Route grade as written in the source logbook, for ticks without a subject */
   grade?: string;
-  /** Crag / area name, for ticks without a subject */
-  crag?: string;
+  /**
+   * Full hierarchical location of the crag (e.g. "France > Vercors > La Balme"), for ticks
+   * without a subject. The whole path helps locating and adding the places on OSM later.
+   */
+  locationHint?: string;
 }
 
 /**

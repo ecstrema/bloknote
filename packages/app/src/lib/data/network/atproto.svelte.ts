@@ -144,6 +144,26 @@ function tickLocalId(entry: LocalTickEntry | TickRecord): string {
   return `t${(hash >>> 0).toString(36)}`;
 }
 
+/**
+ * Assigns a stable unique local id to every tick (mutates entries missing or duplicating one).
+ * Must run before ticks reach the UI: the ticks list keys its each blocks by localId, and
+ * Svelte crashes on duplicate (or undefined) keys.
+ */
+function ensureTickLocalIds(ticks: LocalTickEntry[]): LocalTickEntry[] {
+  const seen = new Set<string>();
+  for (const entry of ticks) {
+    if (entry.localId && !seen.has(entry.localId)) {
+      seen.add(entry.localId);
+      continue;
+    }
+    let id = tickLocalId(entry);
+    while (seen.has(id)) id = `${id}x`;
+    entry.localId = id;
+    seen.add(id);
+  }
+  return ticks;
+}
+
 /** The record stored in the PDS: the local-only fields (uri, label, localId) are stripped */
 function remoteTickRecord(entry: LocalTickEntry): TickRecord {
   return {
@@ -154,8 +174,15 @@ function remoteTickRecord(entry: LocalTickEntry): TickRecord {
     ...(entry.comment ? { comment: entry.comment } : {}),
     ...(entry.name ? { name: entry.name } : {}),
     ...(entry.grade ? { grade: entry.grade } : {}),
-    ...(entry.crag ? { crag: entry.crag } : {}),
+    ...(entry.locationHint ? { locationHint: entry.locationHint } : {}),
   };
+}
+
+/** Ticks written before the location hint (record field "crag", a single name) are migrated on read */
+function normalizeTick(entry: LocalTickEntry): LocalTickEntry {
+  if (!("crag" in entry)) return entry;
+  const { crag, ...rest } = entry as LocalTickEntry & { crag?: string };
+  return crag && !rest.locationHint ? { ...rest, locationHint: crag } : rest;
 }
 
 function createOAuthClient(): Promise<BrowserOAuthClient> {
@@ -187,7 +214,7 @@ async function xrpcErrorMessage(res: Response): Promise<string> {
 
 class AtProtoClient {
   session = $state<AtProtoSession | undefined>(loadSession());
-  ticks = $state<LocalTickEntry[]>(readJson<LocalTickEntry[]>(TICKS_STORAGE_KEY, []));
+  ticks = $state<LocalTickEntry[]>(ensureTickLocalIds(readJson<LocalTickEntry[]>(TICKS_STORAGE_KEY, []).map(normalizeTick)));
   stars = $state<LocalStarEntry[]>(readJson<LocalStarEntry[]>(STARS_STORAGE_KEY, []));
   comments = $state<LocalCommentEntry[]>(
     migrateLegacyReviews(readJson<LocalCommentEntry[]>(COMMENTS_STORAGE_KEY, []), "text"),
@@ -307,7 +334,7 @@ class AtProtoClient {
     if (!session) return;
     try {
       const [remoteTicks, remoteStars, remoteComments, remoteRatings, legacyReviews] = await Promise.all([
-        this.#listRemote<LocalTickEntry>(TICK_COLLECTION),
+        this.#listRemote<LocalTickEntry>(TICK_COLLECTION).then((ticks) => ticks.map(normalizeTick)),
         this.#listRemote<LocalStarEntry>(STAR_COLLECTION),
         this.#listRemote<LocalCommentEntry>(COMMENT_COLLECTION),
         this.#listRemote<LocalRatingEntry>(RATING_COLLECTION),
@@ -347,7 +374,9 @@ class AtProtoClient {
       const legacyRatings = legacyReviews
         .filter((r) => typeof r.rating === "number")
         .map((r) => ({ subject: r.subject, rating: r.rating!, createdAt: r.createdAt, uri: r.uri, label: r.label }));
-      this.ticks = merge(this.ticks, remoteTicks as LocalTickEntry[]);
+      // Local ids are assigned before the assignment: the ticks list keys its each blocks by
+      // localId, and a render with pending (undefined) ids between the awaits would crash it
+      this.ticks = ensureTickLocalIds(merge(this.ticks, remoteTicks as LocalTickEntry[]));
       this.stars = merge(this.stars, remoteStars as LocalStarEntry[]);
       this.comments = merge(this.comments, [...(remoteComments as LocalCommentEntry[]), ...legacyComments]);
       this.ratings = merge(this.ratings, [...(remoteRatings as LocalRatingEntry[]), ...legacyRatings]);
@@ -358,7 +387,6 @@ class AtProtoClient {
         this.#uploadPending(COMMENT_COLLECTION, this.comments),
         this.#uploadPending(RATING_COLLECTION, this.ratings),
       ]);
-      this.#ensureTickLocalIds();
       this.#persistTicks();
       this.#persistStars();
       this.#persistComments();
@@ -512,19 +540,8 @@ class AtProtoClient {
     if (browser) localStorage.setItem(TICKS_STORAGE_KEY, JSON.stringify(this.ticks));
   }
 
-  /** Assigns a stable unique local id to every tick (mutates entries missing or duplicating one) */
   #ensureTickLocalIds() {
-    const seen = new Set<string>();
-    for (const entry of this.ticks) {
-      if (entry.localId && !seen.has(entry.localId)) {
-        seen.add(entry.localId);
-        continue;
-      }
-      let id = tickLocalId(entry);
-      while (seen.has(id)) id = `${id}x`;
-      entry.localId = id;
-      seen.add(id);
-    }
+    this.ticks = ensureTickLocalIds(this.ticks);
   }
 
   #persistStars() {
@@ -574,11 +591,11 @@ class AtProtoClient {
 
   /**
    * Adds a tick for a route that is not on OpenStreetMap (yet): the record carries the route
-   * name (and optionally grade and crag) instead of a subject (issue #154). The ticks list lets
-   * the user add the route to OSM later, or link the tick when the route appears in the data.
+   * name (and optionally grade and location hint) instead of a subject (issue #154). The ticks
+   * list lets the user add the route to OSM later, or link the tick when the route appears in the data.
    */
   async addNameTick(
-    tick: { name: string; grade?: string; crag?: string },
+    tick: { name: string; grade?: string; locationHint?: string },
     style: AscentStyle,
     comment?: string,
     climbedAt?: string,
@@ -591,7 +608,7 @@ class AtProtoClient {
       createdAt: now,
       name: tick.name,
       ...(tick.grade ? { grade: tick.grade } : {}),
-      ...(tick.crag ? { crag: tick.crag } : {}),
+      ...(tick.locationHint ? { locationHint: tick.locationHint } : {}),
       ...(comment?.trim() ? { comment: comment.trim() } : {}),
     };
     if (this.#oauthSession) {
@@ -652,10 +669,13 @@ class AtProtoClient {
   }
 
   /** Attaches a subject-less tick to an OSM element (e.g. once the route exists in OSM) */
-  async linkTick(entry: LocalTickEntry, ref: OsmElementRef): Promise<LocalTickEntry> {
+  async linkTick(entry: LocalTickEntry, ref: OsmElementRef, label?: string): Promise<LocalTickEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
     entry.subject = ref;
-    if (entry.uri) {
+    if (label) entry.label = label;
+    // Locally created elements carry a temporary id until their changeset is pushed: the PDS
+    // record is only updated then (see remapTickSubjects), never with a temporary reference
+    if (entry.uri && ref.id > 0) {
       try {
         await this.#putRemoteRecord(TICK_COLLECTION, entry.uri, remoteTickRecord(entry));
       } catch (error) {
@@ -664,6 +684,30 @@ class AtProtoClient {
     }
     this.#persistTicks();
     return entry;
+  }
+
+  /**
+   * Called after a changeset push assigned real OSM ids to created elements: the ticks pointing
+   * at the temporary ids are remapped locally, and their records are updated on the PDS
+   * (issue #154). Ticks that were never uploaded are picked up by the next sync instead.
+   */
+  async remapTickSubjects(remaps: { type: OsmElementRef["type"]; from: number; to: number }[]): Promise<void> {
+    let changed = false;
+    for (const entry of this.ticks) {
+      if (!entry.subject) continue;
+      const remap = remaps.find((r) => r.type === entry.subject!.type && r.from === entry.subject!.id);
+      if (!remap) continue;
+      entry.subject = { type: entry.subject.type, id: remap.to };
+      changed = true;
+      if (entry.uri) {
+        try {
+          await this.#putRemoteRecord(TICK_COLLECTION, entry.uri, remoteTickRecord(entry));
+        } catch (error) {
+          if (!this.#oauthSession) throw error;
+        }
+      }
+    }
+    if (changed) this.#persistTicks();
   }
 
   async addBulkTicks(features: OsmFeature[], style: AscentStyle, comment?: string): Promise<TickRecord[]> {
