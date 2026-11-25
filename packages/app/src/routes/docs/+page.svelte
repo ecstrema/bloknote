@@ -186,30 +186,35 @@
       {:else if active === "lexicons"}
         <h1>Atmosphere (ATProto) Lexicons</h1>
         <p>
-          Bloknote defines open AT Protocol Lexicon schemas under <code>org.bloknote.*</code> and reusable
-          <code>org.openstreetmap.*</code> namespaces so personal climbing logs and comments are portable across apps.
+          Bloknote defines open AT Protocol Lexicon schemas under <code>org.bloknote.*</code> so personal climbing logs
+          and comments are portable across apps.
         </p>
         <h2>Core schemas</h2>
         <ul>
           <li>
-            <code>org.openstreetmap.core.defs#elementRef</code> — Canonical reference to an OSM element (<code
+            <code>org.bloknote.osm.defs#elementRef</code> — Canonical reference to an OSM element (<code
               >type</code
             >
             + numeric <code>id</code>), resilient to OSM name/slug changes.
           </li>
           <li>
-            <code>org.bloknote.logbook.tick</code> — Personal ascent or attempt record (<code>onsight</code>,
-            <code>flash</code>, <code>redpoint</code>, <code>attempt</code>, optional qualifiers, timestamp, and notes).
+            <code>org.bloknote.logbook.tick</code> — Personal ascent or attempt record (send: <code>onsight</code>,
+            <code>flash</code>, <code>redpoint</code>, <code>pinkpoint</code>; attempt: <code>hangdog</code> with hang
+            count or <code>bailed</code>; optional qualifiers, timestamp, and notes).
           </li>
           <li>
-            <code>org.bloknote.comment</code> — Standalone comment text on a route or crag, independent of ratings so
-            each can be created and deleted separately.
+            <code>org.bloknote.osm.comment</code> — Standalone comment text on an OSM element, independent of ratings
+            so each can be created and deleted separately.
           </li>
           <li>
-            <code>org.bloknote.rating</code> — Standalone normalized rating (<code>0.0–1.0</code>) for a route or crag.
+            <code>org.bloknote.osm.rating</code> — Standalone integer rating (<code>0–120</code>) for an OSM element.
           </li>
           <li>
-            <code>org.openstreetmap.star</code> — Bookmarked climbing features.
+            <code>org.bloknote.osm.bookmark</code> — Bookmarked OSM elements.
+          </li>
+          <li>
+            <code>org.bloknote.osm.opinion</code> — An opinion about the value of a specific OSM tag on an element
+            (e.g. a grade opinion for <code>climbing:grade:french</code>), usable for any field.
           </li>
           <li>
             <code>org.bloknote.actor.profile</code> — User preferences such as preferred route and boulder grading scales.

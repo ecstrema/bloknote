@@ -12,7 +12,7 @@
   import { extractRouteStyle, ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import type { Grade } from "#lib/types.js";
-  import type { AscentStyle } from "@bloknote/common";
+  import { ascentFromStyle, type TickStyle } from "@bloknote/common";
   import { getFeature, type OsmFeature, type Tags } from "osm-api";
   import TickOsmDialog from "#lib/components/tick-osm-dialog.svelte";
 
@@ -26,12 +26,17 @@
   let sortMode = $state<SortMode>("places");
 
   /** Distinct color per ascent style */
-  const STYLE_BADGE_CLASSES: Record<AscentStyle, string> = {
+  const STYLE_BADGE_CLASSES: Record<TickStyle, string> = {
+    redpoint: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
     onsight: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
     flash: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300",
-    redpoint: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
-    attempt: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+    pinkpoint: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
+    hangdog: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+    bailed: "bg-red-500/15 text-red-700 dark:text-red-300",
   };
+
+  /** The style currently set on a tick, for the badge class and the select value */
+  const styleOf = (tick: LocalTickEntry): TickStyle | undefined => tick.sendStyle ?? tick.attemptStyle;
 
   /** Ticks pointing at an OSM element: subject-less ticks (routes not on OSM yet) are excluded */
   const osmTicks = $derived(atproto.ticks.filter((t) => t.subject));
@@ -334,8 +339,11 @@
     }, SAVE_DELAY_MS);
   }
 
-  function setStyle(tick: LocalTickEntry, style: AscentStyle) {
-    tick.style = style;
+  function setStyle(tick: LocalTickEntry, style: TickStyle) {
+    delete tick.sendStyle;
+    delete tick.attemptStyle;
+    delete tick.hangs;
+    Object.assign(tick, ascentFromStyle(style));
     scheduleSave(tick);
   }
 
@@ -446,19 +454,25 @@
               {/if}
               <Select
                 aria-label="Ascent style of {labelFor(tick)}"
-                class={`w-auto rounded px-1.5 py-0.5 text-[11px] font-medium capitalize ${STYLE_BADGE_CLASSES[tick.style]}`}
-                value={tick.style}
-                onchange={(e) => setStyle(tick, (e.target as HTMLSelectElement).value as AscentStyle)}
+                class={`w-auto rounded px-1.5 py-0.5 text-[11px] font-medium capitalize ${styleOf(tick) ? STYLE_BADGE_CLASSES[styleOf(tick)!] : ""}`}
+                value={styleOf(tick)}
+                onchange={(e) => setStyle(tick, (e.target as HTMLSelectElement).value as TickStyle)}
               >
-                <option value="onsight">Onsight</option>
-                <option value="flash">Flash</option>
-                <option value="redpoint">Redpoint</option>
-                <option value="attempt">Attempt</option>
+                <optgroup label="Send">
+                  <option value="redpoint">Redpoint</option>
+                  <option value="onsight">Onsight</option>
+                  <option value="flash">Flash</option>
+                  <option value="pinkpoint">Pinkpoint</option>
+                </optgroup>
+                <optgroup label="Attempt">
+                  <option value="hangdog">Hangdog</option>
+                  <option value="bailed">Bailed</option>
+                </optgroup>
               </Select>
               <Input
                 type="date"
                 class="w-auto text-xs"
-                value={tick.climbedAt.slice(0, 10)}
+                value={tick.climbedAt?.slice(0, 10) ?? ""}
                 aria-label="Ascent date of {labelFor(tick)}"
                 onchange={(e) => setDate(tick, (e.target as HTMLInputElement).value)}
               />

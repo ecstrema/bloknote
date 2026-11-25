@@ -1,4 +1,4 @@
-import type { AscentStyle } from "@bloknote/common";
+import type { TickStyle } from "@bloknote/common";
 
 export type TickImportFormat = "mountainproject" | "thecrag";
 
@@ -12,7 +12,7 @@ export interface ImportedTick {
   area?: string;
   /** Climbing style of the route as written in the export (Sport, Trad, Boulder...) */
   routeType?: string;
-  style: AscentStyle;
+  style: TickStyle;
   /** ISO ascent date, when provided */
   date?: string;
   notes?: string;
@@ -68,23 +68,28 @@ export function parseCsv(csv: string): string[][] {
   return rows.filter((r) => r.some((v) => v.trim() !== ""));
 }
 
-/** MountainProject ascent styles, mapped to the app's AscentStyle */
-function mountainProjectStyle(leadStyle: string | undefined): AscentStyle {
+/** MountainProject ascent styles, mapped to the app's tick styles */
+function mountainProjectStyle(leadStyle: string | undefined): TickStyle {
   const lead = leadStyle?.trim().toLowerCase();
   if (lead === "onsight") return "onsight";
   if (lead === "flash") return "flash";
-  if (lead === "redpoint" || lead === "pinkpoint" || lead === "frenchfree") return "redpoint";
-  // Plain Lead / Follow / Top Rope / Solo styles do not distinguish clean ascents: count as attempts
-  return "attempt";
+  if (lead === "pinkpoint") return "pinkpoint";
+  if (lead === "redpoint" || lead === "frenchfree") return "redpoint";
+  // Plain Lead / Follow / Top Rope / Solo styles do not distinguish clean ascents: conservatively
+  // count them as hangdogs (attempts) rather than claiming a send
+  return "hangdog";
 }
 
-/** TheCrag ascent types, mapped to the app's AscentStyle */
-function theCragStyle(ascentType: string | undefined): AscentStyle {
+/** TheCrag ascent types, mapped to the app's tick styles */
+function theCragStyle(ascentType: string | undefined): TickStyle {
   const type = ascentType?.trim().toLowerCase();
   if (type === "onsight") return "onsight";
   if (type === "flash") return "flash";
+  if (type === "pinkpoint") return "pinkpoint";
+  if (type === "hangdog") return "hangdog";
+  if (type === "bailed") return "bailed";
   if (type === "send" || type === "redpoint" || type === "top rope" || type === "repeat") return "redpoint";
-  return "attempt";
+  return "hangdog";
 }
 
 const clean = (value: string | undefined): string | undefined => {

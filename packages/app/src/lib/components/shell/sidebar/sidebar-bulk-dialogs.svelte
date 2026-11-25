@@ -11,7 +11,7 @@
   import { ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
   import { collectRegionParentOptions, type ParentOption } from "#lib/data/region-locator.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
-  import type { AscentStyle } from "@bloknote/common";
+  import { ascentFromStyle, type TickStyle } from "@bloknote/common";
   import { allScales, type ScaleId } from "@bloknote/holy-grade";
   import type { OsmFeature } from "osm-api";
   import type { SidebarSelection } from "./selection.svelte.js";
@@ -42,7 +42,7 @@
   let targetStyleKey = $state("sport");
   let replaceStyles = $state(true);
   // @wc-ignore
-  let tickStyle = $state<AscentStyle>("redpoint");
+  let tickStyle = $state<TickStyle>("redpoint");
   let tickComment = $state("");
 
   const convertibleScales = allScales.filter((s) => !!scaleIdToTag(s.id));
@@ -131,7 +131,7 @@
     const features = selection.slugs
       .map((s) => appState.tree.getReactiveNode(s)?.feature)
       .filter((f): f is OsmFeature => !!f && f.type !== "geographic");
-    await atproto.addBulkTicks(features, tickStyle, tickComment);
+    await atproto.addBulkTicks(features, ascentFromStyle(tickStyle), tickComment);
     tickComment = "";
     dialog = null;
   }
@@ -227,10 +227,16 @@
           <Dialog.Description>Log a tick for {selection.size} selected items.</Dialog.Description>
         </Dialog.Header>
         <Select aria-label="Ascent style" bind:value={tickStyle}>
-          <option value="onsight">Onsight</option>
-          <option value="flash">Flash</option>
-          <option value="redpoint">Redpoint</option>
-          <option value="attempt">Attempt</option>
+          <optgroup label="Send">
+            <option value="redpoint">Redpoint</option>
+            <option value="onsight">Onsight</option>
+            <option value="flash">Flash</option>
+            <option value="pinkpoint">Pinkpoint</option>
+          </optgroup>
+          <optgroup label="Attempt">
+            <option value="hangdog">Hangdog</option>
+            <option value="bailed">Bailed</option>
+          </optgroup>
         </Select>
         <Input bind:value={tickComment} placeholder="Comment (optional)" />
         {@render footer("Add ticks")}

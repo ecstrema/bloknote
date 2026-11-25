@@ -6,7 +6,7 @@
   import { Textarea } from "#components/ui/textarea/index.js";
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
   import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
-  import { normalizedRatingToStars, starsToNormalizedRating, type AscentStyle } from "@bloknote/common";
+  import { ascentFromStyle, normalizedRatingToStars, starsToNormalizedRating, type TickStyle } from "@bloknote/common";
         import type { OsmFeature } from "osm-api";
 
   const {
@@ -17,7 +17,8 @@
     allowTicks?: boolean;
   } = $props();
 
-  let tickStyle = $state<AscentStyle>("redpoint");
+  let tickStyle = $state<TickStyle>("redpoint");
+  let tickHangs = $state(1);
   let tickComment = $state("");
   let commentText = $state("");
   let busy = $state(false);
@@ -33,7 +34,7 @@
     error = undefined;
     busy = true;
     try {
-      await atproto.addTick(feature, tickStyle, tickComment);
+      await atproto.addTick(feature, ascentFromStyle(tickStyle, tickHangs), tickComment);
       tickComment = "";
     } catch (e) {
       error = e instanceof Error ? e.message : "Could not log tick";
@@ -134,11 +135,20 @@
     {#if allowTicks}
       <form class="flex flex-wrap items-center gap-2" onsubmit={onAddTick}>
         <Select aria-label="Ascent style" class="w-auto" bind:value={tickStyle}>
-          <option value="onsight">Onsight</option>
-          <option value="flash">Flash</option>
-          <option value="redpoint">Redpoint</option>
-          <option value="attempt">Attempt</option>
+          <optgroup label="Send">
+            <option value="redpoint">Redpoint</option>
+            <option value="onsight">Onsight</option>
+            <option value="flash">Flash</option>
+            <option value="pinkpoint">Pinkpoint</option>
+          </optgroup>
+          <optgroup label="Attempt">
+            <option value="hangdog">Hangdog</option>
+            <option value="bailed">Bailed</option>
+          </optgroup>
         </Select>
+        {#if tickStyle === "hangdog"}
+          <Input type="number" min="1" class="w-24" bind:value={tickHangs} aria-label="Number of hangs" />
+        {/if}
         <Input class="min-w-40 flex-1" bind:value={tickComment} placeholder="Ascent note (optional)" />
         <Button size="sm" type="submit" disabled={busy}>
           <span class="icon-[lucide--check] shrink-0 size-4"></span>
@@ -166,7 +176,9 @@
           </button>
         {/each}
         {#if routeRatings[0]}
-          <span class="ml-1">{new Date(routeRatings[0].createdAt).toLocaleDateString()}</span>
+          {#if routeRatings[0].createdAt}
+            <span class="ml-1">{new Date(routeRatings[0].createdAt).toLocaleDateString()}</span>
+          {/if}
           {#if atproto.configured}
             <button
               type="button"
@@ -203,8 +215,10 @@
       <ul class="space-y-1 text-xs">
         {#each routeTicks as tick (tick)}
           <li class="flex flex-wrap items-baseline gap-2">
-            <span class="rounded bg-muted px-1.5 py-0.5 font-medium capitalize">{tick.style}</span>
-            <span class="text-muted-foreground">{new Date(tick.climbedAt).toLocaleDateString()}</span>
+            <span class="rounded bg-muted px-1.5 py-0.5 font-medium capitalize">{tick.sendStyle ?? tick.attemptStyle ?? tick.outcome}</span>
+            {#if tick.climbedAt}
+              <span class="text-muted-foreground">{new Date(tick.climbedAt).toLocaleDateString()}</span>
+            {/if}
             {#if tick.comment}
               <span>{tick.comment}</span>
             {/if}

@@ -1,0 +1,41 @@
+{
+  "lexicon": 1,
+  "id": "org.bloknote.osm.opinion",
+  "description": "An opinion about the value of a specific OpenStreetMap field on an element (node, way, or relation)",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": [
+          "subject",
+          "field",
+          "value"
+        ],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "org.bloknote.osm.defs#elementRef",
+            "description": "The OpenStreetMap element (node, way, or relation) the opinion is about"
+          },
+          "field": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "The OpenStreetMap key the opinion is about, e.g. 'climbing:grade:uiaa' or 'name'"
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "The value the author believes the field should have, e.g. '6b+' for a grade opinion"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "ISO 8601 timestamp when the opinion was posted"
+          }
+        }
+      }
+    }
+  }
+}

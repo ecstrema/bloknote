@@ -1,6 +1,4 @@
-import type { AscentInfo, AscentStyle, ClimbingGradeRef, OsmElementRef, TickRecord } from "./types.ts";
-
-export const CLEAN_ASCENT_STYLES: ReadonlySet<AscentStyle> = new Set(["onsight", "flash", "redpoint"]);
+import type { AscentInfo, AttemptStyle, ClimbingGradeRef, OsmElementRef, SendStyle, TickRecord } from "./types.ts";
 
 export interface GradePyramidEntry {
   scale: string;
@@ -14,7 +12,7 @@ export interface UserStats {
   totalTicks: number;
   totalSends: number;
   totalAttempts: number;
-  byStyle: Partial<Record<AscentStyle, number>>;
+  byStyle: Partial<Record<SendStyle | AttemptStyle, number>>;
   byAscentInfo: Partial<Record<AscentInfo, number>>;
   pyramid: GradePyramidEntry[];
   lastClimbedAt?: string;
@@ -43,15 +41,17 @@ export function computeUserStats(
   const pyramidMap = new Map<string, GradePyramidEntry>();
 
   for (const tick of ticks) {
-    const isSend = CLEAN_ASCENT_STYLES.has(tick.style);
+    // Minimal ticks without an outcome are treated as sends
+    const isSend = tick.outcome !== "attempt";
     if (isSend) {
       stats.totalSends += 1;
     } else {
       stats.totalAttempts += 1;
     }
 
-    // Ascent style counts (strictly onsight, flash, redpoint, attempt)
-    stats.byStyle[tick.style] = (stats.byStyle[tick.style] ?? 0) + 1;
+    // Send style (default redpoint) or attempt style (default hangdog)
+    const style = isSend ? (tick.sendStyle ?? "redpoint") : (tick.attemptStyle ?? "hangdog");
+    stats.byStyle[style] = (stats.byStyle[style] ?? 0) + 1;
 
     // Additional climbing qualifiers / tags (clean, toprope, lead, solo, pinkpoint, etc.)
     if (tick.ascentInfo) {

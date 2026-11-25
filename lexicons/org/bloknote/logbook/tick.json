@@ -8,21 +8,35 @@
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["style", "climbedAt", "createdAt"],
         "properties": {
           "subject": {
             "type": "ref",
-            "ref": "org.openstreetmap.core.defs#elementRef",
+            "ref": "org.bloknote.osm.defs#elementRef",
             "description": "The OpenStreetMap climbing route, pitch, or boulder being ticked. Absent for routes that are not on OpenStreetMap (yet)"
           },
-          "style": {
+          "outcome": {
             "type": "ref",
-            "ref": "#ascentStyle",
-            "description": "Style of ascent: strictly onsight, flash, redpoint, or attempt"
+            "ref": "#ascentOutcome",
+            "description": "Whether the route was sent or only attempted. Optional for minimal ticks."
+          },
+          "sendStyle": {
+            "type": "ref",
+            "ref": "#sendStyle",
+            "description": "Send style: redpoint by default, or strictly onsight, flash, or pinkpoint (with preplaced gear for trad climbs). Only valid when outcome is send."
+          },
+          "attemptStyle": {
+            "type": "ref",
+            "ref": "#attemptStyle",
+            "description": "Attempt style: hangdog (working the route with hangs) by default, or bailed. Only valid when outcome is attempt."
+          },
+          "hangs": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of hangs, when the attempt style is hangdog"
           },
           "ascentInfo": {
             "type": "array",
-            "description": "Additional climbing style qualifiers (clean, toprope, lead, solo, second, aid, pinkpoint, hangdog)",
+            "description": "Additional climbing style qualifiers (toprope, solo, second, aid). Lead is implied when unspecified: these are only set to say the ascent was not a lead, or had another exceptional style.",
             "items": {
               "type": "ref",
               "ref": "#ascentInfo"
@@ -51,7 +65,7 @@
           "climbedAt": {
             "type": "string",
             "format": "datetime",
-            "description": "ISO 8601 timestamp of when the climb occurred"
+            "description": "ISO 8601 timestamp of when the climb occurred. Optional for minimal ticks."
           },
           "createdAt": {
             "type": "string",
@@ -61,15 +75,41 @@
         }
       }
     },
-    "ascentStyle": {
+    "ascentOutcome": {
       "type": "string",
-      "description": "Ascent style for a climbing tick (strictly onsight, flash, redpoint, or attempt)",
-      "knownValues": ["onsight", "flash", "redpoint", "attempt"]
+      "description": "Whether a climbing tick is a send or an attempt",
+      "knownValues": [
+        "send",
+        "attempt"
+      ]
+    },
+    "sendStyle": {
+      "type": "string",
+      "description": "Style of a sent climb (redpoint by default, or strictly onsight, flash, or pinkpoint)",
+      "knownValues": [
+        "redpoint",
+        "onsight",
+        "flash",
+        "pinkpoint"
+      ]
+    },
+    "attemptStyle": {
+      "type": "string",
+      "description": "Style of an attempted climb (hangdog by default, or bailed)",
+      "knownValues": [
+        "hangdog",
+        "bailed"
+      ]
     },
     "ascentInfo": {
       "type": "string",
-      "description": "Additional climbing style/ascent qualifier",
-      "knownValues": ["clean", "toprope", "lead", "solo", "second", "aid", "pinkpoint", "hangdog"]
+      "description": "Additional climbing style/ascent qualifier. Lead is implied when unspecified.",
+      "knownValues": [
+        "toprope",
+        "solo",
+        "second",
+        "aid"
+      ]
     }
   }
 }

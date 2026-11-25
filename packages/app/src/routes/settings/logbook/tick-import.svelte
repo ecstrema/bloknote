@@ -4,6 +4,7 @@
   import { Select } from "#components/ui/select/index.js";
   import { Input } from "#components/ui/input/index.js";
   import * as Collapsible from "#components/ui/collapsible/index.js";
+  import { ascentFromStyle } from "@bloknote/common";
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { getGrade } from "#lib/data/parse/osm-tags.js";
@@ -169,7 +170,7 @@
           continue;
         }
         if (candidate) {
-          await atproto.addTick(candidate.feature, row.tick.style, row.tick.notes, row.tick.date);
+          await atproto.addTick(candidate.feature, ascentFromStyle(row.tick.style), row.tick.notes, row.tick.date);
         } else {
           // Route not on OSM (yet): the tick is stored without a subject and can be linked later
           await atproto.addNameTick(
@@ -178,7 +179,7 @@
               grade: row.tick.grade,
               locationHint: row.tick.location ?? row.tick.area ?? row.tick.cragName,
             },
-            row.tick.style,
+            ascentFromStyle(row.tick.style),
             row.tick.notes,
             row.tick.date,
           );
