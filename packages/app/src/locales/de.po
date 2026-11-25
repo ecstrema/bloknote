@@ -9,6 +9,7 @@ msgstr ""
 "X-Plurals-Order: one, other\n"
 
 #: src/lib/data/region-names.svelte.js
+#: src/routes/settings/+layout.svelte
 msgid "World"
 msgstr "Welt"
 
@@ -17765,11 +17766,10 @@ msgstr ""
 msgid "Could not create the route."
 msgstr ""
 
-#: src/lib/components/tick-osm-dialog.svelte
-msgid "The location from the logbook is matched against the map data, level by level. Click a level to place the route inside it; missing levels are created on the fly."
-msgstr ""
+#~ msgid "The location from the logbook is matched against the map data, level by level. Click a level to place the route inside it; missing levels are created on the fly."
+#~ msgstr ""
 
-#. 0: foundParentName
+#. 0: baseName
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "Pick the location of the route on the map of {0}, then save. The route is created as a pending change you can undo and push to OpenStreetMap."
 msgstr ""
@@ -17795,15 +17795,13 @@ msgstr ""
 msgid "<0/> Log in"
 msgstr ""
 
-#. 0: createNames.join(" › "); 1: foundParentName
+#. 0: createNames.join(" › "); 1: baseName
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "{0} will be created under {1}."
 msgstr ""
 
-#. 0: pickedCoordinates.lat.toFixed(5); 1: pickedCoordinates.lon.toFixed(5)
-#: src/lib/components/tick-osm-dialog.svelte
-msgid "Location: {0}, {1} — click again to adjust. <0/>"
-msgstr ""
+#~ msgid "Location: {0}, {1} — click again to adjust. <0/>"
+#~ msgstr ""
 
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "Click on the map to pick the location."
@@ -17815,4 +17813,18 @@ msgstr ""
 
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "Back"
+msgstr ""
+
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "The location from the logbook is matched against the map data, level by level. Click an existing level to pick it as the parent, or click missing levels to create them — the lowest down selection becomes the parent of the route."
+msgstr ""
+
+#. 0: pickedCoordinates.lat.toFixed(5); 1: pickedCoordinates.lon.toFixed(5)
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "Location: {0}, {1} — click again to adjust."
+msgstr ""
+
+#. 0: parentName
+#: src/lib/components/tick-osm-dialog.svelte
+msgid "<0/> <1/> The route will be added to {0}."
 msgstr ""

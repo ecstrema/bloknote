@@ -17,7 +17,6 @@
   import { page } from "$app/state";
   import { untrack } from "svelte";
   import MapAddDialog from "#lib/components/map-add-dialog.svelte";
-  import TickOsmDialog from "#lib/components/tick-osm-dialog.svelte";
   import DiagnosticsPanel from "#lib/components/diagnostics-panel.svelte";
   import { collectSubtreeDiagnostics } from "#lib/data/parse/diagnostics.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
@@ -40,7 +39,6 @@
   import RssFeedButton from "#components/rss-feed-button.svelte";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
   import { dataClient } from "#lib/data/network/data-client.js";
-  import { atproto } from "#lib/data/network/atproto.svelte.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
   import { findRoutePartPairs, isRouteBottom, isRouteTop, routeCompanionsBySlug } from "#lib/data/parse/route-parts.js";
 
@@ -280,19 +278,6 @@
   let clickedCoordinates = $state<{ lat: number; lon: number } | undefined>(undefined);
   let coordinatesCopied = $state(false);
 
-  // "Add to OSM" flow from the ticks list (issues #154 and #201): the TickOsmDialog matches the
-  // tick's location against the map data, lets the user pick (or create) the parent crag and the
-  // location on the embedded map, then creates everything through the undoable app state actions
-  // so the changes land in the pending OSM changes.
-  const addRouteTickId = $derived(page.url.searchParams.get("addRouteTick"));
-  const pendingTick = $derived(addRouteTickId ? atproto.findTick(addRouteTickId) : undefined);
-
-  function closeTickFlow() {
-    const url = new URL(location.href);
-    url.searchParams.delete("addRouteTick");
-    void goto(url, { state: page.state, shallow: true, replace: true });
-  }
-
   function copyCoordinates() {
     if (!coordinates) return;
     void navigator.clipboard.writeText(`${coordinates.lat}, ${coordinates.lon}`);
@@ -512,7 +497,3 @@
     {/if}
   </Tabs.Content>
 </Tabs.Root>
-
-{#if pendingTick}
-  <TickOsmDialog tick={pendingTick} onClose={closeTickFlow} />
-{/if}

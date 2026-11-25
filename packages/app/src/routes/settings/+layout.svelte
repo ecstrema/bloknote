@@ -8,8 +8,22 @@
   import BloknoteLogo from "#components/bloknote-logo.svelte";
   import * as Tabs from "#components/ui/tabs/index.js";
   import SettingsProvider from "#lib/components/shell/providers/settings-provider.svelte";
+  import OsmChanges from "#lib/components/shell/osm-changes.svelte";
+  import UndoControls from "#lib/components/shell/undo-controls.svelte";
+  import { AppDataTree } from "#lib/data/app-data-tree.svelte.js";
+  import { AppState, setAppState } from "#lib/data/app-state.js";
 
   const { children }: { children: Snippet } = $props();
+
+  // Minimal app state for the settings pages: routes created from the ticks list (and any other
+  // pending OSM change) can be reviewed, undone and pushed to OpenStreetMap from here too, and
+  // the changes survive navigating between the settings and the world section (issue #203).
+  const shellTree = new AppDataTree({
+    feature: { type: "geographic", name: "World" },
+    children: {},
+    childrenFetched: true,
+  });
+  setAppState(new AppState(shellTree, { slugs: [], items: [] }, { current: shellTree.root }));
 
   type SettingsTab = "settings" | "logbook" | "account";
 
@@ -81,6 +95,7 @@
           <a href={resolve("/docs")} class="text-sm text-muted-foreground transition-colors hover:text-foreground">
             Docs
           </a>
+          <UndoControls />
           {#if hasPreviousPage}
             <Button variant="ghost" onclick={goBack}>
               <span class="icon-[lucide--arrow-left] shrink-0 size-4"></span>
@@ -123,4 +138,5 @@
       </Tabs.Root>
     </main>
   </div>
+  <OsmChanges />
 </SettingsProvider>

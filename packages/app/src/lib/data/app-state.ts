@@ -31,19 +31,39 @@ export interface Breadcrumbs {
   items: BreadcrumbSegment[];
 }
 
+/**
+ * Pending OSM edits and the undo stack live app-wide: every AppState instance shares them, so
+ * changes survive navigation between the world section and the settings pages (issue #203).
+ */
+export const sharedOsmUser = new OsmUser();
+export const sharedUndoStack = new UndoManager();
+
 export class AppState {
   tree: AppDataTree;
   breadcrumbs: Breadcrumbs;
   currentNode: FromCurrent<DataTree>;
 
-  osmUser = new OsmUser();
+  /**
+   * Pending OSM edits and the undo stack are shared by every AppState instance: they survive
+   * navigation between the world section and the settings pages, so changes made from one place
+   * (e.g. a route created from the ticks list) can be reviewed, undone and pushed from another
+   * (issue #203). Tests inject fresh instances to stay isolated.
+   */
+  osmUser: OsmUser;
+  undoStack: UndoManager;
 
-  undoStack = new UndoManager();
-
-  constructor(tree: AppDataTree, breadcrumbs: Breadcrumbs, currentNode: FromCurrent<DataTree>) {
+  constructor(
+    tree: AppDataTree,
+    breadcrumbs: Breadcrumbs,
+    currentNode: FromCurrent<DataTree>,
+    osmUser: OsmUser = sharedOsmUser,
+    undoStack: UndoManager = sharedUndoStack,
+  ) {
     this.tree = tree;
     this.breadcrumbs = breadcrumbs;
     this.currentNode = currentNode;
+    this.osmUser = osmUser;
+    this.undoStack = undoStack;
   }
 
   async fetchStats(targetSlug: string): Promise<void> {

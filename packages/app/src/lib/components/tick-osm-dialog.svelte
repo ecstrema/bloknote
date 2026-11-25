@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
+  import { SvelteSet } from "svelte/reactivity";
   import { Button } from "#components/ui/button/index.js";
   import * as Dialog from "#components/ui/dialog/index.js";
   import { Input } from "#components/ui/input/index.js";
   import Loader from "#components/ui/loader.svelte";
-  import { getItemUrl } from "#components/shell/sidebar/utils.js";
   import { getAppState } from "#lib/data/app-state.js";
   import { dataClient } from "#lib/data/network/data-client.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
@@ -17,13 +16,14 @@
   import type { OsmFeature } from "osm-api";
 
   /**
-   * "Add to OSM" flow for a logbook tick (issues #154 and #201), rendered on a world page so the
-   * app state (undo stack, pending OSM changes) is available. Two steps:
-   * 1. the location hint is matched level by level against the map data; any level can be chosen
-   *    as the parent, and missing levels can be created on the fly under the deepest match;
+   * "Add to OSM" flow for a logbook tick (issues #154 and #201), rendered over the ticks list, so
+   * the user never leaves the page. Two steps:
+   * 1. the location hint is matched level by level against the map data; an existing level is
+   *    picked as the parent, and any missing level can be individually selected for creation
+   *    under the deepest existing one — the lowest down selection becomes the route parent;
    * 2. the shared map is embedded in the dialog: the user picks the location and saves, which
-   *    creates the missing parents and the route through the undoable app state actions, links the
-   *    tick to it, and opens the route page where the pending changes can be pushed to OSM.
+   *    creates the missing levels and the route through the undoable app state actions, links the
+   *    tick to it, and leaves the pending changes in the shared app state (upload button, undo).
    */
   let {
     tick,
@@ -48,31 +48,49 @@
   let segments = $state<string[]>([]);
   /** For each hint segment, the resolved region/area, or null when it is not in the dataset */
   let chain = $state<(ChainEntry | null)[]>([]);
-  /** Index in the chain of the level chosen as the route parent: the deepest match by default */
+  /** Index in the chain of the existing level picked as parent: the deepest match by default */
   let selectedIndex = $state<number>();
+  /** Indices of the missing levels selected for creation, individually (issue #201) */
+  let checkedCreate = $state(new SvelteSet<number>());
   let pickedCoordinates = $state<{ lat: number; lon: number }>();
   // svelte-ignore state_referenced_locally: the component instance is created per open dialog
   let routeName = $state(tick.name ?? "");
 
-  const parent = $derived(selectedIndex !== undefined ? (chain[selectedIndex] as ChainEntry | null) : undefined);
-  /** Deepest resolved level at or before the selection: the missing levels below it get created under it */
-  const foundIndex = $derived.by(() => {
-    for (let i = selectedIndex ?? -1; i >= 0; i--) {
+  const checkedIndices = $derived([...checkedCreate].filter((i) => chain[i] === null).sort((a, b) => a - b));
+  const firstChecked = $derived(checkedIndices[0]);
+  const lastChecked = $derived(checkedIndices.at(-1));
+  /**
+   * Deepest existing level the new areas (or the selection) hang under: the deepest match above
+   * the first creation, or the picked existing level when nothing is created.
+   */
+  const baseIndex = $derived.by(() => {
+    const limit = firstChecked ?? (selectedIndex !== undefined ? selectedIndex + 1 : 0);
+    for (let i = limit - 1; i >= 0; i--) {
       if (chain[i]) return i;
     }
     return -1;
   });
-  const foundParent = $derived(foundIndex >= 0 ? (chain[foundIndex] as ChainEntry) : undefined);
-  /** Missing level names between the deepest match and the selection, shallowest first */
-  const createNames = $derived(
-    foundParent && selectedIndex !== undefined ? segments.slice(foundIndex + 1, selectedIndex + 1) : [],
-  );
+  const base = $derived(baseIndex >= 0 ? (chain[baseIndex] as ChainEntry) : undefined);
+  const baseName = $derived(base ? (getLocalizedName(base.data) ?? base.slug) : "");
+  /** The route parent: the lowest down selection, created or existing (issue #201) */
+  const parentIndex = $derived.by(() => {
+    const lowest = lastChecked ?? -1;
+    if (selectedIndex !== undefined && selectedIndex > lowest) return selectedIndex;
+    return lowest;
+  });
+  const parentIsCreated = $derived(parentIndex >= 0 && chain[parentIndex] === null);
+  const parentName = $derived.by(() => {
+    if (parentIndex < 0) return "";
+    const entry = chain[parentIndex];
+    if (entry) return getLocalizedName(entry.data) ?? entry.slug;
+    return segments[parentIndex] ?? "";
+  });
+  const createNames = $derived(checkedIndices.map((i) => segments[i]!));
   const trimmedName = $derived(routeName.trim());
-  const foundParentName = $derived(foundParent ? (getLocalizedName(foundParent.data) ?? foundParent.slug) : "");
   const mapCoordinates = $derived(
-    foundParent && foundParent.data.type !== "geographic" ? getCoordinates(foundParent.data as OsmFeature) : undefined,
+    base && base.data.type !== "geographic" ? getCoordinates(base.data as OsmFeature) : undefined,
   );
-  const mapBounds = $derived(foundParent?.data.type === "geographic" ? foundParent.data.bbox : undefined);
+  const mapBounds = $derived(base?.data.type === "geographic" ? base.data.bbox : undefined);
 
   $effect(() => {
     let cancelled = false;
@@ -81,6 +99,7 @@
     segments = [];
     chain = [];
     selectedIndex = undefined;
+    checkedCreate = new SvelteSet();
     (async () => {
       // Right after a reload the database may still be opening, or an in-memory copy is still
       // re-downloading (another tab holds the OPFS pool): wait instead of failing right away
@@ -106,7 +125,7 @@
       const result = await localDb.matchAreaChain(parts);
       if (cancelled) return;
       chain = result;
-      // The deepest resolved level is the parent by default; the others stay clickable
+      // The deepest resolved level is picked as the parent by default; the others stay clickable
       const deepest = chain.reduce((last, entry, i) => (entry ? i : last), -1);
       selectedIndex = deepest >= 0 ? deepest : undefined;
       loading = false;
@@ -116,9 +135,14 @@
     };
   });
 
-  /** An unfound level can only be picked when something resolved above it, to create it under */
+  /** A missing level can only be selected for creation when an existing level sits above it */
   function canCreate(i: number): boolean {
     return chain.slice(0, i).some((entry) => entry !== null);
+  }
+
+  function toggleCreate(i: number) {
+    if (checkedCreate.has(i)) checkedCreate.delete(i);
+    else checkedCreate.add(i);
   }
 
   /** Integrates the whole ancestor chain of `slug` into the app tree, reading the local dataset */
@@ -140,23 +164,32 @@
   }
 
   async function save() {
-    if (!pickedCoordinates || !foundParent || saving) return;
+    if (!pickedCoordinates || baseIndex < 0 || parentIndex < 0 || saving) return;
     saving = true;
     error = undefined;
     try {
-      const base = await ensureNodeInTree(foundParent.slug);
-      if (!base) throw new Error(`Could not load "${foundParentName}" from the map data.`);
+      const baseEntry = chain[baseIndex] as ChainEntry;
+      let routeParent = await ensureNodeInTree(baseEntry.slug);
+      if (!routeParent) throw new Error(`Could not load "${baseName}" from the map data.`);
+      let routeParentSlug = baseEntry.slug;
 
-      let routeParent = base;
-      let routeParentSlug = foundParent.slug;
-      // Missing parents and the route form a single undo step, like the other multi-part edits
+      // The missing levels and the route form a single undo step, like the other multi-part edits
       appState.undoStack.beginGroup();
       try {
-        for (const name of createNames) {
-          const slug = appState.createArea(routeParent, routeParentSlug, name);
+        for (const i of checkedIndices) {
+          const slug = appState.createArea(routeParent, routeParentSlug, segments[i]);
           setFallbackCoordinates(slug, pickedCoordinates);
           routeParent = appState.tree.getReactiveNode(slug)!;
           routeParentSlug = slug;
+        }
+        // When the lowest down selection is an existing level deeper than the creations, load it
+        if (!parentIsCreated) {
+          const parentEntry = chain[parentIndex] as ChainEntry;
+          if (parentEntry.slug !== routeParentSlug) {
+            routeParent = await ensureNodeInTree(parentEntry.slug);
+            if (!routeParent) throw new Error(`Could not load "${parentName}" from the map data.`);
+            routeParentSlug = parentEntry.slug;
+          }
         }
         const routeSlug = appState.createRoute(
           routeParent,
@@ -172,10 +205,10 @@
           .linkTick(tick, { type: routeFeature.type, id: routeFeature.id }, trimmedName || tick.name)
           .catch((err) => console.error("Could not link the tick to the new route", err));
 
+        // Stay on the ticks page: the tick row shows its route right away (resolved from memory),
+        // and the pending changes are kept in the shared app state, ready to be pushed (issue #203)
         open = false;
-        // Stay in the world section: the route page shows the pending changes (Save button) and
-        // the undo controls, and navigating away from the world layout would drop them (issue #177)
-        void goto(getItemUrl(routeParentSlug, routeFeature as OsmFeature));
+        onClose();
       } finally {
         appState.undoStack.endGroup();
       }
@@ -195,7 +228,7 @@
     if (!next) onClose();
   }}
 >
-  <Dialog.Content class="max-w-xl">
+  <Dialog.Content class="max-w-3xl">
     <Dialog.Header>
       <Dialog.Title class="flex items-center gap-2">
         <span aria-hidden="true" class="icon-[lucide--map-pin-plus] size-4 shrink-0"></span>
@@ -203,8 +236,8 @@
       </Dialog.Title>
       <Dialog.Description>
         {step === 1
-          ? "The location from the logbook is matched against the map data, level by level. Click a level to place the route inside it; missing levels are created on the fly."
-          : `Pick the location of the route on the map of ${foundParentName}, then save. The route is created as a pending change you can undo and push to OpenStreetMap.`}
+          ? "The location from the logbook is matched against the map data, level by level. Click an existing level to pick it as the parent, or click missing levels to create them — the lowest down selection becomes the parent of the route."
+          : `Pick the location of the route on the map of ${baseName}, then save. The route is created as a pending change you can undo and push to OpenStreetMap.`}
       </Dialog.Description>
       <ol class="flex items-center gap-1.5 text-xs text-muted-foreground">
         <li class={step === 1 ? "font-medium text-foreground" : ""}>1 · Parent</li>
@@ -241,7 +274,7 @@
                   <span class:selected={selectedIndex === i} class:text-muted-foreground={selectedIndex !== i}>
                     {getLocalizedName(entry.data) ?? segment}
                   </span>
-                  {#if selectedIndex === i}
+                  {#if selectedIndex === i && !parentIsCreated}
                     <span class="ms-auto text-xs text-muted-foreground">parent</span>
                   {/if}
                 </button>
@@ -249,23 +282,26 @@
                 <button
                   type="button"
                   class="flex w-full items-center gap-2 rounded px-1 py-0.5 text-start hover:bg-accent"
-                  onclick={() => (selectedIndex = i)}
+                  onclick={() => toggleCreate(i)}
                 >
                   <span
                     aria-hidden="true"
-                    class="icon-[lucide--circle-dashed] size-3.5 shrink-0 {selectedIndex === i
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-muted-foreground/50'}"
+                    class="size-3.5 shrink-0 {checkedCreate.has(i)
+                      ? 'icon-[lucide--check] text-emerald-600 dark:text-emerald-400'
+                      : 'icon-[lucide--circle-dashed] text-muted-foreground/50'}"
                   ></span>
-                  <span class:selected={selectedIndex === i} class:text-muted-foreground={selectedIndex !== i}>
+                  <span
+                    class:selected={checkedCreate.has(i)}
+                    class:text-muted-foreground={!checkedCreate.has(i)}
+                  >
                     {segment}
                   </span>
                   <span
-                    class="ms-auto text-xs {selectedIndex === i
+                    class="ms-auto text-xs {checkedCreate.has(i)
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-muted-foreground'}"
                   >
-                    {selectedIndex === i ? "will be created" : "not in the map data — click to create"}
+                    {checkedCreate.has(i) ? "will be created" : "not in the map data — click to create"}
                   </span>
                 </button>
               {:else}
@@ -286,7 +322,7 @@
             <Button {...props} type="button" variant="outline">Cancel</Button>
           {/snippet}
         </Dialog.Close>
-        <Button disabled={loading || !!error || !parent} onclick={() => (step = 2)}>Next: choose the location</Button>
+        <Button disabled={loading || !!error || parentIndex < 0} onclick={() => (step = 2)}>Next: choose the location</Button>
       </Dialog.Footer>
 
     {:else}
@@ -303,12 +339,12 @@
       {/if}
 
       {#await import("#lib/components/location-map.svelte")}
-        <Loader class="h-72 shrink-0" />
+        <Loader class="h-96 shrink-0" />
       {:then { default: LocationMap }}
         <LocationMap
-          class="h-72 shrink-0"
-          currentSlug={foundParent?.slug}
-          currentFeature={foundParent?.data}
+          class="h-96 shrink-0"
+          currentSlug={base?.slug}
+          currentFeature={base?.data}
           coordinates={mapCoordinates}
           bounds={mapBounds}
           placementMode="route"
@@ -324,12 +360,13 @@
       <p class="text-xs text-muted-foreground">
         {#if pickedCoordinates}
           Location: {pickedCoordinates.lat.toFixed(5)}, {pickedCoordinates.lon.toFixed(5)} — click again to adjust.
-          {#if createNames.length > 0}
-            {createNames.join(" › ")} will be created under {foundParentName}.
-          {/if}
         {:else}
           Click on the map to pick the location.
         {/if}
+        {#if createNames.length > 0}
+          {createNames.join(" › ")} will be created under {baseName}.
+        {/if}
+        The route will be added to {parentName}.
       </p>
 
       {#if error}
