@@ -15431,6 +15431,7 @@ msgstr "Supprimer"
 #~ msgid "Compare route grades"
 #~ msgstr "Comparer les cotations de voies"
 
+#: src/lib/components/pulse-panel.svelte
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Deleted"
 msgstr "Supprimé"
@@ -17702,16 +17703,8 @@ msgstr ""
 msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
 msgstr ""
 
-#: src/lib/components/location-map.svelte
-msgid "Toggle 3D terrain. With terrain on, drag with the right mouse button (or two fingers on a trackpad) to rotate the view."
-msgstr ""
-
-#: src/lib/components/pulse-panel.svelte
-msgid "Edit info"
-msgstr ""
-
-#: src/lib/components/pulse-panel.svelte
-msgid "Last edited <0/>"
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "<0/> Explore this data"
 msgstr ""
 
 #: src/routes/explore/+page.svelte
@@ -17739,12 +17732,16 @@ msgstr ""
 msgid "No climbing elements among the matches."
 msgstr ""
 
-#: src/routes/settings/logbook/user-stats-panel.svelte
-msgid "Tries per grade"
+#: src/lib/components/location-map.svelte
+msgid "Toggle 3D terrain. With terrain on, drag with the right mouse button (or two fingers on a trackpad) to rotate the view."
 msgstr ""
 
-#: src/lib/components/shell/sidebar/search-dialog.svelte
-msgid "<0/> Explore this data"
+#: src/lib/components/pulse-panel.svelte
+msgid "Edit info"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Last edited <0/>"
 msgstr ""
 
 #: src/lib/components/pulse-panel.svelte
@@ -17772,4 +17769,22 @@ msgstr ""
 
 #: src/lib/components/pulse-panel.svelte
 msgid "Only one version so far: this item has not been edited since its creation."
+msgstr ""
+
+#: src/routes/settings/logbook/user-stats-panel.svelte
+msgid "Tries per grade"
+msgstr ""
+
+#: src/lib/components/pulse-panel.svelte
+msgid "Show fewer changes"
+msgstr ""
+
+#. 0: entry.tagChanges.length
+#: src/lib/components/pulse-panel.svelte
+msgid "Show all {0} changes"
+msgstr ""
+
+#. 0: entry.changeset
+#: src/lib/components/pulse-panel.svelte
+msgid "Changeset {0}"
 msgstr ""
