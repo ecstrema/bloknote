@@ -15166,6 +15166,7 @@ msgstr "Aggiungi"
 #: src/lib/components/shell/osm-changes.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 #: src/lib/components/topo/topo-viewer.svelte
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
 #: src/routes/world/[...slug]/+page.svelte
 msgid "Cancel"
 msgstr "Annulla"
@@ -17510,9 +17511,8 @@ msgstr ""
 msgid "Imported {0} tick{1} ({2} already logged, {3} without an OSM route)."
 msgstr ""
 
-#: src/routes/settings/logbook/tick-import.svelte
-msgid "<0/> Matching routes in their crags..."
-msgstr ""
+#~ msgid "<0/> Matching routes in their crags..."
+#~ msgstr ""
 
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
@@ -17571,10 +17571,8 @@ msgstr ""
 msgid "Could not link the tick."
 msgstr ""
 
-#. 0: tick.name
-#: src/routes/settings/logbook/ticks-list.svelte
-msgid "No crag known for \"{0}\": open its crag page and use \"Add route\" on the map instead."
-msgstr ""
+#~ msgid "No crag known for \"{0}\": open its crag page and use \"Add route\" on the map instead."
+#~ msgstr ""
 
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Your ticks"
@@ -17599,19 +17597,15 @@ msgstr ""
 msgid "Changing the route links the tick to it."
 msgstr ""
 
-#. 0: labelFor(tick)
-#: src/routes/settings/logbook/ticks-list.svelte
-msgid "Parent crag for {0}"
-msgstr ""
+#~ msgid "Parent crag for {0}"
+#~ msgstr ""
 
-#: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "<0/> Add to OSM"
 msgstr ""
 
-#: src/routes/settings/logbook/ticks-list.svelte
-msgid "You will place the route on the crag's map."
-msgstr ""
+#~ msgid "You will place the route on the crag's map."
+#~ msgstr ""
 
 #~ msgid "Not on OpenStreetMap{0}{1}"
 #~ msgstr ""
@@ -17663,11 +17657,123 @@ msgstr ""
 msgid "Comment on {0}"
 msgstr ""
 
-#. 0: tick.crag ? ` · ${tick.crag}` \\: ""
+#. 0: tick.locationHint ? ` · ${tick.locationHint}` \\: ""
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Not on OpenStreetMap{0}"
 msgstr ""
 
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "<0/> Import ticks"
+msgstr ""
+
+#~ msgid "The offline map data is not loaded yet: download it once, then try again."
+#~ msgstr ""
+
+#~ msgid "No crag matching \"{0}\" was found in the map data: open its page and use \"Add route\" on the map instead."
+#~ msgstr ""
+
+#~ msgid "Could not look up the crag in the map data."
+#~ msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Places"
+msgstr ""
+
+#~ msgid "Not on OpenStreetMap"
+#~ msgstr ""
+
+#~ msgid "Low data mode is on: turn it off (or download the map data from the sidebar) to add routes to OSM."
+#~ msgstr ""
+
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "The offline map data is not available: open the map once to download it, then try again."
+msgstr ""
+
+#~ msgid "No location known for \"{0}\": open its crag page and use \"Add route\" on the map instead."
+#~ msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "Not in the map data"
+msgstr ""
+
+#: src/lib/components/shell/pre-alpha-warning.svelte
+msgid "<0/> Pre-alpha software"
+msgstr ""
+
+#: src/lib/components/shell/pre-alpha-warning.svelte
+msgid "Bloknote is in very early development and might break at any time: data can be incomplete or wrong, and features can change or disappear without notice."
+msgstr ""
+
+#: src/lib/components/shell/pre-alpha-warning.svelte
+msgid "I understand"
+msgstr ""
+
+#. 0: matchingProgress; 1: matchingTotal
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "<0/> Matching routes in their crags... {0}/{1}"
+msgstr ""
+
+#. 0: tick.name
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "No location is known for \"{0}\". Open the place that should hold it and use \"Add route\" on the map instead."
+msgstr ""
+
+#. 0: tick.name
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "<0/> Add \"{0}\" to OpenStreetMap"
+msgstr ""
+
+#~ msgid "The location from the logbook is matched against the map data, level by level. The deepest match becomes the parent of the new route."
+#~ msgstr ""
+
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "<0/> Matching the location in the map data..."
+msgstr ""
+
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "not in the map data"
+msgstr ""
+
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "Place the route on the map"
+msgstr ""
+
+#~ msgid "The whole location exists: place the route on the map of {0}."
+#~ msgstr ""
+
+#. 0: parentName
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "Place the route directly under {0}"
+msgstr ""
+
+#. 0: missingCrag
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "Add \"{0}\" to OSM"
+msgstr ""
+
+#. 0: missingCrag; 1: parentName
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "The crag \"{0}\" is not in the map data. It can be added under {1}, then the route placed inside it."
+msgstr ""
+
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "None of the locations were found in the map data. Open the place that should hold the route and use \"Add route\" on the map instead."
+msgstr ""
+
+#. 0: parentName
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "The crag exists in the map data: place the route on the map of {0}."
+msgstr ""
+
+#. 0: addSectorName
+#: src/routes/world/[...slug]/+page.svelte
+msgid "The crag \"{0}\" from your tick is not in the map data: click on the map to add it, then the route will be placed inside it."
+msgstr ""
+
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "parent"
+msgstr ""
+
+#: src/routes/settings/logbook/add-to-osm-dialog.svelte
+msgid "The location from the logbook is matched against the map data, level by level. Click a level to choose the parent of the new route; the deepest match is selected by default."
 msgstr ""
