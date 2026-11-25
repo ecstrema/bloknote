@@ -14,6 +14,8 @@ import { SvelteMap } from "svelte/reactivity";
 import type { TypedMap } from "#lib/helpers/types.js";
 import { snapshot } from "#lib/helpers/svelte.svelte.js";
 import { localDb } from "#lib/data/db/local-db.svelte.js";
+import { dataClient } from "./data-client.js";
+import { atproto } from "./atproto.svelte.js";
 
 /**
  * Maps slugs to a feature diff
@@ -301,6 +303,7 @@ export class OsmUser {
         },
       );
 
+      const idRemaps: { type: OsmFeatureType; from: number; to: number }[] = [];
       for (const changesetId in result) {
         const changesetDiff: UploadResult[0] = result[changesetId]!;
         for (const [featureType, featureDiff] of Object.entries(changesetDiff.diffResult)) {
@@ -326,11 +329,17 @@ export class OsmUser {
               }
               feature.id = newId;
               feature.version = newVersion;
+              idRemaps.push({ type: featureType as OsmFeatureType, from: oldId as unknown as number, to: newId });
             }
           }
         }
       }
       this.changes.clear();
+      // Created elements have their real OSM ids now: the local database mirror is refreshed
+      // (the ticks list resolves against it) and the ticks pointing at the temporary ids are
+      // updated on the PDS — they could not reference the elements before the push (issue #154)
+      dataClient.syncLocalNodesToDb();
+      void atproto.remapTickSubjects(idRemaps);
     } finally {
       this.submitting = false;
     }

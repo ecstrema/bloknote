@@ -1,4 +1,5 @@
 import type { DataJSON } from "@bloknote/climbing-data-gen";
+import type { OsmFeature } from "osm-api";
 import type { AreaStats } from "#lib/types.js";
 
 export interface TagFilter {
@@ -66,6 +67,12 @@ export type DbRequest =
   | { id: number; type: "matchTicks"; queries: { name: string; area?: string }[] }
   /** Area name matches, to pick a parent when adding a route to OSM from a tick (issue #154) */
   | { id: number; type: "matchAreas"; queries: string[] }
+  /** Walks a hierarchical location hint shallowest-first, constraining each segment to the previous match */
+  | { id: number; type: "matchAreaChain"; segments: string[] }
+  /** Inserts or updates a locally created (not yet pushed) element so it resolves like dataset elements */
+  | { id: number; type: "upsertElement"; slug: string; feature: OsmFeature }
+  /** Removes a locally created element from the database (e.g. the creation was undone) */
+  | { id: number; type: "deleteElement"; slug: string }
   | { id: number; type: "filterStart"; searchId: number; filters: SearchFilters; budgetMs: number }
   /** Continues a search that paused after using its time budget */
   | { id: number; type: "filterMore"; searchId: number; budgetMs: number }
@@ -110,6 +117,10 @@ export type DbResponse =
   | { id: number; type: "tickMatches"; data: TickRouteMatch[][] }
   /** For each query, the area candidates matching by name (aligned with the queries) */
   | { id: number; type: "areaMatches"; data: { slug: string; data: DataJSON }[][] }
+  /** For each hint segment, its resolved region/area or null when absent (aligned with the segments) */
+  | { id: number; type: "areaChain"; chain: ({ slug: string; data: DataJSON } | null)[] }
+  | { id: number; type: "elementUpserted" }
+  | { id: number; type: "elementDeleted" }
   /** Streamed while a search runs, without being a reply to a request */
   | { type: "matchBatch"; searchId: number; slugs: string[] }
   /** The search used its time budget (`exhausted` false) or has no more results */

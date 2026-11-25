@@ -1,6 +1,7 @@
 import { browser, version } from "$app/env";
 import { apiUrl } from "../network/api-url";
 import type { DataJSON } from "@bloknote/climbing-data-gen";
+import type { OsmFeature } from "osm-api";
 import type { AreaStats } from "#lib/types.js";
 import type { DbRequest, DbResponse, MapElementFeatureCollection, NearbyCandidate, OsmRefEntry, SearchFilters, TickRouteMatch, TopLevelPoint } from "./types";
 
@@ -230,6 +231,47 @@ class LocalDb {
     await this.init();
     if (!this.ready || queries.length === 0) return [];
     return (await this.send({ type: "matchAreas", queries }, "areaMatches")).data;
+  }
+
+  /**
+   * Walks a hierarchical location hint (shallowest segment first) against the dataset: each
+   * segment resolves to a region or area below the previous match, or null when absent
+   * (issue #154). Used by the "Add to OSM" dialog to locate the parent crag of a tick.
+   */
+  async matchAreaChain(segments: string[]): Promise<({ slug: string; data: DataJSON } | null)[]> {
+    await this.init();
+    if (!this.ready || segments.length === 0) return [];
+    return (await this.send({ type: "matchAreaChain", segments }, "areaChain")).chain;
+  }
+
+  /**
+   * Inserts or updates a locally created (not yet pushed) element, so it resolves like dataset
+   * elements: the ticks list can already place it, and the OSM reference stays stable until the
+   * changeset is pushed and the element gets its real id (issue #154).
+   */
+  async upsertElement(slug: string, feature: OsmFeature): Promise<void> {
+    await this.init();
+    // Local creations can happen while the dataset is still downloading: wait instead of
+    // silently dropping the element, or the ticks list could never place it
+    if (!(await this.#whenReady())) return;
+    await this.send({ type: "upsertElement", slug, feature }, "elementUpserted");
+  }
+
+  /** Removes a locally created element from the database (e.g. the creation was undone) */
+  async deleteElement(slug: string): Promise<void> {
+    await this.init();
+    if (!(await this.#whenReady())) return;
+    await this.send({ type: "deleteElement", slug }, "elementDeleted");
+  }
+
+  /** Waits shortly for the database to become ready (downloads can take a while) */
+  async #whenReady(timeoutMs = 20_000): Promise<boolean> {
+    const deadline = Date.now() + timeoutMs;
+    while (!this.ready) {
+      if (this.status === "error" || Date.now() > deadline) return false;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+    return true;
   }
 
   /** Streams the matching slugs to `onBatch`. `next()` runs for `budgetMs`, and resolves true when there are no more results. */

@@ -234,6 +234,100 @@ function matchAreaCandidates(db: Database, query: string): { slug: string; data:
     );
 }
 
+/** Token subsets tried for one hint segment, grouped by how many tokens were dropped: the full name first, then dropping leading and trailing tokens */
+function relaxedTokenQueries(segment: string): string[][] {
+  const tokens = segment.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  const levels: string[][] = [];
+  for (let drop = 0; drop < tokens.length; drop++) {
+    const level: string[] = [];
+    for (let dropStart = 0; dropStart <= drop; dropStart++) {
+      const dropEnd = drop - dropStart;
+      if (dropStart + dropEnd >= tokens.length) continue;
+      const subset = tokens.slice(dropStart, tokens.length - dropEnd);
+      level.push(subset.map((t) => `"${t}"*`).join(" "));
+    }
+    if (level.length > 0) levels.push(level);
+  }
+  return levels;
+}
+
+/**
+ * Matches one location-hint segment against regions and areas. The FTS AND-query is relaxed
+ * token by token (dropping leading ones first) because logbook hints carry noise the OSM names
+ * do not have: "15. Laurentides", "3: Main Wall", "Thakhek (Pha Tam Kam)" (issue #154).
+ */
+function matchSegmentCandidates(db: Database, segment: string): { slug: string; data: DataJSON }[] {
+  const target = normalizeName(segment);
+  const targetTokens = new Set(target.split(" ").filter(Boolean));
+  const best = new Map<string, { slug: string; data: DataJSON; rank: number }>();
+  // Collect candidates from the full query and two relaxation levels before ranking: the loosest
+  // level alone often matches noise ("Boulders") while the right one sits one level further
+  const levels = relaxedTokenQueries(segment).slice(0, 3);
+  for (const level of levels) {
+    for (const subset of level) {
+      const subsetName = normalizeName(subset.replaceAll('"', ""));
+      // Common tokens ("north", "15") match many places: shallower slugs (regions) first, so the
+      // LIMIT does not cut them off in favour of deep namesakes
+      const rows = db.selectArrays(
+        `SELECT e.slug, e.data FROM places JOIN elements e ON e.slug = places.slug
+         WHERE places MATCH ? AND e.type IN ('geographic', 'area') ORDER BY length(e.slug) ASC LIMIT 10`,
+        [subset],
+      );
+      for (const [slug, json] of rows) {
+        if (best.has(slug as string)) continue;
+        const data = JSON.parse(json as string) as DataJSON;
+        // Regions keep their name at the top level, OSM elements in their tags (see getName)
+        const name = normalizeName(getName(data) ?? "");
+        const nameTokens = name.split(" ").filter(Boolean);
+        // Exact full name, then a name that is exactly the relaxed subset, then a name whose
+        // tokens are all part of the hint segment. Anything looser (rank 3) is dropped: the
+        // remaining FTS prefixes only match by coincidence ("International" matching a route
+        // called "International No hand contest") and derail the whole chain.
+        const rank =
+          name === target
+            ? 0
+            : name === subsetName
+              ? 1
+              : nameTokens.length > 0 && nameTokens.every((t) => targetTokens.has(t))
+                ? 2
+                : 3;
+        if (rank <= 2) best.set(slug as string, { slug: slug as string, data, rank });
+      }
+    }
+    if (best.size > 0 && [...best.values()].some((c) => c.rank <= 1)) break;
+  }
+  return [...best.values()]
+    .sort((a, b) => a.rank - b.rank || a.slug.length - b.slug.length || a.slug.localeCompare(b.slug))
+    .slice(0, 5)
+    .map(({ slug, data }) => ({ slug, data }));
+}
+
+/**
+ * Walks a hierarchical location hint from its shallowest segment down (issue #154): each segment
+ * must match a region or area below the previous one, so the hint's own hierarchy disambiguates
+ * the names ("Sarcophage" is only kept when it sits under the matched Mont-King, not in France).
+ * A segment with no descendant match is skipped: logbooks often name levels that OSM does not
+ * have, while deeper segments still exist ("Val-David" missing, "Elizabeth Boulder" present).
+ */
+function matchAreaChain(db: Database, segments: string[]): ({ slug: string; data: DataJSON } | null)[] {
+  const chain: ({ slug: string; data: DataJSON } | null)[] = [];
+  let parentSlug = "";
+  for (const segment of segments) {
+    let best: { slug: string; data: DataJSON } | undefined;
+    for (const candidate of matchSegmentCandidates(db, segment)) {
+      if (parentSlug && candidate.slug !== parentSlug && !candidate.slug.startsWith(`${parentSlug}/`)) continue;
+      if (!best || candidate.slug.length < best.slug.length) best = candidate;
+    }
+    if (best) {
+      chain.push(best);
+      parentSlug = best.slug;
+    } else {
+      chain.push(null);
+    }
+  }
+  return chain;
+}
+
 /** How many areas may be scanned per tick query, to bound the subtree scans */
 const MATCH_TICK_MAX_AREAS = 4;
 /** How many route candidates are returned per tick query */
@@ -663,6 +757,38 @@ async function handle(req: DbRequest): Promise<DbResponse> {
         data.push(matchAreaCandidates(db, query));
       }
       return { id: req.id, type: "areaMatches", data };
+    }
+    case "matchAreaChain": {
+      return { id: req.id, type: "areaChain", chain: matchAreaChain(db, req.segments) };
+    }
+    case "upsertElement": {
+      // Locally created (not yet pushed) elements are inserted so they resolve like dataset
+      // elements: the ticks list can already place them, and they are matched by name
+      const { slug, feature } = req;
+      const type = featureToType(feature) ?? "other";
+      const parentSlug = slug.includes("/") ? slug.slice(0, slug.lastIndexOf("/")) : "";
+      const upsert = db.prepare(
+        `INSERT INTO elements (slug, parent_slug, data, type, grade_ref, osm_ref) VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT(slug) DO UPDATE SET parent_slug = excluded.parent_slug, data = excluded.data,
+           type = excluded.type, osm_ref = excluded.osm_ref`,
+      );
+      const name = getName(feature);
+      upsert.bind([
+        slug,
+        parentSlug,
+        JSON.stringify(feature),
+        type,
+        getGradeReference(feature.tags ?? {}) ?? null,
+        `${feature.type}-${feature.id}`,
+      ]).stepReset();
+      db.exec({ sql: "DELETE FROM places WHERE slug = ?", bind: [slug] });
+      if (name) db.exec({ sql: "INSERT INTO places (name, slug) VALUES (?, ?)", bind: [name, slug] });
+      return { id: req.id, type: "elementUpserted" };
+    }
+    case "deleteElement": {
+      db.exec({ sql: "DELETE FROM elements WHERE slug = ?", bind: [req.slug] });
+      db.exec({ sql: "DELETE FROM places WHERE slug = ?", bind: [req.slug] });
+      return { id: req.id, type: "elementDeleted" };
     }
     case "getNearbyElements": {
       // Degrees per meter: 111320m per latitude degree, longitude shrinks with cos(latitude)
