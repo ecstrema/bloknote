@@ -3,6 +3,7 @@
   import { page } from "$app/state";
   import { building } from "$app/env";
   import { goto } from "$app/navigation";
+  import { getBrowserUrl } from "#lib/helpers/url.js";
   import BloknoteLogo from "#components/bloknote-logo.svelte";
   import { Button } from "#components/ui/button/index.js";
 
@@ -23,12 +24,15 @@
     return sections.some((s) => s.id === value) ? (value as DocSectionId) : "how-it-works";
   }
 
-  let active = $state<DocSectionId>(building ? "how-it-works" : parseSection(page.url.searchParams.get("section")));
+  let active = $state<DocSectionId>(
+    building ? "how-it-works" : parseSection(getBrowserUrl().searchParams.get("section")),
+  );
 
   function selectSection(id: DocSectionId) {
     active = id;
     if (building) return;
-    const url = new URL(page.url.href);
+    // Shallow gotos don't update `page.url`, so build from the browser URL (issue #212)
+    const url = new URL(getBrowserUrl().href);
     url.searchParams.set("section", id);
     void goto(url, { state: page.state, shallow: true, replace: true });
   }

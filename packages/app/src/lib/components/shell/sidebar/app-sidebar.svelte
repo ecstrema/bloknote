@@ -7,13 +7,12 @@
   import { featureToType, getName } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { resolve } from "$app/paths";
-  import { page } from "$app/state";
   import AppSidebarChildren from "./app-sidebar-children.svelte";
   import SearchFiltersPanel from "./search-filters.svelte";
 
   import Input from "#components/ui/input/input.svelte";
   import type { DataTree } from "#lib/types.js";
-  import { restoreSidebarOrders, setSearchFilter, type SearchFilter } from "./utils";
+  import { restoreSidebarOrders, setSearchFilter, getBrowserUrl, type SearchFilter } from "./utils";
   import { getAppState } from "#lib/data/app-state.js";
   import { localDb, type FilterSearch } from "#lib/data/db/local-db.svelte.js";
   import { settings } from "#lib/data/settings.svelte.js";
@@ -79,13 +78,17 @@
   // localStorage filters, and is left untouched when navigating without the param.
   $effect(() => {
     if (!restored) return;
-    const q = page.url.searchParams.get("q");
+    // Shallow gotos don't update `page.url`, so read the browser URL (issue #212)
+    const q = getBrowserUrl().searchParams.get("q");
     if (q !== null) filters.text = q;
   });
 
   // Keep the URL in sync with the current search query so it can be copied and shared.
   // replaceState is used to avoid flooding the history on every keystroke. The router-aware
   // helper from $app/navigation is used: raw history.replaceState conflicts with SvelteKit.
+  // The URL is read from window.location: reading getBrowserUrl() here would subscribe this
+  // effect to page.shallow, and every replaceState re-triggers it even for an identical URL,
+  // looping forever.
   $effect(() => {
     const text = filters.text;
     const url = new URL(window.location.href);

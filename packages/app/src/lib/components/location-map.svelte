@@ -78,11 +78,16 @@
     } else {
       dragMarker = new Marker({ color: "#2563eb", draggable }).setLngLat([coords.lon, coords.lat]).addTo(map);
 
-      // MapLibre keeps the drag-pan handler active while a marker is dragged (issue #210):
-      // freeze the camera for the whole drag, and restore it afterwards.
-      dragMarker.on("dragstart", () => {
-        map.dragPan.disable();
+      // MapLibre only starts a marker drag once the pointer moves past the click tolerance, and
+      // keeps the drag-pan handler active until then: the first pixels of the drag still pan the
+      // map (issues #210 and #212). Freeze the camera as soon as the pointer goes down on the
+      // marker instead, and restore it on release. `dragend` also restores it, covering releases
+      // that happen outside of the marker element.
+      const element = dragMarker.getElement();
+      element.addEventListener("pointerdown", () => {
+        if (dragMarker?.isDraggable()) map.dragPan.disable();
       });
+      element.addEventListener("pointerup", () => map.dragPan.enable());
       dragMarker.on("dragend", () => {
         map.dragPan.enable();
         if (currentOnmove) {

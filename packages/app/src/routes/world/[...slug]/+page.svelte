@@ -24,6 +24,7 @@
   import { Button } from "#components/ui/button/index.js";
   import Loader from "#components/ui/loader.svelte";
   import { getFallbackCoordinates } from "#lib/data/route-location.js";
+  import { getBrowserUrl } from "#lib/helpers/url.js";
   import EditableName from "#components/editable/editable-name.svelte";
   import EditableTags from "#components/editable/editable-tags.svelte";
   import * as Tabs from "#components/ui/tabs/index.js";
@@ -61,7 +62,8 @@
   let queriedItem = $state<{ item: DataTree<OsmFeature>; slug: string }>();
   let lastQueryId: string | null | undefined;
   $effect(() => {
-    const id = page.url.searchParams.get("id");
+    // Shallow gotos don't update `page.url`, so read the browser URL (issue #212)
+    const id = getBrowserUrl().searchParams.get("id");
     // The tree walk must not subscribe this effect to every node
     const found = untrack(() => {
       if (!id) return undefined;
@@ -78,7 +80,9 @@
   const itemType = $derived(featureToType(item.feature));
   const hasOsmData = $derived(item.feature.type !== "geographic");
 
-  let activeTab = $state<PageTab>(building ? "overview" : (parseTab(page.url.searchParams.get("tab")) ?? "overview"));
+  let activeTab = $state<PageTab>(
+    building ? "overview" : (parseTab(getBrowserUrl().searchParams.get("tab")) ?? "overview"),
+  );
   const effectiveTab = $derived<PageTab>(activeTab === "osm" && !hasOsmData ? "overview" : activeTab);
 
   $effect(() => {
@@ -90,8 +94,8 @@
   function onTabChange(value: string) {
     const next = parseTab(value) ?? "overview";
     activeTab = next;
-    // Shallow gotos update the browser URL but not `page.url`, so build from `location.href`.
-    const url = new URL(location.href);
+    // Shallow gotos don't update `page.url`, so build from the browser URL (issue #212)
+    const url = new URL(getBrowserUrl().href);
     if (next === "overview") url.searchParams.delete("tab");
     else url.searchParams.set("tab", next);
     void goto(url, { state: page.state, shallow: true, replace: true });
@@ -99,12 +103,12 @@
 
   // Shared links carry the OSM id so the item can be found if its path changes.
   // Not an effect: a shallow goto would re-trigger it. IMPORTANT: reconcile against the
-  // browser URL (`location.href`), not `page.url`: shallow gotos never update `page.url`,
-  // so every shallow goto looked unfinished here and re-triggered goto in an infinite
-  // loop (runaway memory + CPU).
+  // browser URL (`getBrowserUrl()`, i.e. `page.shallow.url`), not `page.url`: shallow gotos
+  // never update `page.url`, so every shallow goto looked unfinished here and re-triggered
+  // goto in an infinite loop (runaway memory + CPU).
   afterNavigate((navigation) => {
     untrack(() => {
-      const url = new URL(location.href);
+      const url = new URL(getBrowserUrl().href);
       const urlTab = parseTab(url.searchParams.get("tab"));
       const existingId = url.searchParams.get("id");
       const targetFeature =
