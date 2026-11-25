@@ -85,6 +85,10 @@
     void resolveAttempt;
     const ready = localDb.ready;
     const datasetVersion = localDb.dataVersion;
+    // The logbook can be the first page of the session (the "Add to OSM" dialog stays on it, issue
+    // #201): make sure the local database is opening (and downloading when it should), otherwise
+    // no lookup would ever run and the ticks would sit outside of their places forever
+    if (!ready && refs.length > 0) void dataClient.waitUntilLocalReady();
     const missing = refs.filter((ref) => {
       const entry = resolved[ref];
       if (entry === undefined) return true;
