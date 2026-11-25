@@ -8,22 +8,48 @@
       "key": "literal:self",
       "record": {
         "type": "object",
-        "required": ["createdAt"],
         "properties": {
+          "knownRouteScales": {
+            "type": "array",
+            "maxLength": 20,
+            "description": "Route grading scales the user understands: grades in these scales are displayed as written",
+            "items": {
+              "type": "ref",
+              "ref": "org.bloknote.defs#routeScale"
+            }
+          },
+          "knownBoulderScales": {
+            "type": "array",
+            "maxLength": 20,
+            "description": "Boulder grading scales the user understands: grades in these scales are displayed as written",
+            "items": {
+              "type": "ref",
+              "ref": "org.bloknote.defs#boulderScale"
+            }
+          },
+          "knownViaFerrataScales": {
+            "type": "array",
+            "maxLength": 20,
+            "description": "Via ferrata grading scales the user understands: grades in these scales are displayed as written",
+            "items": {
+              "type": "ref",
+              "ref": "org.bloknote.defs#viaFerrataScale"
+            }
+          },
           "preferredRouteScale": {
-            "type": "string",
-            "knownValues": ["French", "YDS", "UIAA", "Saxon", "UKTech", "Scandinavian", "Ewbank", "Polish"],
-            "description": "User's preferred route grading scale. Should be unset to use the default notation for the place (crag or region)."
+            "type": "ref",
+            "ref": "org.bloknote.defs#routeScale",
+            "description": "Route scale used wherever a single scale is needed (aggregated charts, plots). Unset to infer from the user's location, falling back to French"
           },
           "preferredBoulderScale": {
-            "type": "string",
-            "knownValues": ["FB", "Hueco"],
-            "description": "User's preferred boulder grading scale. Should be unset to use the default notation for the place (crag or region)."
+            "type": "ref",
+            "ref": "org.bloknote.defs#boulderScale",
+            "description": "Boulder scale used wherever a single scale is needed (aggregated charts, plots). Unset to infer from the user's location, falling back to Fontainebleau"
           },
-          "createdAt": {
-            "type": "string",
-            "format": "datetime",
-            "description": "ISO 8601 timestamp when profile was created"
+          "preferredViaFerrataScale": {
+            "type": "ref",
+            "ref": "org.bloknote.defs#viaFerrataScale",
+            "description": "Via ferrata scale used wherever a single scale is needed (aggregated charts, plots). Unset to infer from the user's location, falling back to Hüsler"
           }
         }
       }

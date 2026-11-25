@@ -1,0 +1,37 @@
+{
+  "lexicon": 1,
+  "id": "org.bloknote.defs",
+  "description": "Shared definitions reused across Bloknote lexicons",
+  "defs": {
+    "routeScale": {
+      "type": "string",
+      "description": "A route grading scale",
+      "knownValues": [
+        "French",
+        "YDS",
+        "UIAA",
+        "Saxon",
+        "UKTech",
+        "Scandinavian",
+        "Ewbank",
+        "Polish"
+      ]
+    },
+    "boulderScale": {
+      "type": "string",
+      "description": "A boulder grading scale",
+      "knownValues": [
+        "FB",
+        "Hueco"
+      ]
+    },
+    "viaFerrataScale": {
+      "type": "string",
+      "description": "A via ferrata grading scale",
+      "knownValues": [
+        "Huesler",
+        "Schall"
+      ]
+    }
+  }
+}

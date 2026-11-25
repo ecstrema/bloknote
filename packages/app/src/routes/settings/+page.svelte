@@ -4,26 +4,77 @@
   import { Select } from "#components/ui/select/index.js";
   import * as Tabs from "#components/ui/tabs/index.js";
   import MapProviderToggles from "#components/map-provider-toggles.svelte";
-  import { allBoulderScales, allRouteScales, convertGrade, french } from "@bloknote/holy-grade";
+  import {
+    allBoulderScales,
+    allRouteScales,
+    allViaFerrataScales,
+    convertGrade,
+    fb,
+    french,
+    getScale,
+    husler,
+    type Scale,
+  } from "@bloknote/holy-grade";
   import { setMode, userPrefersMode } from "mode-watcher";
   import { settings } from "#lib/data/settings.svelte.js";
+  import { gradingScales, type GradingScaleType, type PreferredScaleId } from "#lib/data/grading-scales.svelte.js";
   import { i18n, locales, localeNames, setLocale } from "#lib/i18n.svelte.js";
-  import {
-    getPreferredBoulderGradingScale,
-    getPreferredRouteGradingScale,
-  } from "#lib/components/shell/providers/settings.svelte.js";
 
-  const preferredRouteScale = getPreferredRouteGradingScale();
-  const preferredBoulderScale = getPreferredBoulderGradingScale();
-  const routeScale = $derived(allRouteScales.find((scale) => scale.id === preferredRouteScale.current));
-  const boulderScale = $derived(allBoulderScales.find((scale) => scale.id === preferredBoulderScale.current));
   const routeExamples = $derived(
-    routeScale ? ["6a", "7a", "8a"].map((grade) => convertGrade(grade, french, routeScale)).join(", ") : "",
+    ["6a", "7a", "8a"].map((grade) => convertGrade(grade, french, getScale(gradingScales.effective("route"))!)).join(", "),
   );
   const boulderExamples = $derived(
-    boulderScale ? ["5A", "6A", "7A"].map((grade) => convertGrade(grade, french, boulderScale)).join(", ") : "",
+    ["5A", "6A", "7A"].map((grade) => convertGrade(grade, fb, getScale(gradingScales.effective("boulder"))!)).join(", "),
+  );
+  const viaFerrataExamples = $derived(
+    ["K2", "K4", "K5"].map((grade) => convertGrade(grade, husler, getScale(gradingScales.effective("viaFerrata"))!)).join(", "),
   );
 </script>
+
+{#snippet scaleList(id: string, type: GradingScaleType, scales: Scale[], compareHref: string, examples: string)}
+  <div class="space-y-1">
+    <div class="flex items-center gap-3 text-xs text-muted-foreground">
+      <span class="size-4 shrink-0" aria-hidden="true"></span>
+      <span>Preferred</span>
+      <span class="size-4 shrink-0" aria-hidden="true"></span>
+      <span>Understood</span>
+    </div>
+    {#each scales as scale (scale.id)}
+      <label class="flex min-h-8 items-center gap-3 text-sm">
+        <input
+          type="radio"
+          name={`preferred-${id}`}
+          class="size-4 accent-primary"
+          checked={gradingScales.preferred(type) === scale.id}
+          onclick={() =>
+            gradingScales.setPreferred(
+              type,
+              gradingScales.preferred(type) === scale.id ? undefined : (scale.id as PreferredScaleId),
+            )}
+          aria-label={`Preferred ${scale.name} scale`}
+        />
+        <input
+          type="checkbox"
+          class="size-4 accent-primary"
+          checked={gradingScales.known(type).includes(scale.id as never)}
+          onchange={() => gradingScales.toggleKnown(scale.id as never)}
+          aria-label={`Understand the ${scale.name} scale`}
+        />
+        <span class="flex-1">
+          {scale.name}
+          {#if scale.usedIn}<span class="text-muted-foreground"> · {scale.usedIn}</span>{/if}
+        </span>
+      </label>
+    {/each}
+    <p class="text-sm text-muted-foreground">
+      {getScale(gradingScales.effective(type))?.description}
+      <span class="mt-1 block"
+        ><span class="font-medium text-foreground">Examples:</span> {examples}</span
+      >
+    </p>
+    <a href={compareHref} class="text-sm text-primary hover:underline">Compare grades</a>
+  </div>
+{/snippet}
 
 <Tabs.Content value="settings">
         <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
@@ -71,57 +122,20 @@
           </div>
         </section>
 
-        <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-start">
+        <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,24rem)] sm:items-start">
           <div>
-            <h2 class="font-medium">Route grading scale</h2>
-            <p class="mt-1 text-sm text-muted-foreground">Choose how route grades are displayed.</p>
-          </div>
-          <div class="space-y-2">
-            <Select aria-label="Route grading scale" bind:value={preferredRouteScale.current}>
-              <option value="local">Local to each area</option>
-              {#each allRouteScales as scale (scale.id)}
-                <option value={scale.id}>{scale.name} ({scale.id})</option>
-              {/each}
-            </Select>
-            <p class="text-sm text-muted-foreground">
-              {routeScale?.description ?? "Uses the grading scale set for each area."}
-              {#if routeExamples}
-                <span class="mt-1 block"
-                  ><span class="font-medium text-foreground">Examples:</span>
-                  {routeExamples}</span
-                >
-              {/if}
+            <h2 class="font-medium">Grading scales</h2>
+            <p class="mt-1 text-sm text-muted-foreground">
+              Tick the scales you understand: grades in them are shown as written. Grades in the others are translated
+              to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts,
+              comparisons). Without any preference, the scale of your location is used, falling back to French and
+              Fontainebleau.
             </p>
-            <a href={resolve("/grade-comparison/route")} class="text-sm text-primary hover:underline">
-              Compare route grades
-            </a>
           </div>
-        </section>
-
-        <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-start">
-          <div>
-            <h2 class="font-medium">Boulder grading scale</h2>
-            <p class="mt-1 text-sm text-muted-foreground">Choose how boulder grades are displayed.</p>
-          </div>
-          <div class="space-y-2">
-            <Select aria-label="Boulder grading scale" bind:value={preferredBoulderScale.current}>
-              <option value="local">Local to each area</option>
-              {#each allBoulderScales as scale (scale.id)}
-                <option value={scale.id}>{scale.name} ({scale.id})</option>
-              {/each}
-            </Select>
-            <p class="text-sm text-muted-foreground">
-              {boulderScale?.description ?? "Uses the grading scale set for each area."}
-              {#if boulderExamples}
-                <span class="mt-1 block"
-                  ><span class="font-medium text-foreground">Examples:</span>
-                  {boulderExamples}</span
-                >
-              {/if}
-            </p>
-            <a href={resolve("/grade-comparison/boulder")} class="text-sm text-primary hover:underline">
-              Compare boulder grades
-            </a>
+          <div class="space-y-6">
+            {@render scaleList("route", "route", allRouteScales, resolve("/grade-comparison/route"), routeExamples)}
+            {@render scaleList("boulder", "boulder", allBoulderScales, resolve("/grade-comparison/boulder"), boulderExamples)}
+            {@render scaleList("via-ferrata", "viaFerrata", allViaFerrataScales, resolve("/grade-comparison/via-ferrata"), viaFerrataExamples)}
           </div>
         </section>
 

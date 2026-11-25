@@ -1,28 +1,15 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { PersistentState } from "@friendofsvelte/state";
+  // Module singleton: loads the grading scale preferences and starts the location-based fallback
+  import { gradingScales } from "#lib/data/grading-scales.svelte.js";
 
-  import { setPreferredRouteGradingScale, setPreferredBoulderGradingScale } from "./settings.svelte";
-  import type { BoulderScaleId, RouteScaleId } from "@bloknote/holy-grade";
-
-  const preferredRouteGradingScale = new PersistentState<RouteScaleId | "local">(
-    "bloknote:preferred-route-grading-scale",
-    "local",
-  );
-
-  const preferredBoulderGradingScale = new PersistentState<BoulderScaleId | "local">(
-    "bloknote:preferred-boulder-grading-scale",
-    "local",
-  );
-
-  setPreferredRouteGradingScale(preferredRouteGradingScale);
-  setPreferredBoulderGradingScale(preferredBoulderGradingScale);
-
-  const {
+  let {
     children,
   }: {
     children: Snippet;
   } = $props();
+
+  void gradingScales;
 </script>
 
 {@render children?.()}

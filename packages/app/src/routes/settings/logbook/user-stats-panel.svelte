@@ -10,10 +10,29 @@
   import { getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
   import { extractRouteStyle } from "#lib/data/parse/route-styles.js";
   import { Button } from "#components/ui/button/index.js";
-  import { getReference, getScale, type ScaleId } from "@bloknote/holy-grade";
+  import { gradingScales } from "#lib/data/grading-scales.svelte.js";
+  import { convertGrade, getReference, getScale, type ScaleId } from "@bloknote/holy-grade";
   import type { Grade } from "#lib/types.js";
 
   type ResolvedRef = { slug: string; name?: string; grade?: Grade; gradeRef?: number; style?: string };
+
+  /**
+   * Converts a grade to the single display scale of its discipline: the preferred scale, falling
+   * back to the location-based and worldwide defaults (issue #188). Grades of disciplines without
+   * a preference (ice, aid, danger) are kept as written.
+   */
+  function displayGrade(grade: Grade): Grade {
+    if (grade.scale === "unknown") return grade;
+    const scale = getScale(grade.scale);
+    if (!scale || (scale.gradeType !== "route" && scale.gradeType !== "boulder" && scale.gradeType !== "viaFerrata")) {
+      return grade;
+    }
+    const targetId = gradingScales.effective(scale.gradeType);
+    if (targetId === grade.scale) return grade;
+    const target = getScale(targetId);
+    const converted = target ? convertGrade(grade.v, scale, target) : undefined;
+    return converted && target ? { v: converted, scale: target.id } : grade;
+  }
 
   /** Ticks and stars resolved against the local database: the route's slug, name, and grade */
   let resolvedRefs = $state<Record<string, ResolvedRef>>({});
@@ -49,11 +68,13 @@
 
   const refKey = (subject: OsmElementRef) => `${subject.type}-${subject.id}`;
 
-  /** Grade of a tick's route, resolved against the local database */
+  /** Grade of a tick's route in the display scale, resolved against the local database */
   function gradeLookup(subject: OsmElementRef): ClimbingGradeRef | undefined {
     const grade = resolvedRefs[refKey(subject)]?.grade;
     if (!grade || grade.scale === "unknown") return undefined;
-    return { scale: grade.scale, value: grade.v };
+    const displayed = displayGrade(grade);
+    if (displayed.scale === "unknown") return undefined;
+    return { scale: displayed.scale, value: displayed.v };
   }
 
   const stats = $derived(computeUserStats(atproto.ticks, gradeLookup));
@@ -103,7 +124,7 @@
       if (info?.gradeRef === undefined || !info.grade || info.grade.scale === "unknown") continue;
       const month = tick.climbedAt.slice(0, 7);
       const current = months.get(month);
-      if (!current || info.gradeRef > current.ref) months.set(month, { ref: info.gradeRef, grade: info.grade });
+      if (!current || info.gradeRef > current.ref) months.set(month, { ref: info.gradeRef, grade: displayGrade(info.grade) });
     }
     return [...months.entries()]
       .sort(([a], [b]) => a.localeCompare(b))

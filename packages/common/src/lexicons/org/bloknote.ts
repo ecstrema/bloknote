@@ -3,5 +3,6 @@
  */
 
 export * as actor from "./bloknote/actor.ts";
+export * as defs from "./bloknote/defs.ts";
 export * as logbook from "./bloknote/logbook.ts";
 export * as osm from "./bloknote/osm.ts";

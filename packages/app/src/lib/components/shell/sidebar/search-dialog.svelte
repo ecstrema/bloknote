@@ -16,7 +16,8 @@
     STAT_STYLE_COLORS,
     STAT_STYLE_ORDER,
   } from "#lib/data/parse/sector-stats.js";
-  import { getPreferredBoulderGradingScale, getPreferredRouteGradingScale } from "#components/shell/providers/settings.svelte.js";
+  import { gradingScales } from "#lib/data/grading-scales.svelte.js";
+  import type { BoulderScaleId, RouteScaleId } from "@bloknote/holy-grade";
 
   let { open = $bindable(false), onShowResults }: { open?: boolean; onShowResults: () => void } = $props();
 
@@ -50,9 +51,6 @@
     { kind: "rated", label: "Rated", icon: "icon-[lucide--gauge]" },
     { kind: "commented", label: "Commented", icon: "icon-[lucide--message-circle]" },
   ] as const satisfies readonly { kind: PremadeFilterKind; label: string; icon: string }[];
-
-  const preferredRouteScale = getPreferredRouteGradingScale();
-  const preferredBoulderScale = getPreferredBoulderGradingScale();
 
   let textInput = $state<HTMLInputElement | null>(null);
   let tagKey = $state("");
@@ -131,8 +129,8 @@
     computeSectorStats(
       Object.values(overview).filter((f): f is OsmFeature => f.type !== "geographic"),
       {
-        preferredRouteScale: preferredRouteScale.current,
-        preferredBoulderScale: preferredBoulderScale.current,
+        routeScale: gradingScales.effective("route") as RouteScaleId,
+        boulderScale: gradingScales.effective("boulder") as BoulderScaleId,
       },
     ),
   );

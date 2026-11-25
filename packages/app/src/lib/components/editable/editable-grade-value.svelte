@@ -1,15 +1,12 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
+  import { gradingScales } from "#lib/data/grading-scales.svelte.js";
   import { getRelatedGradeScales, scaleIdToTag, type WithSourceTag } from "#lib/data/parse/osm-tags.js";
   import { getDefaultGradingScales } from "#lib/data/parse/region-grading.js";
   import type { Grade } from "#lib/types.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import { Button } from "#components/ui/button/index.js";
   import * as Popover from "#components/ui/popover/index.js";
-  import {
-    getPreferredBoulderGradingScale,
-    getPreferredRouteGradingScale,
-  } from "#components/shell/providers/settings.svelte.js";
   import { convertGrade, getGradeFromReference, getScale, type ScaleId } from "@bloknote/holy-grade";
   import type { OsmFeature } from "osm-api";
       
@@ -26,8 +23,6 @@
   } = $props();
 
   const appState = getAppState();
-  const preferredRouteScale = getPreferredRouteGradingScale();
-  const preferredBoulderScale = getPreferredBoulderGradingScale();
 
   let open = $state(false);
   let choosingScale = $state(false);
@@ -40,10 +35,10 @@
   const defaultScaleId = $derived.by((): ScaleId => {
     const first = relatedScales[0];
     if (first?.gradeType === "boulder") {
-      return preferredBoulderScale.current !== "local" ? preferredBoulderScale.current : regionDefaults.boulder;
+      return (gradingScales.preferred("boulder") as ScaleId) ?? regionDefaults.boulder;
     }
     if (first?.gradeType === "route") {
-      return preferredRouteScale.current !== "local" ? preferredRouteScale.current : regionDefaults.route;
+      return (gradingScales.preferred("route") as ScaleId) ?? regionDefaults.route;
     }
     return first?.id ?? regionDefaults.route;
   });

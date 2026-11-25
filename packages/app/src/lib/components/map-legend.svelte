@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { RouteScaleId } from "@bloknote/holy-grade";
-  import { getPreferredRouteGradingScale } from "#components/shell/providers/settings.svelte.js";
+  import { gradingScales } from "#lib/data/grading-scales.svelte.js";
   import { getColorFromGrade } from "#lib/data/network/grade.js";
 
   const DEFAULT_ROUTE_GRADES: Record<RouteScaleId, string[]> = {
@@ -59,13 +59,7 @@
     else hiddenTypes = [...hiddenTypes, type];
   }
 
-  const preferredScale = $derived.by(() => {
-    try {
-      const pref = getPreferredRouteGradingScale?.()?.current;
-      if (pref && pref !== "local") return pref;
-    } catch {}
-    return "French" as RouteScaleId;
-  });
+  const preferredScale = $derived(gradingScales.effective("route") as RouteScaleId);
 
   const gradeReferences = $derived(DEFAULT_ROUTE_GRADES[preferredScale] ?? DEFAULT_ROUTE_GRADES.French);
 </script>

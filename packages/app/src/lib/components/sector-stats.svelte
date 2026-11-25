@@ -16,10 +16,8 @@
     type GradeDistributionBucket,
     type StatStyleKey,
   } from "#lib/data/parse/sector-stats.js";
-  import {
-    getPreferredBoulderGradingScale,
-    getPreferredRouteGradingScale,
-  } from "#components/shell/providers/settings.svelte.js";
+  import { gradingScales } from "#lib/data/grading-scales.svelte.js";
+  import type { BoulderScaleId, RouteScaleId } from "@bloknote/holy-grade";
   import type { DataTree } from "#lib/types.js";
     
   const LAYOUT_KEY = "bloknote:sector-stats-layout";
@@ -27,8 +25,6 @@
   let { item, slug }: { item: DataTree; slug: string } = $props();
 
   const appState = getAppState();
-  const preferredRouteScale = getPreferredRouteGradingScale();
-  const preferredBoulderScale = getPreferredBoulderGradingScale();
 
   let layout = $state<"stacked" | "double">("stacked");
   let hoveredGrade = $state<GradeDistributionBucket>();
@@ -74,8 +70,8 @@
 
   const stats = $derived(
     computeSectorStats(features, {
-      preferredRouteScale: preferredRouteScale.current,
-      preferredBoulderScale: preferredBoulderScale.current,
+      routeScale: gradingScales.effective("route") as RouteScaleId,
+      boulderScale: gradingScales.effective("boulder") as BoulderScaleId,
     }),
   );
 

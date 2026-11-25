@@ -14991,38 +14991,27 @@ msgstr "Dark"
 msgid "System"
 msgstr "System"
 
-#: src/routes/settings/+page.svelte
-#: src/routes/settings/+page.svelte
-msgid "Route grading scale"
-msgstr "Route grading scale"
+#~ msgid "Route grading scale"
+#~ msgstr "Route grading scale"
 
-#: src/routes/settings/+page.svelte
-msgid "Choose how route grades are displayed."
-msgstr "Choose how route grades are displayed."
+#~ msgid "Choose how route grades are displayed."
+#~ msgstr "Choose how route grades are displayed."
 
-#: src/routes/settings/+page.svelte
-#: src/routes/settings/+page.svelte
-msgid "Local to each area"
-msgstr "Local to each area"
+#~ msgid "Local to each area"
+#~ msgstr "Local to each area"
 
-#: src/routes/settings/+page.svelte
-#: src/routes/settings/+page.svelte
-msgid "Uses the grading scale set for each area."
-msgstr "Uses the grading scale set for each area."
+#~ msgid "Uses the grading scale set for each area."
+#~ msgstr "Uses the grading scale set for each area."
 
-#: src/routes/settings/+page.svelte
 #: src/routes/settings/+page.svelte
 msgid "Examples:"
 msgstr "Examples:"
 
-#: src/routes/settings/+page.svelte
-#: src/routes/settings/+page.svelte
-msgid "Boulder grading scale"
-msgstr "Boulder grading scale"
+#~ msgid "Boulder grading scale"
+#~ msgstr "Boulder grading scale"
 
-#: src/routes/settings/+page.svelte
-msgid "Choose how boulder grades are displayed."
-msgstr "Choose how boulder grades are displayed."
+#~ msgid "Choose how boulder grades are displayed."
+#~ msgstr "Choose how boulder grades are displayed."
 
 #: src/routes/settings/+page.svelte
 msgid "Data usage"
@@ -15416,7 +15405,7 @@ msgstr "Max grade"
 msgid "Tag, e.g. climbing:rock"
 msgstr "Tag, e.g. climbing:rock"
 
-#: src/lib/components/map-legend.svelte
+#: src/lib/data/grading-scales.svelte.ts
 msgid "French"
 msgstr "French"
 
@@ -15438,9 +15427,8 @@ msgstr "Modified"
 msgid "Delete"
 msgstr "Delete"
 
-#: src/routes/settings/+page.svelte
-msgid "Compare route grades"
-msgstr "Compare route grades"
+#~ msgid "Compare route grades"
+#~ msgstr "Compare route grades"
 
 #: src/lib/components/shell/osm-changes.svelte
 msgid "Deleted"
@@ -15559,9 +15547,8 @@ msgstr "Browse climbing areas by region."
 msgid "Regions"
 msgstr "Regions"
 
-#: src/routes/settings/+page.svelte
-msgid "Compare boulder grades"
-msgstr "Compare boulder grades"
+#~ msgid "Compare boulder grades"
+#~ msgstr "Compare boulder grades"
 
 #: src/routes/world/+error.svelte
 msgid "Page not found | Bloknote"
@@ -17331,7 +17318,7 @@ msgstr "Comment"
 msgid "Comment on {0}"
 msgstr "Comment on {0}"
 
-#. 0: tick.locationHint ? ` · ${tick.locationHint}` \\: ""
+#. 0: tick.locationHint?.length ? ` · ${tick.locationHint.join(" > ")}` \\: ""
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Not on OpenStreetMap{0}"
 msgstr "Not on OpenStreetMap{0}"
@@ -17634,6 +17621,75 @@ msgstr "<0/> — An opinion about the value of a specific OSM tag on an element 
 msgid "Bloknote defines open AT Protocol Lexicon schemas under <0/> so personal climbing logs and comments are portable across apps."
 msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> so personal climbing logs and comments are portable across apps."
 
+#~ msgid "qathet"
+#~ msgstr "qathet"
 
+#~ msgid "victoria island"
+#~ msgstr "victoria island"
 
+#~ msgid "'Asir Province"
+#~ msgstr "'Asir Province"
 
+#~ msgid "'Amran Governorate"
+#~ msgstr "'Amran Governorate"
+
+#: src/lib/data/grading-scales.svelte.ts
+#: src/lib/data/grading-scales.svelte.ts
+msgid "Huesler"
+msgstr "Huesler"
+
+#: src/lib/data/grading-scales.svelte.ts
+#: src/lib/data/grading-scales.svelte.ts
+#: src/lib/data/grading-scales.svelte.ts
+msgid "Hueco"
+msgstr "Hueco"
+
+#: src/lib/data/grading-scales.svelte.ts
+msgid "Schall"
+msgstr "Schall"
+
+#: src/lib/data/grading-scales.svelte.ts
+msgid "UKTech"
+msgstr "UKTech"
+
+#: src/lib/data/grading-scales.svelte.ts
+msgid "Polish"
+msgstr "Polish"
+
+#: src/lib/data/grading-scales.svelte.ts
+msgid "Scandinavian"
+msgstr "Scandinavian"
+
+#: src/lib/data/grading-scales.svelte.ts
+msgid "Ewbank"
+msgstr "Ewbank"
+
+#: src/routes/settings/+page.svelte
+msgid "Preferred"
+msgstr "Preferred"
+
+#: src/routes/settings/+page.svelte
+msgid "Understood"
+msgstr "Understood"
+
+#. 0: scale.name
+#: src/routes/settings/+page.svelte
+msgid "Preferred {0} scale"
+msgstr "Preferred {0} scale"
+
+#. 0: scale.name
+#: src/routes/settings/+page.svelte
+msgid "Understand the {0} scale"
+msgstr "Understand the {0} scale"
+
+#: src/routes/settings/+page.svelte
+msgid "Compare grades"
+msgstr "Compare grades"
+
+#: src/routes/settings/+page.svelte
+msgid "Grading scales"
+msgstr "Grading scales"
+
+#: src/routes/settings/+page.svelte
+msgid "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."
+msgstr "Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons). Without any preference, the scale of your location is used, falling back to French and Fontainebleau."

@@ -99,8 +99,10 @@ export interface SectorStatsSummary {
 export function computeSectorStats(
   features: OsmFeature[],
   options?: {
-    preferredRouteScale?: RouteScaleId | "local";
-    preferredBoulderScale?: BoulderScaleId | "local";
+    /** The single route scale all route grades are converted to (issue #188) */
+    routeScale?: RouteScaleId;
+    /** The single boulder scale all boulder grades are converted to (issue #188) */
+    boulderScale?: BoulderScaleId;
   },
 ): SectorStatsSummary {
   const styleCounts = new Map<StatStyleKey, number>();
@@ -143,19 +145,15 @@ export function computeSectorStats(
     let displayLabel = parsedGrade.v.v;
     let displayScale = sourceScale;
 
-    if (sourceScale.gradeType === "route" && options?.preferredRouteScale && options.preferredRouteScale !== "local") {
-      const target = getScale(options.preferredRouteScale);
+    if (sourceScale.gradeType === "route" && options?.routeScale) {
+      const target = getScale(options.routeScale);
       const converted = target ? convertGrade(parsedGrade.v.v, sourceScale, target) : undefined;
       if (target && converted) {
         displayLabel = converted;
         displayScale = target;
       }
-    } else if (
-      sourceScale.gradeType === "boulder" &&
-      options?.preferredBoulderScale &&
-      options.preferredBoulderScale !== "local"
-    ) {
-      const target = getScale(options.preferredBoulderScale);
+    } else if (sourceScale.gradeType === "boulder" && options?.boulderScale) {
+      const target = getScale(options.boulderScale);
       const converted = target ? convertGrade(parsedGrade.v.v, sourceScale, target) : undefined;
       if (target && converted) {
         displayLabel = converted;

@@ -36,11 +36,11 @@ describe("computeSectorStats", () => {
     expect(stats.gradeDistribution.map((b) => b.grade)).toEqual(["WI4", "6a", "6A", "7a"]);
   });
 
-  it("converts grades when preferred grading scales are provided", () => {
+  it("converts grades to the provided single display scales", () => {
     const features: OsmFeature[] = [
       route(1, { sport: "climbing", climbing: "route_bottom", "climbing:sport": "yes", "climbing:grade:french": "6a" }),
     ];
-    const stats = computeSectorStats(features, { preferredRouteScale: "YDS" });
+    const stats = computeSectorStats(features, { routeScale: "YDS" });
     expect(stats.gradeDistribution[0]?.grade).toBe("5.10a");
   });
 });

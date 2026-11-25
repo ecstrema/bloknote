@@ -3,6 +3,7 @@
  */
 
 import { l } from "@atproto/lex";
+import * as BloknoteDefs from "../defs.defs.ts";
 
 const $nsid = "org.bloknote.actor.profile";
 
@@ -13,23 +14,38 @@ export { $nsid };
 type Main = { $type: "org.bloknote.actor.profile";
 
   /**
-   * User's preferred route grading scale. Should be unset to use the default notation for the place (crag or region).
+   * Route grading scales the user understands: grades in these scales are displayed as written
    */
-  "preferredRouteScale"?:"French" | "YDS" | "UIAA" | "Saxon" | "UKTech" | "Scandinavian" | "Ewbank" | "Polish" | l.UnknownString;
+  "knownRouteScales"?:(BloknoteDefs.RouteScale)[];
 
   /**
-   * User's preferred boulder grading scale. Should be unset to use the default notation for the place (crag or region).
+   * Boulder grading scales the user understands: grades in these scales are displayed as written
    */
-  "preferredBoulderScale"?:"FB" | "Hueco" | l.UnknownString;
+  "knownBoulderScales"?:(BloknoteDefs.BoulderScale)[];
 
   /**
-   * ISO 8601 timestamp when profile was created
+   * Via ferrata grading scales the user understands: grades in these scales are displayed as written
    */
-  "createdAt":l.DatetimeString };
+  "knownViaFerrataScales"?:(BloknoteDefs.ViaFerrataScale)[];
+
+  /**
+   * Route scale used wherever a single scale is needed (aggregated charts, plots). Unset to infer from the user's location, falling back to French
+   */
+  "preferredRouteScale"?:BloknoteDefs.RouteScale;
+
+  /**
+   * Boulder scale used wherever a single scale is needed (aggregated charts, plots). Unset to infer from the user's location, falling back to Fontainebleau
+   */
+  "preferredBoulderScale"?:BloknoteDefs.BoulderScale;
+
+  /**
+   * Via ferrata scale used wherever a single scale is needed (aggregated charts, plots). Unset to infer from the user's location, falling back to Hüsler
+   */
+  "preferredViaFerrataScale"?:BloknoteDefs.ViaFerrataScale };
 
 export type { Main };
 
-const main = /*#__PURE__*/ l.record<"literal:self", Main>("literal:self", $nsid, /*#__PURE__*/ l.object({"preferredRouteScale":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string<{"knownValues":["French","YDS","UIAA","Saxon","UKTech","Scandinavian","Ewbank","Polish"]}>()),"preferredBoulderScale":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string<{"knownValues":["FB","Hueco"]}>()),"createdAt":/*#__PURE__*/ l.string({"format":"datetime"})}));
+const main = /*#__PURE__*/ l.record<"literal:self", Main>("literal:self", $nsid, /*#__PURE__*/ l.object({"knownRouteScales":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<BloknoteDefs.RouteScale>((() => BloknoteDefs.routeScale) as any), {"maxLength":20})),"knownBoulderScales":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<BloknoteDefs.BoulderScale>((() => BloknoteDefs.boulderScale) as any), {"maxLength":20})),"knownViaFerrataScales":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<BloknoteDefs.ViaFerrataScale>((() => BloknoteDefs.viaFerrataScale) as any), {"maxLength":20})),"preferredRouteScale":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<BloknoteDefs.RouteScale>((() => BloknoteDefs.routeScale) as any)),"preferredBoulderScale":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<BloknoteDefs.BoulderScale>((() => BloknoteDefs.boulderScale) as any)),"preferredViaFerrataScale":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<BloknoteDefs.ViaFerrataScale>((() => BloknoteDefs.viaFerrataScale) as any))}));
 
 export { main };
 
