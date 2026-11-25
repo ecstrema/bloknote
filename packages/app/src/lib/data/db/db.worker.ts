@@ -454,6 +454,26 @@ function buildFilterQuery(filters: SearchFilters): { sql: string; bind: (string 
       bind.push(tagPath(key));
     }
   }
+  // Elements referenced by the user's ticks, bookmarks, comments or ratings (issue #166). The
+  // refs are chunked so the statement stays within the SQLite variable limit; the chunks are
+  // OR-ed together inside the same prepared statement so the search keeps streaming.
+  if (filters.mineRefs && filters.mineRefs.length > 0) {
+    const chunkSize = 800;
+    const chunks: string[] = [];
+    for (let i = 0; i < filters.mineRefs.length; i += chunkSize) {
+      const chunk = filters.mineRefs.slice(i, i + chunkSize);
+      chunks.push(`osm_ref IN (${chunk.map(() => "?").join(", ")})`);
+      bind.push(...chunk);
+    }
+    where.push(`(${chunks.join(" OR ")})`);
+  }
+  if (filters.minLength !== undefined) {
+    // Only plain numeric `climbing:length` values (meters) can be compared in SQL: lengths
+    // written with units or in feet are skipped by the database search and still surface
+    // through the tree once their node is loaded.
+    where.push("CAST(json_extract(data, ?) AS REAL) >= ?");
+    bind.push(tagPath("climbing:length"), filters.minLength);
+  }
   if (where.length === 0) return;
   return { sql: `SELECT slug FROM elements WHERE ${where.join(" AND ")}`, bind };
 }
@@ -535,6 +555,18 @@ async function handle(req: DbRequest): Promise<DbResponse> {
         (truncated ? rows.slice(0, limit) : rows).map(([slug, json]) => [slug as string, JSON.parse(json as string)]),
       );
       return { id: req.id, type: "subtreeElements", data, truncated };
+    }
+    case "getElements": {
+      const data: Record<string, DataJSON> = {};
+      for (let i = 0; i < req.slugs.length; i += 500) {
+        const chunk = req.slugs.slice(i, i + 500);
+        const rows = db.selectArrays(
+          `SELECT slug, data FROM elements WHERE slug IN (${chunk.map(() => "?").join(", ")})`,
+          chunk,
+        );
+        for (const [slug, json] of rows) data[slug as string] = JSON.parse(json as string) as DataJSON;
+      }
+      return { id: req.id, type: "elements", data };
     }
     case "getTopLevel": {
       // Places directly under a geographic folder, with their coordinates (center for ways and relations)

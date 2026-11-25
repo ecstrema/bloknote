@@ -18,6 +18,15 @@ export interface SearchFilters {
   /** Styles like sport or trad, matching the `climbing:<style>=yes` tag. A place matches any of them. */
   styles: string[];
   tags: TagFilter[];
+  /**
+   * OSM refs (like `way-123`) of the elements referenced by the user's ticks, bookmarks, comments
+   * and ratings: an element only matches when its ref is in this list. Not persisted: derived
+   * from the premade logbook filters (issue #166) at search time, since the records live in the
+   * ATProto caches, not in the database.
+   */
+  mineRefs?: string[];
+  /** Minimum `climbing:length` in meters */
+  minLength?: number | undefined;
 }
 
 export interface TopLevelPoint {
@@ -58,6 +67,7 @@ export type DbRequest =
   | { id: number; type: "getNode"; slug: string }
   | { id: number; type: "getChildren"; slug: string }
   | { id: number; type: "getSubtreeElements"; slug: string; limit?: number }
+  | { id: number; type: "getElements"; slugs: string[] }
   | { id: number; type: "getStats"; slug: string }
   /** Looks elements up by OSM references like `way-123456` */
   | { id: number; type: "getOsmRefs"; refs: string[] }
@@ -106,6 +116,7 @@ export type DbResponse =
   | { id: number; type: "node"; data: DataJSON | undefined }
   | { id: number; type: "children"; data: Record<string, DataJSON> }
   | { id: number; type: "subtreeElements"; data: Record<string, DataJSON>; truncated: boolean }
+  | { id: number; type: "elements"; data: Record<string, DataJSON> }
   | { id: number; type: "stats"; data: AreaStats | undefined }
   | { id: number; type: "osmRefs"; data: Record<string, OsmRefEntry> }
   | { id: number; type: "nearbyElements"; data: NearbyCandidate[] }

@@ -5,6 +5,7 @@
 
   import AppSidebar from "#components/shell/sidebar/app-sidebar.svelte";
   import { Separator } from "#components/ui/separator/index.js";
+  import { Button } from "#components/ui/button/index.js";
   import * as Sidebar from "#components/ui/sidebar/index.js";
   import AppProvider from "#components/shell/providers/app-provider.svelte";
   import ProfileButton from "#components/shell/app-settings-menu.svelte";
@@ -17,6 +18,7 @@
   import OsmChanges from "#components/shell/osm-changes.svelte";
   import EditButton from "#components/shell/edit-button.svelte";
   import UndoControls from "#components/shell/undo-controls.svelte";
+  import { searchState } from "#components/shell/sidebar/search-state.svelte.js";
 
   const { children, params, data }: WithChildren<LayoutProps> & { data: LayoutLoadType } = $props();
 </script>
@@ -36,6 +38,23 @@
 
         <AppTopNavigation />
         <div class="grow"></div>
+        {#if searchState.active}
+          <!-- Very visible indicator that a search is filtering the sidebar, with a single click to remove it (issue #166) -->
+          <Button
+            variant="secondary"
+            size="sm"
+            class="shrink-0 gap-1.5"
+            title="A search is filtering the sidebar. Click to clear it."
+            onclick={() => searchState.clear()}
+          >
+            <span class="icon-[lucide--search] shrink-0 size-4 text-amber-500"></span>
+            <span class="max-w-48 truncate">
+              {searchState.filters.text.trim() || `${searchState.result?.matches.size ?? 0} results`}</span
+            >
+            <span class="icon-[lucide--x] shrink-0 size-4"></span>
+            <span class="sr-only">Clear the active search</span>
+          </Button>
+        {/if}
         <UndoControls />
         <ProfileButton />
       </header>

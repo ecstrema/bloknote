@@ -196,6 +196,14 @@ class LocalDb {
     return { data: res.data, truncated: res.truncated };
   }
 
+  /** Fetches the raw elements for the given slugs, used by the search results overview (issue #166) */
+  async getElements(slugs: string[]): Promise<Record<string, DataJSON>> {
+    if (slugs.length === 0) return {};
+    await this.init();
+    if (!this.ready) return {};
+    return (await this.send({ type: "getElements", slugs }, "elements")).data;
+  }
+
   async getTopLevelPoints(): Promise<TopLevelPoint[]> {
     return (await this.send({ type: "getTopLevel" }, "topLevel")).data;
   }

@@ -8,11 +8,12 @@
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { resolve } from "$app/paths";
   import AppSidebarChildren from "./app-sidebar-children.svelte";
-  import SearchFiltersPanel from "./search-filters.svelte";
 
   import Input from "#components/ui/input/input.svelte";
   import type { DataTree } from "#lib/types.js";
   import { restoreSidebarOrders, setSearchFilter, getBrowserUrl, type SearchFilter } from "./utils";
+  import SearchDialog from "./search-dialog.svelte";
+  import { searchState } from "./search-state.svelte.js";
   import { getAppState } from "#lib/data/app-state.js";
   import { localDb, type FilterSearch } from "#lib/data/db/local-db.svelte.js";
   import { settings } from "#lib/data/settings.svelte.js";
@@ -30,7 +31,6 @@
               
   /** Above this many matches, the tree isn't opened automatically to reveal them */
   const EXPAND_LIMIT = 1000;
-  const STORAGE_KEY = "bloknote:search-filters";
 
   let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> & {} = $props();
 
@@ -42,45 +42,35 @@
     if (!sidebar.isMobile && !sidebar.open) sidebar.setOpen(true);
   });
 
-  let filters = $state<SearchFilters>({ text: "", types: [], styles: [], tags: [] });
-  let gradeText = $state({ min: "", max: "" });
-  let showFilters = $state(false);
   let collapseVersion = $state(0);
-  let restored = $state(false);
+
+  /** Whether the search dialog with all the options is open (issue #166) */
+  let searchDialogOpen = $state(false);
+
+  /** Called by the search dialog: close it and show the results in the sidebar (also on mobile) */
+  function showResults() {
+    searchDialogOpen = false;
+    if (sidebar.isMobile) sidebar.setOpenMobile(true);
+    else sidebar.setOpen(true);
+  }
 
   onMount(() => {
     restoreSidebarOrders();
-    try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
-      if (stored) {
-        filters = { ...filters, ...stored.filters };
-        gradeText = { ...gradeText, ...stored.gradeText };
-        showFilters = stored.showFilters === true;
-      }
-    } catch {
-      // Unreadable settings are ignored
-    }
-    restored = true;
+    searchState.restore();
   });
 
   $effect(() => {
-    const data = $state.snapshot({ filters, gradeText, showFilters });
-    if (restored) localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  });
-
-  $effect(() => {
-    filters.gradeMin = gradeTextToReference(gradeText.min);
-    filters.gradeMax = gradeTextToReference(gradeText.max);
+    if (searchState.restored) searchState.persist();
   });
 
   // The ?q= URL param pre-fills the search once the stored filters have been restored, so that
   // external links can send someone to Bloknote with a specific search. It wins over the
   // localStorage filters, and is left untouched when navigating without the param.
   $effect(() => {
-    if (!restored) return;
+    if (!searchState.restored) return;
     // Shallow gotos don't update `page.url`, so read the browser URL (issue #212)
     const q = getBrowserUrl().searchParams.get("q");
-    if (q !== null) filters.text = q;
+    if (q !== null) searchState.filters.text = q;
   });
 
   // Keep the URL in sync with the current search query so it can be copied and shared.
@@ -90,38 +80,29 @@
   // effect to page.shallow, and every replaceState re-triggers it even for an identical URL,
   // looping forever.
   $effect(() => {
-    const text = filters.text;
+    const text = searchState.filters.text;
     const url = new URL(window.location.href);
     if (text.trim() !== "") url.searchParams.set("q", text);
     else url.searchParams.delete("q");
     replaceState(url, history.state);
   });
 
-  const hasFilters = $derived(
-    filters.types.length > 0 ||
-      filters.gradeMin !== undefined ||
-      filters.gradeMax !== undefined ||
-      filters.styles.length > 0 ||
-      filters.tags.length > 0,
-  );
-  const active = $derived(filters.text.trim() !== "" || hasFilters);
+  // Grade inputs accept text like "6b" or "7A": they are converted to reference numbers here.
+  $effect(() => {
+    searchState.filters.gradeMin = gradeTextToReference(searchState.gradeText.min);
+    searchState.filters.gradeMax = gradeTextToReference(searchState.gradeText.max);
+  });
 
   /** The places matching the filters, and their ancestors so that the tree leads to them */
-  let result = $state.raw<{
-    matches: Set<string>;
-    visible: Set<string>;
-    expand: Set<string>;
-    status: "searching" | "paused" | "done";
-  }>();
-  let loadMore: (() => void) | undefined;
-
   $effect(() => {
-    if (!active || !localDb.ready) {
-      result = undefined;
-      loadMore = undefined;
+    if (!searchState.active || !localDb.ready) {
+      searchState.result = undefined;
+      searchState.loadMore = undefined;
       return;
     }
-    const snapshot = $state.snapshot(filters);
+    // dbFilters() reads every search input (filters, premade refs, min length): the effect
+    // restarts whenever any of them changes (issue #166).
+    const dbFilters = searchState.dbFilters();
     const matches = new Set<string>();
     const expand = new Set<string>();
     let pending: string[] = [];
@@ -137,7 +118,7 @@
         for (const parent of getParentSlugs(slug)) expand.add(parent);
       }
       pending = [];
-      result = {
+      searchState.result = {
         matches: new Set(matches),
         expand: new Set(expand),
         visible: new Set([...matches, ...expand]),
@@ -157,12 +138,12 @@
     }
 
     const timer = setTimeout(() => {
-      search = localDb.filter(snapshot, (slugs) => {
+      search = localDb.filter(dbFilters, (slugs) => {
         pending.push(...slugs);
         // Batches are grouped so that the tree isn't rebuilt for each one
         flushTimer ??= setTimeout(() => flush("searching"), 150);
       });
-      loadMore = run;
+      searchState.loadMore = run;
       run();
     }, 150);
     return () => {
@@ -180,7 +161,7 @@
 
   /** Text-only fallback until the whole dataset is available locally: only covers nodes already loaded in this session. */
   function fallbackMatches(d: DataTree): boolean {
-    const text = filters.text.trim().toLowerCase();
+    const text = searchState.filters.text.trim().toLowerCase();
     const t = featureToType(d.feature);
     if (t === "route" || t === "gym") return getName(d.feature)?.toLowerCase().includes(text) ?? false;
     if (d.children) return Object.values(d.children).some((child) => fallbackMatches(child));
@@ -189,11 +170,12 @@
 
   const searchFilter: SearchFilter = {
     matches(slug, d) {
-      if (!active) return true;
-      if (localDb.ready) return result ? result.visible.has(slug) : true;
-      return hasFilters ? true : fallbackMatches(d);
+      if (!searchState.active) return true;
+      if (localDb.ready) return searchState.result ? searchState.result.visible.has(slug) : true;
+      return searchState.hasFilters ? true : fallbackMatches(d);
     },
     shouldExpand(slug) {
+      const result = searchState.result;
       if (!result || result.matches.size > EXPAND_LIMIT) return false;
       return result.expand.has(slug);
     },
@@ -354,14 +336,14 @@
         <Input
           placeholder={localDb.status === "downloading" ? "Search (preparing all data...)" : "Search..."}
           class="w-full pr-8"
-          bind:value={filters.text}
+          bind:value={searchState.filters.text}
         />
-        {#if filters.text}
+        {#if searchState.filters.text}
           <button
             type="button"
             aria-label="Clear search"
             class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            onclick={() => (filters.text = "")}
+            onclick={() => (searchState.filters.text = "")}
           >
             <span class="icon-[lucide--x] shrink-0 size-4"></span>
           </button>
@@ -376,12 +358,13 @@
       >
         <span class="icon-[lucide--chevrons-down-up] shrink-0 size-4"></span>
       </Button>
+      <!-- Opens the search dialog with all the options (issue #166). Highlighted while a search is active. -->
       <Button
-        variant={showFilters ? "default" : "outline"}
+        variant={searchState.hasFilters ? "default" : "outline"}
         size="icon"
-        aria-label="Filters"
-        aria-expanded={showFilters}
-        onclick={() => (showFilters = !showFilters)}
+        aria-label="Search options"
+        title="Search options"
+        onclick={() => (searchDialogOpen = true)}
       >
         <span class="icon-[lucide--list-filter] shrink-0 size-4"></span>
       </Button>
@@ -398,15 +381,12 @@
         </Button>
       {/if}
     </div>
-    {#if showFilters}
-      <SearchFiltersPanel bind:filters bind:gradeText />
-    {/if}
   </Sidebar.Header>
   <Sidebar.Content bind:ref={contentRef} onscroll={scheduleUnindent} class="overflow-x-hidden">
-    {#if active && !localDb.ready && localDb.status !== "error"}
+    {#if searchState.active && !localDb.ready && localDb.status !== "error"}
       <div class="flex flex-col gap-2 px-4 py-2 text-sm text-muted-foreground">
         <span>
-          {hasFilters ? "Filters need all the data." : "Results only include areas you have already opened."}
+          {searchState.hasFilters ? "Filters need all the data." : "Results only include areas you have already opened."}
         </span>
         {#if localDb.status === "downloading"}
           <span>Downloading all data...</span>
@@ -416,15 +396,15 @@
           </Button>
         {/if}
       </div>
-    {:else if result?.status === "done" && result.matches.size === 0}
+    {:else if searchState.result?.status === "done" && searchState.result.matches.size === 0}
       <span class="px-4 py-2 text-sm text-muted-foreground">No results</span>
     {/if}
-    {#if result && result.matches.size > EXPAND_LIMIT}
+    {#if searchState.result && searchState.result.matches.size > EXPAND_LIMIT}
       <span class="px-4 py-2 text-sm text-muted-foreground">
         Too many results to open automatically. Open the areas you want to see.
       </span>
     {/if}
-    {#if !(result?.status === "done" && result.matches.size === 0)}
+    {#if !(searchState.result?.status === "done" && searchState.result.matches.size === 0)}
       <Sidebar.Group>
         <Sidebar.GroupLabel
           ><a href={resolve("world")}>{getLocalizedName(appState.tree.root.feature)}</a></Sidebar.GroupLabel
@@ -499,12 +479,14 @@
         </Sidebar.GroupContent>
       </Sidebar.Group>
     {/if}
-    {#if result?.status === "searching"}
-      <span class="px-4 py-2 text-sm text-muted-foreground">Searching... {result.matches.size} matches</span>
-    {:else if result?.status === "paused"}
+    {#if searchState.result?.status === "searching"}
+      <span class="px-4 py-2 text-sm text-muted-foreground">
+        Searching... {searchState.result.matches.size} matches
+      </span>
+    {:else if searchState.result?.status === "paused"}
       <div class="flex flex-col gap-2 px-4 py-2 text-sm text-muted-foreground">
-        <span>{result.matches.size} matches so far</span>
-        <Button size="xs" variant="outline" onclick={() => loadMore?.()}>Load more results</Button>
+        <span>{searchState.result.matches.size} matches so far</span>
+        <Button size="xs" variant="outline" onclick={() => searchState.loadMore?.()}>Load more results</Button>
       </div>
     {/if}
   </Sidebar.Content>
@@ -559,3 +541,4 @@
 </Sidebar.Root>
 
 <SidebarBulkDialogs bind:dialog={bulkDialog} {selection} />
+<SearchDialog bind:open={searchDialogOpen} onShowResults={showResults} />

@@ -14910,7 +14910,7 @@ msgstr "Via"
 #: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/sector-stats.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Boulder"
 msgstr "Boulder"
@@ -14918,7 +14918,7 @@ msgstr "Boulder"
 #: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/sector-stats.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Ice"
 msgstr "Gelo"
@@ -14926,7 +14926,7 @@ msgstr "Gelo"
 #: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/sector-stats.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Aid"
 msgstr "Artificial"
@@ -15124,7 +15124,7 @@ msgstr "Tag"
 
 #: src/lib/components/editable/editable-tags.svelte
 #: src/lib/components/editable/editable-tags.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Value"
 msgstr "Valor"
 
@@ -15158,7 +15158,7 @@ msgid "Key"
 msgstr "Chave"
 
 #: src/lib/components/editable/editable-tags.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Add"
 msgstr "Adicionar"
 
@@ -15262,7 +15262,7 @@ msgstr "Sem vias"
 msgid "No children"
 msgstr "Sem elementos filhos"
 
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 #: src/routes/world/[...slug]/children-table.svelte
 msgid "Areas"
 msgstr "Áreas"
@@ -15341,6 +15341,7 @@ msgid "Search..."
 msgstr "Buscar..."
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Clear search"
 msgstr "Limpar busca"
 
@@ -15349,7 +15350,7 @@ msgstr "Limpar busca"
 msgid "Collapse all"
 msgstr "Recolher tudo"
 
-#: src/lib/components/shell/sidebar/app-sidebar.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Filters"
 msgstr "Filtros"
 
@@ -15370,6 +15371,7 @@ msgid "Download all data to search everywhere"
 msgstr "Baixar todos os dados para buscar em qualquer lugar"
 
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "No results"
 msgstr "Sem resultados"
 
@@ -15377,12 +15379,12 @@ msgstr "Sem resultados"
 msgid "Too many results to open automatically. Open the areas you want to see."
 msgstr "Muitos resultados para abrir automaticamente. Abra as áreas que deseja ver."
 
-#. 0: result.matches.size
+#. 0: searchState.result.matches.size
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "Searching... {0} matches"
 msgstr "Buscando... {0} resultados"
 
-#. 0: result.matches.size
+#. 0: searchState.result.matches.size
 #: src/lib/components/shell/sidebar/app-sidebar.svelte
 msgid "{0} matches so far"
 msgstr "{0} resultados até agora"
@@ -15393,75 +15395,74 @@ msgstr "Carregar mais resultados"
 
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/sector-stats.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Routes"
 msgstr "Vias"
 
 #: src/lib/components/map-legend.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Gyms"
 msgstr "Academias"
 
 #: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Sport"
 msgstr "Esportiva"
 
 #: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Trad"
 msgstr "Tradicional"
 
 #: src/lib/components/climbing-styles.svelte
 #: src/lib/components/map-legend.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Top rope"
 msgstr "Top rope"
 
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Speed"
 msgstr "Velocidade"
 
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Multi-pitch"
 msgstr "Várias enfiadas"
 
 #: src/lib/components/climbing-styles.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Mixed"
 msgstr "Misto"
 
 #: src/lib/components/climbing-styles.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Dry tooling"
 msgstr "Dry tooling"
 
 #: src/lib/components/climbing-styles.svelte
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Deep-water solo"
 msgstr "Deep-water solo"
 
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Any style"
 msgstr "Qualquer estilo"
 
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Min grade"
 msgstr "Grau mín."
 
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Max grade"
 msgstr "Grau máx."
 
-#: src/lib/components/shell/sidebar/search-filters.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Tag, e.g. climbing:rock"
 msgstr "Tag, p. ex. climbing:rock"
 
-#: src/lib/components/shell/sidebar/search-filters.svelte
-msgid "Clear filters"
-msgstr "Limpar filtros"
+#~ msgid "Clear filters"
+#~ msgstr "Limpar filtros"
 
 #: src/lib/components/map-legend.svelte
 msgid "French"
@@ -16390,7 +16391,9 @@ msgid "{0} ice"
 msgstr "{0} gelo"
 
 #. 0: stats.ungraded
+#. 0: stats.ungraded
 #: src/lib/components/sector-stats.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "{0} ungraded"
 msgstr "{0} sem grau"
 
@@ -17026,6 +17029,7 @@ msgid "Could not update bookmark"
 msgstr ""
 
 #: src/lib/components/bookmark-button.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Bookmarked"
 msgstr ""
 
@@ -17847,4 +17851,117 @@ msgstr ""
 #. 0: parentName
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "<0/> <1/> The route will be added to {0}. <2/>"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Ticked"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Rated"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Commented"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Search"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Find climbs everywhere and filter the sidebar tree."
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Name..."
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Search by name"
+msgstr ""
+
+#. 0: premade.icon
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "{0} shrink-0 size-3.5"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Connect Atmosphere in the settings to search among your ticks, bookmarks, ratings and comments."
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "From your logbook"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Minimum length in meters"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "<0/> Has image"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Longer than <0/> m"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Attributes"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Search results overview"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Type a name or pick a filter to search."
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Searching everywhere needs all the data. Open an area first, or download everything in the sidebar."
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Searching..."
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Load more"
+msgstr ""
+
+#. 0: searchState.result.matches.size
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "{0} matches"
+msgstr ""
+
+#. 0: OVERVIEW_LIMIT
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Charts cover the first {0} matches."
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Results"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Show results"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/app-sidebar.svelte
+#: src/lib/components/shell/sidebar/app-sidebar.svelte
+msgid "Search options"
+msgstr ""
+
+#: src/routes/world/[...slug]/+layout.svelte
+msgid "A search is filtering the sidebar. Click to clear it."
+msgstr ""
+
+#. 0: searchState.result?.matches.size ?? 0
+#: src/routes/world/[...slug]/+layout.svelte
+msgid "{0} results"
+msgstr ""
+
+#: src/routes/world/[...slug]/+layout.svelte
+msgid "Clear the active search"
 msgstr ""
