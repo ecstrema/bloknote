@@ -234,6 +234,13 @@ export function formatPopupHtml(props: MapElementFeature["properties"]): string 
   return `<div class="font-semibold text-xs">${title}</div>${badge ? `<div class="text-[11px] opacity-80">${badge}</div>` : ""}`;
 }
 
+/**
+ * Opacity expression fading features flagged `dimmed` by the active search filters (issue #215).
+ * Features without the flag render at full opacity.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const DIMMED_OPACITY = ["case", ["get", "dimmed"], 0.2, 1] as any;
+
 export const CLIMBING_LAYERS: LayerSpecification[] = [
   {
     id: "sectors-contour",
@@ -244,6 +251,7 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "line-color": "#64748b",
       "line-dasharray": [4, 3],
       "line-width": 1.5,
+      "line-opacity": DIMMED_OPACITY,
     },
   },
   {
@@ -263,6 +271,7 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "text-color": "#475569",
       "text-halo-color": "#ffffff",
       "text-halo-width": 1.5,
+      "text-opacity": DIMMED_OPACITY,
     },
   },
   {
@@ -331,6 +340,7 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
     paint: {
       "line-color": "#78350f",
       "line-width": 2.5,
+      "line-opacity": DIMMED_OPACITY,
     },
   },
   {
@@ -343,6 +353,8 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "circle-color": ["get", "fillColor"],
       "circle-stroke-color": ["get", "strokeColor"],
       "circle-stroke-width": 1.5,
+      "circle-opacity": DIMMED_OPACITY,
+      "circle-stroke-opacity": DIMMED_OPACITY,
     },
   },
   {
@@ -355,6 +367,8 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "circle-color": ["get", "fillColor"],
       "circle-stroke-color": ["get", "strokeColor"],
       "circle-stroke-width": 1.5,
+      "circle-opacity": DIMMED_OPACITY,
+      "circle-stroke-opacity": DIMMED_OPACITY,
     },
   },
   {
@@ -368,6 +382,8 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "circle-color": ["get", "fillColor"],
       "circle-stroke-color": ["get", "strokeColor"],
       "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 8, 1, 14, 1.5, 17, 2],
+      "circle-opacity": DIMMED_OPACITY,
+      "circle-stroke-opacity": DIMMED_OPACITY,
     },
   },
   {
@@ -406,6 +422,7 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "text-color": "#1e293b",
       "text-halo-color": "#ffffff",
       "text-halo-width": 1.5,
+      "text-opacity": DIMMED_OPACITY,
     },
   },
   {

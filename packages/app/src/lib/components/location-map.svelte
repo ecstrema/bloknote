@@ -21,6 +21,7 @@
   import type { OsmFeature } from "osm-api";
   import { setMapCenterProvider } from "./map-center.js";
   import { addTerrainSource } from "./map-controls.js";
+  import { searchState } from "./shell/sidebar/search-state.svelte.js";
   import { CLIMBING_LAYERS, applyElementTypeVisibility, featureToMapElement, formatPopupHtml, VECTOR_STYLE } from "./location-map-helper.js";
   import MapLegend from "./map-legend.svelte";
 
@@ -53,6 +54,11 @@
   let sharedColorMode: "grade" | "type" | "both" = "both";
   /** Slugs currently selected through the sidebar (or a map lasso), highlighted on the map */
   let activeSelectionSlugs: string[] = [];
+  /**
+   * Slugs matching the active search filters: features outside of this set are faded on the map
+   * (issue #215). Undefined when no search is active: nothing is dimmed.
+   */
+  let dimMatches: ReadonlySet<string> | undefined;
   /** Set by the LocationMap instance, which has access to the sidebar selection context */
   let lassoSelect: ((slugs: string[]) => void) | undefined;
   /** Set by the LocationMap instance, which has access to the sidebar selection context */
@@ -129,6 +135,24 @@
     const source = map.getSource<GeoJSONSource>("climbing-elements");
     if (!source) return;
     source.setData(collection);
+  }
+
+  /**
+   * Flags the cached features excluded by the active search filters, so the map layers fade them
+   * out while keeping colors for matching elements (issue #215). Only the features whose flag
+   * changed are rewritten, and the source is updated once.
+   */
+  function applySearchDimming(map: MapLibreMap) {
+    const matches = dimMatches;
+    let changed = false;
+    for (const f of cachedCollection.features) {
+      const dimmed = matches !== undefined && !matches.has(f.properties.slug);
+      if (Boolean(f.properties.dimmed) !== dimmed) {
+        f.properties.dimmed = dimmed;
+        changed = true;
+      }
+    }
+    if (changed) setElementsSourceData(map, cachedCollection);
   }
 
   /** Adds the climbing source and layers to the current style. Safe to call again after a style switch. */
@@ -321,6 +345,8 @@
         cachedCollection = data;
         allElementsLoaded = true;
         setElementsSourceData(map, cachedCollection);
+        // The collection was replaced: reapply the search dimming flags (issue #215)
+        applySearchDimming(map);
         return;
       }
     }
@@ -346,6 +372,7 @@
         }),
       };
       setElementsSourceData(map, cachedCollection);
+      applySearchDimming(map);
     }
   }
 
@@ -367,6 +394,8 @@
     }
     const element = featureToMapElement(slug, feature, fallbackCoords);
     if (!element) return;
+    // Keep the dimming state consistent when an element is downloaded or updated mid-search
+    element.properties.dimmed = dimMatches !== undefined && !dimMatches.has(slug);
     if (existingIndex >= 0) {
       cachedCollection.features[existingIndex] = element;
     } else {
@@ -936,6 +965,17 @@
   $effect(() => {
     activeSelectionSlugs = selection ? [...selection.selected] : [];
     if (attached && shared?.map) applyHighlightFilters(shared.map, currentSlug);
+  });
+
+  // Fade the elements excluded by the active search filters on the map (issue #215). The dimming
+  // is only applied once a search batch has settled (paused or done): re-pushing the whole source
+  // on every streamed batch would stall the map while searching.
+  $effect(() => {
+    const active = searchState.active;
+    const result = searchState.result;
+    if (!attached || !shared?.map) return;
+    dimMatches = active && result ? result.matches : undefined;
+    if (result === undefined || result.status !== "searching") applySearchDimming(shared.map);
   });
 </script>
 

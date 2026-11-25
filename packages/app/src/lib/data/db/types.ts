@@ -51,6 +51,8 @@ export interface MapElementFeature {
     fillColor: string;
     strokeColor: string;
     href: string;
+    /** True when the feature is excluded by the active search filters and faded on the map (issue #215) */
+    dimmed?: boolean;
   };
 }
 
