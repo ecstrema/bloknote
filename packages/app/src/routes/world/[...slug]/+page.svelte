@@ -18,6 +18,7 @@
   import { page } from "$app/state";
   import { untrack } from "svelte";
   import MapAddDialog from "#lib/components/map-add-dialog.svelte";
+  import { getItemUrl } from "#components/shell/sidebar/utils.js";
   import DiagnosticsPanel from "#lib/components/diagnostics-panel.svelte";
   import { collectSubtreeDiagnostics } from "#lib/data/parse/diagnostics.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
@@ -274,33 +275,42 @@
     !loadingDiagnostics && diagnosticsCount === 0 && (!isAreaLike || localDb.ready),
   );
 
-  let placementMode = $state<"route" | null>(null);
+  let placementMode = $state<"route" | "sector" | null>(null);
   let addDialogOpen = $state(false);
   let addDialogKind = $state<"route" | "sector">("route");
   let clickedCoordinates = $state<{ lat: number; lon: number } | undefined>(undefined);
   let coordinatesCopied = $state(false);
 
   // "Add to OSM" flow from the ticks list (issue #154): the tick is placed as a new route on the
-  // map of its crag, then linked to the created element
+  // map of its crag, then linked to the created element. When the crag itself is missing from the
+  // map data (addSector param), it is created first and the route placement continues inside it.
   const addRouteTickId = $derived(page.url.searchParams.get("addRouteTick"));
+  const addSectorName = $derived(page.url.searchParams.get("addSector"));
   const pendingTick = $derived(addRouteTickId ? atproto.findTick(addRouteTickId) : undefined);
 
   function onTickRouteCreated(feature: OsmFeature) {
     const tick = pendingTick;
-    if (!tick) return;
-    void atproto
-      .linkTick(tick, { type: feature.type, id: feature.id })
-      .catch((err) => console.error("Could not link the tick to the new route", err))
-      .finally(() => {
-        // Back to the ticks list, where the tick now shows its route
-        void goto(resolve("/settings/logbook"), { replace: true });
-      });
+    if (!tick) return undefined;
+    void atproto.linkTick(tick, { type: feature.type, id: feature.id }, feature.tags?.name).catch((err) =>
+      console.error("Could not link the tick to the new route", err),
+    );
+    // Back to the ticks list, where the tick now shows its route
+    return resolve("/settings/logbook");
   }
+
+  function onTickSectorCreated(feature: OsmFeature) {
+    // The missing crag exists now: continue the tick flow by placing its route inside it
+    const tick = pendingTick;
+    if (!tick) return undefined;
+    return `${getItemUrl(itemSlug, feature)}&addRouteTick=${tick.localId}`;
+  }
+
+  const tickPlacementKind = $derived(addSectorName ? "sector" : "route");
 
   $effect(() => {
     if (!pendingTick || !appState.osmUser.loggedIn) return;
     if (activeTab !== "map") onTabChange("map");
-    if (effectiveTab === "map" && placementMode !== "route") placementMode = "route";
+    if (effectiveTab === "map" && placementMode !== tickPlacementKind) placementMode = tickPlacementKind;
   });
 
   function copyCoordinates() {
@@ -442,7 +452,12 @@
         <div class="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
           <span aria-hidden="true" class="icon-[lucide--map-pin-plus] size-4 shrink-0"></span>
           {#if appState.osmUser.loggedIn}
-            Adding "{pendingTick.name}" for your tick: click on the map to place the route.
+            {#if addSectorName}
+              The crag "{addSectorName}" from your tick is not in the map data: click on the map to
+              add it, then the route will be placed inside it.
+            {:else}
+              Adding "{pendingTick.name}" for your tick: click on the map to place the route.
+            {/if}
           {:else}
             <span class="text-destructive">
               Log in with OpenStreetMap to add "{pendingTick.name}" for your tick.
@@ -481,9 +496,9 @@
         kind={addDialogKind}
         coordinates={clickedCoordinates}
         currentSlug={itemSlug}
-        prefillName={pendingTick?.name}
+        prefillName={addSectorName ?? pendingTick?.name}
         preferredParentSlug={pendingTick ? itemSlug : undefined}
-        onCreated={pendingTick ? onTickRouteCreated : undefined}
+        onCreated={pendingTick ? (addSectorName ? onTickSectorCreated : onTickRouteCreated) : undefined}
       />
     {/if}
   </Tabs.Content>

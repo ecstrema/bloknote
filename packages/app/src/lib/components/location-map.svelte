@@ -29,7 +29,7 @@
   let dragMarker: Marker | undefined;
   let currentOnmove: ((position: { lat: number; lon: number }) => void) | undefined;
   let currentOnmapclick: ((position: { lat: number; lon: number }) => void) | undefined;
-  let activePlacementMode: "route" | null = null;
+  let activePlacementMode: "route" | "sector" | null = null;
   /** False until the view was first set to a place */
   let positioned = false;
   /** True once the user moved the map themselves: later target moves then re-center gently instead of flying */
@@ -642,7 +642,7 @@
     fallbackCoordinates?: { lat: number; lon: number } | undefined;
     bounds?: { x0: number; x1: number; y0: number; y1: number } | undefined;
     draggable?: boolean;
-    placementMode?: "route" | null;
+    placementMode?: "route" | "sector" | null;
     /** When set, an "Add route" button is shown with the other map commands to toggle placement */
     addRoute?: { active: boolean; toggle: () => void };
     zoom?: number;

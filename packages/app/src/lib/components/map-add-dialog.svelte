@@ -35,8 +35,11 @@
     prefillName?: string;
     /** Parent slug selected by default when it is among the options */
     preferredParentSlug?: string;
-    /** Called with the created feature, to link a tick to it for instance */
-    onCreated?: (feature: OsmFeature) => void;
+    /**
+     * Called with the created feature, to link a tick to it for instance. May return the URL to
+     * navigate to instead of the default (the created feature's page), e.g. to continue a flow.
+     */
+    onCreated?: (feature: OsmFeature) => void | string;
   } = $props();
 
   const appState = getAppState();
@@ -128,8 +131,10 @@
     const feature = parent.children?.[newSlug]?.feature;
     open = false;
     if (feature && feature.type !== "geographic") {
-      onCreated?.(feature as OsmFeature);
-      void goto(getItemUrl(selectedParentSlug, feature));
+      // The callback may redirect (e.g. back to the logbook after linking a tick, or to the
+      // freshly created crag to continue placing a tick's route inside it)
+      const target = onCreated?.(feature as OsmFeature);
+      void goto(typeof target === "string" ? target : getItemUrl(selectedParentSlug, feature));
     }
   }
 </script>

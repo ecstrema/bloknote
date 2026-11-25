@@ -6,20 +6,24 @@
   import { Select } from "#components/ui/select/index.js";
   import { atproto, type LocalTickEntry } from "#lib/data/network/atproto.svelte.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
+  import { dataClient } from "#lib/data/network/data-client.js";
   import { getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
+  import { getName } from "#lib/data/parse/data.js";
   import { extractRouteStyle, ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import type { Grade } from "#lib/types.js";
   import type { AscentStyle } from "@bloknote/common";
-  import type { OsmFeature, Tags } from "osm-api";
+  import { getFeature, type OsmFeature, type Tags } from "osm-api";
+  import AddToOsmDialog from "./add-to-osm-dialog.svelte";
 
-  type SortMode = "recent" | "name" | "grade";
+  type SortMode = "places" | "recent" | "name" | "grade";
   const sortModes: { value: SortMode; label: string }[] = [
+    { value: "places", label: "Places" },
     { value: "recent", label: "Recent" },
     { value: "name", label: "Name" },
     { value: "grade", label: "Grade" },
   ];
-  let sortMode = $state<SortMode>("recent");
+  let sortMode = $state<SortMode>("places");
 
   /** Distinct color per ascent style */
   const STYLE_BADGE_CLASSES: Record<AscentStyle, string> = {
@@ -34,18 +38,42 @@
 
   /** Ticks and stars resolved against the local database: the route's slug, name, grade, style */
   interface ResolvedRef {
+    slug?: string;
     name?: string;
     grade?: Grade;
     gradeRef?: number;
     style?: string;
+    /** Checked against a ready local database and absent from it: no need to re-check for a slug */
+    notInDataset?: boolean;
+    /** The dataset version the absence was checked against: a newer dataset may contain the element */
+    datasetVersion?: string;
   }
   let resolved = $state<Record<string, ResolvedRef>>({});
+  /** Bumped to re-run the resolution after a failed database lookup */
+  let resolveAttempt = $state(0);
 
   /** Route candidates found again in the OSM data for subject-less ticks, by local tick id */
   let rematch = $state<Record<string, { candidates: { slug: string; name: string; grade?: string; feature: OsmFeature }[] }>>({});
 
   let busy = $state(false);
   let error = $state<string>();
+
+  /** Live OSM fallback for elements missing from the local dataset (routes added after it was built) */
+  async function resolveFromOsm(ref: string): Promise<ResolvedRef> {
+    const [type, id] = ref.split("-");
+    try {
+      const [feature] = await getFeature(type as "node" | "way" | "relation", Number(id));
+      const tags = feature?.tags ?? {};
+      return {
+        name: tags.name,
+        grade: getGrade(tags)?.v,
+        gradeRef: getGradeReference(tags),
+        style: extractRouteStyle(tags),
+      };
+    } catch {
+      return {};
+    }
+  }
 
   $effect(() => {
     const refs = [
@@ -54,22 +82,75 @@
         ...atproto.stars.map((s) => `${s.subject.type}-${s.subject.id}`),
       ]),
     ];
-    const missing = refs.filter((ref) => resolved[ref] === undefined);
-    if (missing.length === 0 || !localDb.ready) return;
-    localDb.getByOsmRefs(missing).then((entries) => {
-      const next = { ...resolved };
-      for (const ref of missing) {
-        const entry = entries[ref];
-        const tags = (entry?.data as OsmFeature | undefined)?.tags ?? {};
-        next[ref] = {
-          name: tags.name,
-          grade: getGrade(tags)?.v,
-          gradeRef: getGradeReference(tags),
-          style: extractRouteStyle(tags),
-        };
-      }
-      resolved = next;
+    void resolveAttempt;
+    const ready = localDb.ready;
+    const datasetVersion = localDb.dataVersion;
+    const missing = refs.filter((ref) => {
+      const entry = resolved[ref];
+      if (entry === undefined) return true;
+      // Entries whose absence was checked against an older dataset are re-checked after an update
+      return ready && !entry.slug && (!entry.notInDataset || entry.datasetVersion !== datasetVersion);
     });
+    if (missing.length === 0) return;
+    let cancelled = false;
+    // While the database is still opening the names are resolved live from the OSM API instead,
+    // without a slug, then re-checked against the database once it becomes ready
+    localDb
+      .getByOsmRefs(ready ? missing : [])
+      .then(async (entries) => {
+        const next = { ...resolved };
+        for (const ref of missing) {
+          const entry = entries[ref];
+          const tags = (entry?.data as OsmFeature | undefined)?.tags ?? {};
+          if (tags.name) {
+            next[ref] = {
+              slug: entry?.slug,
+              name: tags.name,
+              grade: getGrade(tags)?.v,
+              gradeRef: getGradeReference(tags),
+              style: extractRouteStyle(tags),
+            };
+          } else if (!cancelled) {
+            // Locally created elements (not yet pushed to OSM) are resolved from memory: the
+            // ticks list can place them under their parent right after the creation, without
+            // waiting for the database mirror or the changeset push
+            const local = dataClient.getLocalNodeByOsmRef(ref);
+            if (local) {
+              const tags = local.feature.tags ?? {};
+              next[ref] = {
+                slug: local.slug,
+                name: tags.name,
+                grade: getGrade(tags)?.v,
+                gradeRef: getGradeReference(tags),
+                style: extractRouteStyle(tags),
+              };
+            } else {
+              const fromOsm = await resolveFromOsm(ref);
+              // The absence is only cached when the lookup really ran against a ready database:
+              // a data update may have started since the effect ran (the lookup then returned
+              // nothing at all), and the refreshed dataset may contain the element after all.
+              // Reading the readiness now instead of reusing the effect-run value keeps the flag
+              // off in that window, so the element is re-checked once the database is back.
+              next[ref] =
+                ready && localDb.ready
+                  ? { ...fromOsm, notInDataset: true, datasetVersion: localDb.dataVersion }
+                  : fromOsm;
+            }
+          }
+        }
+        // Merge instead of replacing: later effect runs may have resolved more refs while this
+        // one was still waiting for the live OSM fallbacks
+        if (!cancelled) resolved = { ...resolved, ...next };
+      })
+      .catch(() => {
+        // Leave the refs unresolved and retry shortly: a failed lookup (database busy or
+        // rebuilding) must not park the ticks outside of their places for the whole session
+        if (cancelled || resolveAttempt >= 5) return;
+        setTimeout(() => (resolveAttempt = resolveAttempt + 1), 3000);
+      });
+    return () => {
+      cancelled = true;
+    };
   });
 
   $effect(() => {
@@ -81,7 +162,7 @@
     (async () => {
       for (let start = 0; start < toCheck.length; start += 20) {
         const batch = toCheck.slice(start, start + 20);
-        const matches = await localDb.matchTicks(batch.map((t) => ({ name: t.name!, area: t.crag })));
+        const matches = await localDb.matchTicks(batch.map((t) => ({ name: t.name!, area: t.locationHint })));
         if (cancelled) return;
         rematch = { ...rematch };
         matches.forEach((found, index) => {
@@ -132,6 +213,84 @@
       default:
         return ticks.sort((a, b) => (b.climbedAt ?? "").localeCompare(a.climbedAt ?? ""));
     }
+  });
+
+  /** Names of the places along the resolved slugs, for the "Places" tree */
+  let placeNames = $state<Record<string, string>>({});
+
+  /** A node of the "Places" tree: a place in the slug hierarchy with the ticks attached to it */
+  interface PlaceNode {
+    /** Full slug path; absent for the invisible root and the unlinked bucket */
+    slug?: string;
+    name: string;
+    children: PlaceNode[];
+    ticks: LocalTickEntry[];
+    total: number;
+  }
+
+  /** Groups the ticks under the places of their slug hierarchy (default "Places" mode) */
+  const placeTree = $derived.by(() => {
+    if (sortMode !== "places") return undefined;
+    const root: PlaceNode = { name: "", children: [], ticks: [], total: 0 };
+    const nodes = new Map<string, PlaceNode>([["", root]]);
+    const ensure = (slug: string): PlaceNode => {
+      const existing = nodes.get(slug);
+      if (existing) return existing;
+      const node: PlaceNode = {
+        slug,
+        name: placeNames[slug] ?? slug.split("/").at(-1)!.replaceAll("-", " "),
+        children: [],
+        ticks: [],
+        total: 0,
+      };
+      nodes.set(slug, node);
+      ensure(slug.includes("/") ? slug.slice(0, slug.lastIndexOf("/")) : "").children.push(node);
+      return node;
+    };
+    for (const tick of sortedTicks) {
+      const info = tick.subject ? resolved[`${tick.subject.type}-${tick.subject.id}`] : undefined;
+      if (info?.slug) {
+        ensure(info.slug).ticks.push(tick);
+        continue;
+      }
+      // Ticks without a place in the tree. Both kinds belong to the same bucket: subject-less
+      // ticks are not on OSM at all yet (issue #154), while ticks with a subject exist on OSM
+      // but are missing from the local dataset snapshot (e.g. routes just added to the map).
+      // The tick rows themselves tell the two cases apart (OSM link vs "Add to OSM").
+      const bucketName = "Not in the map data";
+      let bucket = nodes.get(bucketName);
+      if (!bucket) {
+        bucket = { name: bucketName, children: [], ticks: [], total: 0 };
+        nodes.set(bucketName, bucket);
+        root.children.push(bucket);
+      }
+      bucket.ticks.push(tick);
+    }
+    const order = (node: PlaceNode): number => {
+      node.children.sort((a, b) => a.name.localeCompare(b.name));
+      node.total = node.ticks.length + node.children.reduce((sum, child) => sum + order(child), 0);
+      return node.total;
+    };
+    order(root);
+    return root;
+  });
+
+  $effect(() => {
+    if (sortMode !== "places" || !localDb.ready) return;
+    const slugs = new Set<string>();
+    const walk = (node: PlaceNode) => {
+      if (node.slug && placeNames[node.slug] === undefined) slugs.add(node.slug);
+      node.children.forEach(walk);
+    };
+    walk(placeTree!);
+    if (slugs.size === 0) return;
+    Promise.all([...slugs].map(async (slug) => [slug, await localDb.getNode(slug)] as const)).then((entries) => {
+      // Geographic places keep their name at the top level, OSM elements in their tags (see getName)
+      placeNames = {
+        ...placeNames,
+        ...Object.fromEntries(entries.map(([slug, node]) => [slug, (node && getName(node)) || slug])),
+      };
+    });
   });
 
   /** Inline edits are pushed to the PDS after a short delay, so typing stays smooth */
@@ -191,7 +350,7 @@
     busy = true;
     error = undefined;
     try {
-      await atproto.linkTick(tick, { type: candidate.feature.type, id: candidate.feature.id });
+      await atproto.linkTick(tick, { type: candidate.feature.type, id: candidate.feature.id }, candidate.feature.tags?.name);
       const { [tick.localId!]: _removed, ...rest } = rematch;
       rematch = rest;
     } catch (err) {
@@ -201,32 +360,8 @@
     }
   }
 
-  /** Parent area candidates for the "add to OSM" flow, by local tick id */
-  let areaChoices = $state<Record<string, { slug: string; name: string }[]>>({});
-  let chosenArea = $state<Record<string, string>>({});
-
-  async function onAddToOsm(tick: LocalTickEntry) {
-    const id = tick.localId!;
-    error = undefined;
-    if (!tick.crag) {
-      error = `No crag known for "${tick.name}": open its crag page and use "Add route" on the map instead.`;
-      return;
-    }
-    if (areaChoices[id]) return;
-    const matches = await localDb.matchAreas([tick.crag]);
-    areaChoices = {
-      ...areaChoices,
-      [id]: matches[0]!.map((m) => ({ slug: m.slug, name: (m.data as OsmFeature).tags?.name ?? m.slug })),
-    };
-    const first = areaChoices[id]![0];
-    if (first) chosenArea = { ...chosenArea, [id]: first.slug };
-  }
-
-  function gotoPlacement(tick: LocalTickEntry) {
-    const parentSlug = chosenArea[tick.localId!];
-    if (!parentSlug) return;
-    void goto(`${resolve("/world/[...slug]", { slug: parentSlug })}?addRouteTick=${tick.localId}`);
-  }
+  /** The tick currently going through the "Add to OSM" dialog */
+  let addOsmTick = $state<LocalTickEntry | undefined>();
 </script>
 
 <section class="flex flex-col gap-3 rounded-md border p-3.5" aria-label="Your ticks">
@@ -243,19 +378,17 @@
     <p class="text-xs text-destructive">{error}</p>
   {/if}
 
-  {#if sortedTicks.length === 0}
-    <p class="text-xs text-muted-foreground">No ticks yet. Log them on a route page, or import a logbook above.</p>
-  {:else}
-    <ul class="flex flex-col gap-2 text-sm">
-      {#each sortedTicks as tick (tick.localId)}
+  {#snippet tickRow(tick: LocalTickEntry)}
         {@const linked = rematch[tick.localId!]?.candidates ?? []}
         {@const info = tick.subject ? resolved[`${tick.subject.type}-${tick.subject.id}`] : undefined}
         <li class="flex flex-col gap-1 rounded border p-2">
           <div class="flex flex-wrap items-center gap-2">
             {#if tick.subject}
               <a
-                href={`https://www.openstreetmap.org/${tick.subject.type}/${tick.subject.id}`}
-                target="_blank"
+                href={info?.slug
+                  ? resolve("/world/[...slug]", { slug: info.slug })
+                  : `https://www.openstreetmap.org/${tick.subject.type}/${tick.subject.id}`}
+                target={info?.slug ? undefined : "_blank"}
                 rel="noreferrer"
                 class="font-medium underline underline-offset-2"
               >
@@ -298,13 +431,6 @@
                 aria-label="Ascent date of {labelFor(tick)}"
                 onchange={(e) => setDate(tick, (e.target as HTMLInputElement).value)}
               />
-              <Input
-                class="min-w-40 flex-1 text-xs"
-                value={tick.comment ?? ""}
-                placeholder="Comment"
-                aria-label="Comment on {labelFor(tick)}"
-                oninput={(e) => setComment(tick, (e.target as HTMLInputElement).value)}
-              />
               <Button
                 size="icon-xs"
                 variant="ghost"
@@ -317,10 +443,17 @@
               </Button>
             </span>
           </div>
+          <Input
+            class="w-full text-xs"
+            value={tick.comment ?? ""}
+            placeholder="Comment"
+            aria-label="Comment on {labelFor(tick)}"
+            oninput={(e) => setComment(tick, (e.target as HTMLInputElement).value)}
+          />
 
           {#if !tick.subject}
             <p class="text-xs text-muted-foreground">
-              Not on OpenStreetMap{tick.crag ? ` · ${tick.crag}` : ""}
+              Not on OpenStreetMap{tick.locationHint ? ` · ${tick.locationHint}` : ""}
             </p>
 
             {#if linked.length > 0}
@@ -342,34 +475,51 @@
               </div>
             {:else}
               <div class="flex flex-wrap items-center gap-2">
-                {#if areaChoices[tick.localId!]}
-                  <Select
-                    aria-label="Parent crag for {labelFor(tick)}"
-                    class="w-auto max-w-56"
-                    value={chosenArea[tick.localId!] ?? ""}
-                    onchange={(e) =>
-                      (chosenArea = { ...chosenArea, [tick.localId!]: (e.target as HTMLSelectElement).value })}
-                  >
-                    {#each areaChoices[tick.localId!] as area (area.slug)}
-                      <option value={area.slug}>{area.name}</option>
-                    {/each}
-                  </Select>
-                  <Button size="xs" variant="outline" onclick={() => gotoPlacement(tick)}>
-                    <span class="icon-[lucide--map-pin-plus] shrink-0 size-4"></span>
-                    Add to OSM
-                  </Button>
-                  <span class="text-xs text-muted-foreground">You will place the route on the crag's map.</span>
-                {:else}
-                  <Button size="xs" variant="outline" disabled={busy} onclick={() => onAddToOsm(tick)}>
-                    <span class="icon-[lucide--map-pin-plus] shrink-0 size-4"></span>
-                    Add to OSM
-                  </Button>
-                {/if}
+                <Button size="xs" variant="outline" onclick={() => (addOsmTick = tick)}>
+                  <span class="icon-[lucide--map-pin-plus] shrink-0 size-4"></span>
+                  Add to OSM
+                </Button>
               </div>
             {/if}
           {/if}
         </li>
+  {/snippet}
+
+  {#snippet placeNode(node: PlaceNode)}
+    <li>
+      <details open>
+        <summary class="cursor-pointer select-none text-xs font-medium text-muted-foreground">
+          {node.name} ({node.total})
+        </summary>
+        <ul class="ms-2 flex flex-col gap-1 border-s ps-3 pt-1">
+          {#each node.children as child (child.slug ?? child.name)}
+            {@render placeNode(child)}
+          {/each}
+          {#each node.ticks as tick (tick.localId)}
+            {@render tickRow(tick)}
+          {/each}
+        </ul>
+      </details>
+    </li>
+  {/snippet}
+
+  {#if sortedTicks.length === 0}
+    <p class="text-xs text-muted-foreground">No ticks yet. Log them on a route page, or import a logbook above.</p>
+  {:else if sortMode === "places"}
+    <ul class="flex flex-col gap-1 text-sm">
+      {#each placeTree!.children as node (node.slug ?? node.name)}
+        {@render placeNode(node)}
+      {/each}
+    </ul>
+  {:else}
+    <ul class="flex flex-col gap-2 text-sm">
+      {#each sortedTicks as tick (tick.localId)}
+        {@render tickRow(tick)}
       {/each}
     </ul>
   {/if}
 </section>
+
+{#if addOsmTick}
+  <AddToOsmDialog tick={addOsmTick} onClose={() => (addOsmTick = undefined)} />
+{/if}

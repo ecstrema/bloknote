@@ -44,6 +44,9 @@
   let truncated = $state(false);
   let format = $state<TickImportFormat>("mountainproject");
   let phase = $state<"pick" | "matching" | "review" | "importing">("pick");
+  /** Ticks whose OSM lookup has been processed so far, shown while matching */
+  let matchingProgress = $state(0);
+  let matchingTotal = $state(0);
   let parseError = $state<string>();
   let result = $state<{ imported: number; unmatched: number; alreadyLogged: number }>();
   let progress = $state(0);
@@ -93,15 +96,18 @@
     format = parsed.format;
     truncated = parsed.ticks.length > MAX_ROWS;
 
-    phase = "matching";
     const importRows: ImportRow[] = parsed.ticks
       .slice(0, MAX_ROWS)
       .map((tick, id) => ({ id, tick, candidates: [], selectedSlug: "", alreadyLogged: false }));
+    phase = "matching";
+    matchingTotal = importRows.length;
+    matchingProgress = 0;
     // Routes are only searched inside the area given by the export: the location from the CSV
     // locates the crag(s), then route names are matched inside them (issue #154)
     const queries = importRows.map((row) => ({ name: row.tick.routeName, area: row.tick.area }));
     for (let start = 0; start < queries.length; start += MATCH_BATCH) {
       const matches = await localDb.matchTicks(queries.slice(start, start + MATCH_BATCH));
+      matchingProgress = Math.min(start + MATCH_BATCH, queries.length);
       matches.forEach((found, index) => {
         const row = importRows[start + index];
         if (!row) return;
@@ -167,7 +173,11 @@
         } else {
           // Route not on OSM (yet): the tick is stored without a subject and can be linked later
           await atproto.addNameTick(
-            { name: row.tick.routeName, grade: row.tick.grade, crag: row.tick.cragName },
+            {
+              name: row.tick.routeName,
+              grade: row.tick.grade,
+              locationHint: row.tick.location ?? row.tick.area ?? row.tick.cragName,
+            },
             row.tick.style,
             row.tick.notes,
             row.tick.date,
@@ -250,7 +260,7 @@
   {#if phase === "matching"}
     <p class="flex items-center gap-2 text-xs text-muted-foreground">
       <span aria-hidden="true" class="icon-[lucide--loader-circle] size-4 animate-spin"></span>
-      Matching routes in their crags...
+      Matching routes in their crags... {matchingProgress}/{matchingTotal}
     </p>
   {:else if phase === "importing"}
     <p class="flex items-center gap-2 text-xs text-muted-foreground">
