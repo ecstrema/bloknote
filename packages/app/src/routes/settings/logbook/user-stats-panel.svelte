@@ -132,18 +132,23 @@
   });
   const maxGradeRef = $derived(Math.max(1, ...maxGradePerMonth.map((m) => m.ref)));
 
-  /** Tick count per route: the number of tries on each climbed route */
-  const triesPerRoute = $derived.by(() => {
-    const counts = new Map<string, { name: string; count: number }>();
+  /** Tries (attempts) per grade in the display scale: only meaningful when attempts are logged (issue #199) */
+  const triesPerGrade = $derived.by(() => {
+    const counts = new Map<string, { grade: string; count: number; ref: number }>();
     for (const tick of osmTicks) {
-      const key = refKey(tick.subject!);
-      const entry = counts.get(key) ?? { name: resolvedRefs[key]?.name ?? tick.label ?? key, count: 0 };
+      if (tick.outcome !== "attempt") continue;
+      const info = resolvedRefs[refKey(tick.subject!)];
+      if (!info?.grade || info.grade.scale === "unknown") continue;
+      const displayed = displayGrade(info.grade);
+      if (displayed.scale === "unknown") continue;
+      const ref = getReference(displayed.v, getScale(displayed.scale as ScaleId)!) ?? 0;
+      const entry = counts.get(displayed.v) ?? { grade: displayed.v, count: 0, ref };
       entry.count += 1;
-      counts.set(key, entry);
+      counts.set(displayed.v, entry);
     }
-    return [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 8);
+    return [...counts.values()].sort((a, b) => a.ref - b.ref);
   });
-  const maxTries = $derived(Math.max(1, ...triesPerRoute.map((r) => r.count)));
+  const maxTries = $derived(Math.max(1, ...triesPerGrade.map((g) => g.count)));
 
   /** Grade pyramid, filterable by route style */
   let pyramidType = $state("all");
@@ -364,30 +369,38 @@
       </div>
     {/if}
 
-    {#if triesPerRoute.length > 0}
-      {@const triesHeight = triesPerRoute.length * 26 + padding.top + padding.bottom}
+    {#if stats.totalAttempts > 0 && triesPerGrade.length > 0}
       <div class="flex flex-col gap-2">
-        <h3 class="text-xs font-semibold uppercase text-muted-foreground">Tries per route</h3>
-        <div class="w-full max-w-md" style={`height: ${triesHeight}px`}>
+        <h3 class="text-xs font-semibold uppercase text-muted-foreground">Tries per grade</h3>
+        <div class="h-[160px] w-full max-w-md">
           <Chart
-            data={triesPerRoute}
-            height={triesHeight}
-            x="count"
-            y="name"
-            xScale={scaleLinear()}
-            yScale={scaleBand().padding(0.2)}
-            xDomain={[0, maxTries]}
+            data={triesPerGrade}
+            height={160}
+            x="grade"
+            y="count"
+            xScale={scaleBand().padding(0.28)}
+            yScale={scaleLinear()}
+            yDomain={[0, maxTries]}
             {padding}
           >
             {#snippet children({ context })}
               <Layer>
-                <Axis placement="bottom" ticks={Math.min(4, maxTries)} grid rule />
-                {#each triesPerRoute as entry (entry.name)}
-                  {@const y = context.yScale(entry.name) ?? 0}
-                  {@const bh = context.yScale.bandwidth?.() ?? 16}
-                  {@const w = context.xScale(entry.count) - context.xScale(0)}
-                  <Rect x={context.xScale(0)} {y} width={Math.max(1, w)} height={bh} fill="#8b5cf6" rx={2} />
-                  <Text x={4} y={y + bh / 2} fontSize={10} dominantBaseline="middle" value={entry.name} />
+                <Axis placement="left" ticks={Math.min(4, maxTries)} grid rule />
+                <Axis placement="bottom" rule />
+                {#each triesPerGrade as entry (entry.grade)}
+                  {@const x = context.xScale(entry.grade) ?? 0}
+                  {@const bw = context.xScale.bandwidth?.() ?? 20}
+                  {@const yTop = context.yScale(entry.count)}
+                  {@const yBot = context.yScale(0)}
+                  <Rect {x} y={yTop} width={bw} height={Math.max(1, yBot - yTop)} fill="#8b5cf6" rx={2} />
+                  <Text
+                    x={x + bw / 2}
+                    y={yTop - 4}
+                    textAnchor="middle"
+                    fontSize={10}
+                    value={String(entry.count)}
+                    class="fill-muted-foreground"
+                  />
                 {/each}
               </Layer>
             {/snippet}
