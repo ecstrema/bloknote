@@ -531,9 +531,20 @@
       attributionControl: { compact: true },
     });
     if (typeof window !== "undefined") (window as any).__maplibre = map;
+    // The compass doubles as a north arrow (issue #213): always visible in 3D, and whenever the
+    // map is rotated so north is not up. `map-3d` is toggled by the terrain control above.
+    const syncRotated = () => element.classList.toggle("map-rotated", map.getBearing() !== 0);
+    map.on("rotate", syncRotated);
+    syncRotated();
     map.addControl(new NavigationControl({ visualizePitch: true }), "top-right");
     map.addControl(new GeolocateControl({ positionOptions: { enableHighAccuracy: true } }), "top-right");
     map.addControl(new TerrainControl({ source: "terrain" }), "top-right");
+    // The relief button toggles 3D terrain: explain how to rotate the view once it is on (issue #213)
+    const terrainButton = element.querySelector<HTMLButtonElement>(".maplibregl-ctrl-terrain");
+    if (terrainButton) {
+      terrainButton.title =
+        "Toggle 3D terrain. With terrain on, drag with the right mouse button (or two fingers on a trackpad) to rotate the view.";
+    }
     map.addControl(addRouteControl, "top-right");
     map.addControl(legendControl, "top-right");
     map.addControl(new ScaleControl({ unit: "metric" }), "bottom-left");
@@ -950,11 +961,13 @@
 </div>
 
 <style>
-  /* The compass (pitch indicator) only makes sense with 3D terrain enabled */
+  /* The compass (pitch indicator) doubles as a north arrow: visible in 3D, and whenever the
+     map is rotated so north is not up (issue #213) */
   :global(.location-map-host .maplibregl-ctrl-compass) {
     display: none;
   }
-  :global(.location-map-host.map-3d .maplibregl-ctrl-compass) {
+  :global(.location-map-host.map-3d .maplibregl-ctrl-compass),
+  :global(.location-map-host.map-rotated .maplibregl-ctrl-compass) {
     display: block;
   }
   /* MapLibre popups are white, whatever the theme */
