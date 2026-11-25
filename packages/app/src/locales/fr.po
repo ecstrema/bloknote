@@ -17813,3 +17813,47 @@ msgstr "Comparer les cotations de via ferrata"
 #: src/routes/docs/+page.svelte
 msgid "<0/> — User preferences such as preferred route and boulder grading scales, theme and language."
 msgstr ""
+
+#: src/lib/components/shell/sidebar/app-sidebar.svelte
+msgid "<0/> Suggest sectors..."
+msgstr "<0/> Suggérer des secteurs..."
+
+#: src/lib/components/shell/sidebar/app-sidebar.svelte
+msgid "Suggest sectors..."
+msgstr "Suggérer des secteurs..."
+
+#. 0: getLocalizedName(moveTargetParent?.feature) ?? "this place"
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "No routes without a sector found in {0}."
+msgstr "Aucune route sans secteur trouvée dans {0}."
+
+#. 0: orphanRoutes.length; 1: orphanRoutes.length === 1 ? "" \\: "s"; 2: getLocalizedName(moveTargetParent?.feature) ?? "this place"
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Group the {0} route{1} of {2} that are not in a sector yet, by how close they are to each other. Create the suggested sectors you agree with."
+msgstr "Regroupez les {0} routes{1} de {2} qui ne sont pas encore dans un secteur, selon leur proximité. Créez les secteurs suggérés qui vous conviennent."
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Suggest sectors"
+msgstr "Suggérer des secteurs"
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Max distance between routes"
+msgstr "Distance max entre les routes"
+
+#. 0: index + 1
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Sector {0} name (optional)"
+msgstr "Nom du secteur {0} (optionnel)"
+
+#. 0: orphanUnplaced; 1: orphanUnplaced === 1 ? "" \\: "s"
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "{0} route{1} without coordinates cannot be clustered."
+msgstr "{0} route{1} sans coordonnées ne peu(ven)t être regroupées."
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Max distance between routes <0/>"
+msgstr "Distance max entre les routes <0/>"
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Create sectors"
+msgstr "Créer les secteurs"

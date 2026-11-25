@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import { untrack } from "svelte";
   import { Button } from "#components/ui/button/index.js";
   import * as Dialog from "#components/ui/dialog/index.js";
   import { Input } from "#components/ui/input/index.js";
@@ -9,6 +10,12 @@
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { scaleIdToTag } from "#lib/data/parse/osm-tags.js";
   import { ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
+  import {
+    collectOrphanRoutes,
+    clusterRoutes,
+    describeClusterSize,
+    type OrphanRoute,
+  } from "#lib/data/parse/sector-clustering.js";
   import { collectRegionParentOptions, type ParentOption } from "#lib/data/region-locator.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
   import { ascentFromStyle, type TickStyle } from "@bloknote/common";
@@ -19,6 +26,7 @@
 
   export type BulkDialogKind =
     | "new-sector"
+    | "suggest-sectors"
     | "move-folder"
     | "change-scale"
     | "change-type"
@@ -44,6 +52,16 @@
   // @wc-ignore
   let tickStyle = $state<TickStyle>("redpoint");
   let tickComment = $state("");
+
+  // Suggested sectors from route clustering (issue #157)
+  let orphanRoutes = $state<OrphanRoute[]>([]);
+  let orphanUnplaced = $state(0);
+  // @wc-ignore
+  let clusterThreshold = $state(100);
+  let clusterChecks = $state<boolean[]>([]);
+  let clusterNames = $state<string[]>([]);
+
+  const suggestedClusters = $derived(clusterRoutes(orphanRoutes, Number(clusterThreshold)));
 
   const convertibleScales = allScales.filter((s) => !!scaleIdToTag(s.id));
   const styleOptions = Object.entries(ROUTE_STYLE_LABELS).filter(([k]) => k !== "other" && k !== "viaferrata");
@@ -86,6 +104,33 @@
     })();
   });
 
+  $effect(() => {
+    if (dialog !== "suggest-sectors") return;
+    // Everything below is untracked: the first automatic selection clears and refills the
+    // selection, which the parent slug derives from — tracking it would re-run this effect and
+    // close the dialog right away (issue #157).
+    untrack(() => {
+      const parent = moveTargetParentSlug !== undefined ? appState.tree.getReactiveNode(moveTargetParentSlug) : undefined;
+      if (!parent) {
+        dialog = null;
+        return;
+      }
+      const collected = collectOrphanRoutes(parent);
+      orphanRoutes = collected.routes;
+      orphanUnplaced = collected.unplaced;
+      clusterThreshold = 100;
+      // First automatic selection: highlight the routes of the biggest cluster (issue #157)
+      selection.clear();
+      for (const slug of clusterRoutes(collected.routes, 100)[0]?.slugs ?? []) selection.selected.add(slug);
+    });
+  });
+
+  // Reset the per-cluster form state whenever the clustering changes (threshold, new routes)
+  $effect(() => {
+    clusterChecks = suggestedClusters.map((cluster) => cluster.slugs.length >= 2);
+    clusterNames = suggestedClusters.map(() => "");
+  });
+
   const filteredFolders = $derived.by(() => {
     const q = folderFilter.trim().toLowerCase();
     return q
@@ -104,6 +149,19 @@
         void goto(getItemUrl(moveTargetParentSlug, feature));
       }
     }
+  }
+
+  function confirmSuggestSectors(event: SubmitEvent) {
+    event.preventDefault();
+    let created = 0;
+    suggestedClusters.forEach((cluster, index) => {
+      if (!clusterChecks[index]) return;
+      if (appState.createSectorWithItems(cluster.slugs, clusterNames[index]?.trim() || undefined, moveTargetParentSlug)) {
+        created++;
+      }
+    });
+    selection.clear();
+    dialog = null;
   }
 
   function confirmMoveFolder(event: SubmitEvent) {
@@ -157,6 +215,56 @@
         </Dialog.Header>
         <Input bind:value={newSectorName} placeholder="Sector name (optional)" autofocus />
         {@render footer("Create & move")}
+      </form>
+    {:else if dialog === "suggest-sectors"}
+      <form onsubmit={confirmSuggestSectors} class="flex flex-col gap-4">
+        <Dialog.Header>
+          <Dialog.Title>Suggest sectors</Dialog.Title>
+          <Dialog.Description>
+            {orphanRoutes.length === 0
+              ? `No routes without a sector found in ${getLocalizedName(moveTargetParent?.feature) ?? "this place"}.`
+              : `Group the ${orphanRoutes.length} route${orphanRoutes.length === 1 ? "" : "s"} of ${
+                  getLocalizedName(moveTargetParent?.feature) ?? "this place"
+                } that are not in a sector yet, by how close they are to each other. Create the suggested sectors you agree with.`}
+          </Dialog.Description>
+        </Dialog.Header>
+        {#if orphanRoutes.length > 0}
+          <label class="flex items-center justify-between gap-2 text-sm">
+            Max distance between routes
+            <Select aria-label="Max distance between routes" bind:value={clusterThreshold}>
+              <option value={50}>50 m</option>
+              <option value={100}>100 m</option>
+              <option value={200}>200 m</option>
+              <option value={500}>500 m</option>
+            </Select>
+          </label>
+          <div class="flex max-h-64 flex-col gap-2 overflow-y-auto">
+            {#each suggestedClusters as cluster, index (cluster.slugs[0])}
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2 text-sm">
+                  <input type="checkbox" class="size-4 accent-primary" bind:checked={clusterChecks[index]} />
+                  <Input
+                    bind:value={clusterNames[index]}
+                    placeholder={`Sector ${index + 1} name (optional)`}
+                    class="flex-1"
+                  />
+                  <span class="shrink-0 text-xs text-muted-foreground">{describeClusterSize(cluster)}</span>
+                </div>
+                {#if cluster.names.length > 0}
+                  <p class="truncate pl-6 text-xs text-muted-foreground">
+                    {cluster.names.slice(0, 4).join(", ")}{cluster.names.length > 4 ? `, +${cluster.names.length - 4}` : ""}
+                  </p>
+                {/if}
+              </div>
+            {/each}
+          </div>
+          {#if orphanUnplaced > 0}
+            <p class="text-xs text-muted-foreground">
+              {orphanUnplaced} route{orphanUnplaced === 1 ? "" : "s"} without coordinates cannot be clustered.
+            </p>
+          {/if}
+        {/if}
+        {@render footer("Create sectors", false, !clusterChecks.some(Boolean))}
       </form>
     {:else if dialog === "move-folder"}
       <form onsubmit={confirmMoveFolder} class="flex flex-col gap-4">

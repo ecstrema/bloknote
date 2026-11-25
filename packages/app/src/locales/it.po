@@ -17813,3 +17813,47 @@ msgstr "Confronta i gradi delle vie ferrate"
 #: src/routes/docs/+page.svelte
 msgid "<0/> — User preferences such as preferred route and boulder grading scales, theme and language."
 msgstr ""
+
+#: src/lib/components/shell/sidebar/app-sidebar.svelte
+msgid "<0/> Suggest sectors..."
+msgstr "<0/> Suggerisci settori..."
+
+#: src/lib/components/shell/sidebar/app-sidebar.svelte
+msgid "Suggest sectors..."
+msgstr "Suggerisci settori..."
+
+#. 0: getLocalizedName(moveTargetParent?.feature) ?? "this place"
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "No routes without a sector found in {0}."
+msgstr "Nessuna via senza settore trovata in {0}."
+
+#. 0: orphanRoutes.length; 1: orphanRoutes.length === 1 ? "" \\: "s"; 2: getLocalizedName(moveTargetParent?.feature) ?? "this place"
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Group the {0} route{1} of {2} that are not in a sector yet, by how close they are to each other. Create the suggested sectors you agree with."
+msgstr "Raggruppa le {0} vie{1} di {2} che non sono ancora in un settore, in base alla loro vicinanza. Crea i settori suggeriti con cui sei d'accordo."
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Suggest sectors"
+msgstr "Suggerisci settori"
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Max distance between routes"
+msgstr "Distanza massima tra le vie"
+
+#. 0: index + 1
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Sector {0} name (optional)"
+msgstr "Nome del settore {0} (opzionale)"
+
+#. 0: orphanUnplaced; 1: orphanUnplaced === 1 ? "" \\: "s"
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "{0} route{1} without coordinates cannot be clustered."
+msgstr "Non è possibile raggruppare {0} via{1} senza coordinate."
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Max distance between routes <0/>"
+msgstr "Distanza massima tra le vie <0/>"
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "Create sectors"
+msgstr "Crea i settori"

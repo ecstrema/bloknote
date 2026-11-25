@@ -102,7 +102,7 @@ export interface ItemVersion {
   geometryChange: string | undefined;
 }
 
-function haversineMeters(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
+export function haversineMeters(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat);
   const dLon = toRad(b.lon - a.lon);
@@ -111,7 +111,7 @@ function haversineMeters(a: { lat: number; lon: number }, b: { lat: number; lon:
   return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
 }
 
-function formatDistance(meters: number): string {
+export function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`;
 }
 

@@ -435,6 +435,10 @@
                   <span class="icon-[lucide--folder-plus] shrink-0 size-4"></span>
                   Move to new sector...
                 </ContextMenu.Item>
+                <ContextMenu.Item onclick={() => (bulkDialog = "suggest-sectors")}>
+                  <span class="icon-[lucide--wand-sparkles] shrink-0 size-4"></span>
+                  Suggest sectors...
+                </ContextMenu.Item>
                 <ContextMenu.Separator />
                 <ContextMenu.Sub>
                   <ContextMenu.SubTrigger>Change grading system</ContextMenu.SubTrigger>
@@ -511,6 +515,7 @@
             </DropdownMenu.Trigger>
             <DropdownMenu.Content align="end">
               <DropdownMenu.Item onclick={() => (bulkDialog = "move-folder")}>Move to folder...</DropdownMenu.Item>
+              <DropdownMenu.Item onclick={() => (bulkDialog = "suggest-sectors")}>Suggest sectors...</DropdownMenu.Item>
               <DropdownMenu.Item onclick={() => (bulkDialog = "change-scale")}
                 >Change grading system...</DropdownMenu.Item
               >
