@@ -78,9 +78,15 @@
     } else {
       dragMarker = new Marker({ color: "#2563eb", draggable }).setLngLat([coords.lon, coords.lat]).addTo(map);
 
+      // MapLibre keeps the drag-pan handler active while a marker is dragged (issue #210):
+      // freeze the camera for the whole drag, and restore it afterwards.
+      dragMarker.on("dragstart", () => {
+        map.dragPan.disable();
+      });
       dragMarker.on("dragend", () => {
-        if (dragMarker && currentOnmove) {
-          const lngLat = dragMarker.getLngLat();
+        map.dragPan.enable();
+        if (currentOnmove) {
+          const lngLat = dragMarker!.getLngLat();
           currentOnmove({ lat: lngLat.lat, lon: lngLat.lng });
         }
       });
@@ -709,9 +715,9 @@
 
     if (!coordinates) return;
 
-    // Gentle re-centering when the user placed the view themselves and the target is visible
+    // The user placed the camera themselves: a target that is already visible is only
+    // highlighted and selected, the map is not moved at all (issue #200)
     if (userPositioned && map.getBounds().contains([coordinates.lon, coordinates.lat])) {
-      map.easeTo({ center: [coordinates.lon, coordinates.lat], duration: 500 });
       return;
     }
 

@@ -15,11 +15,21 @@ export function addTerrainSource(map: MapLibreMap): void {
     maxzoom: 15,
     attribution: "Elevation: Mapzen / AWS Terrain Tiles",
   });
+  // Hillshading uses its own DEM source: MapLibre warns that sharing one raster-dem source
+  // between a hillshade layer and 3D terrain hurts rendering quality (issue #209)
+  map.addSource("hillshade", {
+    type: "raster-dem",
+    tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],
+    encoding: "terrarium",
+    tileSize: 256,
+    maxzoom: 15,
+    attribution: "Elevation: Mapzen / AWS Terrain Tiles",
+  });
   // Hidden until terrain is enabled, so tiles are not downloaded before
   map.addLayer({
     id: "hillshade",
     type: "hillshade",
-    source: "terrain",
+    source: "hillshade",
     layout: { visibility: "none" },
     paint: { "hillshade-exaggeration": 0.45 },
   });
