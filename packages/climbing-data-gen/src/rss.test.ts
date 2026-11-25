@@ -38,6 +38,32 @@ describe("rss", () => {
     expect(item!.xml).toContain("world/europe/france/bas-cuvier");
     expect(item!.xml).toContain('isPermaLink="false">osm-node-42-v3<');
     expect(item!.xml).toContain("Fri, 20 Nov 2026 10:00:00 GMT");
+    // Version > 1 means the element already existed: it was edited, not added (issue #182)
+    expect(item!.xml).toContain("was edited by");
+  });
+
+  it("says that a first-version element was added, and a later one edited (issue #182)", () => {
+    const added = recentItemXml(
+      feature({ id: 1, version: 1, timestamp: "2026-11-20T10:00:00Z", user: "Alice", tags: { name: "X" } }),
+      "world/x",
+      NOW,
+    )!;
+    expect(added.xml).toContain("was added by");
+    expect(added.xml).not.toContain("was edited");
+    const edited = recentItemXml(
+      feature({ id: 1, version: 4, timestamp: "2026-11-20T10:00:00Z", user: "Alice", tags: { name: "X" } }),
+      "world/x",
+      NOW,
+    )!;
+    expect(edited.xml).toContain("was edited by");
+    expect(edited.xml).not.toContain("was added");
+    // Elements without a version are treated as newly created
+    const unknown = recentItemXml(
+      feature({ id: 1, timestamp: "2026-11-20T10:00:00Z", user: "Alice", tags: { name: "X" } }),
+      "world/x",
+      NOW,
+    )!;
+    expect(unknown.xml).toContain("was added by");
   });
 
   it("credits the contributor with a profile link in the description", () => {

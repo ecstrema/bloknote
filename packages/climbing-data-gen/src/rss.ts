@@ -67,10 +67,11 @@ function commonsFiles(value: string | undefined): { page: string; image: string 
 }
 
 /** The "… was added by <contributor>" paragraph, with a link to the OSM profile */
-function authorParagraph(summary: string, user: string | undefined): string {
-  if (!user) return escapeXml(`${summary} was added by an anonymous editor`);
+function authorParagraph(summary: string, user: string | undefined, created: boolean): string {
+  const verb = created ? "was added" : "was edited";
+  if (!user) return escapeXml(`${summary} ${verb} by an anonymous editor`);
   const profile = `${OSM_BASE_URL}/user/${encodeURIComponent(user)}`;
-  return `${escapeXml(`${summary} was added by`)} <a href="${escapeXml(profile)}">${escapeXml(user)}</a>`;
+  return `${escapeXml(`${summary} ${verb} by`)} <a href="${escapeXml(profile)}">${escapeXml(user)}</a>`;
 }
 
 /** The paragraph of links to the same feature on OpenStreetMap, OpenClimbing and Bloknote */
@@ -104,7 +105,7 @@ export function recentItemXml(el: OsmFeature, slug: string, now: number = Date.n
   const link = `${SITE_BASE_URL}/world/${cleanSlug}`;
   const guid = `osm-${el.type}-${el.id}-v${el.version ?? 0}`;
 
-  const paragraphs = [`<p>${authorParagraph(summary, el.user)}</p>`];
+  const paragraphs = [`<p>${authorParagraph(summary, el.user, (el.version ?? 1) === 1)}</p>`];
   for (const { page, image } of commonsFiles(el.tags?.wikimedia_commons)) {
     paragraphs.push(
       `<p><a href="${escapeXml(page)}"><img src="${escapeXml(image)}" alt="${escapeXml(`Photo of ${name}`)}" width="480"/></a></p>`,
