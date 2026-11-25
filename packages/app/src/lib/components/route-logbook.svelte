@@ -176,7 +176,9 @@
           </button>
         {/each}
         {#if routeRatings[0]}
-          <span class="ml-1">{new Date(routeRatings[0].createdAt).toLocaleDateString()}</span>
+          {#if routeRatings[0].createdAt}
+            <span class="ml-1">{new Date(routeRatings[0].createdAt).toLocaleDateString()}</span>
+          {/if}
           {#if atproto.configured}
             <button
               type="button"

@@ -10,7 +10,11 @@
     },
     "./polyfills": "./src/polyfills.ts"
   },
+  "scripts": {
+    "generate": "lex build --lexicons ../../lexicons --out src/lexicons --lib @atproto/lex --index-file --clear --import-ext \".ts\""
+  },
   "devDependencies": {
+    "@atproto/lex": "^0.7.0",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
   }

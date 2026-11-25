@@ -8,7 +8,11 @@
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["subject", "field", "value", "createdAt"],
+        "required": [
+          "subject",
+          "field",
+          "value"
+        ],
         "properties": {
           "subject": {
             "type": "ref",

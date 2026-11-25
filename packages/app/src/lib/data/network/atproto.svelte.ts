@@ -137,7 +137,6 @@ function remoteTickRecord(entry: LocalTickEntry): TickRecord {
     ...(entry.hangs ? { hangs: entry.hangs } : {}),
     ...(entry.ascentInfo ? { ascentInfo: entry.ascentInfo } : {}),
     climbedAt: entry.climbedAt,
-    createdAt: entry.createdAt,
     ...(entry.comment ? { comment: entry.comment } : {}),
     ...(entry.name ? { name: entry.name } : {}),
     ...(entry.grade ? { grade: entry.grade } : {}),
@@ -534,7 +533,6 @@ class AtProtoClient {
       subject: { type: feature.type, id: feature.id },
       ...ascent,
       climbedAt: climbed,
-      createdAt: now,
       label: feature.tags?.name,
       ...(comment?.trim() ? { comment: comment.trim() } : {}),
     };
@@ -569,7 +567,6 @@ class AtProtoClient {
     const record: LocalTickEntry = {
       ...ascent,
       climbedAt: climbedAt ?? now,
-      createdAt: now,
       name: tick.name,
       ...(tick.grade ? { grade: tick.grade } : {}),
       ...(tick.locationHint ? { locationHint: tick.locationHint } : {}),
@@ -756,14 +753,12 @@ class AtProtoClient {
 
     const entry: LocalStarEntry = {
       subject: ref,
-      createdAt: new Date().toISOString(),
       label: feature.tags?.name,
     };
     if (this.session && feature.id > 0) {
       try {
         entry.uri = await this.#createRemoteRecord(STAR_COLLECTION, {
           subject: entry.subject,
-          createdAt: entry.createdAt,
         });
       } catch (error) {
         if (!this.#oauthSession) throw error;
@@ -807,7 +802,6 @@ class AtProtoClient {
     const entry: LocalRatingEntry = {
       subject: { type: feature.type, id: feature.id },
       rating,
-      createdAt: new Date().toISOString(),
       label: feature.tags?.name,
     };
     if (this.session && feature.id > 0) {
@@ -815,7 +809,6 @@ class AtProtoClient {
         entry.uri = await this.#createRemoteRecord(RATING_COLLECTION, {
           subject: entry.subject,
           rating: entry.rating,
-          createdAt: entry.createdAt,
         });
       } catch (error) {
         if (!this.#oauthSession) throw error;

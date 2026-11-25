@@ -23,11 +23,6 @@
           "description": "OpenStreetMap element version the record refers to, when known. The ID can survive a way split or retagging, so this pins the exact state (e.g. the one that was ticked), retrievable from the OSM API history."
         }
       }
-    },
-    "geoPoint": {
-      "type": "ref",
-      "ref": "community.lexicon.location.geo",
-      "description": "Geographic coordinate pair, as defined by community.lexicon.location.geo"
     }
   }
 }
