@@ -13,6 +13,7 @@ import { hasScaleFields } from "../grading-scale-record.js";
 
 const BASE = "/bloknote";
 const SESSION_STORAGE_KEY = "bloknote:atproto-session";
+const HANDLES_STORAGE_KEY = "bloknote:atproto-handles";
 const TICKS_STORAGE_KEY = "bloknote:atproto-ticks";
 const STARS_STORAGE_KEY = "bloknote:atproto-stars";
 const COMMENTS_STORAGE_KEY = "bloknote:atproto-comments";
@@ -106,6 +107,17 @@ function loadSession(): AtProtoSession | undefined {
   const raw = readJson<AtProtoSession | null>(SESSION_STORAGE_KEY, null);
   if (raw && typeof raw.did === "string") return raw;
   return undefined;
+}
+
+/** Handles previously used to sign in on this device, for the login input autocomplete (issue #232) */
+export function previousHandles(): string[] {
+  return readJson<unknown[]>(HANDLES_STORAGE_KEY, []).filter((h): h is string => typeof h === "string" && !!h);
+}
+
+function rememberHandle(handle: string | undefined) {
+  if (!browser || !handle) return;
+  const handles = previousHandles().filter((h) => h !== handle);
+  localStorage.setItem(HANDLES_STORAGE_KEY, JSON.stringify([handle, ...handles].slice(0, 5)));
 }
 
 export function sameElementRef(a: OsmElementRef | undefined, b: OsmElementRef | undefined): boolean {
@@ -288,6 +300,7 @@ class AtProtoClient {
     const handle = stored?.did === oauthSession.did ? stored.handle : await this.#fetchHandle(oauthSession.did);
     this.session = { did: oauthSession.did, handle };
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(this.session));
+    rememberHandle(handle);
     await this.#hydrate();
   }
 
