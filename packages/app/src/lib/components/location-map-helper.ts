@@ -16,6 +16,12 @@ import { getParentSlug } from "#lib/helpers/slug.js";
 
 export const VECTOR_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 
+/**
+ * Cliffs (issue #55) are only downloaded and drawn when the user zooms deep into the region of
+ * the selected crag: there are too many of them to show worldwide.
+ */
+export const CLIFFS_MIN_ZOOM = 18;
+
 export function featureToMapElement(
   slug: string,
   feature: OsmFeature,
@@ -189,7 +195,7 @@ export const ELEMENT_TYPE_LAYERS: Record<string, string[]> = {
   route: ["routes", "route-labels"],
   area: ["areas"],
   gym: ["gyms"],
-  cliff: ["cliffs"],
+  cliff: ["cliffs", "cliff-points"],
   sector: ["sectors-contour", "sectors-label"],
 };
 
@@ -201,7 +207,9 @@ export function applyElementTypeVisibility(map: MapLibreMap, hiddenTypes: Readon
   for (const [elementType, layerIds] of Object.entries(ELEMENT_TYPE_LAYERS)) {
     for (const layerId of layerIds) {
       if (!map.getLayer(layerId)) continue;
-      const layer = CLIMBING_LAYERS.find((l) => l.id === layerId) as (LayerSpecification & { filter?: unknown }) | undefined;
+      const layer = CLIMBING_LAYERS.find((l) => l.id === layerId) as
+        | (LayerSpecification & { filter?: unknown })
+        | undefined;
       const base = layer?.filter;
       if (!base) continue;
       map.setFilter(
@@ -232,6 +240,23 @@ export function formatPopupHtml(props: MapElementFeature["properties"]): string 
   }
 
   return `<div class="font-semibold text-xs">${title}</div>${badge ? `<div class="text-[11px] opacity-80">${badge}</div>` : ""}`;
+}
+
+function escapeHtmlText(text: string): string {
+  return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+
+/** Popup of a cliff point of the `cliff-points` layer (issue #55) */
+export function cliffPopupHtml(props: { ref?: string; name?: string; pending?: boolean }): string {
+  const ref = props.ref ?? "";
+  const osmType = ref.startsWith("n") ? "node" : ref.startsWith("w") ? "way" : "relation";
+  const name = props.name ? escapeHtmlText(props.name) : "Unnamed cliff";
+  const link = `https://www.openstreetmap.org/${osmType}/${ref.slice(1)}`;
+  const pending = props.pending ? ' · <span style="color:#d97706">pending edit</span>' : "";
+  return (
+    `<div class="font-semibold text-xs">${name}</div>` +
+    `<div class="text-[11px] opacity-80">Cliff · <a href="${link}" target="_blank" rel="noopener noreferrer">${ref}</a>${pending}</div>`
+  );
 }
 
 /**
@@ -341,6 +366,20 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "line-color": "#78350f",
       "line-width": 2.5,
       "line-opacity": DIMMED_OPACITY,
+    },
+  },
+  {
+    // Cliff points of the region of the selected crag, loaded on demand at high zoom (issue #55)
+    id: "cliff-points",
+    type: "circle",
+    source: "cliff-points",
+    minzoom: CLIFFS_MIN_ZOOM,
+    filter: ["==", ["get", "elementType"], "cliff"],
+    paint: {
+      "circle-radius": ["case", ["get", "created"], 6, 5],
+      "circle-color": ["case", ["get", "created"], "#16a34a", "#78350f"],
+      "circle-stroke-color": "#ffffff",
+      "circle-stroke-width": 1.5,
     },
   },
   {

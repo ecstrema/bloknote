@@ -42,6 +42,7 @@
   import { dataClient } from "#lib/data/network/data-client.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
   import { findRoutePartPairs, isRouteBottom, isRouteTop, routeCompanionsBySlug } from "#lib/data/parse/route-parts.js";
+  import { moveCliffNode } from "#lib/data/cliffs.svelte.js";
 
   type PageTab = "overview" | "map" | "osm" | "diagnostics" | "pulse";
   function parseTab(value: string | null): PageTab | undefined {
@@ -304,6 +305,19 @@
     placementMode = null;
     addDialogOpen = true;
   }
+
+  // Cliffs of the region, shown on the map at high zoom while a crag is selected (issue #55)
+  const showCliffs = $derived(itemType === "area");
+  const cliffsEditable = $derived(showCliffs && appState.osmUser.loggedIn === true);
+
+  function onCliffMove(ref: string, position: { lat: number; lon: number }) {
+    void moveCliffNode(appState.osmUser, ref, position);
+  }
+
+  function onCliffCreate(position: { lat: number; lon: number }) {
+    // When the selected crag is a relation, the new cliff becomes one of its members
+    appState.createCliff(position, item.feature.type === "relation" ? itemSlug : undefined);
+  }
 </script>
 
 <svelte:window
@@ -323,7 +337,7 @@
     </h1>
     <RssFeedButton class="ms-auto" slug={itemSlug} />
   {:else if itemType === "gym"}
-    <span aria-hidden="true"  class="icon-[lucide--building] shrink-0 size-6 shrink-0"></span>
+    <span aria-hidden="true" class="icon-[lucide--building] shrink-0 size-6 shrink-0"></span>
     <EditableName feature={item.feature} featureSlug={itemSlug} />
     <BookmarkButton class="ms-auto" feature={item.feature} />
   {:else}
@@ -331,12 +345,20 @@
     {#if itemType === "route"}
       {@const routeTags = (item.feature as OsmFeature).tags ?? {}}
       {@const isProject = isProjectRoute(routeTags)}
-      <EditableGrade feature={item.feature} grade={getGrade(routeTags)} featureSlug={itemSlug} gradedProject={isProject} />
+      <EditableGrade
+        feature={item.feature}
+        grade={getGrade(routeTags)}
+        featureSlug={itemSlug}
+        gradedProject={isProject}
+      />
       {#if isTradRoute(routeTags)}
         <TradCamIcon class="self-center" />
       {/if}
       {#if isIceRoute(routeTags)}
-        <span aria-label="Ice / dry-tooling route" class="icon-[lucide--snowflake] shrink-0 size-3.5 self-center text-cyan-500"></span>
+        <span
+          aria-label="Ice / dry-tooling route"
+          class="icon-[lucide--snowflake] shrink-0 size-3.5 self-center text-cyan-500"
+        ></span>
       {/if}
       <EditableLength feature={item.feature} featureSlug={itemSlug} />
       <EditablePitches feature={item.feature} featureSlug={itemSlug} />
@@ -380,7 +402,10 @@
             {diagnosticsCount}{diagDbTruncated ? "+" : ""}
           </span>
         {:else if diagnosticsKnownClean}
-          <span aria-label="No issues"  class="icon-[lucide--check-circle-2] shrink-0 size-3.5 text-emerald-600 dark:text-emerald-400"></span>
+          <span
+            aria-label="No issues"
+            class="icon-[lucide--check-circle-2] shrink-0 size-3.5 text-emerald-600 dark:text-emerald-400"
+          ></span>
         {/if}
       </Tabs.Trigger>
       <Tabs.Trigger value="pulse">
@@ -434,17 +459,28 @@
           {fallbackCoordinates}
           {bounds}
           {placementMode}
-          addRoute={appState.osmUser.loggedIn ? { active: placementMode === "route", toggle: togglePlacement } : undefined}
+          addRoute={appState.osmUser.loggedIn
+            ? { active: placementMode === "route", toggle: togglePlacement }
+            : undefined}
           onmapclick={onMapPlacementClick}
           draggable={editable}
           onmove={editable ? (pos) => appState.setCoordinates(itemSlug, pos) : undefined}
           {companionSlugs}
+          cliffsEnabled={showCliffs}
+          {cliffsEditable}
+          oncliffmove={cliffsEditable ? onCliffMove : undefined}
+          oncliffcreate={cliffsEditable ? onCliffCreate : undefined}
         />
       {/await}
       {#if editable && coordinates}
         <p class="text-xs text-muted-foreground">Drag the marker on the map to move the route.</p>
       {/if}
-      <MapAddDialog bind:open={addDialogOpen} kind={addDialogKind} coordinates={clickedCoordinates} currentSlug={itemSlug} />
+      <MapAddDialog
+        bind:open={addDialogOpen}
+        kind={addDialogKind}
+        coordinates={clickedCoordinates}
+        currentSlug={itemSlug}
+      />
     {/if}
   </Tabs.Content>
 
@@ -454,13 +490,7 @@
         <span>{item.feature.type}/{item.feature.id}</span>
         {#if coordinates}
           <span>{coordinates.lat}, {coordinates.lon}</span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            title="Copy coordinates"
-            onclick={copyCoordinates}
-          >
+          <Button type="button" variant="ghost" size="icon-xs" title="Copy coordinates" onclick={copyCoordinates}>
             {#if coordinatesCopied}
               <span aria-hidden="true" class="icon-[lucide--check] shrink-0 size-3.5"></span>
             {:else}
@@ -477,7 +507,7 @@
             class="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground"
           >
             View on OpenStreetMap
-            <span aria-hidden="true"  class="icon-[lucide--external-link] shrink-0 size-3.5"></span>
+            <span aria-hidden="true" class="icon-[lucide--external-link] shrink-0 size-3.5"></span>
           </a>
         {/if}
       </div>

@@ -56,40 +56,50 @@ function postOverpassToEndpoint(query: string, endpoint: string): Promise<string
   });
 }
 
-/** Downloads and caches one worldwide Overpass result instead of splitting it into tiles. */
-export async function downloadClimbingData(
-  outputFilePath: string,
-  { force = false, onRetry }: { force?: boolean; onRetry?: (error: string) => void } = {},
-): Promise<string> {
-  if (!force && existsSync(outputFilePath)) {
-    const cached = JSON.parse(await readFile(outputFilePath, "utf8"));
-    if (Array.isArray(cached.elements)) {
-      console.log(`Using cached worldwide climbing data from ${outputFilePath}`);
-      return outputFilePath;
-    }
-    throw new Error(`Invalid climbing data cache: ${outputFilePath}`);
-  }
-
-  console.log("Downloading worldwide climbing data in one Overpass query...");
-  let data: any;
+/**
+ * Runs one Overpass query, retrying up to `GLOBAL_RETRIES` times with `GLOBAL_RETRY_DELAY`
+ * between attempts. Returns the parsed JSON of a valid response.
+ */
+export async function postOverpassWithRetries(
+  query: string,
+  { subject, onRetry }: { subject: string; onRetry?: (error: string) => void } = { subject: "Overpass data" },
+): Promise<any> {
   for (let attempt = 0; ; attempt++) {
     try {
-      const response = await postOverpass(WORLD_CLIMBING_QUERY, (result) => {
+      const response = await postOverpass(query, (result) => {
         if (result.remark) {
-          throw new Error(`Overpass returned incomplete climbing data: ${result.remark}`);
+          throw new Error(`Overpass returned an incomplete result: ${result.remark}`);
         }
       });
-      data = JSON.parse(response);
-      break;
+      return JSON.parse(response);
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
-      if (attempt >= GLOBAL_RETRIES) throw new Error(`Failed to download worldwide climbing data: ${message}`);
+      if (attempt >= GLOBAL_RETRIES) throw new Error(`Failed to download ${subject}: ${message}`);
       const warning = `Overpass failed (${message.slice(0, 300)}), retrying in ${GLOBAL_RETRY_DELAY / 1000} s (${GLOBAL_RETRIES - attempt} tries left)`;
       console.warn(warning);
       onRetry?.(warning);
       await sleep(GLOBAL_RETRY_DELAY);
     }
   }
+}
+
+/** Downloads and caches one worldwide Overpass result instead of splitting it into tiles. */
+export async function downloadOverpassData(
+  query: string,
+  outputFilePath: string,
+  { force = false, onRetry, subject }: { force?: boolean; onRetry?: (error: string) => void; subject: string },
+): Promise<string> {
+  if (!force && existsSync(outputFilePath)) {
+    const cached = JSON.parse(await readFile(outputFilePath, "utf8"));
+    if (Array.isArray(cached.elements)) {
+      console.log(`Using cached ${subject} from ${outputFilePath}`);
+      return outputFilePath;
+    }
+    throw new Error(`Invalid ${subject} cache: ${outputFilePath}`);
+  }
+
+  console.log(`Downloading worldwide ${subject} in one Overpass query...`);
+  const data = await postOverpassWithRetries(query, { subject, onRetry });
 
   await mkdir(dirname(outputFilePath), { recursive: true });
   const temporaryPath = `${outputFilePath}.tmp`;
@@ -97,4 +107,16 @@ export async function downloadClimbingData(
   await rename(temporaryPath, outputFilePath);
   console.log(`Saved ${data.elements.length} elements to ${outputFilePath}`);
   return outputFilePath;
+}
+
+/** Downloads and caches one worldwide Overpass result instead of splitting it into tiles. */
+export async function downloadClimbingData(
+  outputFilePath: string,
+  { force = false, onRetry }: { force?: boolean; onRetry?: (error: string) => void } = {},
+): Promise<string> {
+  return downloadOverpassData(WORLD_CLIMBING_QUERY, outputFilePath, {
+    force,
+    onRetry,
+    subject: "climbing data",
+  });
 }

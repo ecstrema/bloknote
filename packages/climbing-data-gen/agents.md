@@ -27,6 +27,7 @@ Overpass API (sport=climbing)
     |     `-- feed.xml       (RSS feed of recent subtree edits, only written when recent items exist)
     |-- world/download.json  (flat record of every feature, keyed by slug)
     |-- world/data-version.json (date-based version number (YYYYMMDD) and generation timestamp, used for client change detection and data age display)
+    |-- world/.../<region>/cliffs.json (lightweight natural=cliff points of the region, only written in regions holding climbing data; downloaded by the app at zoom 18+ on a selected crag, issue #55)
     `-- osm-index/node-*.json   (sharded OSM node index for live OSM lookups)
 ```
 
@@ -38,6 +39,7 @@ Overpass API (sport=climbing)
 - **`src/reverse-geolocation.ts`**: Evaluates point coordinates against the hierarchy bounding box index (`HIERARCHY_INDEX`), then performs precise Turf point-in-polygon checks on leaf GeoJSON boundaries.
 - **`src/static-api-generator.ts`**: Partitions climbing places into regional directory buckets, writes per-region `data.json`, `children.json`, `stats.json`, and `feed.xml` (see `src/rss.ts`), and assembles the top-level `download.json` (every feature in one flat record) plus `data-version.json` (a date-based version number YYYYMMDD and the generation timestamp).
 - **`src/world-points.ts`**: Extracts lightweight point coordinates and attributes for fast spatial sorting and map rendering.
+- **`src/cliffs.ts`**: Downloads every `natural=cliff` worldwide (cached in `src/cliffs.json`, refreshed with `--refresh-cliffs`), geolocates each cliff center like the climbing places, and writes one `cliffs.json` per region directory that already exists (issue #55). A failed cliff download only logs a warning: the climbing API is already generated at that point.
 
 ---
 

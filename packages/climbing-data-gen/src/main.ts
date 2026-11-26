@@ -20,7 +20,8 @@ if (!Map.prototype.getOrInsert) {
 
 import { existsSync } from "fs";
 import { rm } from "fs/promises";
-import { CLIMBING_DATA_FILE, OUT_DIR } from "./config.ts";
+import { CLIFFS_DATA_FILE, CLIMBING_DATA_FILE, OUT_DIR } from "./config.ts";
+import { downloadCliffsData, generateCliffFiles } from "./cliffs.ts";
 import { downloadClimbingData } from "./download.ts";
 import { generateStaticAPI } from "./static-api-generator.ts";
 
@@ -42,3 +43,19 @@ await generateStaticAPI({
   outApiDirectory: OUT_DIR,
   reverseGeocodingDataDirectory: REVERSE_GEOCODING_DATA_DIR,
 });
+
+// Cliffs are auxiliary data (issue #55): a failed download must not break the climbing API,
+// which was already generated above.
+try {
+  const cliffsDataFile = await downloadCliffsData(CLIFFS_DATA_FILE, {
+    force: process.argv.includes("--refresh-cliffs"),
+  });
+  await generateCliffFiles({
+    geoIndexFile: HIERARCHY_INDEX,
+    reverseGeocodingDataDirectory: REVERSE_GEOCODING_DATA_DIR,
+    cliffsDataFile,
+    outApiDirectory: OUT_DIR,
+  });
+} catch (e) {
+  console.warn(`Skipping the cliffs files (issue #55): ${e instanceof Error ? e.message : e}`);
+}

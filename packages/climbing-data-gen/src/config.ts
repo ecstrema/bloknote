@@ -12,3 +12,5 @@ if (dirname.includes(".svelte-kit")) {
 export const OUT_DIR = join(dirname, "../build");
 /** Raw worldwide Overpass result containing climbing features and their dependencies */
 export const CLIMBING_DATA_FILE = join(dirname, "climbing.json");
+/** Raw worldwide Overpass result containing every natural=cliff feature */
+export const CLIFFS_DATA_FILE = join(dirname, "cliffs.json");

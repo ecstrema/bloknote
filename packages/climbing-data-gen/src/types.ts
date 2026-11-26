@@ -27,3 +27,19 @@ export interface GeographicFolderElement {
 }
 
 export type DataJSON = OsmFeature | GeographicFolderElement;
+
+/** One cliff of a region cliffs.json file, keyed by its OSM reference (`w123`) */
+export interface CliffPoint {
+  /** `n123`, `w123` or `r123` */
+  id: string;
+  lon: number;
+  lat: number;
+  name?: string;
+}
+
+/** Content of the cliffs.json file of a region, downloaded by the app at high zoom (issue #55) */
+export interface RegionCliffs {
+  /** ISO date of the OSM data */
+  timestamp: string;
+  cliffs: CliffPoint[];
+}

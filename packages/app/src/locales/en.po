@@ -14870,14 +14870,18 @@ msgstr "Opening hours: {0}"
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
 msgid "FeatureCollection"
 msgstr "FeatureCollection"
 
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
 msgid "Feature"
 msgstr "Feature"
 
+#: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
@@ -17851,3 +17855,7 @@ msgstr "(downloading the offline dataset first, {0}{1} {2}%)"
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "<0/> Matching routes in their crags... {0}/{1} <1/>"
 msgstr "<0/> Matching routes in their crags... {0}/{1} <1/>"
+
+#: src/lib/components/location-map.svelte
+msgid "Drag this pin onto the map to add a cliff"
+msgstr "Drag this pin onto the map to add a cliff"

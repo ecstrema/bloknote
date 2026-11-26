@@ -6,6 +6,7 @@ import type { FromCurrent } from "#components/shell/providers/types.js";
 import { UndoManager } from "./undo/undo-stack";
 import {
   UndoableAreaCreate,
+  UndoableCliffCreate,
   UndoableFeatureSet,
   UndoableGroup,
   UndoableMove,
@@ -179,6 +180,24 @@ export class AppState {
     const action = new UndoableAreaCreate(this.osmUser, this.tree, parent, parentSlug, name, climbing);
     this.undoStack.do(action);
     return action.slug;
+  }
+
+  /**
+   * Applies {@link UndoableCliffCreate} to add a natural=cliff node on the map (issue #55). When
+   * `relationSlug` points at a climbing area or crag relation, the cliff is added as a member of
+   * it. Returns the slug of the pending cliff change.
+   */
+  createCliff(position: Coordinates, relationSlug?: string): string {
+    const relation = relationSlug ? this.tree.getReactiveNode(relationSlug) : undefined;
+    const action = new UndoableCliffCreate(
+      this.osmUser,
+      position,
+      relation?.feature.type === "relation"
+        ? { item: relation as DataTree<OsmRelation>, slug: relationSlug! }
+        : undefined,
+    );
+    this.undoStack.do(action);
+    return action.cliffSlug;
   }
 
   #buildPromoteAreaAction(parent: DataTree, parentSlug: string): UndoablePromoteAreaToRelation | undefined {

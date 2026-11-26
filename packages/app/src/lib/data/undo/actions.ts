@@ -8,6 +8,8 @@ import { reversed } from "#lib/helpers/iterators.js";
 import { dataClient } from "../network/data-client.js";
 import type { AppDataTree } from "../app-data-tree.svelte.js";
 import { getCoordinates } from "../parse/osm-tags.js";
+import { createdCliffs } from "../cliffs.svelte.js";
+import type { Coordinates } from "@bloknote/climbing-data-gen";
 
 /** An undoable action can be done and undone. */
 export class OsmUndoable {
@@ -156,7 +158,7 @@ export class UndoableGroup implements Undoable {
 }
 
 let nextTempOsmId = -Math.floor(Date.now() / 1000);
-function createTempOsmId(): number {
+export function createTempOsmId(): number {
   return --nextTempOsmId;
 }
 
@@ -691,5 +693,66 @@ export class UndoableFeatureSet extends OsmUndoable implements Undoable {
       this.item.feature = this.featureBefore;
       this.featureBefore = undefined;
     }
+  }
+}
+
+/**
+ * A natural=cliff node added on the map (issue #55), optionally added as a member of the
+ * climbing area or crag relation it was placed in. Cliffs live outside of the data tree: they
+ * are tracked in `createdCliffs` so the map can draw them, and the pending node is uploaded
+ * with the next changeset.
+ */
+export class UndoableCliffCreate extends OsmUndoable implements Undoable {
+  /** Slug of the pending cliff node change (`cliff/n<temp id>`) */
+  cliffSlug: string;
+  #node: OsmNode;
+  #addedMember = false;
+
+  constructor(
+    osmUser: OsmUser,
+    position: Coordinates,
+    private relation?: { item: DataTree<OsmRelation>; slug: string },
+  ) {
+    super(osmUser);
+    this.#node = {
+      type: "node",
+      id: createTempOsmId(),
+      version: 0,
+      tags: { natural: "cliff" },
+      changeset: 0,
+      lat: position.lat,
+      lon: position.lon,
+      timestamp: "-1",
+      uid: -1,
+      user: "",
+    };
+    this.cliffSlug = `cliff/n${this.#node.id}`;
+  }
+
+  do() {
+    createdCliffs.set(this.cliffSlug, this.#node);
+    this.osmUser.markAsDirty(undefined, this.cliffSlug, this.#node);
+
+    if (this.relation) {
+      const rel = this.relation.item.feature;
+      if (!rel.members.some((m) => m.type === "node" && m.ref === this.#node.id)) {
+        const before = snapshot(rel);
+        this.#addedMember = true;
+        rel.members = [...rel.members, { type: "node", ref: this.#node.id, role: "" }];
+        this.osmUser.markAsDirty(before, this.relation.slug, rel);
+      }
+    }
+  }
+
+  undo() {
+    if (this.relation && this.#addedMember) {
+      const rel = this.relation.item.feature;
+      const before = snapshot(rel);
+      rel.members = rel.members.filter((m) => !(m.type === "node" && m.ref === this.#node.id));
+      this.osmUser.markAsDirty(before, this.relation.slug, rel);
+    }
+    createdCliffs.delete(this.cliffSlug);
+    // Undoing a creation cancels the pending change entirely
+    this.osmUser.markAsDirty(this.#node, this.cliffSlug, undefined);
   }
 }

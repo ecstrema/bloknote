@@ -11,18 +11,37 @@
     ScaleControl,
     type GeoJSONSource,
     type IControl,
+    type MapLayerMouseEvent,
+    type MapMouseEvent,
   } from "#lib/maplibre.js";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import { dataClient } from "#lib/data/network/data-client.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import type { MapElementFeature, MapElementFeatureCollection } from "#lib/data/db/types.js";
+  import type { FeatureCollection } from "geojson";
   import { FEATURE_COLORS } from "#lib/data/parse/route-styles.js";
   import type { OsmFeature } from "osm-api";
   import { setMapCenterProvider } from "./map-center.js";
   import { addTerrainSource } from "./map-controls.js";
   import { searchState } from "./shell/sidebar/search-state.svelte.js";
-  import { CLIMBING_LAYERS, applyElementTypeVisibility, featureToMapElement, formatPopupHtml, VECTOR_STYLE } from "./location-map-helper.js";
+  import {
+    CLIFFS_MIN_ZOOM,
+    CLIMBING_LAYERS,
+    applyElementTypeVisibility,
+    cliffPopupHtml,
+    featureToMapElement,
+    formatPopupHtml,
+    VECTOR_STYLE,
+  } from "./location-map-helper.js";
+  import {
+    cliffIsPending,
+    cliffPosition,
+    createdCliffs,
+    getRegionCliffs,
+    movedCliffs,
+    type CliffPoint,
+  } from "#lib/data/cliffs.svelte.js";
   import MapLegend from "./map-legend.svelte";
 
   // One map (and WebGL context) for the whole app: kept across page navigation.
@@ -74,6 +93,130 @@
     const center = shared.map.getCenter();
     return { lat: center.lat, lon: center.lng };
   });
+
+  // ---------------------------------------------------------------------------------------------
+  // Cliffs (issue #55)
+  // ---------------------------------------------------------------------------------------------
+
+  let cliffLayerEnabled = $state(false);
+  let cliffEditingEnabled = $state(false);
+  /** Slug of the item the cliff layer is currently bound to */
+  let cliffSlug = "";
+  /** Cliffs of the region of the current crag, downloaded at high zoom */
+  let cliffs: CliffPoint[] = $state.raw([]);
+  /** Ref of a cliff node being dragged, with its live position */
+  let draggingCliff: { ref: string; lon: number; lat: number } | undefined = $state.raw();
+
+  let currentOnCliffMove: ((ref: string, position: { lat: number; lon: number }) => void) | undefined;
+  let currentOnCliffCreate: ((position: { lat: number; lon: number }) => void) | undefined;
+
+  function cliffFeature(ref: string, name: string, created: boolean, lon: number, lat: number) {
+    return {
+      type: "Feature" as const,
+      geometry: { type: "Point" as const, coordinates: [lon, lat] },
+      properties: { ref, name, created, pending: cliffIsPending(ref), elementType: "cliff" },
+    };
+  }
+
+  function cliffFeatures(): FeatureCollection {
+    const features = cliffs.map((point) => {
+      // A dragged cliff overrides its static position
+      const dragging = draggingCliff?.ref === point.id ? draggingCliff : undefined;
+      const position = dragging ?? cliffPosition(point);
+      return cliffFeature(point.id, point.name ?? "", false, position.lon, position.lat);
+    });
+    for (const node of createdCliffs.values()) {
+      features.push(cliffFeature(`n${node.id}`, node.tags?.name ?? "", true, node.lon, node.lat));
+    }
+    return { type: "FeatureCollection", features };
+  }
+
+  function refreshCliffSource() {
+    const source = shared?.map.getSource<GeoJSONSource>("cliff-points");
+    source?.setData(cliffFeatures());
+  }
+
+  /** Region whose cliffs were loaded, to avoid reloading on every move */
+  let loadedRegion = "";
+
+  async function loadRegionCliffs(map: MapLibreMap) {
+    if (!cliffLayerEnabled || map.getZoom() < CLIFFS_MIN_ZOOM) return;
+    if (loadedRegion === cliffSlug) return;
+    loadedRegion = cliffSlug;
+    const data = await getRegionCliffs(cliffSlug);
+    // The user may have navigated to another item while the download ran
+    if (loadedRegion !== cliffSlug) return;
+    cliffs = data?.cliffs ?? [];
+    refreshCliffSource();
+  }
+
+  function updateCliffLayerVisibility() {
+    if (!shared?.map || !shared.map.getLayer("cliff-points")) return;
+    shared.map.setLayoutProperty("cliff-points", "visibility", cliffLayerEnabled ? "visible" : "none");
+  }
+
+  /** Green marker pinned at the center of the view, dragged onto the map to add a cliff */
+  let cliffAddMarker: Marker | undefined;
+  let cliffAddMarkerDragging = false;
+
+  function updateCliffAddMarker() {
+    const map = shared?.map;
+    if (!map) return;
+    const visible = cliffLayerEnabled && cliffEditingEnabled && map.getZoom() >= CLIFFS_MIN_ZOOM;
+    if (!visible) {
+      cliffAddMarker?.remove();
+      cliffAddMarker = undefined;
+      return;
+    }
+    if (!cliffAddMarker) {
+      cliffAddMarker = new Marker({ color: "#16a34a", draggable: true }).setLngLat(map.getCenter()).addTo(map);
+      const element = cliffAddMarker.getElement();
+      element.title = "Drag this pin onto the map to add a cliff";
+      element.style.cursor = "grab";
+      element.addEventListener("pointerdown", () => (cliffAddMarkerDragging = true));
+      element.addEventListener("pointerup", () => (cliffAddMarkerDragging = false));
+      cliffAddMarker.on("dragend", () => {
+        cliffAddMarkerDragging = false;
+        const lngLat = cliffAddMarker!.getLngLat();
+        if (currentOnCliffCreate) currentOnCliffCreate({ lat: lngLat.lat, lon: lngLat.lng });
+        // Ready for the next cliff: back to the center of the view
+        cliffAddMarker?.setLngLat(map.getCenter());
+      });
+    } else if (!cliffAddMarkerDragging) {
+      // The marker follows the center of the view while panning
+      cliffAddMarker.setLngLat(map.getCenter());
+    }
+  }
+
+  /** Starts dragging an existing cliff node (only nodes can be moved) */
+  function onCliffMouseDown(map: MapLibreMap, e: MapLayerMouseEvent) {
+    const ref = e.features?.[0]?.properties?.ref as string | undefined;
+    if (!cliffEditingEnabled || !ref || !ref.startsWith("n") || e.originalEvent?.button !== 0) return;
+    e.preventDefault();
+    // Freeze the camera while the point is dragged, like the draggable markers do
+    map.dragPan.disable();
+    map.getCanvas().style.cursor = "grabbing";
+    const onMove = (ev: MapMouseEvent) => {
+      draggingCliff = { ref, lon: ev.lngLat.lng, lat: ev.lngLat.lat };
+      refreshCliffSource();
+    };
+    map.on("mousemove", onMove);
+    window.addEventListener(
+      "mouseup",
+      () => {
+        map.off("mousemove", onMove);
+        map.dragPan.enable();
+        map.getCanvas().style.cursor = "";
+        const drag = draggingCliff;
+        draggingCliff = undefined;
+        if (drag?.ref === ref) currentOnCliffMove?.(ref, { lat: drag.lat, lon: drag.lon });
+        else refreshCliffSource();
+      },
+      { once: true },
+    );
+  }
+
+  // ---------------------------------------------------------------------------------------------
 
   function setMarkerPosition(coords: { lat: number; lon: number }, draggable = false) {
     if (!shared) return;
@@ -177,6 +320,12 @@
         type: "geojson",
         data: cachedCollection,
         tolerance: 0.5,
+      });
+    }
+    if (!map.getSource("cliff-points")) {
+      map.addSource("cliff-points", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
       });
     }
     if (!map.getSource("route-line")) {
@@ -432,14 +581,16 @@
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
       const a = polygon[i]!;
       const b = polygon[j]!;
-      if (a.y > point.y !== b.y > point.y && point.x < ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x) inside = !inside;
+      if (a.y > point.y !== b.y > point.y && point.x < ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x)
+        inside = !inside;
     }
     return inside;
   }
 
   /** True when any route segment crosses a lasso edge, so routes poking through the shape are caught too */
   function lineCrossesPolygon(points: LassoPoint[], polygon: LassoPoint[]) {
-    const cross = (o: LassoPoint, p: LassoPoint, q: LassoPoint) => (p.x - o.x) * (q.y - o.y) - (p.y - o.y) * (q.x - o.x);
+    const cross = (o: LassoPoint, p: LassoPoint, q: LassoPoint) =>
+      (p.x - o.x) * (q.y - o.y) - (p.y - o.y) * (q.x - o.x);
     for (let i = 1; i < points.length; i++) {
       for (let j = 1; j < polygon.length; j++) {
         const a = points[i - 1]!;
@@ -451,7 +602,6 @@
     }
     return false;
   }
-
 
   /** Shift+drag draws a freehand lasso and selects every route inside or crossing it, like the sidebar selection */
   function setupLasso(map: MapLibreMap) {
@@ -610,15 +760,26 @@
           popup.remove();
           return;
         }
+        // Cliff points of the selected crag (issue #55) hover like the other elements
+        const cliffFeature = cliffLayerEnabled
+          ? map.queryRenderedFeatures(e.point, { layers: ["cliff-points"] })[0]
+          : undefined;
         // Dimmed features (excluded by the active search filters) are non-interactive: no popup (issue #219)
         const features = map.queryRenderedFeatures(e.point, { layers: interactiveLayers });
-        const feature = features.find((f) => !f.properties?.dimmed);
+        const feature = cliffFeature ?? features.find((f) => !f.properties?.dimmed);
         if (!feature) {
           map.getCanvas().style.cursor = "";
           popup.remove();
           return;
         }
         map.getCanvas().style.cursor = "pointer";
+        if (cliffFeature) {
+          popup
+            .setLngLat(e.lngLat)
+            .setHTML(cliffPopupHtml(cliffFeature.properties as { ref?: string; name?: string; pending?: boolean }))
+            .addTo(map);
+          return;
+        }
         const props = feature.properties as MapElementFeature["properties"];
         popup.setLngLat(e.lngLat).setHTML(formatPopupHtml(props)).addTo(map);
       });
@@ -637,6 +798,17 @@
           currentOnmapclick({ lat: e.lngLat.lat, lon: e.lngLat.lng });
           return;
         }
+        // Clicking a cliff point shows its popup instead of navigating (issue #55)
+        const cliffHit = cliffLayerEnabled
+          ? map.queryRenderedFeatures(e.point, { layers: ["cliff-points"] })[0]
+          : undefined;
+        if (cliffHit) {
+          popup
+            .setLngLat(e.lngLat)
+            .setHTML(cliffPopupHtml(cliffHit.properties as { ref?: string; name?: string; pending?: boolean }))
+            .addTo(map);
+          return;
+        }
         // A plain click on the map dismisses the active selection
         if (activeSelectionSlugs.length > 0) clearSidebarSelection?.();
         // Dimmed features (excluded by the active search filters) are non-interactive: no navigation (issue #219)
@@ -653,6 +825,15 @@
         if (href) goto(href);
       });
 
+      // Dragging an existing cliff node moves it (issue #55)
+      map.on("mousedown", "cliff-points", (e) => onCliffMouseDown(map, e));
+      map.on("mouseenter", "cliff-points", () => {
+        if (!draggingCliff) map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "cliff-points", () => {
+        if (!draggingCliff) map.getCanvas().style.cursor = "";
+      });
+
       map.on("moveend", (e) => {
         if ((e as { originalEvent?: unknown }).originalEvent) {
           userPositioned = true;
@@ -660,6 +841,13 @@
           // The user took control of the camera: the next target move may re-position it
           cameraTargetKey = undefined;
         }
+      });
+
+      // The cliffs are loaded at high zoom, and the add-cliff pin follows the center of the view
+      map.on("move", () => updateCliffAddMarker());
+      map.on("moveend", () => {
+        updateCliffAddMarker();
+        void loadRegionCliffs(map);
       });
 
       void loadMapElements(map);
@@ -688,6 +876,10 @@
     onmove,
     onmapclick,
     companionSlugs = {},
+    cliffsEnabled = false,
+    cliffsEditable = false,
+    oncliffmove,
+    oncliffcreate,
   }: {
     currentSlug?: string;
     currentFeature?: OsmFeature | GeographicFolderElement | undefined;
@@ -704,6 +896,12 @@
     onmapclick?: (position: { lat: number; lon: number }) => void;
     /** Map of route slug -> companion (bottom/top of the same route) slug, highlighted together (issue #135) */
     companionSlugs?: Record<string, string>;
+    /** Shows the cliffs of the region at high zoom, only while a crag is selected (issue #55) */
+    cliffsEnabled?: boolean;
+    /** Shows the add-cliff pin and lets the cliff points be dragged (issue #55) */
+    cliffsEditable?: boolean;
+    oncliffmove?: (ref: string, position: { lat: number; lon: number }) => void;
+    oncliffcreate?: (position: { lat: number; lon: number }) => void;
   } = $props();
 
   let host: HTMLDivElement;
@@ -978,6 +1176,32 @@
     if (!attached || !shared?.map) return;
     dimMatches = active && result ? result.matches : undefined;
     if (result === undefined || result.status !== "searching") applySearchDimming(shared.map);
+  });
+
+  // Cliffs of the region of the selected crag (issue #55): loaded on demand at high zoom, and
+  // editable when the user is logged in.
+  $effect(() => {
+    cliffLayerEnabled = cliffsEnabled;
+    cliffEditingEnabled = cliffsEditable;
+    currentOnCliffMove = oncliffmove;
+    currentOnCliffCreate = oncliffcreate;
+    if (currentSlug !== cliffSlug) {
+      cliffSlug = currentSlug;
+      loadedRegion = "";
+      cliffs = [];
+    }
+    if (attached && shared?.map) {
+      updateCliffLayerVisibility();
+      updateCliffAddMarker();
+      void loadRegionCliffs(shared.map);
+    }
+  });
+
+  // Redraw the cliff layer when the pending cliff edits change
+  $effect(() => {
+    void createdCliffs.size;
+    for (const change of movedCliffs.values()) void change.final;
+    if (attached && shared?.map) refreshCliffSource();
   });
 </script>
 
