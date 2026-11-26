@@ -124,13 +124,13 @@
             <span class="icon-[lucide--settings] shrink-0 size-4"></span>
             Settings
           </Tabs.Trigger>
-          <Tabs.Trigger value="logbook">
-            <span class="icon-[lucide--book-open] shrink-0 size-4"></span>
-            Logbook
-          </Tabs.Trigger>
           <Tabs.Trigger value="account">
             <span class="icon-[lucide--user-round] shrink-0 size-4"></span>
             Account
+          </Tabs.Trigger>
+          <Tabs.Trigger value="logbook">
+            <span class="icon-[lucide--book-open] shrink-0 size-4"></span>
+            Logbook
           </Tabs.Trigger>
         </Tabs.List>
 
