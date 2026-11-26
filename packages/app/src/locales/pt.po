@@ -14971,7 +14971,6 @@ msgstr "Explorar vias"
 #: src/routes/+page.svelte
 #: src/routes/docs/+page.svelte
 #: src/routes/settings/+layout.svelte
-#: src/routes/settings/+layout.svelte
 msgid "Settings"
 msgstr "Configurações"
 
@@ -15148,7 +15147,7 @@ msgstr "Adicionar"
 msgid "Cancel"
 msgstr "Cancelar"
 
-#. 0: isDev ? "[DEV] " \\: ""; 1: name ? ` - ${name}` \\: ""
+#. 0: devPrefix; 1: name ? ` - ${name}` \\: ""
 #: src/lib/components/shell/head.svelte
 msgid "{0}Bloknote{1}"
 msgstr "{0}Bloknote{1}"
@@ -15236,30 +15235,20 @@ msgstr "Taxa"
 msgid "Free"
 msgstr "Grátis"
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/aid/+page.svelte
-msgid "{0}Bloknote - Aid Grade Comparison"
-msgstr "{0}Bloknote - Comparação de graus de artificial"
+#~ msgid "{0}Bloknote - Aid Grade Comparison"
+#~ msgstr "{0}Bloknote - Comparação de graus de artificial"
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/boulder/+page.svelte
-msgid "{0}Bloknote - Boulder Grade Comparison"
-msgstr "{0}Bloknote - Comparação de graus de boulder"
+#~ msgid "{0}Bloknote - Boulder Grade Comparison"
+#~ msgstr "{0}Bloknote - Comparação de graus de boulder"
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/ice/+page.svelte
-msgid "{0}Bloknote - Ice Grade Comparison"
-msgstr "{0}Bloknote - Comparação de graus de gelo"
+#~ msgid "{0}Bloknote - Ice Grade Comparison"
+#~ msgstr "{0}Bloknote - Comparação de graus de gelo"
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/danger/+page.svelte
-msgid "{0}Bloknote - Danger Grade Comparison"
-msgstr "{0}Bloknote - Comparação de graus de perigo"
+#~ msgid "{0}Bloknote - Danger Grade Comparison"
+#~ msgstr "{0}Bloknote - Comparação de graus de perigo"
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/route/+page.svelte
-msgid "{0}Bloknote - Route Grade Comparison"
-msgstr "{0}Bloknote - Comparação de graus de vias"
+#~ msgid "{0}Bloknote - Route Grade Comparison"
+#~ msgstr "{0}Bloknote - Comparação de graus de vias"
 
 #: src/lib/components/shell/app-top-navigation.svelte
 #: src/lib/components/shell/sidebar/app-sidebar-node.svelte
@@ -15794,7 +15783,6 @@ msgstr "Arraste uma via para a imagem para posicionar seu início, ou toque em u
 
 #: src/lib/components/topo/add-image-dialog.svelte
 #: src/routes/settings/+layout.svelte
-#: src/routes/settings/+layout.svelte
 msgid "Account"
 msgstr "Conta"
 
@@ -16220,7 +16208,7 @@ msgstr "Não foi possível aplicar a correção."
 msgid "Profile & settings"
 msgstr "Perfil e configurações"
 
-#. 0: activeTab === "account" ? "Account" \\: activeTab === "logbook" ? "Logbook" \\: "Settings"
+#. 0: tabLabel
 #: src/routes/settings/+layout.svelte
 msgid "{0} | Bloknote"
 msgstr "{0} | Bloknote"
@@ -17035,7 +17023,6 @@ msgid "<0/> Logbook"
 msgstr ""
 
 #: src/routes/settings/+layout.svelte
-#: src/routes/settings/+layout.svelte
 msgid "Logbook"
 msgstr ""
 
@@ -17085,10 +17072,8 @@ msgstr ""
 msgid "Show on map"
 msgstr ""
 
-#. 0: import.meta.env.DEV ? "[DEV] " \\: ""
-#: src/routes/grade-comparison/via-ferrata/+page.svelte
-msgid "{0}Bloknote - Via Ferrata Grade Comparison"
-msgstr ""
+#~ msgid "{0}Bloknote - Via Ferrata Grade Comparison"
+#~ msgstr ""
 
 #: src/lib/components/rss-feed-button.svelte
 msgid "Recent climbing changes"
@@ -17862,3 +17847,30 @@ msgstr ""
 #: src/lib/components/location-map.svelte
 msgid "Drag this pin onto the map to add a cliff"
 msgstr ""
+
+#~ msgid "Bloknote{0}"
+#~ msgstr ""
+
+#: src/routes/grade-comparison/aid/+page.svelte
+msgid "Bloknote - Aid Grade Comparison"
+msgstr "Bloknote - Comparação de graus de artificial"
+
+#: src/routes/grade-comparison/ice/+page.svelte
+msgid "Bloknote - Ice Grade Comparison"
+msgstr "Bloknote - Comparação de graus de gelo"
+
+#: src/routes/grade-comparison/boulder/+page.svelte
+msgid "Bloknote - Boulder Grade Comparison"
+msgstr "Bloknote - Comparação de graus de boulder"
+
+#: src/routes/grade-comparison/route/+page.svelte
+msgid "Bloknote - Route Grade Comparison"
+msgstr "Bloknote - Comparação de graus de vias"
+
+#: src/routes/grade-comparison/via-ferrata/+page.svelte
+msgid "Bloknote - Via Ferrata Grade Comparison"
+msgstr ""
+
+#: src/routes/grade-comparison/danger/+page.svelte
+msgid "Bloknote - Danger Grade Comparison"
+msgstr "Bloknote - Comparação de graus de perigo"

@@ -17,6 +17,7 @@
   import { loadFromGitHub, REPOSITORY, UPLOAD_MAX_FILES, UPLOAD_URL } from "./github";
   import { runRawOverpassQuery } from "./overpass";
   import type { BoundaryStates } from "./types";
+  import { pageTitle } from "#lib/page-title.js";
 
   // With `vite dev`, data/ is read from and saved to the disk. On the deployed site, it is read
   // from GitHub, and the changes are downloaded as a zip or proposed as a pull request.
@@ -250,7 +251,7 @@
   });
 </script>
 
-<svelte:head><title>{import.meta.env.DEV ? "[DEV] " : ""}Bloknote - Boundary editor</title></svelte:head>
+<svelte:head><title>{pageTitle("Bloknote - Boundary editor")}</title></svelte:head>
 <svelte:window {onkeydown} />
 
 {#if !store && !loadError}

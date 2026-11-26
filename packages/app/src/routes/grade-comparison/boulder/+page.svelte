@@ -1,10 +1,11 @@
 <script lang="ts">
   import { allBoulderScales } from "@bloknote/holy-grade";
   import GradeComparisonChart from "../GradeComparisonChart.svelte";
+  import { pageTitle } from "#lib/page-title.js";
 </script>
 
 <svelte:head>
-  <title>{import.meta.env.DEV ? "[DEV] " : ""}Bloknote - Boulder Grade Comparison</title>
+  <title>{pageTitle("Bloknote - Boulder Grade Comparison")}</title>
 </svelte:head>
 
 <GradeComparisonChart scales={allBoulderScales} />

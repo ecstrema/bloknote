@@ -126,3 +126,13 @@ bun run build
 2. **50 KB Boundary Limit**: Region boundaries in `packages/reverse-geocoding-data/data` cannot exceed 50 KB. Any modification or creation must be simplified to respect this constraint.
 3. **Svelte Runes Mutability**: When mutating arrays or objects in `$state`, ensure reactivity triggers correctly. Use `$state.raw` when storing non-reactive instances (like MapLibre maps or large caches).
 4. **Static Deployment**: The application deploys as a static site (GitHub Pages). Server routes (`+server.ts`) must only be used for dev tooling or pre-rendering; runtime operations must run entirely in the browser using static API fetch or direct Overpass/OSM calls.
+
+## 6. Additional information
+
+You can use the `gh` cli to see existing issues, create new ones or add comments.
+
+When asked to fix issues, commit with fix #... and push to the `main` branch. If there are followup issues for things you could not fix, create a new issue and link it to the original one. Always add a comment on closed issues to explain what you did and why.
+
+The build is very very slow: 10-20 minutes. Do not run the build unless you are sure you need to.
+
+Ask the user to provide guidance whenever you are unsure about what to do. You can ask questions and it will answer.

@@ -1,8 +1,7 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
-
-  const isDev = import.meta.env.DEV;
+  import { devPrefix } from "#lib/page-title.js";
 
   const appState = getAppState();
 
@@ -10,5 +9,5 @@
 </script>
 
 <svelte:head>
-  <title>{isDev ? "[DEV] " : ""}Bloknote{name ? ` - ${name}` : ""}</title>
+  <title>{devPrefix}Bloknote{name ? ` - ${name}` : ""}</title>
 </svelte:head>

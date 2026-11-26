@@ -1,6 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import BloknoteLogo from "#components/bloknote-logo.svelte";
+  import { pageTitle } from "#lib/page-title.js";
 
   const regions = [
     { name: "Africa", slug: "africa" },
@@ -12,7 +13,7 @@
 </script>
 
 <svelte:head>
-  <title>Bloknote</title>
+  <title>{pageTitle("Bloknote")}</title>
   <meta name="description" content="Explore climbing routes and areas by region." />
 </svelte:head>
 

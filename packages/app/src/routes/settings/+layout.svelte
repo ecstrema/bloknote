@@ -12,6 +12,7 @@
   import UndoControls from "#lib/components/shell/undo-controls.svelte";
   import { AppDataTree } from "#lib/data/app-data-tree.svelte.js";
   import { AppState, setAppState } from "#lib/data/app-state.js";
+  import { pageTitle } from "#lib/page-title.js";
 
   const { children }: { children: Snippet } = $props();
 
@@ -34,6 +35,7 @@
         ? "logbook"
         : "settings",
   );
+  const tabLabel = $derived(activeTab === "account" ? "Account" : activeTab === "logbook" ? "Logbook" : "Settings");
 
   function onTabChange(value: string) {
     const route =
@@ -80,7 +82,7 @@
 </script>
 
 <svelte:head>
-  <title>{activeTab === "account" ? "Account" : activeTab === "logbook" ? "Logbook" : "Settings"} | Bloknote</title>
+  <title>{pageTitle(`${tabLabel} | Bloknote`)}</title>
 </svelte:head>
 
 <SettingsProvider>
@@ -114,7 +116,7 @@
       <div class="mb-6 border-l-4 border-primary pl-5">
         <p class="text-xs font-semibold uppercase text-muted-foreground">Profile</p>
         <h1 class="mt-1 text-3xl font-semibold tracking-tight">
-          {activeTab === "account" ? "Account" : activeTab === "logbook" ? "Logbook" : "Settings"}
+          {tabLabel}
         </h1>
       </div>
 

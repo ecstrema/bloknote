@@ -4,6 +4,7 @@
   import { building } from "$app/env";
   import { goto } from "$app/navigation";
   import { getBrowserUrl } from "#lib/helpers/url.js";
+  import { pageTitle } from "#lib/page-title.js";
   import BloknoteLogo from "#components/bloknote-logo.svelte";
   import { Button } from "#components/ui/button/index.js";
 
@@ -39,7 +40,7 @@
 </script>
 
 <svelte:head>
-  <title>Documentation | Bloknote</title>
+  <title>{pageTitle("Documentation | Bloknote")}</title>
 </svelte:head>
 
 <div class="min-h-screen bg-background text-foreground">

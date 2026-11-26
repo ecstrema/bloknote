@@ -8,6 +8,7 @@
   import { dataClient } from "#lib/data/network/data-client.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
+  import { pageTitle } from "#lib/page-title.js";
   import type { DataJSON } from "@bloknote/climbing-data-gen";
 
   const slug = $derived(page.params.slug ?? "");
@@ -47,7 +48,7 @@
 </script>
 
 <svelte:head>
-  <title>Page not found | Bloknote</title>
+  <title>{pageTitle("Page not found | Bloknote")}</title>
 </svelte:head>
 
 <div class="mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-4 p-6">

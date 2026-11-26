@@ -7,6 +7,7 @@
   import { searchState } from "#lib/components/shell/sidebar/search-state.svelte.js";
   import { computeSectorStats, STAT_STYLE_COLORS, STAT_STYLE_ORDER } from "#lib/data/parse/sector-stats.js";
   import { gradingScales } from "#lib/data/grading-scales.svelte.js";
+  import { pageTitle } from "#lib/page-title.js";
   import type { BoulderScaleId, RouteScaleId } from "@bloknote/holy-grade";
 
   /** How many matched elements are loaded for the overview charts (issue #214) */
@@ -47,7 +48,7 @@
 </script>
 
 <svelte:head>
-  <title>Explore search results</title>
+  <title>{pageTitle("Explore search results")}</title>
   <meta name="description" content="Overview plots of the current search results." />
 </svelte:head>
 

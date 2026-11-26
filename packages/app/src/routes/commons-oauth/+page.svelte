@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { completeCommonsLogin } from "#lib/data/network/commons.js";
+  import { pageTitle } from "#lib/page-title.js";
 
   let message = $state("Completing Wikimedia sign-in…");
 
@@ -14,7 +15,7 @@
 </script>
 
 <svelte:head>
-  <title>Wikimedia sign-in | Bloknote</title>
+  <title>{pageTitle("Wikimedia sign-in | Bloknote")}</title>
 </svelte:head>
 
 <main class="mx-auto max-w-xl px-5 py-16 text-center">
