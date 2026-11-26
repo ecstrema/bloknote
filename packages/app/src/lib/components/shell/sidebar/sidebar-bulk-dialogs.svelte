@@ -6,9 +6,9 @@
   import { Input } from "#components/ui/input/index.js";
   import { Select } from "#components/ui/select/index.js";
   import { commonParentSlug, getAppState } from "#lib/data/app-state.js";
-  // Scale ids are identifiers: the default comes from the wuchale-ignored grading-scales module
-  // so the "French" literal is never rewritten to a translation (issue #229).
-  import { DEFAULT_SCALES } from "#lib/data/grading-scales.svelte.js";
+  // Scale ids are identifiers: the default comes from a plain module that wuchale never
+  // processes, so the "French" literal cannot be rewritten to a translation (issue #229).
+  import { DEFAULT_SCALES } from "#lib/data/grading-scale-ids.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { scaleIdToTag } from "#lib/data/parse/osm-tags.js";

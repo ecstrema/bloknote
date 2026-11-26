@@ -1,21 +1,17 @@
 import { browser } from "$app/env";
 import { getScale, type BoulderScaleId, type GradeType, type RouteScaleId, type ViaFerrataScaleId } from "@bloknote/holy-grade";
+import { DEFAULT_SCALES, type GradingScaleType, type PreferredScaleId } from "./grading-scale-ids.js";
+
+export type { GradingScaleType, PreferredScaleId };
 
 /**
  * Grading comprehension preferences (issue #188): the scales the user understands stay as-is in
  * the UI, everything else is translated to the preferred scale. Preferences are stored locally
  * and mirrored in the org.bloknote.actor.settings lexicon shape (known and preferred scale fields).
+ *
+ * Note: this file is excluded from wuchale in wuchale.config.js, because the scale ids it holds
+ * ("French", "Huesler"...) are identifiers, not user-facing text.
  */
-
-export type GradingScaleType = Extract<GradeType, "route" | "boulder" | "viaFerrata">;
-export type PreferredScaleId = RouteScaleId | BoulderScaleId | ViaFerrataScaleId;
-
-/** The fallback when no preferred scale is set and the location is unknown */
-export const DEFAULT_SCALES: Record<GradingScaleType, PreferredScaleId> = {
-  route: "French",
-  boulder: "FB",
-  viaFerrata: "Huesler",
-};
 
 const STORAGE_KEY = "bloknote:grading-scales";
 
