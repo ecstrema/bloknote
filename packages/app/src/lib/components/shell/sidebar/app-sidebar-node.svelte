@@ -113,7 +113,9 @@
     itemType === "route" ? "route" : itemType === "area" ? "area" : undefined,
   );
   const treeDepth = $derived(slug ? slug.split("/").length - 1 : 0);
-  const canDrag = $derived(itemType !== "geographic" && (!!reorderType || !!appState.osmUser.loggedIn));
+  // HTML5 drag & drop does not work with touch: on mobile it only hijacks the scroll gesture
+  // and long-press, so reordering stays a desktop affordance
+  const canDrag = $derived(!sidebar.isMobile && itemType !== "geographic" && (!!reorderType || !!appState.osmUser.loggedIn));
   const parentSlug = $derived(getParentSlug(slug) ?? "");
   const dropPosition = $derived(getSidebarDropPosition(slug));
 

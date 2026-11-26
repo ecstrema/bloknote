@@ -60,6 +60,12 @@
         className,
       )}
       style="--sidebar-width: {SIDEBAR_WIDTH_MOBILE};"
+      onOpenAutoFocus={(event) => {
+        // The dialog would focus the search input on open, and iOS Safari then ignores the
+        // swipe on the tree until the focus moves elsewhere (issue #235): don't steal focus,
+        // the keyboard can still be raised by tapping the search field
+        event.preventDefault();
+      }}
       {side}
     >
       <Sheet.Header class="sr-only">
