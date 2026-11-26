@@ -1,5 +1,5 @@
 import { browser } from "$app/env";
-import type { BoulderScaleId, GradeType, RouteScaleId, ViaFerrataScaleId } from "@bloknote/holy-grade";
+import { getScale, type BoulderScaleId, type GradeType, type RouteScaleId, type ViaFerrataScaleId } from "@bloknote/holy-grade";
 
 /**
  * Grading comprehension preferences (issue #188): the scales the user understands stay as-is in
@@ -11,7 +11,7 @@ export type GradingScaleType = Extract<GradeType, "route" | "boulder" | "viaFerr
 export type PreferredScaleId = RouteScaleId | BoulderScaleId | ViaFerrataScaleId;
 
 /** The fallback when no preferred scale is set and the location is unknown */
-const DEFAULT_SCALES: Record<GradingScaleType, PreferredScaleId> = {
+export const DEFAULT_SCALES: Record<GradingScaleType, PreferredScaleId> = {
   route: "French",
   boulder: "FB",
   viaFerrata: "Huesler",
@@ -32,10 +32,28 @@ function scaleType(scaleId: PreferredScaleId): GradingScaleType {
   return "route";
 }
 
-function storedScales(raw: unknown): Partial<StoredScales> | undefined {
+/** Whether the id actually resolves to a known scale of this type (issue #229: stale/legacy storage must not crash) */
+export function isValidScaleId(scaleId: PreferredScaleId, type: GradingScaleType): boolean {
+  return getScale(scaleId)?.gradeType === (type as GradeType);
+}
+
+/** Drops unknown or mistyped scale ids coming from storage (e.g. legacy `"local"` values, issue #229) */
+export function storedScales(raw: unknown): Partial<StoredScales> | undefined {
   if (!raw || typeof raw !== "object") return undefined;
   const { known, preferred } = raw as StoredScales;
-  return { known, preferred };
+  const validKnown =
+    known &&
+    ({
+      route: (known.route ?? []).filter((id) => isValidScaleId(id, "route")),
+      boulder: (known.boulder ?? []).filter((id) => isValidScaleId(id, "boulder")),
+      viaFerrata: (known.viaFerrata ?? []).filter((id) => isValidScaleId(id, "viaFerrata")),
+    } as StoredScales["known"]);
+  const validPreferred = preferred
+    ? (Object.fromEntries(
+        Object.entries(preferred).filter(([type, id]) => id !== undefined && isValidScaleId(id, type as GradingScaleType)),
+      ) as StoredScales["preferred"])
+    : undefined;
+  return { known: validKnown, preferred: validPreferred };
 }
 
 /** Seeds the new storage from the pre-#188 single-select keys, then removes them */
@@ -47,11 +65,11 @@ function migrateLegacyKeys(): Partial<StoredScales> {
   localStorage.removeItem("bloknote:preferred-route-grading-scale");
   localStorage.removeItem("bloknote:preferred-boulder-grading-scale");
   const migrated: Partial<StoredScales> = {};
-  if (route && route !== "local") {
+  if (route && route !== "local" && isValidScaleId(route as RouteScaleId, "route")) {
     migrated.preferred = { route: route as RouteScaleId };
     migrated.known = { ...EMPTY_KNOWN, route: [route as RouteScaleId] };
   }
-  if (boulder && boulder !== "local") {
+  if (boulder && boulder !== "local" && isValidScaleId(boulder as BoulderScaleId, "boulder")) {
     migrated.preferred = { ...migrated.preferred, boulder: boulder as BoulderScaleId };
     migrated.known = { ...EMPTY_KNOWN, ...migrated.known, boulder: [boulder as BoulderScaleId] };
   }
@@ -169,9 +187,17 @@ class GradingScales {
     this.#persist();
   }
 
-  /** The single scale to use for this type: preferred, then location-based, then the worldwide default */
+  /**
+   * The single scale to use for this type: preferred, then location-based, then the worldwide
+   * default. Every candidate is checked against the actual scales: a stale id from storage or a
+   * changed lexicon must never bubble up to callers doing `getScale(effective(type))` (issue #229).
+   */
   effective(type: GradingScaleType): PreferredScaleId {
-    return this.#scales.preferred[type] ?? locationScales[type] ?? DEFAULT_SCALES[type];
+    const candidates = [this.#scales.preferred[type], locationScales[type], DEFAULT_SCALES[type]];
+    for (const id of candidates) {
+      if (id !== undefined && isValidScaleId(id, type)) return id;
+    }
+    return DEFAULT_SCALES[type];
   }
 }
 

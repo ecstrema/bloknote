@@ -12,6 +12,9 @@ export default defineConfig({
         ignore: [
           "src/lib/components/ui/**",
           "src/lib/i18n.svelte.ts",
+          // Scale ids like "French" or "Huesler" are identifiers, not user-facing text: translating
+          // them broke getScale(effective(type)) with an empty string (issue #229).
+          "src/lib/data/grading-scales.svelte.ts",
           "src/lib/data/network/**",
           "src/routes/edit-map/**",
           "src/routes/commons-oauth/**",
