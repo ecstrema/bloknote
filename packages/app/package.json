@@ -38,6 +38,7 @@
     "@internationalized/date": "catalog:",
     "@sveltejs/adapter-static": "catalog:",
     "@sveltejs/kit": "catalog:",
+    "@sveltejs/vite-devtools-svelte": "^0.11.1",
     "@sveltejs/vite-plugin-svelte": "catalog:",
     "@tailwindcss/typography": "catalog:",
     "@tailwindcss/vite": "catalog:",

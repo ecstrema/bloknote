@@ -1,3 +1,4 @@
+import { svelteDevtools } from "@sveltejs/vite-devtools-svelte";
 import { execSync } from "child_process";
 import { cpSync, createReadStream, existsSync, statSync } from "fs";
 import { basename, join, normalize, resolve } from "path";
@@ -82,7 +83,11 @@ function climbingApi(): Plugin {
 const staticAdapter = adapter({ fallback: "404.html" });
 
 export default defineConfig({
+  // Vite DevTools dock, only in the dev server (issue #241)
+  devtools: { apply: "serve" },
   plugins: [
+    // Must come before sveltekit() so its transforms run before the Svelte compiler
+    svelteDevtools(),
     climbingApi(),
     tailwindcss(),
     wuchale({ hmrDelayThreshold: 5000 }),

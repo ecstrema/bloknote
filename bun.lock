@@ -34,6 +34,7 @@
         "@internationalized/date": "catalog:",
         "@sveltejs/adapter-static": "catalog:",
         "@sveltejs/kit": "catalog:",
+        "@sveltejs/vite-devtools-svelte": "^0.11.1",
         "@sveltejs/vite-plugin-svelte": "catalog:",
         "@tailwindcss/typography": "catalog:",
         "@tailwindcss/vite": "catalog:",
@@ -396,6 +397,8 @@
     "@sveltejs/load-config": ["@sveltejs/load-config@0.2.3", "", {}, "sha512-VT3qmUb8pRV2QrZjd8iAmtg8lf4W0TIjZbvXtz5MKei/q96teWZgGJyyidJzOjzZzvdq616eSRVeMYIQChUTAQ=="],
 
     "@sveltejs/sv-utils": ["@sveltejs/sv-utils@1.1.2", "", {}, "sha512-ArlN6baQtHy0VkzbArKRA8wN7qKA/NqWdQjkzU1vUDwzKzGALSuFG+m44C6mTB4vVsawayYq668RD+xIaAA6YA=="],
+
+    "@sveltejs/vite-devtools-svelte": ["@sveltejs/vite-devtools-svelte@0.11.1", "", { "dependencies": { "devframe": "^1.3.6" }, "peerDependencies": { "@sveltejs/kit": "^3.3.0", "svelte": "^5.46.4", "vite": "^8.3.5" }, "optionalPeers": ["@sveltejs/kit"], "bin": { "vite-devtools-svelte": "./bin/vite-devtools-svelte.mjs" } }, "sha512-ZXqBVsPFXzOFAJj2Vvtxl6uuGNoDX8CPkW6lYnzp5qZUGPplMA8fJm8NNF11x1vafEhmI51iqrzYwXqQExNRvQ=="],
 
     "@sveltejs/vite-plugin-svelte": ["@sveltejs/vite-plugin-svelte@7.3.1", "", { "dependencies": { "deepmerge": "^4.3.1", "magic-string": "^1.0.0", "obug": "^2.1.0", "vitefu": "^1.1.2" }, "peerDependencies": { "svelte": "^5.46.4", "vite": "^8.0.0-beta.7 || ^8.0.0" } }, "sha512-ZPsLN8B1e/En+Ak5s4V7srFDT532oS0qieLsQwu63NGKsS+iAjoO2Js1BochlHlglcU+Pt7WAO3C5Ee+4f6gVA=="],
 
