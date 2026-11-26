@@ -18,11 +18,12 @@ let commonsImagePuts = 0;
 
 const KEPT_CACHES = new Set([APP_CACHE, MAP_TILES_CACHE, COMMONS_IMAGES_CACHE]);
 const IMMUTABLE_PATH = `${resolve("/").replace(/\/$/, "")}/_app/immutable/`;
+const CLIENT_METADATA_PATH = `${resolve("/").replace(/\/$/, "")}/client-metadata.json`;
 
 const ASSETS = [
   ...immutable.map((a) => resolve(a.path)), // the app itself
   ...assets.map((a) => resolve(a.path)), // everything in `static`
-];
+].filter((path) => path !== CLIENT_METADATA_PATH);
 
 self.addEventListener("install", (event) => {
   // Only download the files that are not cached yet
@@ -54,9 +55,11 @@ self.addEventListener("activate", (event) => {
         await caches.delete(key);
         continue;
       }
-      // Drop edit-map pages cached by previous service worker versions (issue #176)
+      // Drop edit-map pages cached by previous service worker versions (issue #176), and any
+      // stale client-metadata.json that older versions precached (issue #231)
       if (key === APP_CACHE) {
         const cache = await caches.open(key);
+        await cache.delete(CLIENT_METADATA_PATH);
         for (const request of await cache.keys()) {
           if (isEditMapPath(new URL(request.url).pathname)) await cache.delete(request);
         }
@@ -99,6 +102,11 @@ self.addEventListener("fetch", (event) => {
 
   // SvelteKit's update check must always hit the network, a cached copy makes it report stale versions.
   if (url.pathname.endsWith("/_app/version.json")) return;
+
+  // The OAuth client-metadata document must always come live from the network: the authorization
+  // server fetches and validates it on its side, so a stale cached copy makes the requested scope
+  // mismatch the declared one and logins fail with "invalid_scope" (issue #231)
+  if (url.pathname === CLIENT_METADATA_PATH) return;
 
   // Content-hashed bundles never change: answer from the cache without a request
   if (url.pathname.startsWith(IMMUTABLE_PATH)) {
