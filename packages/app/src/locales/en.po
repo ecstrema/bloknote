@@ -15407,9 +15407,8 @@ msgstr "Max grade"
 msgid "Tag, e.g. climbing:rock"
 msgstr "Tag, e.g. climbing:rock"
 
-#: src/lib/data/grading-scales.svelte.ts
-msgid "French"
-msgstr "French"
+#~ msgid "French"
+#~ msgstr "French"
 
 #: src/routes/settings/+page.svelte
 #: src/routes/settings/+page.svelte
@@ -17355,10 +17354,8 @@ msgstr "Bloknote is in very early development and might break at any time: data 
 msgid "I understand"
 msgstr "I understand"
 
-#. 0: matchingProgress; 1: matchingTotal
-#: src/routes/settings/logbook/tick-import.svelte
-msgid "<0/> Matching routes in their crags... {0}/{1}"
-msgstr "<0/> Matching routes in their crags... {0}/{1}"
+#~ msgid "<0/> Matching routes in their crags... {0}/{1}"
+#~ msgstr "<0/> Matching routes in their crags... {0}/{1}"
 
 #. 0: tick.name
 #: src/lib/components/tick-osm-dialog.svelte
@@ -17641,36 +17638,26 @@ msgstr "Bloknote defines open AT Protocol Lexicon schemas under <0/> so personal
 #~ msgid "'Amran Governorate"
 #~ msgstr "'Amran Governorate"
 
-#: src/lib/data/grading-scales.svelte.ts
-#: src/lib/data/grading-scales.svelte.ts
-msgid "Huesler"
-msgstr "Huesler"
+#~ msgid "Huesler"
+#~ msgstr "Huesler"
 
-#: src/lib/data/grading-scales.svelte.ts
-#: src/lib/data/grading-scales.svelte.ts
-#: src/lib/data/grading-scales.svelte.ts
-msgid "Hueco"
-msgstr "Hueco"
+#~ msgid "Hueco"
+#~ msgstr "Hueco"
 
-#: src/lib/data/grading-scales.svelte.ts
-msgid "Schall"
-msgstr "Schall"
+#~ msgid "Schall"
+#~ msgstr "Schall"
 
-#: src/lib/data/grading-scales.svelte.ts
-msgid "UKTech"
-msgstr "UKTech"
+#~ msgid "UKTech"
+#~ msgstr "UKTech"
 
-#: src/lib/data/grading-scales.svelte.ts
-msgid "Polish"
-msgstr "Polish"
+#~ msgid "Polish"
+#~ msgstr "Polish"
 
-#: src/lib/data/grading-scales.svelte.ts
-msgid "Scandinavian"
-msgstr "Scandinavian"
+#~ msgid "Scandinavian"
+#~ msgstr "Scandinavian"
 
-#: src/lib/data/grading-scales.svelte.ts
-msgid "Ewbank"
-msgstr "Ewbank"
+#~ msgid "Ewbank"
+#~ msgstr "Ewbank"
 
 #: src/routes/settings/+page.svelte
 msgid "Preferred"
@@ -17854,3 +17841,13 @@ msgstr "Max distance between routes <0/>"
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Create sectors"
 msgstr "Create sectors"
+
+#. 0: localDb.phase === "download" ? "download" \\: "parsing"; 1: " "; 2: Math.min(100, Math.round((localDb.loaded / (localDb.total ?? 1)) * 100))
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "(downloading the offline dataset first, {0}{1} {2}%)"
+msgstr "(downloading the offline dataset first, {0}{1} {2}%)"
+
+#. 0: matchingProgress; 1: matchingTotal
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "<0/> Matching routes in their crags... {0}/{1} <1/>"
+msgstr "<0/> Matching routes in their crags... {0}/{1} <1/>"
