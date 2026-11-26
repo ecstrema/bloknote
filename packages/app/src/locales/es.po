@@ -16542,7 +16542,9 @@ msgstr[1] "# elementos modificados"
 msgstr[2] "# elementos modificados"
 
 #. 0: days
+#. 0: days
 #: src/routes/+layout.svelte
+#: src/routes/settings/about-dialog.svelte
 msgid "{0} days ago"
 msgstr "hace {0} días"
 
@@ -17851,21 +17853,98 @@ msgstr ""
 #~ msgid "Bloknote{0}"
 #~ msgstr ""
 
+#: src/routes/settings/+page.svelte
+#: src/routes/settings/+page.svelte
+#: src/routes/settings/about-dialog.svelte
+msgid "About Bloknote"
+msgstr ""
+
+#: src/routes/settings/+page.svelte
+msgid "What Bloknote is, the version you are running, and the state of your downloaded data"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Full dataset downloaded"
+msgstr ""
+
+#. 0: Math.min(100, Math.round((localDb.loaded / localDb.total) * 100))
+#: src/routes/settings/about-dialog.svelte
+msgid "Downloading… {0}%"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Downloading…"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Local storage unavailable"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Only the pages you visited are stored"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "A free and open-source climbing directory built on OpenStreetMap: the places and their grades come straight from the map, your edits are changesets on OpenStreetMap, and your logbook lives on the AT Protocol. Read the <0>documentation</0> for the details."
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Version"
+msgstr ""
+
+#. 0: dataAgeLabel(); 1: localDb.dataVersion ?? "none"
+#: src/routes/settings/about-dialog.svelte
+msgid "<0>Climbing data</0> from {0} (version {1})"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Checking…"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Check for updates"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Reload to update"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Download new climbing data"
+msgstr ""
+
+#. 0: checkedLabel
+#: src/routes/settings/about-dialog.svelte
+msgid "Everything is up to date (checked at {0})."
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Star on GitHub"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Report an issue"
+msgstr ""
+
+#: src/routes/settings/about-dialog.svelte
+msgid "Close"
+msgstr ""
+
 #: src/routes/grade-comparison/aid/+page.svelte
 msgid "Bloknote - Aid Grade Comparison"
-msgstr "Bloknote - Comparación de grados de artificial"
-
-#: src/routes/grade-comparison/ice/+page.svelte
-msgid "Bloknote - Ice Grade Comparison"
-msgstr "Bloknote - Comparación de grados de hielo"
+msgstr ""
 
 #: src/routes/grade-comparison/boulder/+page.svelte
 msgid "Bloknote - Boulder Grade Comparison"
-msgstr "Bloknote - Comparación de grados de bloques"
+msgstr ""
+
+#: src/routes/grade-comparison/ice/+page.svelte
+msgid "Bloknote - Ice Grade Comparison"
+msgstr ""
 
 #: src/routes/grade-comparison/route/+page.svelte
 msgid "Bloknote - Route Grade Comparison"
-msgstr "Bloknote - Comparación de grados de vías"
+msgstr ""
 
 #: src/routes/grade-comparison/via-ferrata/+page.svelte
 msgid "Bloknote - Via Ferrata Grade Comparison"
@@ -17873,4 +17952,4 @@ msgstr ""
 
 #: src/routes/grade-comparison/danger/+page.svelte
 msgid "Bloknote - Danger Grade Comparison"
-msgstr "Bloknote - Comparación de grados de peligro"
+msgstr ""

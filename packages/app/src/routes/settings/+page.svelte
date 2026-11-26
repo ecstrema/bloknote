@@ -18,6 +18,7 @@
   import { setMode, userPrefersMode } from "mode-watcher";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
   import { settings } from "#lib/data/settings.svelte.js";
+  import AboutDialog from "./about-dialog.svelte";
   import { gradingScales, type GradingScaleType, type PreferredScaleId } from "#lib/data/grading-scales.svelte.js";
   import { i18n, locales, localeNames, setLocale } from "#lib/i18n.svelte.js";
   import * as Popover from "#components/ui/popover/index.js";
@@ -51,6 +52,7 @@
 
   /** Scale hovered in the tables, shown on the left; falls back to the effective scales */
   let inspected = $state<ScaleInfo>();
+  let aboutOpen = $state(false);
   const defaultDetails = $derived(
     (["route", "boulder", "viaFerrata"] as const)
       .map((type) => getScale(gradingScales.effective(type)))
@@ -223,7 +225,7 @@
           </label>
         </section>
 
-        <section class="grid gap-4 border-b py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-start">
+        <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-start">
           <div>
             <h2 class="font-medium">Open in maps</h2>
             <p class="mt-1 text-sm text-muted-foreground">
@@ -233,4 +235,16 @@
           </div>
           <MapProviderToggles />
         </section>
+
+        <section class="grid gap-4 border-b py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
+          <div>
+            <h2 class="font-medium">About Bloknote</h2>
+            <p class="mt-1 text-sm text-muted-foreground">
+              What Bloknote is, the version you are running, and the state of your downloaded data
+            </p>
+          </div>
+          <Button variant="outline" onclick={() => (aboutOpen = true)}>About Bloknote</Button>
+        </section>
       </Tabs.Content>
+
+<AboutDialog bind:open={aboutOpen} />
