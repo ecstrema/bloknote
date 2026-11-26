@@ -1,24 +1,24 @@
 import { browser } from "$app/env";
+import type { SettingsRecord } from "@bloknote/common";
 import { getScale, type BoulderScaleId, type GradeType, type RouteScaleId, type ViaFerrataScaleId } from "@bloknote/holy-grade";
 import { DEFAULT_SCALES, type GradingScaleType, type PreferredScaleId } from "./grading-scale-ids.js";
+import { recordToScales, scalesToRecordFields, type StoredScales } from "./grading-scale-record.js";
+import { atproto, registerLocalScaleFields } from "./network/atproto.svelte.js";
 
 export type { GradingScaleType, PreferredScaleId };
+export type { StoredScales };
 
 /**
  * Grading comprehension preferences (issue #188): the scales the user understands stay as-is in
  * the UI, everything else is translated to the preferred scale. Preferences are stored locally
- * and mirrored in the org.bloknote.actor.settings lexicon shape (known and preferred scale fields).
+ * and mirrored in the org.bloknote.actor.settings lexicon shape (known and preferred scale fields,
+ * synced on the user's ATProto repository, issue #238).
  *
  * Note: this file is excluded from wuchale in wuchale.config.js, because the scale ids it holds
  * ("French", "Huesler"...) are identifiers, not user-facing text.
  */
 
 const STORAGE_KEY = "bloknote:grading-scales";
-
-interface StoredScales {
-  known: { route: RouteScaleId[]; boulder: BoulderScaleId[]; viaFerrata: ViaFerrataScaleId[] };
-  preferred: { route?: RouteScaleId; boulder?: BoulderScaleId; viaFerrata?: ViaFerrataScaleId };
-}
 
 const EMPTY_KNOWN = { route: [], boulder: [], viaFerrata: [] };
 
@@ -170,6 +170,7 @@ class GradingScales {
     const next = known.includes(scaleId as never) ? known.filter((id) => id !== scaleId) : [...known, scaleId];
     this.#scales.known = { ...this.#scales.known, [type]: next };
     this.#persist();
+    this.#push();
   }
 
   /** The scale the user picked for this type, if any */
@@ -180,6 +181,37 @@ class GradingScales {
   /** Sets or unsets (clicking the selected radio again) the preferred scale of this type */
   setPreferred(type: GradingScaleType, scaleId: PreferredScaleId | undefined) {
     this.#scales.preferred = { ...this.#scales.preferred, [type]: scaleId };
+    this.#persist();
+    this.#push();
+  }
+
+  /** Snapshot of the current preferences, for the settings record seeding and pushes (issue #238) */
+  get snapshot(): StoredScales {
+    return $state.snapshot({
+      known: { ...this.#scales.known },
+      preferred: { ...this.#scales.preferred },
+    }) as StoredScales;
+  }
+
+  /** Pushes the current preferences to the ATProto settings record, when one is synced */
+  #push() {
+    void atproto.saveSettings(scalesToRecordFields(this.snapshot));
+  }
+
+  /**
+   * Applies the grading-scale fields of a remote org.bloknote.actor.settings record: the PDS is
+   * the source of truth (issue #238). Idempotent: a push echoed back by a sync is a no-op, so it
+   * never triggers another write.
+   */
+  applyRemote(record: SettingsRecord) {
+    const validated = storedScales(recordToScales(record));
+    if (!validated) return;
+    const next: StoredScales = {
+      known: { ...EMPTY_KNOWN, ...validated.known },
+      preferred: validated.preferred ?? {},
+    };
+    if (JSON.stringify(next) === JSON.stringify(this.#scales)) return;
+    this.#scales = next;
     this.#persist();
   }
 
@@ -198,3 +230,8 @@ class GradingScales {
 }
 
 export const gradingScales = new GradingScales();
+
+// The grading-scale preferences are part of the synced org.bloknote.actor.settings record
+// (issue #238): they seed it on first sync and every edit is pushed. Registered through a
+// provider, because the ATProto client must not import this reactive store.
+registerLocalScaleFields(() => scalesToRecordFields(gradingScales.snapshot));

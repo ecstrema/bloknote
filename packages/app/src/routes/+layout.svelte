@@ -27,6 +27,7 @@
   import { onMount, untrack } from "svelte";
   import { i18n, initLocale, isLocale, setLocale } from "#lib/i18n.svelte.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
+  import { gradingScales } from "#lib/data/grading-scales.svelte.js";
   import EditNudge from "#lib/components/shell/edit-nudge.svelte";
   import PreAlphaWarning from "#lib/components/shell/pre-alpha-warning.svelte";
   const { children } = $props();
@@ -94,15 +95,17 @@
     return () => clearInterval(interval);
   });
 
-  // Apply the appearance and language synced from the ATProto account when they change on it
-  // (issue #187). Only differing values are applied, so a synced change never pushes back: the
-  // pushes happen in the settings page when the user edits the settings themselves.
+  // Apply the appearance, language and grading scales synced from the ATProto account when they
+  // change on it (issues #187 and #238). Only differing values are applied, so a synced change
+  // never pushes back: the pushes happen in the settings page when the user edits the settings
+  // themselves, and gradingScales.applyRemote is a no-op when nothing differs.
   $effect(() => {
     const remote = atproto.settings;
     if (!atproto.session || !remote) return;
     untrack(() => {
       if (remote.mode && remote.mode !== userPrefersMode.current) setMode(remote.mode);
       if (remote.locale && isLocale(remote.locale) && remote.locale !== i18n.locale) void setLocale(remote.locale);
+      gradingScales.applyRemote(remote);
     });
   });
 </script>

@@ -135,4 +135,8 @@ When asked to fix issues, commit with fix #... and push to the `main` branch. If
 
 The build is very very slow: 10-20 minutes. Do not run the build unless you are sure you need to.
 
-Ask the user to provide guidance whenever you are unsure about what to do. You can ask questions and it will answer.
+You can ask the user questions and it will answer. Assume that the user is a senior developer and will provide guidance when needed. Always ask for clarification if you are unsure about what to do.
+
+Make sure to keep the codebase clean, organized and as small as possible. Avoid unnecessary complexity.
+
+Assume that `fetch` will fail. The app needs to work offline.

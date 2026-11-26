@@ -9,6 +9,7 @@ import {
   type OAuthSession,
 } from "@atproto/oauth-client-browser";
 import type { OsmFeature } from "osm-api";
+import { hasScaleFields } from "../grading-scale-record.js";
 
 const BASE = "/bloknote";
 const SESSION_STORAGE_KEY = "bloknote:atproto-session";
@@ -69,12 +70,23 @@ export interface LocalRatingEntry extends RatingRecord {
   label?: string;
 }
 
-/** Current local appearance and language, used to seed the account settings on first sync */
+/**
+ * Provides the locally stored grading-scale preferences, used to seed the settings record on
+ * first sync and to complete records created before the scale fields existed (issue #238).
+ * Registered by grading-scales.svelte.ts: a direct import would create an import cycle.
+ */
+let localScaleFields: () => Partial<SettingsRecord> = () => ({});
+export function registerLocalScaleFields(provider: () => Partial<SettingsRecord>) {
+  localScaleFields = provider;
+}
+
+/** Current local appearance, language and grading scales, used to seed the account settings on first sync */
 function localSettings(): SettingsRecord {
   if (!browser) return {};
   const mode = localStorage.getItem("bloknote:mode");
   const locale = localStorage.getItem("bloknote:locale");
   return {
+    ...localScaleFields(),
     ...(mode === "light" || mode === "dark" || mode === "system" ? { mode } : {}),
     ...(locale ? { locale } : {}),
   };
@@ -424,6 +436,12 @@ class AtProtoClient {
       if (res.ok) {
         const data = (await res.json()) as { value?: SettingsRecord };
         this.settings = data.value ?? undefined;
+        if (this.settings) {
+          // Records created before the grading-scale fields existed (issue #238) are completed
+          // with the local preferences, and a stored default mode "system" is cleaned up
+          if (!hasScaleFields(this.settings)) void this.saveSettings(localScaleFields());
+          else if (this.settings.mode === "system") void this.saveSettings({});
+        }
       } else {
         // No record yet (HTTP 400/404): create one from the current local preferences
         await this.saveSettings(localSettings());
@@ -442,6 +460,8 @@ class AtProtoClient {
     if (!this.session || this.#settingsWriteFailed) return;
     const record: SettingsRecord = { ...this.settings, ...patch };
     delete (record as { $type?: string }).$type;
+    // `system` is the implicit default: it is never stored in the record (issue #238)
+    if (record.mode === "system") delete record.mode;
     this.settings = record;
     try {
       await this.#putRemoteRecord(SETTINGS_COLLECTION, SETTINGS_RKEY, record);
