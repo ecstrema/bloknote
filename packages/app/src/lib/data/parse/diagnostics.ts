@@ -36,6 +36,8 @@ export interface TagDiagnostic {
 
 const GRADE_KEYS: Key[] = ["climbing:grade", ...gradeTags.map(([key]) => key)];
 const SECONDARY_GRADE_KEYS = new Set<Key>(["climbing:grade:british_adjectival", "climbing:grade:yds_danger"]);
+/** Tags set to their implicit default value: they carry no information and should be removed (issue #233) */
+const REDUNDANT_DEFAULT_TAGS: [Key, string][] = [["deepwater", "no"]];
 const nonEmpty = (value: string | undefined): value is string => value !== undefined && value.trim() !== "";
 
 export function getAreaKindLabel(feature: OsmFeature): string {
@@ -49,6 +51,18 @@ export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature
   const tags: Tags = feature.tags ?? {};
   const featureType = featureToTypeOSM(feature);
   const diagnostics: TagDiagnostic[] = [];
+
+  for (const [key, defaultValue] of REDUNDANT_DEFAULT_TAGS) {
+    if (tags[key] !== defaultValue) continue;
+    diagnostics.push({
+      id: `useless:${key}`,
+      severity: "warning",
+      title: `Useless "${key}=${defaultValue}" tag`,
+      description: `"${key}=${defaultValue}" is the default value: it carries no information and should be removed.`,
+      tags: [key],
+      fixes: [{ label: `Remove ${key}`, patch: { remove: [key] } }],
+    });
+  }
 
   for (const rawKey of Object.keys(tags)) {
     const key = rawKey as Key;

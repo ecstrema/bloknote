@@ -128,4 +128,17 @@ describe("getFeatureDiagnostics", () => {
     // Only the bottom is referenced: no diagnostic
     expect(getFeatureDiagnostics(crag, [bottom]).some((d) => d.id.startsWith("duplicate:route-parts"))).toBe(false);
   });
+
+  it("flags useless default-valued tags such as deepwater=no (issue #233)", () => {
+    const diags = getFeatureDiagnostics(
+      route({ sport: "climbing", climbing: "route_bottom", name: "DWS", "climbing:grade:french": "6a", deepwater: "no" }),
+    );
+    const diag = diags.find((d) => d.id === "useless:deepwater");
+    expect(diag).toBeDefined();
+    expect(diag!.severity).toBe("warning");
+    expect(diag!.fixes?.[0]?.patch).toEqual({ remove: ["deepwater"] });
+
+    // Any other value is meaningful: no diagnostic
+    expect(getFeatureDiagnostics(route({ sport: "climbing", climbing: "route_bottom", deepwater: "yes" })).some((d) => d.id === "useless:deepwater")).toBe(false);
+  });
 });

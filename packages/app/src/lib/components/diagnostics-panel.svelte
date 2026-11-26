@@ -29,6 +29,7 @@
   let scanningLoaded = $state(false);
   let severityFilter = $state<"all" | DiagnosticSeverity>("all");
   let categoryFilter = $state("all");
+  let fixableOnly = $state(false);
   const fixingSlugs = new SvelteSet<string>();
   let fixError = $state<string>();
 
@@ -78,7 +79,8 @@
         diagnostics: entry.diagnostics.filter(
           (d) =>
             (severityFilter === "all" || d.severity === severityFilter) &&
-            (categoryFilter === "all" || d.id === categoryFilter),
+            (categoryFilter === "all" || d.id === categoryFilter) &&
+            (!fixableOnly || (d.fixes && d.fixes.length > 0)),
         ),
       }))
       .filter((entry) => entry.diagnostics.length > 0),
@@ -87,13 +89,15 @@
   const counts = $derived.by(() => {
     let errors = 0;
     let warnings = 0;
+    let fixable = 0;
     for (const entry of allEntries) {
       for (const d of entry.diagnostics) {
         if (d.severity === "error") errors++;
         else warnings++;
+        if (d.fixes && d.fixes.length > 0) fixable++;
       }
     }
-    return { errors, warnings, total: errors + warnings };
+    return { errors, warnings, fixable, total: errors + warnings };
   });
 
   async function scanUnloadedSubtree() {
@@ -211,6 +215,13 @@
           onclick={() => (severityFilter = "warning")}
         >
           Warnings ({counts.warnings})
+        </Button>
+        <Button
+          size="xs"
+          variant={fixableOnly ? "default" : "outline"}
+          onclick={() => (fixableOnly = !fixableOnly)}
+        >
+          With fixes ({counts.fixable})
         </Button>
       </div>
 
