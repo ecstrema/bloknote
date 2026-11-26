@@ -6,6 +6,7 @@ import type { Coordinates, DataJSON, GeographicFolderElement, OverpassRequest } 
 import { ensureDirExists, slugify, USER_AGENT } from "@bloknote/reverse-geocoding-data";
 import type { OsmFeature } from "osm-api";
 import { getStaticIdentifier, osmIndexFile } from "@bloknote/common";
+import { RSS_PREVIOUS_VERSIONS_CACHE } from "./config.ts";
 import {
   isRecentItem,
   OSM_BASE_URL,
@@ -274,7 +275,7 @@ async function writeStaticApi(
   writeChildrenDataToGeoTree([options.outApiDirectory], geographicTree, geolocator);
 
   console.info("Writing static child, download, and stats endpoints");
-  await writeStaticApiMetadata(join(options.outApiDirectory, "world"));
+  await writeStaticApiMetadata(join(options.outApiDirectory, "world"), RSS_PREVIOUS_VERSIONS_CACHE);
 }
 
 function writeChildrenDataToGeoTree(path: string[], mapTree: MapTree, geolocator: ReverseGeolocator) {
@@ -343,12 +344,53 @@ function collectRecentFeatures(directory: string, features: OsmFeature[] = []): 
  * elements that can make it into a feed are fetched (capped at RSS_CHANGES_FETCH_LIMIT), with
  * a delay between requests to stay polite with the OSM API. Failures are skipped: items simply
  * get no "Changes" paragraph.
+ *
+ * The fetched versions are persisted between builds (issue #228): only edits newer than the
+ * last build require a request. The cache maps "type/id" to the feature at `version` and the
+ * previous-version feature that was used for its change summary, so two consecutive builds
+ * chain without re-fetching (the feature of the previous build is the new previous version).
  */
-async function fetchPreviousVersions(features: OsmFeature[]): Promise<Map<string, OsmFeature>> {
+type PreviousVersionsCacheEntry = { version: number; feature: OsmFeature; previous?: OsmFeature };
+type PreviousVersionsCache = Record<string, PreviousVersionsCacheEntry>;
+
+function loadPreviousVersionsCache(cacheFile: string): PreviousVersionsCache {
+  try {
+    return JSON.parse(readFileSync(cacheFile, "utf8")) as PreviousVersionsCache;
+  } catch {
+    return {};
+  }
+}
+
+function savePreviousVersionsCache(cacheFile: string, cache: PreviousVersionsCache, keepKeys: Set<string>) {
+  const pruned = Object.fromEntries(Object.entries(cache).filter(([key]) => keepKeys.has(key)));
+  try {
+    writeFileSync(cacheFile, JSON.stringify(pruned));
+  } catch (error) {
+    console.info(`Could not persist the RSS previous-versions cache: ${error}`);
+  }
+}
+
+async function fetchPreviousVersions(
+  features: OsmFeature[],
+  cache: PreviousVersionsCache,
+): Promise<Map<string, OsmFeature>> {
   const previous = new Map<string, OsmFeature>();
   for (const feature of features.slice(0, RSS_CHANGES_FETCH_LIMIT)) {
     const version = feature.version ?? 1;
     if (version <= 1) continue;
+    const key = `${feature.type}/${feature.id}`;
+    const entry = cache[key];
+    // Cache hit: the entry matches the current version (reused across builds, issue #228),
+    // or is exactly one version behind (its feature is the previous version we need)
+    if (entry?.previous && entry.version === version) {
+      previous.set(key, entry.previous);
+      continue;
+    }
+    if (entry?.version === version - 1) {
+      cache[key] = { version, feature, previous: entry.feature };
+      previous.set(key, entry.feature);
+      continue;
+    }
     try {
       const url = `${OSM_BASE_URL}/api/0.6/${feature.type}/${feature.id}/${version - 1}.json`;
       const response = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
@@ -356,7 +398,10 @@ async function fetchPreviousVersions(features: OsmFeature[]): Promise<Map<string
       const element = ((await response.json()) as { elements: OsmFeature[] }).elements.find(
         (e) => e.type === feature.type && e.id === feature.id,
       );
-      if (element) previous.set(`${feature.type}/${feature.id}`, element);
+      if (element) {
+        cache[key] = { version, feature, previous: element };
+        previous.set(`${feature.type}/${feature.id}`, element);
+      }
     } catch (error) {
       console.info(`Skipping change summary for ${feature.type}/${feature.id}: ${error}`);
     }
@@ -365,11 +410,16 @@ async function fetchPreviousVersions(features: OsmFeature[]): Promise<Map<string
   return previous;
 }
 
-async function writeStaticApiMetadata(worldDirectory: string) {
+async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string) {
   const recentFeatures = collectRecentFeatures(worldDirectory).sort(
     (a, b) => Date.parse(b.timestamp!) - Date.parse(a.timestamp!),
   );
-  const previousVersions = await fetchPreviousVersions(recentFeatures);
+  const cache = cacheFile ? loadPreviousVersionsCache(cacheFile) : {};
+  const previousVersions = await fetchPreviousVersions(recentFeatures, cache);
+  if (cacheFile) {
+    const keepKeys = new Set(recentFeatures.map((f) => `${f.type}/${f.id}`));
+    savePreviousVersionsCache(cacheFile, cache, keepKeys);
+  }
   /** Every node of the world, written once at the root for the app to download */
   const download: DataJSONRecord = {};
 

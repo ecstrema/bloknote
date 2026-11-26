@@ -5,3 +5,4 @@ src/cliffs.json
 build/
 src/world-climbing-points.json
 src/climbing-data/
+src/rss-previous-versions.json

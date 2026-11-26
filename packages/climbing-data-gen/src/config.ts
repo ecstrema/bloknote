@@ -14,3 +14,5 @@ export const OUT_DIR = join(dirname, "../build");
 export const CLIMBING_DATA_FILE = join(dirname, "climbing.json");
 /** Raw worldwide Overpass result containing every natural=cliff feature */
 export const CLIFFS_DATA_FILE = join(dirname, "cliffs.json");
+/** Persisted previous versions of recently edited elements, so RSS change summaries only fetch new edits (issue #228) */
+export const RSS_PREVIOUS_VERSIONS_CACHE = join(dirname, "rss-previous-versions.json");
