@@ -65,7 +65,7 @@ function openDb() {
     let persistent = false;
     let opfsUsable = false;
     try {
-      const pool = await withTimeout(sqlite3.installOpfsSAHPoolVfs({ name: "bloknote" }), 10_000);
+      const pool = await installPool(sqlite3);
       db = new pool.OpfsSAHPoolDb("/bloknote.sqlite3");
       persistent = true;
       opfsUsable = true;
@@ -78,6 +78,22 @@ function openDb() {
     return { db, persistent, opfsUsable };
   })();
   return dbPromise;
+}
+
+/** When a leader tab closes, the browser releases its OPFS sync handles asynchronously: the newly
+ * elected leader could briefly fail to install the pool and wrongly fall back to memory, so a
+ * short retry loop bridges the handoff (issue #208) */
+async function installPool(sqlite3: Awaited<ReturnType<typeof sqlite3InitModule>>) {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      return await withTimeout(sqlite3.installOpfsSAHPoolVfs({ name: "bloknote" }), 10_000);
+    } catch (err) {
+      lastErr = err;
+      await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+    }
+  }
+  throw lastErr;
 }
 
 function createSchema(db: Database) {
@@ -103,8 +119,33 @@ function getMeta(db: Database, key: string): string | undefined {
   return db.selectValue("SELECT value FROM meta WHERE key = ?", [key]) as string | undefined;
 }
 
+let buildPromise: Promise<void> | undefined;
+const buildIds = new Set<number>();
+
+/** Progress goes to every tab that asked for the build, not only to the first requester */
+function postBuildProgress(loaded: number, total: number | undefined, phase: "download" | "parsing") {
+  for (const id of buildIds) self.postMessage({ id, type: "progress", loaded, total, phase } satisfies DbResponse);
+}
+
 async function buildDatabase(url: string, version: string, bytes: number | undefined, id: number) {
+  buildIds.add(id);
+  // Several tabs can ask for the same build (a tab opened on an empty database, a replayed
+  // request after a leader handoff): they share the running one instead of racing on downloads
+  // and db.transaction (issue #208)
+  buildPromise ??= doBuild(url, version, bytes).finally(() => {
+    buildPromise = undefined;
+  });
+  try {
+    await buildPromise;
+  } finally {
+    buildIds.delete(id);
+  }
+}
+
+async function doBuild(url: string, version: string, bytes: number | undefined) {
   const { db } = await openDb();
+  // A replayed request or another tab may already have built this exact version
+  if (getMeta(db, "version") === `${version}:${SCHEMA}`) return;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to download ${url}: ${res.status}`);
   // Prefer the exact decompressed size published in data-version.json: with gzip/brotli the
@@ -120,7 +161,7 @@ async function buildDatabase(url: string, version: string, bytes: number | undef
     if (done) break;
     chunks.push(value);
     loaded += value.length;
-    self.postMessage({ id, type: "progress", loaded, total, phase: "download" } satisfies DbResponse);
+    postBuildProgress(loaded, total, "download");
   }
   const records: Record<string, DataJSON> = JSON.parse(await new Blob(chunks as BlobPart[]).text());
 
@@ -161,7 +202,7 @@ async function buildDatabase(url: string, version: string, bytes: number | undef
         if (name) insertPlace.bind([name, slugs[i]]).stepReset();
         // Parsing and inserting is slow: report progress so the UI can show how far along it is
         if (i % 2000 === 0) {
-          self.postMessage({ id, type: "progress", loaded: i, total: slugs.length, phase: "parsing" } satisfies DbResponse);
+          postBuildProgress(i, slugs.length, "parsing");
         }
       }
       for (const [slug, total] of totals) insertStats.bind([slug, total]).stepReset();

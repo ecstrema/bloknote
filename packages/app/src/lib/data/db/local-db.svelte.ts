@@ -4,6 +4,7 @@ import type { DataJSON } from "@bloknote/climbing-data-gen";
 import type { OsmFeature } from "osm-api";
 import type { AreaStats } from "#lib/types.js";
 import type { DbRequest, DbResponse, MapElementFeatureCollection, NearbyCandidate, OsmRefEntry, SearchFilters, TickRouteMatch, TopLevelPoint } from "./types";
+import { createDbTransport, type DbTransport } from "./db-transport";
 
 export type LocalDbStatus = "unknown" | "empty" | "downloading" | "ready" | "error";
 
@@ -25,7 +26,7 @@ class LocalDb {
   status = $state<LocalDbStatus>("unknown");
   /** False when the database lives in memory only, and would be lost on reload */
   persistent = $state(true);
-  /** Whether the browser could actually use OPFS, even though another tab may hold the database */
+  /** Whether the browser could actually use OPFS, reported by the database worker */
   opfsAvailable = $state(false);
   /** True when a visited page showed that OSM has newer data than the downloaded dataset */
   upstreamChanged = $state(false);
@@ -35,7 +36,7 @@ class LocalDb {
   /** Whether loaded/total currently refers to the download or to the parsing/insertion */
   phase = $state<"download" | "parsing">("download");
 
-  private worker?: Worker;
+  private transport?: DbTransport;
   private nextId = 0;
   private pending = new Map<number, { resolve: (r: DbResponse) => void; reject: (e: Error) => void }>();
   private initPromise?: Promise<void>;
@@ -49,7 +50,7 @@ class LocalDb {
     req: DistributiveOmit<DbRequest, "id">,
     _expected?: T,
   ): Promise<Extract<DbResponse, { type: T }>> {
-    this.worker ??= this.createWorker();
+    this.transport ??= this.createTransport();
     const id = this.nextId++;
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve: resolve as (r: DbResponse) => void, reject });
@@ -57,13 +58,13 @@ class LocalDb {
       // mirroring a locally created route): proxies cannot be structured-cloned into the
       // worker, so they are deep-unwrapped here first, otherwise postMessage throws
       // "Proxy object could not be cloned" and the element never reaches the database
-      this.worker!.postMessage($state.snapshot({ ...req, id }));
+      this.transport!.postMessage($state.snapshot({ ...req, id }));
     });
   }
 
-  private createWorker() {
-    const worker = new Worker(new URL("./db.worker.ts", import.meta.url), { type: "module" });
-    worker.onmessage = (event: MessageEvent<DbResponse>) => {
+  private createTransport(): DbTransport {
+    const transport = createDbTransport();
+    transport.onmessage = (event: MessageEvent<DbResponse>) => {
       if (event.data.type === "progress") {
         this.loaded = event.data.loaded;
         this.total = event.data.total;
@@ -80,7 +81,7 @@ class LocalDb {
       if (event.data.type === "error") entry.reject(new Error(event.data.message));
       else entry.resolve(event.data);
     };
-    return worker;
+    return transport;
   }
 
   /** True when a previous visit stored a local database version marker */
@@ -105,6 +106,13 @@ class LocalDb {
   /** Called when a visited page turned out to have newer data upstream than the local dataset */
   markUpstreamChanged(): void {
     this.upstreamChanged = true;
+  }
+
+  /** Another tab finished downloading or refreshing the shared database: re-check its status */
+  recheck(): void {
+    if (this.status === "downloading") return; // this tab has its own build in flight
+    this.initPromise = undefined;
+    void this.init();
   }
 
   /** Opens the database and checks whether it holds the current data. Safe to call repeatedly. */
@@ -309,10 +317,18 @@ class LocalDb {
       },
       cancel: () => {
         this.searches.delete(searchId);
-        if (started) this.worker?.postMessage({ type: "filterCancel", searchId, id: this.nextId++ });
+        if (started) this.transport?.postMessage({ type: "filterCancel", searchId, id: this.nextId++ });
       },
     };
   }
 }
 
 export const localDb = new LocalDb();
+
+if (browser) {
+  // The database is shared across tabs (issue #208): when another tab downloads or refreshes
+  // the dataset it updates the version marker, and this tab re-checks the shared database
+  addEventListener("storage", (event) => {
+    if (event.key === MARKER_KEY && event.newValue !== null) localDb.recheck();
+  });
+}
