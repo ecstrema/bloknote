@@ -103,6 +103,9 @@
     phase = "matching";
     matchingTotal = importRows.length;
     matchingProgress = 0;
+    // The import can run before the dataset was ever downloaded (settings pages do not trigger
+    // it): start the download, the matching below waits for it instead of finding nothing (issue #225)
+    void localDb.download();
     // Routes are only searched inside the area given by the export: the location from the CSV
     // locates the crag(s), then route names are matched inside them (issue #154)
     const queries = importRows.map((row) => ({ name: row.tick.routeName, area: row.tick.area }));
@@ -262,6 +265,10 @@
     <p class="flex items-center gap-2 text-xs text-muted-foreground">
       <span aria-hidden="true" class="icon-[lucide--loader-circle] size-4 animate-spin"></span>
       Matching routes in their crags... {matchingProgress}/{matchingTotal}
+      {#if localDb.status === "downloading"}
+        (downloading the offline dataset first, {localDb.phase === "download" ? "download" : "parsing"}{" "}
+        {Math.min(100, Math.round((localDb.loaded / (localDb.total ?? 1)) * 100))}%)
+      {/if}
     </p>
   {:else if phase === "importing"}
     <p class="flex items-center gap-2 text-xs text-muted-foreground">

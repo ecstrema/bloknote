@@ -233,15 +233,19 @@ class LocalDb {
 
   /** Route candidates matching each queried name inside its area, for the tick import (issue #154) */
   async matchTicks(queries: { name: string; area?: string | string[] }[]): Promise<TickRouteMatch[][]> {
+    if (queries.length === 0) return [];
+    // The import runs from the settings pages where the dataset may not be downloaded yet:
+    // wait for it instead of silently returning no matches for every tick (issue #225)
     await this.init();
-    if (!this.ready || queries.length === 0) return [];
+    if (!(await this.#whenReady(300_000))) return [];
     return (await this.send({ type: "matchTicks", queries }, "tickMatches")).data;
   }
 
   /** Area candidates matching each queried name, to pick a parent when adding a route to OSM */
   async matchAreas(queries: string[]): Promise<{ slug: string; data: DataJSON }[][]> {
+    if (queries.length === 0) return [];
     await this.init();
-    if (!this.ready || queries.length === 0) return [];
+    if (!(await this.#whenReady())) return [];
     return (await this.send({ type: "matchAreas", queries }, "areaMatches")).data;
   }
 
@@ -251,8 +255,9 @@ class LocalDb {
    * (issue #154). Used by the "Add to OSM" dialog to locate the parent crag of a tick.
    */
   async matchAreaChain(segments: string[]): Promise<({ slug: string; data: DataJSON } | null)[]> {
+    if (segments.length === 0) return [];
     await this.init();
-    if (!this.ready || segments.length === 0) return [];
+    if (!(await this.#whenReady())) return [];
     return (await this.send({ type: "matchAreaChain", segments }, "areaChain")).chain;
   }
 
