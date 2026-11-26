@@ -1,5 +1,6 @@
 <script lang="ts">
   import { navigating, updated } from "$app/state";
+  import { resolve } from "$app/paths";
   import { localDb, DATA_STALE_AFTER_DAYS } from "#lib/data/db/local-db.svelte.js";
   import { apiUrl } from "#lib/data/network/api-url.js";
   import { Button } from "#components/ui/button/index.js";
@@ -42,6 +43,9 @@
 
   /** Whether the user dismissed the app update banner */
   let dismissed = $state(false);
+
+  /** Whether the user dismissed the ATProto permissions banner (issue #227) */
+  let permissionsDismissed = $state(false);
 
   /** How old the locally stored dataset is, in a human-readable form */
   function dataAgeLabel(): string {
@@ -158,6 +162,15 @@
     undefined,
     () => window.location.reload(),
     () => (dismissed = true),
+  )}
+{/if}
+
+{#if atproto.session && atproto.needsNewPermissions && !permissionsDismissed}
+  {@render updateBanner(
+    "Reconnect your ATProto account",
+    "New features need permissions that your current connection is missing. Disconnect and reconnect your account to grant them.",
+    () => (window.location.href = resolve("/settings/account")),
+    () => (permissionsDismissed = true),
   )}
 {/if}
 

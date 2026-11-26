@@ -228,6 +228,12 @@ async function xrpcErrorMessage(res: Response): Promise<string> {
 
 class AtProtoClient {
   session = $state<AtProtoSession | undefined>(loadSession());
+  /**
+   * Set when the PDS rejects a write with HTTP 403: the session was authorized
+   * before some of the currently required scopes existed and must be re-granted
+   * by disconnecting and reconnecting the account (issue #227).
+   */
+  needsNewPermissions = $state(false);
   ticks = $state<LocalTickEntry[]>(ensureTickLocalIds(readJson<LocalTickEntry[]>(TICKS_STORAGE_KEY, []).map(normalizeTick)));
   stars = $state<LocalStarEntry[]>(readJson<LocalStarEntry[]>(STARS_STORAGE_KEY, []));
   comments = $state<LocalCommentEntry[]>(readJson<LocalCommentEntry[]>(COMMENTS_STORAGE_KEY, []));
@@ -296,6 +302,7 @@ class AtProtoClient {
 
   async #activate(oauthSession: OAuthSession) {
     this.#oauthSession = oauthSession;
+    this.needsNewPermissions = false;
     const stored = loadSession();
     const handle = stored?.did === oauthSession.did ? stored.handle : await this.#fetchHandle(oauthSession.did);
     this.session = { did: oauthSession.did, handle };
@@ -523,6 +530,7 @@ class AtProtoClient {
     this.#clearLocalData();
     this.settings = undefined;
     this.#settingsWriteFailed = false;
+    this.needsNewPermissions = false;
     if (session) await session.signOut().catch(() => {});
   }
 
@@ -538,6 +546,15 @@ class AtProtoClient {
       localStorage.removeItem(COMMENTS_STORAGE_KEY);
       localStorage.removeItem(RATINGS_STORAGE_KEY);
     }
+  }
+
+  /**
+   * A PDS write rejected with HTTP 403 (e.g. InsufficientScope) means the session was
+   * authorized before some of the currently required scopes existed: the user must
+   * disconnect and reconnect their account (issue #227).
+   */
+  #markInsufficientScope(res: Response) {
+    if (res.status === 403) this.needsNewPermissions = true;
   }
 
   async #createRemoteRecord(collection: string, record: object): Promise<string> {
@@ -556,10 +573,12 @@ class AtProtoClient {
         record: { $type: collection, ...record },
       }),
     });
-    if (!res.ok)
+    if (!res.ok) {
+      this.#markInsufficientScope(res);
       throw new Error(
         `Could not save the record to your ATProto repository (HTTP ${res.status})${await xrpcErrorMessage(res)}`,
       );
+    }
     const data = (await res.json()) as { uri?: string };
     if (!data.uri) throw new Error("Your ATProto repository did not return a record URI");
     return data.uri;
@@ -583,10 +602,12 @@ class AtProtoClient {
         record: { $type: collection, ...record },
       }),
     });
-    if (!res.ok)
+    if (!res.ok) {
+      this.#markInsufficientScope(res);
       throw new Error(
         `Could not update the record in your ATProto repository (HTTP ${res.status})${await xrpcErrorMessage(res)}`,
       );
+    }
   }
 
   async #deleteRemoteRecord(collection: string, uri: string) {
@@ -599,10 +620,12 @@ class AtProtoClient {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ repo: session.did, collection, rkey }),
     });
-    if (!res.ok)
+    if (!res.ok) {
+      this.#markInsufficientScope(res);
       throw new Error(
         `Could not delete the record from your ATProto repository (HTTP ${res.status})${await xrpcErrorMessage(res)}`,
       );
+    }
   }
 
   #persistTicks() {
