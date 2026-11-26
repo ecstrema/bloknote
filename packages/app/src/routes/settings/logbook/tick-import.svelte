@@ -15,8 +15,8 @@
 
   /** Safety cap: very large exports are truncated instead of freezing the page */
   const MAX_ROWS = 1000;
-  /** Area matching scans crag subtrees: keep the batches small */
-  const MATCH_BATCH = 20;
+  /** One tick at a time: the matching is fast enough and the counter advances on every tick (issue #239) */
+  const MATCH_BATCH = 1;
 
   interface ImportCandidate {
     slug: string;

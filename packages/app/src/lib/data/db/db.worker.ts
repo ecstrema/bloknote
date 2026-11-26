@@ -374,6 +374,12 @@ const MATCH_TICK_MAX_AREAS = 4;
 /** How many route candidates are returned per tick query */
 const MATCH_TICK_MAX_ROUTES = 5;
 
+/** Upper bound for an index range scan over all slugs starting with `prefix` (no slug contains
+ * U+FFFF, so anything below it and above the prefix starts with the prefix) */
+function subtreeUpper(prefix: string): string {
+  return `${prefix}\uffff`;
+}
+
 function scanAreaSubtree(
   db: Database,
   areaSlug: string,
@@ -381,11 +387,15 @@ function scanAreaSubtree(
   results: TickRouteMatch[],
   seenSlugs: Set<string>,
 ) {
+  // The slug range uses the primary key index: `substr(slug, 1, ?) = ?` forced a full scan of
+  // every route for each area, which made matching a long logbook crawl (issue #239). Only the
+  // `area/` subtree is scanned: `matchAreaCandidates` only returns areas, so the `slug = area`
+  // arm of the old condition never matched a route anyway.
   const prefix = `${areaSlug}/`;
   const rows = db.selectArrays(
     `SELECT slug, parent_slug, data FROM elements
-     WHERE type = 'route' AND (slug = ? OR substr(slug, 1, ?) = ?) LIMIT 2000`,
-    [areaSlug, prefix.length, prefix],
+     WHERE type = 'route' AND slug >= ? AND slug < ? LIMIT 2000`,
+    [prefix, subtreeUpper(prefix)],
   );
   for (const [slug, parentSlug, json] of rows) {
     if (results.length >= MATCH_TICK_MAX_ROUTES) return;
@@ -403,8 +413,13 @@ function scanAreaSubtree(
  * The location hierarchy is tried deepest first (the wall is more specific than the country).
  * A fallback matches the route name globally, but only when the slug path mentions one of the
  * area segments: routes sometimes sit directly under a region while the logbook names its crag.
+ * `areaCache` lets consecutive ticks from the same crag reuse the expensive area lookups.
  */
-function matchTickQuery(db: Database, query: { name: string; area?: string | string[] }): TickRouteMatch[] {
+function matchTickQuery(
+  db: Database,
+  query: { name: string; area?: string | string[] },
+  areaCache?: Map<string, { slug: string; data: DataJSON }[]>,
+): TickRouteMatch[] {
   const variants = nameVariants(query.name);
   if (variants.length === 0 || !query.area) return [];
 
@@ -415,7 +430,12 @@ function matchTickQuery(db: Database, query: { name: string; area?: string | str
 
   for (const segment of segments) {
     if (results.length >= MATCH_TICK_MAX_ROUTES || visitedAreas.size >= MATCH_TICK_MAX_AREAS) break;
-    for (const area of matchAreaCandidates(db, segment)) {
+    let candidates = areaCache?.get(segment);
+    if (!candidates) {
+      candidates = matchAreaCandidates(db, segment);
+      areaCache?.set(segment, candidates);
+    }
+    for (const area of candidates) {
       if (results.length >= MATCH_TICK_MAX_ROUTES || visitedAreas.size >= MATCH_TICK_MAX_AREAS) break;
       if (visitedAreas.has(area.slug)) continue;
       visitedAreas.add(area.slug);
@@ -819,8 +839,10 @@ async function handle(req: DbRequest): Promise<DbResponse> {
       // crag/sector(s), then route names are matched inside their subtrees. Name-only matches are
       // useless: without an area, no candidates are returned.
       const data: TickRouteMatch[][] = [];
+      // Logbooks usually repeat the same crag for many ticks: share the area lookups (issue #239)
+      const areaCache = new Map<string, { slug: string; data: DataJSON }[]>();
       for (const query of req.queries) {
-        data.push(matchTickQuery(db, query));
+        data.push(matchTickQuery(db, query, areaCache));
       }
       return { id: req.id, type: "tickMatches", data };
     }
