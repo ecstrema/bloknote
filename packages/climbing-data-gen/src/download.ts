@@ -90,12 +90,16 @@ export async function downloadOverpassData(
   { force = false, onRetry, subject }: { force?: boolean; onRetry?: (error: string) => void; subject: string },
 ): Promise<string> {
   if (!force && existsSync(outputFilePath)) {
-    const cached = JSON.parse(await readFile(outputFilePath, "utf8"));
-    if (Array.isArray(cached.elements)) {
-      console.log(`Using cached ${subject} from ${outputFilePath}`);
-      return outputFilePath;
+    try {
+      const cached = JSON.parse(await readFile(outputFilePath, "utf8"));
+      if (Array.isArray(cached.elements)) {
+        console.log(`Using cached ${subject} from ${outputFilePath}`);
+        return outputFilePath;
+      }
+    } catch {
+      // Truncated or corrupted cache (e.g. cancelled CI job): fall through to a fresh download.
     }
-    throw new Error(`Invalid ${subject} cache: ${outputFilePath}`);
+    console.warn(`Invalid ${subject} cache at ${outputFilePath}: downloading a fresh copy`);
   }
 
   console.log(`Downloading worldwide ${subject} in one Overpass query...`);

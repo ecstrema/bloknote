@@ -40,6 +40,7 @@ Overpass API (sport=climbing)
 - **`src/static-api-generator.ts`**: Partitions climbing places into regional directory buckets, writes per-region `data.json`, `children.json`, `stats.json`, and `feed.xml` (see `src/rss.ts`), and assembles the top-level `download.json` (every feature in one flat record) plus `data-version.json` (a date-based version number YYYYMMDD and the generation timestamp).
 - **`src/world-points.ts`**: Extracts lightweight point coordinates and attributes for fast spatial sorting and map rendering.
 - **`src/cliffs.ts`**: Downloads every `natural=cliff` worldwide (cached in `src/cliffs.json`, refreshed with `--refresh-cliffs`), geolocates each cliff center like the climbing places, and writes one `cliffs.json` per region directory that already exists (issue #55). A failed cliff download only logs a warning: the climbing API is already generated at that point.
+- **CI caching**: `src/cliffs.json` is gitignored and cached in `.github/workflows/deploy.yml` with a static key, so the ~1M-element Overpass download runs once and is reused on every build. A corrupt cache falls back to a fresh download; bump the cache key suffix to force a refresh.
 
 ---
 

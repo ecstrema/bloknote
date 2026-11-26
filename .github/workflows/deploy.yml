@@ -34,6 +34,17 @@ jobs:
       - uses: oven-sh/setup-bun@v2
 
       - run: bun install --frozen-lockfile
+
+      - name: Cache worldwide cliffs data
+        uses: actions/cache@v6
+        with:
+          # Raw Overpass response holding every natural=cliff (~1M elements). Downloading it can
+          # take a long time, and a failed download must not break the build (issue #55), so the
+          # raw cache is persisted between runs: a stale cache is always better than no cache.
+          # Bump the key suffix to force a fresh download.
+          path: packages/climbing-data-gen/src/cliffs.json
+          key: ${{ runner.os }}-world-cliffs
+
       - run: bun run build:reverse-geocoding-data
       - run: bun run build:climbing-data-gen
 
