@@ -7,6 +7,7 @@ import {
   getTagRule,
   gradeTags,
   isProjectRoute,
+  isViaFerrata,
   parseClimbingLength,
   scaleIdToTag,
 } from "./osm-tags.js";
@@ -169,13 +170,16 @@ export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature
       fixes: [{ label: "Remove grade", patch: { remove: presentGradeKeys } }],
     });
   } else if (featureType === "route" && !project && presentGradeKeys.length === 0) {
-    diagnostics.push({
-      id: "missing:grade",
-      severity: "warning",
-      title: "Missing grade",
-      description: "This route does not have a grade tag.",
-      tags: [],
-    });
+    // A via ferrata graded only with the SAC hiking scale is not "missing" a grade (issue #234)
+    if (!(isViaFerrata(tags) && nonEmpty(tags.sac_scale))) {
+      diagnostics.push({
+        id: "missing:grade",
+        severity: "warning",
+        title: "Missing grade",
+        description: "This route does not have a grade tag.",
+        tags: [],
+      });
+    }
   }
 
   if (nonEmpty(tags.phone) && nonEmpty(tags["contact:phone"])) {

@@ -65,6 +65,11 @@ export function isProjectRoute(tags: Tags | undefined): boolean {
   return /\b(project|projet|projekt|progetto)\b/i.test(tags.name);
 }
 
+/** Whether the element is a via ferrata (issue #234) */
+export function isViaFerrata(tags: Tags): boolean {
+  return tags.climbing === "via_ferrata" || tags.highway === "via_ferrata" || tags.via_ferrata_scale !== undefined;
+}
+
 const climbingStyleLabels = [
   ["sport", "Sport"],
   ["trad", "Trad"],
@@ -121,6 +126,23 @@ const processedGrades: ProcessedTags = {
   ...Object.fromEntries(gradeTags.map(([key, scale]) => [key, allowFromNormalize(getScale(scale)!.normalize)])),
 };
 
+/** sac_scale values (SAC hiking scale, often reused to grade via ferratas, issue #234) */
+const sacScaleValues = new Set([
+  "hiking",
+  "mountain_hiking",
+  "demanding_mountain_hiking",
+  "alpine_hiking",
+  "demanding_alpine_hiking",
+  "difficult_alpine_hiking",
+  "T1",
+  "T2",
+  "T3",
+  "T4",
+  "T5",
+  "T6",
+]);
+const sacScaleTag = (value: string) => sacScaleValues.has(value) || sacScaleValues.has(value.toUpperCase());
+
 export function scaleIdToTag(s: ScaleId): Key | undefined {
   return gradeTags.find(([, scale]) => scale === s)?.[0];
 }
@@ -137,8 +159,7 @@ export function getRelatedGradeScales(tags: Tags, currentScale?: ScaleId | "unkn
   const isMixed = tags["climbing:mixed"] === "yes" || !!tags["climbing:grade:mixed"];
   const isDry = tags["climbing:dry"] === "yes" || tags.climbing === "drytooling" || !!tags["climbing:grade:dry"];
   const isAid = tags["climbing:aid"] === "yes" || !!tags["climbing:grade:aid"];
-  const isViaFerrata =
-    tags.climbing === "via_ferrata" || tags.highway === "via_ferrata" || tags.via_ferrata_scale !== undefined;
+  const isViaFerrataElement = isViaFerrata(tags);
   const isRockRoute =
     tags["climbing:sport"] === "yes" ||
     tags["climbing:trad"] === "yes" ||
@@ -157,7 +178,7 @@ export function getRelatedGradeScales(tags: Tags, currentScale?: ScaleId | "unkn
   }
   if (isIce || isMixed || isDry) addAll(allIceScales);
   if (isAid) addAll(allAidScales);
-  if (isViaFerrata) addAll(allViaFerrataScales);
+  if (isViaFerrataElement) addAll(allViaFerrataScales);
   if (isRockRoute) addAll(allRouteScales);
 
   if (currentScale && currentScale !== "unknown") {
@@ -180,6 +201,13 @@ export function getGrade(tags: Tags): WithSourceTag<Grade> | undefined {
 
   if (grade) {
     return grade;
+  }
+
+  // Via ferratas are often graded with the SAC hiking scale instead of a dedicated via ferrata
+  // scale (issue #234). There is no consensus on how to map it to the via ferrata scales, so the
+  // value is displayed as written (unknown scale) instead of being converted.
+  if (isViaFerrata(tags) && tags.sac_scale && sacScaleTag(tags.sac_scale)) {
+    return { v: { v: tags.sac_scale, scale: "unknown" }, source: "sac_scale" };
   }
 
   // If no grade was found, check for a generic climbing:grade tag
@@ -412,6 +440,7 @@ export const processedTags: Record<OSMClimbingFeatureType, ProcessedTags> = {
     "climbing:pitches": (v: string) => /^[1-9]\d*$/.test(v.trim()),
     climbing: allowMultipleValues(routeClimbingValues),
     highway: allowSingleValue("via_ferrata"),
+    sac_scale: sacScaleTag,
   },
   area: {
     ...sharedProcessedTags,

@@ -10,6 +10,7 @@ import {
   getRelatedGradeScales,
   getTagRule,
   isProjectRoute,
+  isViaFerrata,
   parseClimbingLength,
   routeClimbingValues,
   scaleIdToTag,
@@ -88,6 +89,44 @@ describe("climbing grades", () => {
     ["Polish", "climbing:grade:polish"],
   ] as const)("maps scale %s to %s", (scale, key) => {
     expect(scaleIdToTag(scale)).toBe(key);
+  });
+});
+
+describe("sac_scale on via ferratas (issue #234)", () => {
+  it("uses sac_scale as the written grade of a via ferrata", () => {
+    expect(getGrade({ climbing: "via_ferrata", sac_scale: "T3" })).toEqual({
+      v: { v: "T3", scale: "unknown" },
+      source: "sac_scale",
+    });
+    expect(getGrade({ highway: "via_ferrata", sac_scale: "alpine_hiking" })).toMatchObject({
+      v: { v: "alpine_hiking", scale: "unknown" },
+      source: "sac_scale",
+    });
+  });
+
+  it("keeps dedicated via ferrata grades ahead of sac_scale", () => {
+    expect(getGrade({ climbing: "via_ferrata", via_ferrata_scale: "K3", sac_scale: "T3" })).toMatchObject({
+      v: { scale: "Huesler" },
+      source: "via_ferrata_scale",
+    });
+  });
+
+  it("ignores sac_scale on non-via-ferrata features", () => {
+    expect(getGrade({ climbing: "route", sac_scale: "T3" })).toBeUndefined();
+  });
+
+  it("recognizes sac_scale as a valid route tag", () => {
+    const rule = getTagRule("route", "sac_scale");
+    const accepts = (value: string) => (typeof rule === "function" ? rule(value) : false);
+    expect(accepts("T3")).toBe(true);
+    expect(accepts("t6")).toBe(true);
+    expect(accepts("alpine_hiking")).toBe(true);
+    expect(accepts("bananas")).toBe(false);
+  });
+
+  it("treats sac_scale as a via ferrata grade, not an element type indicator", () => {
+    expect(isViaFerrata({ sac_scale: "T2" })).toBe(false);
+    expect(isViaFerrata({ highway: "via_ferrata" })).toBe(true);
   });
 });
 
