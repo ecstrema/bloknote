@@ -14873,6 +14873,9 @@ msgstr "Öffnungszeiten: {0}"
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
 msgid "FeatureCollection"
 msgstr "FeatureCollection"
 
@@ -14890,11 +14893,13 @@ msgstr "Feature"
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
 msgid "Point"
 msgstr "Point"
 
 #: src/lib/components/diagnostics-panel.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/map-info-box.svelte
 #: src/lib/components/pulse-panel.svelte
 #: src/routes/explore/+page.svelte
 #: src/routes/settings/logbook/tick-import.svelte
@@ -14903,6 +14908,7 @@ msgstr "Point"
 msgid "Unnamed"
 msgstr "Unbenannt"
 
+#: src/lib/components/map-info-box.svelte
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Route"
 msgstr "Route"
@@ -15606,6 +15612,7 @@ msgstr "Ziehe den Marker auf der Karte, um die Route zu verschieben."
 msgid "Both"
 msgstr "Beide"
 
+#: src/lib/components/map-info-box.svelte
 #: src/lib/components/map-legend.svelte
 #: src/lib/components/map-legend.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
@@ -15629,6 +15636,7 @@ msgstr "Grade (Füllung)"
 msgid "Type (stroke)"
 msgstr "Typ (Umriss)"
 
+#: src/lib/components/map-info-box.svelte
 #: src/lib/components/map-legend.svelte
 msgid "Gym"
 msgstr "Halle"
@@ -16234,6 +16242,7 @@ msgid "Stores the shared climbing directory—routes, sectors, crags, gyms, grad
 msgstr "Speichert das gemeinsame Kletterverzeichnis — Routen, Sektoren, Crags, Hallen, Grade und Tags. Melde dich an, um Kletterdaten hinzuzufügen, zu bearbeiten, umzustrukturieren oder zu korrigieren und deine Changesets zu veröffentlichen."
 
 #: src/routes/settings/account/accounts-tab.svelte
+#: src/routes/settings/logbook/+page.svelte
 msgid "Atmosphere"
 msgstr "Atmosphere"
 
@@ -16382,6 +16391,7 @@ msgid "Bloknote home"
 msgstr "Bloknote-Startseite"
 
 #: src/lib/components/route-logbook.svelte
+#: src/lib/components/tick-button.svelte
 #: src/lib/components/tick-button.svelte
 msgid "Could not log tick"
 msgstr "Begehung konnte nicht geloggt werden"
@@ -16542,7 +16552,7 @@ msgstr "Kernschemas"
 msgid "Your climbing stats"
 msgstr "Deine Kletterstatistiken"
 
-#: src/routes/settings/account/accounts-tab.svelte
+#: src/lib/components/atproto-login.svelte
 msgid "Handle (e.g. alice.bsky.social)"
 msgstr "Handle (z. B. alice.bsky.social)"
 
@@ -16641,23 +16651,23 @@ msgstr "Diese Route ist als Projekt benannt, hat aber einen Grad zugewiesen ({0}
 msgid "Remove grade"
 msgstr "Grad entfernen"
 
-#: src/routes/settings/account/accounts-tab.svelte
+#: src/lib/components/atproto-login.svelte
 msgid "User navigated back"
 msgstr "Benutzer ist zurück navigiert"
 
-#: src/routes/settings/account/accounts-tab.svelte
+#: src/lib/components/atproto-login.svelte
 msgid "Login cancelled"
 msgstr "Anmeldung abgebrochen"
 
-#: src/routes/settings/account/accounts-tab.svelte
+#: src/lib/components/atproto-login.svelte
 msgid "Redirecting..."
 msgstr "Weiterleitung..."
 
-#: src/routes/settings/account/accounts-tab.svelte
+#: src/lib/components/atproto-login.svelte
 msgid "Continue"
 msgstr "Weiter"
 
-#: src/routes/settings/account/accounts-tab.svelte
+#: src/lib/components/atproto-login.svelte
 msgid "You will be redirected to your ATProto provider to log in and authorize Bloknote. No app password needed."
 msgstr "Du wirst zu deinem ATProto-Anbieter weitergeleitet, um dich anzumelden und Bloknote zu autorisieren. Kein App-Passwort erforderlich."
 
@@ -16678,10 +16688,12 @@ msgid "Length"
 msgstr ""
 
 #: src/lib/components/editable/editable-description.svelte
+#: src/lib/components/map-info-box.svelte
 msgid "Description"
 msgstr ""
 
 #: src/lib/components/editable/editable-name.svelte
+#: src/lib/components/map-info-box.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Name"
 msgstr ""
@@ -17030,9 +17042,8 @@ msgstr ""
 msgid "Logbook"
 msgstr ""
 
-#: src/routes/settings/logbook/+page.svelte
-msgid "Connect your Atmosphere account in the <0>Account</0> tab to keep your ticks, bookmarks, and comments."
-msgstr ""
+#~ msgid "Connect your Atmosphere account in the <0>Account</0> tab to keep your ticks, bookmarks, and comments."
+#~ msgstr ""
 
 #: src/routes/grade-comparison/+layout.svelte
 msgid "Via ferrata"
@@ -17052,6 +17063,7 @@ msgid "Rate {0} star{1}"
 msgstr ""
 
 #: src/routes/settings/account/accounts-tab.svelte
+#: src/routes/settings/logbook/+page.svelte
 msgid "Stores your personal climbing activity on the AT Protocol—logbook ticks and ascents, comments, star ratings, and bookmarked climbs—in your own data repository, separate from OpenStreetMap."
 msgstr ""
 
@@ -17261,6 +17273,7 @@ msgstr ""
 msgid "Could not link the tick."
 msgstr ""
 
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Your ticks"
 msgstr ""
@@ -17930,6 +17943,7 @@ msgstr ""
 msgid "Report an issue"
 msgstr ""
 
+#: src/lib/components/map-info-box.svelte
 #: src/routes/settings/about-dialog.svelte
 msgid "Close"
 msgstr ""
@@ -18044,10 +18058,8 @@ msgstr ""
 msgid "Tick this climb"
 msgstr ""
 
-#: src/lib/components/tick-button.svelte
-#: src/lib/components/tick-button.svelte
-msgid "Connect Atmosphere in the settings to log ticks"
-msgstr ""
+#~ msgid "Connect Atmosphere in the settings to log ticks"
+#~ msgstr ""
 
 #: src/lib/components/tick-button.svelte
 msgid "Change the date"
@@ -18093,4 +18105,58 @@ msgstr ""
 
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV), <1>TheCrag</1> (dashboard, actions, logbook CSV), <2>8a.nu</2> (profile, edit, download CSV at the bottom), <3>Sendage</3>, <4>UKClimbing</4> (logbook, export) or <5>OpenClimbing</5>, then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
+msgstr ""
+
+#: src/lib/components/tick-button.svelte
+#: src/lib/components/tick-button.svelte
+msgid "Connect Atmosphere to log ticks"
+msgstr ""
+
+#: src/lib/components/tick-button.svelte
+msgid "Connect Atmosphere"
+msgstr ""
+
+#: src/lib/components/tick-button.svelte
+msgid "Log in to keep your ticks, bookmarks, and comments in your own ATProto repository."
+msgstr ""
+
+#: src/lib/components/tick-button.svelte
+msgid "<0/> Add tick"
+msgstr ""
+
+#: src/lib/components/map-info-box.svelte
+msgid "Tick button"
+msgstr ""
+
+#. 0: ROUTE_STYLE_LABELS[properties.routeStyle ?? "unknown"] ?? "Route"
+#: src/lib/components/map-info-box.svelte
+msgid "{0} route"
+msgstr ""
+
+#: src/lib/components/map-info-box.svelte
+msgid "Cliff"
+msgstr ""
+
+#: src/lib/components/map-info-box.svelte
+msgid "Sector"
+msgstr ""
+
+#: src/lib/components/map-info-box.svelte
+msgid "Area / Crag"
+msgstr ""
+
+#: src/lib/components/map-info-box.svelte
+msgid "Selected element information"
+msgstr ""
+
+#: src/lib/components/map-info-box.svelte
+msgid "Choose what the box shows"
+msgstr ""
+
+#: src/lib/components/map-info-box.svelte
+msgid "Edit the box contents"
+msgstr ""
+
+#: src/lib/components/map-info-box.svelte
+msgid "Close the information box"
 msgstr ""

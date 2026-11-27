@@ -187,10 +187,10 @@ export function buildSectorContour(points: [number, number][], bufferDist = SECT
  * Selection highlights stay visible regardless of the toggles.
  */
 export const ELEMENT_TYPE_LAYERS: Record<string, string[]> = {
-  route: ["routes", "route-labels"],
+  route: ["routes", "route-labels", "clusters", "cluster-count"],
   area: ["areas"],
   gym: ["gyms"],
-  cliff: ["cliffs", "cliff-points"],
+  cliff: ["cliffs", "cliff-points", "cliff-labels"],
   sector: ["sectors-contour", "sectors-label"],
 };
 
@@ -256,10 +256,11 @@ export function cliffPopupHtml(props: { ref?: string; name?: string; pending?: b
 
 /**
  * Opacity expression fading features flagged `dimmed` by the active search filters (issue #215).
- * Features without the flag render at full opacity.
+ * Features without the flag render at full opacity. The `boolean` coercion is required: MapLibre
+ * v6 rejects a raw `get` as a `case` condition.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const DIMMED_OPACITY = ["case", ["get", "dimmed", false], 0.2, 1] as any;
+const DIMMED_OPACITY = ["case", ["boolean", ["get", "dimmed"], false], 0.2, 1] as any;
 
 export const CLIMBING_LAYERS: LayerSpecification[] = [
   {
@@ -406,11 +407,45 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
     },
   },
   {
+    // Marker clustering (issue #196): routes are clustered at low zoom instead of only being
+    // added past a zoom threshold. Clicking a cluster expands it.
+    id: "clusters",
+    type: "circle",
+    source: "route-clusters",
+    filter: ["has", "point_count"],
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 2, 10, 10, 14, 50, 18, 200, 22],
+      "circle-color": "#2563eb",
+      "circle-opacity": 0.8,
+      "circle-stroke-color": "#ffffff",
+      "circle-stroke-width": 1.5,
+    },
+  },
+  {
+    id: "cluster-count",
+    type: "symbol",
+    source: "route-clusters",
+    filter: ["has", "point_count"],
+    layout: {
+      "text-field": ["get", "point_count_abbreviated"],
+      "text-size": 11,
+      "text-allow-overlap": true,
+      "text-ignore-placement": true,
+    },
+    paint: {
+      "text-color": "#ffffff",
+    },
+  },
+  {
     id: "routes",
     type: "circle",
-    source: "climbing-elements",
-    minzoom: 7,
-    filter: ["==", ["get", "elementType"], "route"],
+    source: "route-clusters",
+    filter: [
+      "all",
+      ["==", ["geometry-type"], "Point"],
+      ["!", ["has", "point_count"]],
+      ["==", ["get", "elementType"], "route"],
+    ],
     paint: {
       "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 2.5, 12, 4, 15, 5.5, 18, 7.5],
       "circle-color": ["get", "fillColor"],
@@ -418,6 +453,20 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 8, 1, 14, 1.5, 17, 2],
       "circle-opacity": DIMMED_OPACITY,
       "circle-stroke-opacity": DIMMED_OPACITY,
+    },
+  },
+  {
+    // Selected route on the clustered route source (issue #196): routes no longer live in the
+    // climbing-elements source, which is now reserved for areas, gyms, cliffs, and sectors
+    id: "selected-ring-routes",
+    type: "circle",
+    source: "route-clusters",
+    filter: ["all", ["==", ["geometry-type"], "Point"], ["!", ["has", "point_count"]], ["==", ["get", "slug"], ""]],
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 6, 12, 9, 15, 12, 18, 15],
+      "circle-color": "transparent",
+      "circle-stroke-color": "#2563eb",
+      "circle-stroke-width": 2.5,
     },
   },
   {
@@ -440,9 +489,14 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
   {
     id: "route-labels",
     type: "symbol",
-    source: "climbing-elements",
+    source: "route-clusters",
     minzoom: 14,
-    filter: ["==", ["get", "elementType"], "route"],
+    filter: [
+      "all",
+      ["==", ["geometry-type"], "Point"],
+      ["!", ["has", "point_count"]],
+      ["==", ["get", "elementType"], "route"],
+    ],
     layout: {
       "text-field": ["get", "name"],
       "text-size": 11,
@@ -454,6 +508,28 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
     },
     paint: {
       "text-color": "#1e293b",
+      "text-halo-color": "#ffffff",
+      "text-halo-width": 1.5,
+      "text-opacity": DIMMED_OPACITY,
+    },
+  },
+  {
+    // Cliff names, shown when the cliffs are actually discernible (issue #196)
+    id: "cliff-labels",
+    type: "symbol",
+    source: "climbing-elements",
+    minzoom: 15,
+    filter: ["==", ["get", "elementType"], "cliff"],
+    layout: {
+      "symbol-placement": "line",
+      "text-field": ["get", "name"],
+      "text-size": 10,
+      "text-offset": [0, -0.6],
+      "text-optional": true,
+      "text-allow-overlap": false,
+    },
+    paint: {
+      "text-color": "#78350f",
       "text-halo-color": "#ffffff",
       "text-halo-width": 1.5,
       "text-opacity": DIMMED_OPACITY,

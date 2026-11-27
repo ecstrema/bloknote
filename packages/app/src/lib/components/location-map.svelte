@@ -83,6 +83,38 @@
   /** Set by the LocationMap instance, which has access to the sidebar selection context */
   let clearSidebarSelection: (() => void) | undefined;
 
+  // -------------------------------------------------------------------------------------------
+  // Bottom-left info box of the selected element (issue #196)
+  // -------------------------------------------------------------------------------------------
+
+  let infoBoxSlug = $state("");
+  let infoBoxProps = $state<MapElementFeature["properties"] | undefined>();
+  /** Full OSM feature of the selected element, for the description and the tick button */
+  let infoBoxOsmFeature = $state<OsmFeature | undefined>();
+  /** Slug selected by a map click, highlighted with the selection rings like the sidebar selection */
+  let mapSelectedSlug = "";
+
+  function showInfoBox(props: MapElementFeature["properties"]) {
+    infoBoxProps = { ...props };
+    infoBoxSlug = props.slug;
+    const cleanSlug = props.slug.replace(/^world\//, "");
+    mapSelectedSlug = cleanSlug;
+    if (shared?.map) applyHighlightFilters(shared.map, activeHighlightSlug);
+    // Fetch the full feature for the description and the tick button
+    void dataClient.getNode(cleanSlug).then((data) => {
+      if (infoBoxSlug !== props.slug || !data || data.type === "geographic") return;
+      infoBoxOsmFeature = data as OsmFeature;
+    });
+  }
+
+  function hideInfoBox() {
+    infoBoxProps = undefined;
+    infoBoxOsmFeature = undefined;
+    infoBoxSlug = "";
+    mapSelectedSlug = "";
+    if (shared?.map) applyHighlightFilters(shared.map, activeHighlightSlug);
+  }
+
   function setSharedColorMode(mode: "grade" | "type" | "both") {
     sharedColorMode = mode;
     if (shared?.map) applyColorMode(shared.map, mode);
@@ -275,9 +307,15 @@
   }
 
   function setElementsSourceData(map: MapLibreMap, collection: MapElementFeatureCollection) {
-    const source = map.getSource<GeoJSONSource>("climbing-elements");
-    if (!source) return;
-    source.setData(collection);
+    // Routes live in their own clustered source (issue #196); the climbing-elements source keeps
+    // areas, gyms, cliffs, and sectors
+    const routes: MapElementFeature[] = [];
+    const others: MapElementFeature[] = [];
+    for (const f of collection.features) {
+      (f.properties.elementType === "route" ? routes : others).push(f);
+    }
+    map.getSource<GeoJSONSource>("climbing-elements")?.setData({ type: "FeatureCollection", features: others });
+    map.getSource<GeoJSONSource>("route-clusters")?.setData({ type: "FeatureCollection", features: routes });
   }
 
   /**
@@ -319,6 +357,17 @@
       map.addSource("climbing-elements", {
         type: "geojson",
         data: cachedCollection,
+        tolerance: 0.5,
+      });
+    }
+    if (!map.getSource("route-clusters")) {
+      // Clustered route markers (issue #196). Above clusterMaxZoom every route shows individually.
+      map.addSource("route-clusters", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+        cluster: true,
+        clusterRadius: 60,
+        clusterMaxZoom: 13,
         tolerance: 0.5,
       });
     }
@@ -430,6 +479,7 @@
     const companion = companionLookup[cleanSlug] ?? companionLookup[slug] ?? "";
     const slugLiterals = [slug, cleanSlug, `world/${cleanSlug}`];
     if (companion) slugLiterals.push(companion);
+    if (mapSelectedSlug) slugLiterals.push(mapSelectedSlug);
     const selectionLiterals = activeSelectionSlugs.flatMap((s) => {
       const parts = [s, companionLookup[s]];
       return parts.filter((p): p is string => !!p);
@@ -439,6 +489,19 @@
         "all",
         ["==", ["geometry-type"], "Point"],
         ["!=", ["get", "elementType"], "sector"],
+        [
+          "any",
+          ["in", ["get", "slug"], ["literal", slugLiterals]],
+          ["in", ["get", "slug"], ["literal", selectionLiterals]],
+        ],
+      ]);
+    }
+    if (map.getLayer("selected-ring-routes")) {
+      // Same highlight for routes, which live on the clustered route source (issue #196)
+      map.setFilter("selected-ring-routes", [
+        "all",
+        ["==", ["geometry-type"], "Point"],
+        ["!", ["has", "point_count"]],
         [
           "any",
           ["in", ["get", "slug"], ["literal", slugLiterals]],
@@ -649,16 +712,48 @@
       const polygon = trace;
       endLasso();
       const slugs = new Set<string>();
-      for (const feature of map.queryRenderedFeatures({ layers: ["routes"] })) {
-        const points = featureLineCoordinates(feature.geometry).map((c) => map.project(c));
-        if (points.some((p) => pointInPolygon(p, polygon)) || lineCrossesPolygon(points, polygon)) {
+      // Clusters (issue #196) are expanded to their leaves, which are tested individually
+      const rendered = [
+        ...map.queryRenderedFeatures({ layers: ["routes"] }),
+        ...map.queryRenderedFeatures({ layers: ["clusters"] }),
+      ];
+      const leafPromises: Promise<void>[] = [];
+      const leafHit = (leaf: MapElementFeature) => {
+        const points = featureLineCoordinates(leaf.geometry).map((c) => map.project(c));
+        return points.some((p) => pointInPolygon(p, polygon)) || lineCrossesPolygon(points, polygon);
+      };
+      for (const feature of rendered) {
+        const clusterId = feature.properties?.cluster_id as number | undefined;
+        if (clusterId !== undefined) {
+          const source = map.getSource<GeoJSONSource>("route-clusters");
+          if (!source) continue;
+          const count = Number(feature.properties?.point_count ?? 0);
+          if (count <= 0) continue;
+          leafPromises.push(
+            source
+              .getClusterLeaves(clusterId, count, 0)
+              .then((leaves) => {
+                for (const leaf of leaves as unknown as MapElementFeature[]) {
+                  if (leafHit(leaf)) {
+                    const slug = leaf.properties?.slug;
+                    if (typeof slug === "string") slugs.add(slug);
+                  }
+                }
+              })
+              .catch(() => {}),
+          );
+          continue;
+        }
+        if (leafHit(feature as unknown as MapElementFeature)) {
           const slug = feature.properties?.slug;
           if (typeof slug === "string") slugs.add(slug);
         }
       }
       // The click event fires right after mouseup: swallow it so it does not navigate
       setTimeout(() => (suppressNextClick = false), 0);
-      if (slugs.size > 0) lassoSelect?.([...slugs]);
+      void Promise.all(leafPromises).then(() => {
+        if (slugs.size > 0) lassoSelect?.([...slugs]);
+      });
     });
 
     // Right-clicking a selected route opens the same bulk context menu as the sidebar selection.
@@ -789,6 +884,21 @@
         popup.remove();
       });
 
+      // Clicking a cluster expands it instead of navigating (issue #196)
+      map.on("click", "clusters", (e) => {
+        const feature = e.features?.[0];
+        const clusterId = feature?.properties?.cluster_id as number | undefined;
+        const source = map.getSource<GeoJSONSource>("route-clusters");
+        if (!feature || clusterId === undefined || !source) return;
+        void source
+          .getClusterExpansionZoom(clusterId)
+          .then((zoom) => {
+            const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+            map.easeTo({ center: coords, zoom: Math.min(zoom + 0.5, 18), duration: 500 });
+          })
+          .catch(() => {});
+      });
+
       map.on("click", (e) => {
         if (suppressNextClick) {
           suppressNextClick = false;
@@ -796,6 +906,10 @@
         }
         if (activePlacementMode && currentOnmapclick) {
           currentOnmapclick({ lat: e.lngLat.lat, lon: e.lngLat.lng });
+          return;
+        }
+        // Cluster clicks are handled by the layer handler above (issue #196)
+        if (map.getLayer("clusters") && map.queryRenderedFeatures(e.point, { layers: ["clusters"] }).length > 0) {
           return;
         }
         // Clicking a cliff point shows its popup instead of navigating (issue #55)
@@ -811,16 +925,31 @@
         }
         // A plain click on the map dismisses the active selection
         if (activeSelectionSlugs.length > 0) clearSidebarSelection?.();
-        // Dimmed features (excluded by the active search filters) are non-interactive: no navigation (issue #219)
         const features = map.queryRenderedFeatures(e.point, { layers: interactiveLayers });
         const feature = features.find((f) => !f.properties?.dimmed);
-        if (!feature) return;
+        if (!feature) {
+          // Clicking empty map also closes the bottom-left info box (issue #196)
+          hideInfoBox();
+          return;
+        }
 
         if (feature.geometry.type === "Point") {
           const [lon, lat] = feature.geometry.coordinates as [number, number];
           setMarkerPosition({ lon, lat });
         }
 
+        // A plain click selects the element: it is highlighted and shown in the bottom-left info
+        // box. Double-clicking opens the overview page instead (issue #196).
+        showInfoBox(feature.properties as MapElementFeature["properties"]);
+      });
+
+      // Double-clicking an element opens its overview page without zooming the map (issue #196)
+      map.on("dblclick", (e) => {
+        if (activePlacementMode || suppressNextClick) return;
+        const features = map.queryRenderedFeatures(e.point, { layers: interactiveLayers });
+        const feature = features.find((f) => !f.properties?.dimmed);
+        if (!feature) return;
+        e.preventDefault();
         const href = feature.properties?.href;
         if (href) goto(href);
       });
@@ -858,9 +987,10 @@
 </script>
 
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import type { GeographicFolderElement } from "@bloknote/climbing-data-gen";
   import { getSidebarSelection } from "./shell/sidebar/selection.svelte";
+  import MapInfoBox from "./map-info-box.svelte";
 
   let {
     currentSlug = "",
@@ -913,6 +1043,9 @@
       localDb.status === "downloading" ||
       (localDb.status === "ready" && !allElementsLoaded),
   );
+
+  /** Height of the map host, to decide whether the info box has room to show (issue #196) */
+  let hostHeight = $state(0);
 
   const selection = getSidebarSelection();
 
@@ -1069,6 +1202,7 @@
     const ro = new ResizeObserver(() => {
       if (attached && host.clientWidth > 0 && host.clientHeight > 0) {
         map.resize();
+        hostHeight = host.clientHeight;
       }
     });
     ro.observe(host);
@@ -1092,6 +1226,17 @@
   $effect(() => {
     if (currentSlug && currentFeature && currentFeature.type !== "geographic" && shared?.map) {
       updateOrAddElement(shared.map, currentSlug, currentFeature as OsmFeature, fallbackCoordinates);
+    }
+  });
+
+  // The currently open page is also a selection: mirror it in the bottom-left info box (issue #196)
+  $effect(() => {
+    untrack(() => fallbackCoordinates);
+    if (currentSlug && currentFeature && currentFeature.type !== "geographic") {
+      const element = featureToMapElement(currentSlug, currentFeature as OsmFeature);
+      if (element) showInfoBox(element.properties);
+    } else if (!currentSlug) {
+      hideInfoBox();
     }
   });
 
@@ -1222,6 +1367,16 @@
           <span class="text-xs text-muted-foreground">Loading climbing data...</span>
         {/if}
       </div>
+    {/if}
+
+    {#if infoBoxProps && hostHeight >= 380}
+      <!-- Bottom-left info box of the selected element (issue #196) -->
+      <MapInfoBox
+        properties={infoBoxProps}
+        feature={infoBoxOsmFeature}
+        onclose={hideInfoBox}
+        class="absolute bottom-10 left-2 z-10 max-h-[45%] max-w-[calc(100%-1rem)]"
+      />
     {/if}
   </div>
 </div>

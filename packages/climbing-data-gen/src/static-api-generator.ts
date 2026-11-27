@@ -492,7 +492,10 @@ async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string
     }
 
     writeFileSync(join(directory, "children.json"), JSON.stringify(children));
-    writeFileSync(join(directory, "stats.json"), JSON.stringify({ totalRoutes, raw }));
+    // Individual routes have no use for precalculated stats (their page shows no stats panel, and
+    // the client falls back to computing from the features): only areas, crags, and geographic
+    // folders get a stats.json, which keeps the static API small (issue #257)
+    if (!isRoute(data)) writeFileSync(join(directory, "stats.json"), JSON.stringify({ totalRoutes, raw }));
 
     return { data, totalRoutes, raw, recent: recent.slice(0, RSS_MAX_ITEMS) };
   }

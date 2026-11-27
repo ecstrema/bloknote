@@ -23,7 +23,7 @@ Overpass API (sport=climbing)
     |-- world/.../<region>/
     |     |-- data.json      (clustered climbing feature for this region)
     |     |-- children.json  (direct children, used for tree navigation)
-    |     |-- stats.json     (total route counts and raw grade/style stats for this subtree, issue #114)
+    |     |-- stats.json     (total route counts and raw grade/style stats for this subtree, issue #114; only written for areas, crags, and geographic folders, not for individual routes, issue #257)
     |     `-- feed.xml       (RSS feed of recent subtree edits, only written when recent items exist)
     |-- world/download.json  (flat record of every feature, keyed by slug)
     |-- world/data-version.json (date-based version number (YYYYMMDD) and generation timestamp, used for client change detection and data age display)

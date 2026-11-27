@@ -875,8 +875,10 @@ async function handle(req: DbRequest): Promise<DbResponse> {
     case "getStats": {
       const rows = db.selectArrays("SELECT total_routes, raw FROM stats WHERE slug = ?", [req.slug]);
       const total = rows[0]?.[0] as number | undefined;
+      // Route leaves have no stats row: they don't need precalculated stats (issue #257)
+      if (total === undefined) return { id: req.id, type: "stats", data: undefined };
       const raw = rows[0]?.[1] ? (JSON.parse(rows[0][1] as string) as RawSectorStats) : undefined;
-      return { id: req.id, type: "stats", data: { totalRoutes: total ?? 0, raw } };
+      return { id: req.id, type: "stats", data: { totalRoutes: total, raw } };
     }
     case "getOsmRefs": {
       const data: Record<string, OsmRefEntry> = {};

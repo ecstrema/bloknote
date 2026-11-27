@@ -395,8 +395,7 @@
         {/each}
         {#if counts.unmatched > 0}
           <li class="flex flex-wrap items-center gap-2 pt-1 text-sm">
-            <span aria-hidden="true" class="icon-[lucide--map-pin-x] size-4 shrink-0 text-muted-foreground"
-            ></span>
+            <span aria-hidden="true" class="icon-[lucide--map-pin-x] size-4 shrink-0 text-muted-foreground"></span>
             and {counts.unmatched} route{counts.unmatched === 1 ? "" : "s"} not found on OSM. You can add them still, and
             link them with OSM later from your ticks list.
           </li>
