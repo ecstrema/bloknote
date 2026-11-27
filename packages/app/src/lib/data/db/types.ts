@@ -6,6 +6,12 @@ export interface TagFilter {
   key: string;
   /** Empty means that the tag only has to be present */
   value: string;
+  /**
+   * Comparison operator applied to the tag value (issue #236): `=` and `!=` compare the raw
+   * string, `~` is a substring match, and `>`, `>=`, `<`, `<=` compare numerically. Undefined
+   * means `=`. Comparisons are handled in SQL by the database worker.
+   */
+  op?: "!=" | ">=" | "<=" | "=" | ">" | "<" | "~";
 }
 
 export interface SearchFilters {

@@ -7,6 +7,7 @@
   import Input from "#components/ui/input/input.svelte";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { gradeTextToReference } from "#lib/data/db/grade-text.js";
+  import { formatTagFilter, parseTagFilter } from "#lib/data/db/tag-filter.js";
   import { searchState, type PremadeFilterKind } from "./search-state.svelte.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
 
@@ -82,9 +83,11 @@
   }
 
   function addTag() {
-    const key = tagKey.trim();
-    if (!key) return;
-    searchState.filters.tags = [...searchState.filters.tags, { key, value: tagValue.trim() }];
+    // The key input accepts expressions like climbing:length>40 or name~crag (issue #236);
+    // a separately typed value still means a plain equality match
+    const parsed = parseTagFilter(tagValue.trim() ? `${tagKey.trim()}=${tagValue.trim()}` : tagKey);
+    if (!parsed) return;
+    searchState.filters.tags = [...searchState.filters.tags, parsed];
     tagKey = "";
     tagValue = "";
   }
@@ -208,7 +211,7 @@
             addTag();
           }}
         >
-          <Input placeholder="Tag, e.g. climbing:rock" class="h-8" bind:value={tagKey} />
+          <Input placeholder="Tag, e.g. climbing:length>40" class="h-8" bind:value={tagKey} />
           <Input placeholder="Value" class="h-8" bind:value={tagValue} />
           <Button size="xs" variant="outline" type="submit">Add</Button>
         </form>
@@ -221,7 +224,7 @@
                 variant="secondary"
                 onclick={() => (searchState.filters.tags = searchState.filters.tags.filter((_, j) => j !== i))}
               >
-                {tag.key}{tag.value ? `=${tag.value}` : ""}
+                {formatTagFilter(tag)}
                 <span class="icon-[lucide--x] shrink-0 size-3"></span>
               </Button>
             {/each}

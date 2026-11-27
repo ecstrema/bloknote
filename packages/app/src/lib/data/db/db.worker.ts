@@ -506,13 +506,26 @@ function buildFilterQuery(filters: SearchFilters): { sql: string; bind: (string 
       ]),
     );
   }
-  for (const { key, value } of filters.tags) {
-    if (value) {
-      where.push("json_extract(data, ?) = ?");
-      bind.push(tagPath(key), value);
-    } else {
+  for (const { key, value, op } of filters.tags) {
+    const path = tagPath(key);
+    if (!value) {
       where.push("json_extract(data, ?) IS NOT NULL");
-      bind.push(tagPath(key));
+      bind.push(path);
+    } else if (!op || op === "=") {
+      where.push("json_extract(data, ?) = ?");
+      bind.push(path, value);
+    } else if (op === "!=") {
+      // A missing tag does not match "different from": the user explicitly typed a value
+      where.push("json_extract(data, ?) IS NOT NULL AND json_extract(data, ?) != ?");
+      bind.push(path, path, value);
+    } else if (op === "~") {
+      where.push("json_extract(data, ?) LIKE '%' || ? || '%'");
+      bind.push(path, value);
+    } else {
+      // Numeric comparison (>, >=, <, <=), e.g. climbing:length>40: both sides are cast to
+      // REAL, so values with units fail the comparison like the minLength filter (issue #236)
+      where.push(`CAST(json_extract(data, ?) AS REAL) ${op} CAST(? AS REAL)`);
+      bind.push(path, value);
     }
   }
   // Elements referenced by the user's ticks, bookmarks, comments or ratings (issue #166). The
