@@ -99,4 +99,151 @@ describe("parseTickCsv", () => {
     expect(parsed?.ticks).toHaveLength(2);
     expect(parsed?.errors).toHaveLength(1);
   });
+
+  const eightANu = [
+    "route_boulder,name,location_name,sector_name,area_name,country_code,date,type,sub_type,rating,project,tries,repeats,difficulty,perceived_hardness,comment,height,recommended,sits",
+    'BOULDER,Globetrotter,Chironico,Boogalagga,Ticino,CH,2024-08-04 12:00:00,rp,,4,0,20,0,7A,0,"",,0,',
+    'ROUTE,Remember Wadi Rum ***,Ghost Kitchen,Ghost Kitchen main,Kalymnos,GR,2024-08-31 12:00:00,os,"",5,0,1,0,6c,0,,25,0,0',
+  ].join("\n");
+
+  it("parses 8a.nu exports with crag/sector locations and abbreviated styles", () => {
+    const parsed = parseTickCsv(eightANu);
+    expect(parsed?.format).toBe("8anu");
+    expect(parsed?.errors).toEqual([]);
+    expect(parsed?.ticks).toEqual([
+      {
+        routeName: "Globetrotter",
+        grade: "7A",
+        cragName: "Chironico",
+        area: "Boogalagga",
+        location: "CH > Ticino > Chironico > Boogalagga",
+        routeType: "BOULDER",
+        style: "redpoint",
+        date: "2024-08-04T00:00:00.000Z",
+        notes: undefined,
+      },
+      {
+        routeName: "Remember Wadi Rum ***",
+        grade: "6c",
+        cragName: "Ghost Kitchen",
+        area: "Ghost Kitchen main",
+        location: "GR > Kalymnos > Ghost Kitchen > Ghost Kitchen main",
+        routeType: "ROUTE",
+        style: "onsight",
+        date: "2024-08-31T00:00:00.000Z",
+        notes: undefined,
+      },
+    ]);
+  });
+
+  const sendage = [
+    '"These climbs were exported from Sendage Climbing.",http://sendage.com',
+    "L,2023-06-01",
+    "",
+    'Date,"Send Type",Climb,"Climb Type",Grade,Area,Country,Rating,Comments',
+    '2023-06-01,flash,"Death Chute",boulder,V4,"The Crops",,,',
+    ',redpoint,"Dazed and Confused",boulder,V8,"The Crops",,,',
+  ].join("\n");
+
+  it("parses Sendage exports with their preamble and carried-down dates", () => {
+    const parsed = parseTickCsv(sendage);
+    expect(parsed?.format).toBe("sendage");
+    expect(parsed?.errors).toEqual([]);
+    expect(parsed?.ticks).toEqual([
+      {
+        routeName: "Death Chute",
+        grade: "V4",
+        cragName: "The Crops",
+        area: "The Crops",
+        location: "The Crops",
+        routeType: "boulder",
+        style: "flash",
+        date: "2023-06-01T00:00:00.000Z",
+        notes: undefined,
+      },
+      {
+        routeName: "Dazed and Confused",
+        grade: "V8",
+        cragName: "The Crops",
+        area: "The Crops",
+        location: "The Crops",
+        routeType: "boulder",
+        style: "redpoint",
+        date: "2023-06-01T00:00:00.000Z",
+        notes: undefined,
+      },
+    ]);
+  });
+
+  const ukc = [
+    "Name,Grade,Style,Partner(empty),Notes,Date,Crag,County,Region,Country,Pitches,Type",
+    '"Five Gallon Buckets",5.8,Lead,,,31/May/23,"Smith Rock","OR Smith Rocks",Oregon,USA,1,Sport',
+    '"Lion\'s Jaw",5.8,TR,,,02/Jun/23,"Squared Ledge",Essex,Massachusetts,USA,1,Trad',
+  ].join("\n");
+
+  it("parses UKClimbing exports with dd/Mon/yy dates", () => {
+    const parsed = parseTickCsv(ukc);
+    expect(parsed?.format).toBe("ukclimbing");
+    expect(parsed?.errors).toEqual([]);
+    expect(parsed?.ticks).toEqual([
+      {
+        routeName: "Five Gallon Buckets",
+        grade: "5.8",
+        cragName: "Smith Rock",
+        area: "Smith Rock",
+        location: "USA > Oregon > OR Smith Rocks > Smith Rock",
+        routeType: "Sport",
+        style: "redpoint",
+        date: "2023-05-31T00:00:00.000Z",
+        notes: undefined,
+      },
+      {
+        routeName: "Lion's Jaw",
+        grade: "5.8",
+        cragName: "Squared Ledge",
+        area: "Squared Ledge",
+        location: "USA > Massachusetts > Essex > Squared Ledge",
+        routeType: "Trad",
+        style: "hangdog",
+        date: "2023-06-02T00:00:00.000Z",
+        notes: undefined,
+      },
+    ]);
+  });
+
+  const openClimbing = [
+    "date,route_name,route_grade,grade_system,my_grade,style,note,crag,area,route_short_id,route_lon,route_lat",
+    '"2026-11-27T13:45:27.385Z","Le Matin des Magiciens","5.12a","original","","OS","","Ligne Jaune","Mont Larose / Weir","n8088532936","-74.53008","45.945646"',
+    '"2026-11-20T10:00:00.000Z","Another Route","6b+","original","","RP","crux runout","Some Crag","Some Area","w123","1.0","2.0"',
+  ].join("\n");
+
+  it("parses OpenClimbing exports with abbreviated styles", () => {
+    const parsed = parseTickCsv(openClimbing);
+    expect(parsed?.format).toBe("openclimbing");
+    expect(parsed?.errors).toEqual([]);
+    expect(parsed?.ticks).toEqual([
+      {
+        routeName: "Le Matin des Magiciens",
+        grade: "5.12a",
+        cragName: "Ligne Jaune",
+        area: "Ligne Jaune",
+        location: "Mont Larose / Weir > Ligne Jaune",
+        routeType: undefined,
+        style: "onsight",
+        date: "2026-11-27T13:45:27.385Z",
+        notes: undefined,
+      },
+      {
+        routeName: "Another Route",
+        grade: "6b+",
+        cragName: "Some Crag",
+        area: "Some Crag",
+        location: "Some Area > Some Crag",
+        routeType: undefined,
+        style: "redpoint",
+        date: "2026-11-20T10:00:00.000Z",
+        notes: "crux runout",
+      },
+    ]);
+  });
 });

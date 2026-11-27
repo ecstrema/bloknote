@@ -64,6 +64,10 @@
   const formatters: Record<TickImportFormat, string> = {
     mountainproject: "MountainProject",
     thecrag: "TheCrag",
+    "8anu": "8a.nu",
+    sendage: "Sendage",
+    ukclimbing: "UKClimbing",
+    openclimbing: "OpenClimbing",
   };
 
   function toCandidate(match: TickRouteMatch): ImportCandidate {
@@ -100,7 +104,8 @@
       return;
     }
     if (!parsed) {
-      parseError = "Unrecognized format: expected a MountainProject tick export or a TheCrag logbook CSV.";
+      parseError =
+        "Unrecognized format: expected a logbook CSV from MountainProject, TheCrag, 8a.nu, Sendage, UKClimbing, or OpenClimbing.";
       return;
     }
     format = parsed.format;
@@ -239,15 +244,28 @@
         target="_blank"
         rel="noreferrer">MountainProject</a
       >
-      (profile, "see all ticks", export as CSV) or
+      (profile, "see all ticks", export as CSV),
       <a
         class="underline underline-offset-2"
         href="https://www.thecrag.com/climber/logbook-csv"
         target="_blank"
         rel="noreferrer">TheCrag</a
       >
-      (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes
-      that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list.
+      (dashboard, actions, logbook CSV),
+      <a class="underline underline-offset-2" href="https://www.8a.nu" target="_blank" rel="noreferrer">8a.nu</a>
+      (profile, edit, download CSV at the bottom),
+      <a class="underline underline-offset-2" href="https://sendage.com" target="_blank" rel="noreferrer">Sendage</a>,
+      <a
+        class="underline underline-offset-2"
+        href="https://www.ukclimbing.com/logbook/"
+        target="_blank"
+        rel="noreferrer">UKClimbing</a
+      >
+      (logbook, export) or
+      <a class="underline underline-offset-2" href="https://openclimbing.org" target="_blank" rel="noreferrer"
+        >OpenClimbing</a
+      >, then import it here. Routes are searched inside the crag given by the export; routes that are not on
+      OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list.
     </p>
 
     {#if !atproto.configured}

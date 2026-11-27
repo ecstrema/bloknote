@@ -1,6 +1,6 @@
 import type { TickStyle } from "@bloknote/common";
 
-export type TickImportFormat = "mountainproject" | "thecrag";
+export type TickImportFormat = "mountainproject" | "thecrag" | "8anu" | "sendage" | "ukclimbing" | "openclimbing";
 
 export interface ImportedTick {
   routeName: string;
@@ -92,6 +92,29 @@ function theCragStyle(ascentType: string | undefined): TickStyle {
   return "hangdog";
 }
 
+/** Maps ascent types shared by 8a.nu, Sendage, and OpenClimbing exports (abbreviations included) */
+function ascentTypeStyle(ascentType: string | undefined): TickStyle {
+  const type = ascentType?.trim().toLowerCase();
+  if (type === "onsight" || type === "os") return "onsight";
+  if (type === "flash" || type === "fl") return "flash";
+  if (type === "redpoint" || type === "rp") return "redpoint";
+  if (type === "bailed" || type === "bail" || type === "dnf") return "bailed";
+  // Hangdog, top rope, solo, and unknown styles are not clean leads: count them as attempts
+  return "hangdog";
+}
+
+/** UKClimbing logbook styles, mapped to the app's tick styles */
+function ukcStyle(style: string | undefined): TickStyle {
+  const value = style?.trim().toLowerCase();
+  if (value === "onsight") return "onsight";
+  if (value === "flash") return "flash";
+  if (value === "bailed") return "bailed";
+  // UKC does not distinguish redpoints from onsights: a logged lead, solo, or boulder is a send
+  if (value === "lead" || value === "solo" || value === "boulder") return "redpoint";
+  // Top rope and second are not clean leads: count them as attempts
+  return "hangdog";
+}
+
 const clean = (value: string | undefined): string | undefined => {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
@@ -118,20 +141,139 @@ function normalizeDate(value: string | undefined): string | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
+const MONTHS: Record<string, number> = {
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  apr: 3,
+  may: 4,
+  jun: 5,
+  jul: 6,
+  aug: 7,
+  sep: 8,
+  oct: 9,
+  nov: 10,
+  dec: 11,
+};
+
+/** UKClimbing exports dates as 31/May/23: two-digit years count from 2000 below 69, 1900 above */
+function ukcDate(value: string | undefined): string | undefined {
+  const match = clean(value)?.match(/^(\d{1,2})\/([A-Za-z]{3})\/(\d{2})$/);
+  if (!match) return normalizeDate(value);
+  const month = MONTHS[match[2]!.toLowerCase()];
+  if (month === undefined) return undefined;
+  const year = Number(match[3]) + (Number(match[3]) < 69 ? 2000 : 1900);
+  return new Date(Date.UTC(year, month, Number(match[1]))).toISOString();
+}
+
 /**
- * Parses a tick logbook CSV exported from MountainProject (profile > see all ticks > export)
- * or TheCrag (dashboard > actions > logbook CSV). Returns undefined when the headers match
- * neither format (issue #154).
+ * Parses a tick logbook CSV exported from MountainProject (profile > see all ticks > export),
+ * TheCrag (dashboard > actions > logbook CSV), 8a.nu (profile > edit > download CSV at the
+ * bottom), Sendage (profile > export), UKClimbing (logbook > export), or OpenClimbing. Returns
+ * undefined when the headers match none of the formats (issues #154, #256, #259, #260, #255).
  */
 export function parseTickCsv(csv: string): ParsedTickCsv | undefined {
   const rows = parseCsv(csv);
   if (rows.length === 0) return undefined;
-  const headers = rows[0]!.map((h) => h.trim());
+  // Sendage exports start with two preamble lines: the header row is the one containing "Send Type"
+  const headerRow = Math.max(
+    0,
+    rows.findIndex((row) => row.some((cell) => cell.trim().toLowerCase() === "send type")),
+  );
+  const headers = rows[headerRow]!.map((h) => h.trim());
   const index = (name: string): number => headers.findIndex((h) => h.toLowerCase() === name.toLowerCase());
 
   let format: TickImportFormat;
   let getTick: (row: string[]) => ImportedTick | { error: string };
-  if (index("Ascent ID") !== -1 && index("Crag Name") !== -1) {
+  if (index("route_boulder") !== -1 && index("location_name") !== -1) {
+    // 8a.nu: location_name is the crag and sector_name the sector inside it (issue #256)
+    format = "8anu";
+    const col = (name: string) => index(name);
+    getTick = (row) => {
+      const routeName = clean(row[col("name")]);
+      if (!routeName) return { error: "Missing route name" };
+      const crag = clean(row[col("location_name")]);
+      const sector = clean(row[col("sector_name")]);
+      const location = ["country_code", "area_name", "location_name", "sector_name"]
+        .map((name) => clean(row[col(name)]))
+        .filter((segment): segment is string => !!segment);
+      return {
+        routeName,
+        grade: clean(row[col("difficulty")]),
+        cragName: crag,
+        area: sector ?? crag,
+        location: location.length > 0 ? location.join(" > ") : undefined,
+        routeType: clean(row[col("route_boulder")]),
+        style: ascentTypeStyle(row[col("type")]),
+        // The time of day does not matter for ticks: keep the date only, so parsing does not depend
+        // on the local timezone ("2024-08-04 12:00:00" would otherwise shift by the UTC offset)
+        date: normalizeDate(row[col("date")]?.slice(0, 10)),
+        notes: clean(row[col("comment")]),
+      };
+    };
+  } else if (index("send type") !== -1 && index("climb") !== -1) {
+    format = "sendage";
+    const col = (name: string) => index(name);
+    getTick = (row) => {
+      const routeName = clean(row[col("Climb")]);
+      if (!routeName) return { error: "Missing route name" };
+      const area = clean(row[col("Area")]);
+      const country = clean(row[col("Country")]);
+      return {
+        routeName,
+        grade: clean(row[col("Grade")]),
+        cragName: area,
+        area,
+        location: [country, area].filter((segment) => !!segment).join(" > ") || undefined,
+        routeType: clean(row[col("Climb Type")]),
+        style: ascentTypeStyle(row[col("Send Type")]),
+        date: normalizeDate(row[col("Date")]),
+        notes: clean(row[col("Comments")]),
+      };
+    };
+  } else if (index("crag") !== -1 && index("county") !== -1) {
+    format = "ukclimbing";
+    const col = (name: string) => index(name);
+    getTick = (row) => {
+      const routeName = clean(row[col("Name")]);
+      if (!routeName) return { error: "Missing route name" };
+      const crag = clean(row[col("Crag")]);
+      const location = ["Country", "Region", "County", "Crag"]
+        .map((name) => clean(row[col(name)]))
+        .filter((segment): segment is string => !!segment);
+      return {
+        routeName,
+        grade: clean(row[col("Grade")]),
+        cragName: crag,
+        area: crag,
+        location: location.length > 0 ? location.join(" > ") : undefined,
+        routeType: clean(row[col("Type")]),
+        style: ukcStyle(row[col("Style")]),
+        date: ukcDate(row[col("Date")]),
+        notes: clean(row[col("Notes")]),
+      };
+    };
+  } else if (index("route_short_id") !== -1 && index("route_name") !== -1) {
+    format = "openclimbing";
+    const col = (name: string) => index(name);
+    getTick = (row) => {
+      const routeName = clean(row[col("route_name")]);
+      if (!routeName) return { error: "Missing route name" };
+      const crag = clean(row[col("crag")]);
+      const area = clean(row[col("area")]);
+      return {
+        routeName,
+        grade: clean(row[col("route_grade")]),
+        cragName: crag ?? area,
+        area: crag ?? area,
+        location: [area, crag].filter((segment) => !!segment).join(" > ") || undefined,
+        routeType: undefined,
+        style: ascentTypeStyle(row[col("style")]),
+        date: normalizeDate(row[col("date")]),
+        notes: clean(row[col("note")]),
+      };
+    };
+  } else if (index("Ascent ID") !== -1 && index("Crag Name") !== -1) {
     format = "thecrag";
     const col = (name: string) => index(name);
     getTick = (row) => {
@@ -172,10 +314,19 @@ export function parseTickCsv(csv: string): ParsedTickCsv | undefined {
 
   const ticks: ImportedTick[] = [];
   const errors: string[] = [];
-  for (const [i, row] of rows.slice(1).entries()) {
+  // Sendage leaves the date empty on the rows of a day already announced: carry the last date down
+  let previousDate: string | undefined;
+  for (const [i, row] of rows.slice(headerRow + 1).entries()) {
     const parsed = getTick(row);
-    if ("error" in parsed) errors.push(`Row ${i + 2}: ${parsed.error}`);
-    else ticks.push(parsed);
+    if ("error" in parsed) {
+      errors.push(`Row ${i + headerRow + 2}: ${parsed.error}`);
+      continue;
+    }
+    if (format === "sendage") {
+      if (parsed.date) previousDate = parsed.date;
+      else parsed.date = previousDate;
+    }
+    ticks.push(parsed);
   }
   return { format, ticks, errors };
 }

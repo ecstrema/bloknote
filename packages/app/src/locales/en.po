@@ -16773,6 +16773,7 @@ msgid "Search on Mountain Project"
 msgstr "Search on Mountain Project"
 
 #: src/lib/components/climbing-provider-links.svelte
+#: src/routes/settings/logbook/tick-import.svelte
 msgid "OpenClimbing"
 msgstr "OpenClimbing"
 
@@ -17156,9 +17157,8 @@ msgstr "TheCrag"
 msgid "Could not read the file."
 msgstr "Could not read the file."
 
-#: src/routes/settings/logbook/tick-import.svelte
-msgid "Unrecognized format: expected a MountainProject tick export or a TheCrag logbook CSV."
-msgstr "Unrecognized format: expected a MountainProject tick export or a TheCrag logbook CSV."
+#~ msgid "Unrecognized format: expected a MountainProject tick export or a TheCrag logbook CSV."
+#~ msgstr "Unrecognized format: expected a MountainProject tick export or a TheCrag logbook CSV."
 
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "Import failed."
@@ -17207,9 +17207,8 @@ msgstr "Already logged"
 msgid "Imported {0} tick{1} ({2} already logged, {3} without an OSM route)."
 msgstr "Imported {0} tick{1} ({2} already logged, {3} without an OSM route)."
 
-#: src/routes/settings/logbook/tick-import.svelte
-msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
-msgstr "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
+#~ msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
+#~ msgstr "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
 
 #. 0: rows.length; 1: rows.length === 1 ? "" \\: "s"; 2: formatters[format]; 3: counts.matched; 4: counts.alreadyLogged
 #: src/routes/settings/logbook/tick-import.svelte
@@ -18079,3 +18078,19 @@ msgstr "See all ticks"
 #: src/lib/components/tick-button.svelte
 msgid "<0/> Delete {0}"
 msgstr "<0/> Delete {0}"
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Sendage"
+msgstr "Sendage"
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "UKClimbing"
+msgstr "UKClimbing"
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Unrecognized format: expected a logbook CSV from MountainProject, TheCrag, 8a.nu, Sendage, UKClimbing, or OpenClimbing."
+msgstr "Unrecognized format: expected a logbook CSV from MountainProject, TheCrag, 8a.nu, Sendage, UKClimbing, or OpenClimbing."
+
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV), <1>TheCrag</1> (dashboard, actions, logbook CSV), <2>8a.nu</2> (profile, edit, download CSV at the bottom), <3>Sendage</3>, <4>UKClimbing</4> (logbook, export) or <5>OpenClimbing</5>, then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
+msgstr "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV), <1>TheCrag</1> (dashboard, actions, logbook CSV), <2>8a.nu</2> (profile, edit, download CSV at the bottom), <3>Sendage</3>, <4>UKClimbing</4> (logbook, export) or <5>OpenClimbing</5>, then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
