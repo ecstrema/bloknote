@@ -125,7 +125,7 @@ export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature
     });
   }
 
-  if (!nonEmpty(tags.name)) {
+  if (!nonEmpty(tags.name) && tags.playground !== "climbingwall") {
     diagnostics.push({
       id: "missing:name",
       severity: "warning",

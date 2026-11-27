@@ -465,6 +465,7 @@ export const sharedProcessedTags: ProcessedTags = {
   natural: allowAll,
   amenity: allowAll,
   building: allowAll,
+  playground: allowSingleValue("climbingwall"),
   "tower:type": allowAll,
   path: allowAll,
   ...recognizedClimbingTags,

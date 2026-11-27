@@ -164,6 +164,17 @@ describe("getFeatureDiagnostics", () => {
     expect(diags.some((d) => d.id === "missing:sport")).toBe(true);
   });
 
+  it("does not flag a missing name on children playground=climbingwall (issue #258)", () => {
+    const diags = getFeatureDiagnostics(route({ sport: "climbing", playground: "climbingwall" }));
+    expect(diags.some((d) => d.id === "missing:name")).toBe(false);
+
+    // Named walls, and other unnamed features, still get the warning
+    expect(getFeatureDiagnostics(route({ sport: "climbing", playground: "climbingwall", name: "Wall" })).length).toBe(0);
+    expect(getFeatureDiagnostics(route({ sport: "climbing", climbing: "indoor_wall" })).some((d) => d.id === "missing:name")).toBe(
+      true,
+    );
+  });
+
   it("flags duplicate email tags and suggests keeping one (issue #249)", () => {
     const diags = getFeatureDiagnostics(
       route({
