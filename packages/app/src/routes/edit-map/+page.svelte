@@ -2,7 +2,7 @@
   import { resolve } from "$app/paths";
   import { Button } from "#components/ui/button/index.js";
   import { Input } from "#components/ui/input/index.js";
-                import type { WorldClimbingPoints, WorldDownloadStatus } from "@bloknote/climbing-data-gen";
+  import type { WorldClimbingPoints, WorldDownloadStatus } from "@bloknote/climbing-data-gen";
   import { parseWorldClimbingPoints, WORLD_CLIMBING_QUERY } from "@bloknote/climbing-data-gen/world-points";
 
   import type { Feature } from "geojson";
@@ -276,7 +276,10 @@
   </div>
 {:else if !store}
   <div class="flex flex-col gap-1 p-6 text-sm">
-    <p class="flex items-center gap-2"><span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span> {status}</p>
+    <p class="flex items-center gap-2">
+      <span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>
+      {status}
+    </p>
     {#if progress}
       <p class="text-muted-foreground">
         Started at {new Date(progress.startedAt).toLocaleTimeString()}
@@ -315,7 +318,9 @@
               onclick={save}
               title="Write the changes to packages/reverse-geocoding-data/data"
             >
-              {#if saving}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>{:else}<span class="icon-[lucide--save] shrink-0 size-4"></span>{/if} Save
+              {#if saving}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>{:else}<span
+                  class="icon-[lucide--save] shrink-0 size-4"
+                ></span>{/if} Save
               {#if stats?.modified}<span class="rounded bg-primary-foreground/20 px-1 text-xs">{stats.modified}</span
                 >{/if}
             </Button>
@@ -385,7 +390,9 @@
                 </p>
               {/if}
               <div class="flex items-center gap-2">
-                <Button size="xs" onclick={pullRequest}><span class="icon-[lucide--git-pull-request] shrink-0 size-4"></span> Create the pull request</Button>
+                <Button size="xs" onclick={pullRequest}
+                  ><span class="icon-[lucide--git-pull-request] shrink-0 size-4"></span> Create the pull request</Button
+                >
                 <Button
                   size="xs"
                   variant="ghost"

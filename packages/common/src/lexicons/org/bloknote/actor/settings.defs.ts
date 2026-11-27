@@ -11,51 +11,85 @@ type $nsid = typeof $nsid;
 
 export { $nsid };
 
-type Main = { $type: "org.bloknote.actor.settings";
+type Main = {
+  $type: "org.bloknote.actor.settings";
 
   /**
    * Route grading scales the user understands: grades in these scales are displayed as written
    */
-  "knownRouteScales"?:(BloknoteDefs.RouteScale)[];
+  knownRouteScales?: BloknoteDefs.RouteScale[];
 
   /**
    * Boulder grading scales the user understands: grades in these scales are displayed as written
    */
-  "knownBoulderScales"?:(BloknoteDefs.BoulderScale)[];
+  knownBoulderScales?: BloknoteDefs.BoulderScale[];
 
   /**
    * Via ferrata grading scales the user understands: grades in these scales are displayed as written
    */
-  "knownViaFerrataScales"?:(BloknoteDefs.ViaFerrataScale)[];
+  knownViaFerrataScales?: BloknoteDefs.ViaFerrataScale[];
 
   /**
    * Route scale used wherever a single scale is needed (aggregated charts, plots). Unset to infer from the user's location, falling back to French
    */
-  "preferredRouteScale"?:BloknoteDefs.RouteScale;
+  preferredRouteScale?: BloknoteDefs.RouteScale;
 
   /**
    * Boulder scale used wherever a single scale is needed (aggregated charts, plots). Unset to infer from the user's location, falling back to Fontainebleau
    */
-  "preferredBoulderScale"?:BloknoteDefs.BoulderScale;
+  preferredBoulderScale?: BloknoteDefs.BoulderScale;
 
   /**
    * Via ferrata scale used wherever a single scale is needed (aggregated charts, plots). Unset to infer from the user's location, falling back to Hüsler
    */
-  "preferredViaFerrataScale"?:BloknoteDefs.ViaFerrataScale;
+  preferredViaFerrataScale?: BloknoteDefs.ViaFerrataScale;
 
   /**
    * Interface theme: light, dark, or following the system preference
    */
-  "mode"?:"light" | "dark" | "system";
+  mode?: "light" | "dark" | "system";
 
   /**
    * Language of the interface and of the names of the regions (BCP 47 code, e.g. en, fr)
    */
-  "locale"?:string };
+  locale?: string;
+};
 
 export type { Main };
 
-const main = /*#__PURE__*/ l.record<"literal:self", Main>("literal:self", $nsid, /*#__PURE__*/ l.object({"knownRouteScales":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<BloknoteDefs.RouteScale>((() => BloknoteDefs.routeScale) as any), {"maxLength":20})),"knownBoulderScales":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<BloknoteDefs.BoulderScale>((() => BloknoteDefs.boulderScale) as any), {"maxLength":20})),"knownViaFerrataScales":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<BloknoteDefs.ViaFerrataScale>((() => BloknoteDefs.viaFerrataScale) as any), {"maxLength":20})),"preferredRouteScale":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<BloknoteDefs.RouteScale>((() => BloknoteDefs.routeScale) as any)),"preferredBoulderScale":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<BloknoteDefs.BoulderScale>((() => BloknoteDefs.boulderScale) as any)),"preferredViaFerrataScale":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<BloknoteDefs.ViaFerrataScale>((() => BloknoteDefs.viaFerrataScale) as any)),"mode":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.enum(["light","dark","system"])),"locale":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":8}))}));
+const main = /*#__PURE__*/ l.record<"literal:self", Main>(
+  "literal:self",
+  $nsid,
+  /*#__PURE__*/ l.object({
+    knownRouteScales: /*#__PURE__*/ l.optional(
+      /*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<BloknoteDefs.RouteScale>((() => BloknoteDefs.routeScale) as any), {
+        maxLength: 20,
+      }),
+    ),
+    knownBoulderScales: /*#__PURE__*/ l.optional(
+      /*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<BloknoteDefs.BoulderScale>((() => BloknoteDefs.boulderScale) as any), {
+        maxLength: 20,
+      }),
+    ),
+    knownViaFerrataScales: /*#__PURE__*/ l.optional(
+      /*#__PURE__*/ l.array(
+        /*#__PURE__*/ l.ref<BloknoteDefs.ViaFerrataScale>((() => BloknoteDefs.viaFerrataScale) as any),
+        { maxLength: 20 },
+      ),
+    ),
+    preferredRouteScale: /*#__PURE__*/ l.optional(
+      /*#__PURE__*/ l.ref<BloknoteDefs.RouteScale>((() => BloknoteDefs.routeScale) as any),
+    ),
+    preferredBoulderScale: /*#__PURE__*/ l.optional(
+      /*#__PURE__*/ l.ref<BloknoteDefs.BoulderScale>((() => BloknoteDefs.boulderScale) as any),
+    ),
+    preferredViaFerrataScale: /*#__PURE__*/ l.optional(
+      /*#__PURE__*/ l.ref<BloknoteDefs.ViaFerrataScale>((() => BloknoteDefs.viaFerrataScale) as any),
+    ),
+    mode: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.enum(["light", "dark", "system"])),
+    locale: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({ maxLength: 8 })),
+  }),
+);
 
 export { main };
 

@@ -1,5 +1,14 @@
 import { describe, expect, it } from "bun:test";
-import { describeClimbingFeature, describeGeometryChange, describeTagChanges, escapeXml, isRecentItem, recentItemXml, renderRssFeed, RSS_MAX_ITEMS } from "./rss.ts";
+import {
+  describeClimbingFeature,
+  describeGeometryChange,
+  describeTagChanges,
+  escapeXml,
+  isRecentItem,
+  recentItemXml,
+  renderRssFeed,
+  RSS_MAX_ITEMS,
+} from "./rss.ts";
 import type { OsmFeature } from "osm-api";
 
 const NOW = Date.parse("2026-11-23T12:00:00Z");
@@ -171,7 +180,7 @@ describe("rss", () => {
     )!;
     const feed = renderRssFeed({ title: "France", slug: "world/europe/france", items: [item] });
     expect(feed).toContain('<?xml version="1.0" encoding="UTF-8"?>');
-    expect(feed).toContain("<rss version=\"2.0\">");
+    expect(feed).toContain('<rss version="2.0">');
     expect(feed).toContain("<title>France</title>");
     expect(feed).toContain("Recently added or edited climbing routes and crags in France");
     expect(feed).toContain(item.xml);
@@ -214,12 +223,12 @@ describe("rss", () => {
   });
 
   it("summarizes geometry changes between two versions (issue #222)", () => {
-    expect(describeGeometryChange(feature({ id: 1, lat: 48.4, lon: 2.6 }), feature({ id: 1, lat: 48.4001, lon: 2.6 }))).toBe(
-      "moved 11 m",
-    );
-    expect(describeGeometryChange(feature({ id: 1, lat: 48.4, lon: 2.6 }), feature({ id: 1, lat: 48.4, lon: 2.6 }))).toBe(
-      undefined,
-    );
+    expect(
+      describeGeometryChange(feature({ id: 1, lat: 48.4, lon: 2.6 }), feature({ id: 1, lat: 48.4001, lon: 2.6 })),
+    ).toBe("moved 11 m");
+    expect(
+      describeGeometryChange(feature({ id: 1, lat: 48.4, lon: 2.6 }), feature({ id: 1, lat: 48.4, lon: 2.6 })),
+    ).toBe(undefined);
     expect(
       describeGeometryChange(
         { type: "way", id: 1, nodes: [1, 2, 3] } as OsmFeature,

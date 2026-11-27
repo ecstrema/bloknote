@@ -143,8 +143,8 @@
     {#if atproto.session}
       <p class="mt-2 text-xs text-muted-foreground">
         Connected as <span class="font-medium text-foreground">{atproto.session.handle ?? atproto.session.did}</span>
-        · records are stored in your ATProto repository (PDS)
-        · <a
+        · records are stored in your ATProto repository (PDS) ·
+        <a
           class="text-primary hover:underline"
           href={`https://pds.ls/at://${atproto.session.did}`}
           target="_blank"

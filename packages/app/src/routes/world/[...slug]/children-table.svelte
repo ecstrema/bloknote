@@ -11,7 +11,7 @@
   import { sortChildren, type SortedChildren } from "#components/shell/sidebar/utils.ts";
   import * as Table from "#components/ui/table/index.js";
   import type { OsmFeature } from "osm-api";
-    
+
   const {
     item = $bindable(),
   }: {
@@ -84,7 +84,10 @@
                 <TradCamIcon />
               {/if}
               {#if isIceRoute(routeTags)}
-                <span aria-label="Ice / dry-tooling route"  class="icon-[lucide--snowflake] shrink-0 size-3.5 shrink-0 text-cyan-500"></span>
+                <span
+                  aria-label="Ice / dry-tooling route"
+                  class="icon-[lucide--snowflake] shrink-0 size-3.5 shrink-0 text-cyan-500"
+                ></span>
               {/if}
             </span>
           </Table.Cell>

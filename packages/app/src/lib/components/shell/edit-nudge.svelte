@@ -31,12 +31,7 @@
   >
     <div class="flex items-start justify-between gap-2">
       <p class="text-sm font-medium">Everything here is editable</p>
-      <button
-        type="button"
-        class="text-muted-foreground hover:text-foreground"
-        aria-label="Dismiss"
-        onclick={dismiss}
-      >
+      <button type="button" class="text-muted-foreground hover:text-foreground" aria-label="Dismiss" onclick={dismiss}>
         <span class="icon-[lucide--x] size-4"></span>
       </button>
     </div>

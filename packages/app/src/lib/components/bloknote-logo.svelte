@@ -9,9 +9,4 @@
 </script>
 
 <!-- Climbing tree emblem, from paroisduquebec.ca (issue #85) -->
-<img
-  {src}
-  alt=""
-  class={cn("size-6 shrink-0", isDev && "grayscale opacity-60", className)}
-  aria-hidden="true"
-/>
+<img {src} alt="" class={cn("size-6 shrink-0", isDev && "grayscale opacity-60", className)} aria-hidden="true" />

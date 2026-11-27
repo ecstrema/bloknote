@@ -58,7 +58,9 @@
   let resolveAttempt = $state(0);
 
   /** Route candidates found again in the OSM data for subject-less ticks, by local tick id */
-  let rematch = $state<Record<string, { candidates: { slug: string; name: string; grade?: string; feature: OsmFeature }[] }>>({});
+  let rematch = $state<
+    Record<string, { candidates: { slug: string; name: string; grade?: string; feature: OsmFeature }[] }>
+  >({});
 
   let busy = $state(false);
   let error = $state<string>();
@@ -379,7 +381,11 @@
     busy = true;
     error = undefined;
     try {
-      await atproto.linkTick(tick, { type: candidate.feature.type, id: candidate.feature.id }, candidate.feature.tags?.name);
+      await atproto.linkTick(
+        tick,
+        { type: candidate.feature.type, id: candidate.feature.id },
+        candidate.feature.tags?.name,
+      );
       const { [tick.localId!]: _removed, ...rest } = rematch;
       rematch = rest;
     } catch (err) {
@@ -408,126 +414,123 @@
   {/if}
 
   {#snippet tickRow(tick: LocalTickEntry)}
-        {@const linked = rematch[tick.localId!]?.candidates ?? []}
-        {@const info = tick.subject ? resolved[`${tick.subject.type}-${tick.subject.id}`] : undefined}
-        <li class="flex flex-col gap-1 rounded border p-2 [content-visibility:auto] [contain-intrinsic-size:auto_4.5rem]">
-          <div class="flex flex-wrap items-center gap-2">
-            {#if tick.subject}
-              {#if info?.slug}
-                <a
-                  href={resolve("/world/[...slug]", { slug: info.slug })}
-                  class="font-medium underline underline-offset-2"
-                >
-                  {labelFor(tick)}
-                </a>
-              {:else}
-                <span class="font-medium">{labelFor(tick)}</span>
-                <a
-                  href={`https://www.openstreetmap.org/${tick.subject.type}/${tick.subject.id}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  class="inline-flex items-center rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                  title="Open in OSM"
-                  aria-label="Open {labelFor(tick)} in OSM"
-                >
-                  <span aria-hidden="true" class="icon-[lucide--external-link] size-3.5"></span>
-                </a>
-              {/if}
-            {:else}
-              <span class="font-medium">{labelFor(tick)}</span>
-            {/if}
-            {#if info?.grade}
-              <HolyGrade class="text-xs font-semibold" grade={info.grade} />
-            {:else if tick.grade}
-              <span class="text-xs text-muted-foreground">{tick.grade}</span>
-            {/if}
-            {#if info?.style}
-              <span class="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
-                {ROUTE_STYLE_LABELS[info.style] ?? info.style}
-              </span>
-            {/if}
-            <span class="ms-auto flex flex-wrap items-center gap-2">
-              {#if saving[tick.localId!]}
-                <span class="text-[11px] text-muted-foreground">Saving…</span>
-              {:else if !tick.uri}
-                <span class="rounded border px-1.5 py-0.5 text-[11px] text-muted-foreground">Pending sync</span>
-              {/if}
-              <Select
-                aria-label="Ascent style of {labelFor(tick)}"
-                class={`w-auto rounded px-1.5 py-0.5 text-[11px] font-medium capitalize ${styleOf(tick) ? STYLE_BADGE_CLASSES[styleOf(tick)!] : ""}`}
-                value={styleOf(tick)}
-                onchange={(e) => setStyle(tick, (e.target as HTMLSelectElement).value as TickStyle)}
-              >
-                <optgroup label="Send">
-                  <option value="redpoint">Redpoint</option>
-                  <option value="onsight">Onsight</option>
-                  <option value="flash">Flash</option>
-                  <option value="pinkpoint">Pinkpoint</option>
-                </optgroup>
-                <optgroup label="Attempt">
-                  <option value="hangdog">Hangdog</option>
-                  <option value="bailed">Bailed</option>
-                </optgroup>
-              </Select>
-              <Input
-                type="date"
-                class="w-auto text-xs"
-                value={tick.climbedAt?.slice(0, 10) ?? ""}
-                aria-label="Ascent date of {labelFor(tick)}"
-                onchange={(e) => setDate(tick, (e.target as HTMLInputElement).value)}
-              />
-              <Button
-                size="icon-xs"
-                variant="ghost"
-                title="Delete tick"
-                aria-label="Delete tick"
-                disabled={busy}
-                onclick={() => onDelete(tick)}
-              >
-                <span aria-hidden="true" class="icon-[lucide--trash-2] size-3.5"></span>
-              </Button>
-            </span>
-          </div>
-          <Input
-            class="w-full text-xs"
-            value={tick.comment ?? ""}
-            placeholder="Comment"
-            aria-label="Comment on {labelFor(tick)}"
-            oninput={(e) => setComment(tick, (e.target as HTMLInputElement).value)}
-          />
-
-          {#if !tick.subject}
-            <p class="text-xs text-muted-foreground">
-              Not on OpenStreetMap{tick.locationHint?.length ? ` · ${tick.locationHint.join(" > ")}` : ""}
-            </p>
-
-            {#if linked.length > 0}
-              <div class="flex flex-wrap items-center gap-2 text-xs">
-                <span class="text-muted-foreground">Found in the OSM data:</span>
-                <Select
-                  aria-label="Matching OSM route for {labelFor(tick)}"
-                  class="w-auto max-w-56"
-                  value={linked[0]!.slug}
-                  onchange={(e) => onLink(tick, (e.target as HTMLSelectElement).value)}
-                >
-                  {#each linked as candidate (candidate.slug)}
-                    <option value={candidate.slug}>
-                      {candidate.name}{candidate.grade ? ` (${candidate.grade})` : ""}
-                    </option>
-                  {/each}
-                </Select>
-                <span class="text-muted-foreground">Changing the route links the tick to it.</span>
-              </div>
-            {:else}
-              <div class="flex flex-wrap items-center gap-2">
-                <Button size="xs" variant="outline" onclick={() => (addOsmTick = tick)}>
-                  <span class="icon-[lucide--map-pin-plus] shrink-0 size-4"></span>
-                  Add to OSM
-                </Button>
-              </div>
-            {/if}
+    {@const linked = rematch[tick.localId!]?.candidates ?? []}
+    {@const info = tick.subject ? resolved[`${tick.subject.type}-${tick.subject.id}`] : undefined}
+    <li class="flex flex-col gap-1 rounded border p-2 [content-visibility:auto] [contain-intrinsic-size:auto_4.5rem]">
+      <div class="flex flex-wrap items-center gap-2">
+        {#if tick.subject}
+          {#if info?.slug}
+            <a href={resolve("/world/[...slug]", { slug: info.slug })} class="font-medium underline underline-offset-2">
+              {labelFor(tick)}
+            </a>
+          {:else}
+            <span class="font-medium">{labelFor(tick)}</span>
+            <a
+              href={`https://www.openstreetmap.org/${tick.subject.type}/${tick.subject.id}`}
+              target="_blank"
+              rel="noreferrer"
+              class="inline-flex items-center rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+              title="Open in OSM"
+              aria-label="Open {labelFor(tick)} in OSM"
+            >
+              <span aria-hidden="true" class="icon-[lucide--external-link] size-3.5"></span>
+            </a>
           {/if}
-        </li>
+        {:else}
+          <span class="font-medium">{labelFor(tick)}</span>
+        {/if}
+        {#if info?.grade}
+          <HolyGrade class="text-xs font-semibold" grade={info.grade} />
+        {:else if tick.grade}
+          <span class="text-xs text-muted-foreground">{tick.grade}</span>
+        {/if}
+        {#if info?.style}
+          <span class="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
+            {ROUTE_STYLE_LABELS[info.style] ?? info.style}
+          </span>
+        {/if}
+        <span class="ms-auto flex flex-wrap items-center gap-2">
+          {#if saving[tick.localId!]}
+            <span class="text-[11px] text-muted-foreground">Saving…</span>
+          {:else if !tick.uri}
+            <span class="rounded border px-1.5 py-0.5 text-[11px] text-muted-foreground">Pending sync</span>
+          {/if}
+          <Select
+            aria-label="Ascent style of {labelFor(tick)}"
+            class={`w-auto rounded px-1.5 py-0.5 text-[11px] font-medium capitalize ${styleOf(tick) ? STYLE_BADGE_CLASSES[styleOf(tick)!] : ""}`}
+            value={styleOf(tick)}
+            onchange={(e) => setStyle(tick, (e.target as HTMLSelectElement).value as TickStyle)}
+          >
+            <optgroup label="Send">
+              <option value="redpoint">Redpoint</option>
+              <option value="onsight">Onsight</option>
+              <option value="flash">Flash</option>
+              <option value="pinkpoint">Pinkpoint</option>
+            </optgroup>
+            <optgroup label="Attempt">
+              <option value="hangdog">Hangdog</option>
+              <option value="bailed">Bailed</option>
+            </optgroup>
+          </Select>
+          <Input
+            type="date"
+            class="w-auto text-xs"
+            value={tick.climbedAt?.slice(0, 10) ?? ""}
+            aria-label="Ascent date of {labelFor(tick)}"
+            onchange={(e) => setDate(tick, (e.target as HTMLInputElement).value)}
+          />
+          <Button
+            size="icon-xs"
+            variant="ghost"
+            title="Delete tick"
+            aria-label="Delete tick"
+            disabled={busy}
+            onclick={() => onDelete(tick)}
+          >
+            <span aria-hidden="true" class="icon-[lucide--trash-2] size-3.5"></span>
+          </Button>
+        </span>
+      </div>
+      <Input
+        class="w-full text-xs"
+        value={tick.comment ?? ""}
+        placeholder="Comment"
+        aria-label="Comment on {labelFor(tick)}"
+        oninput={(e) => setComment(tick, (e.target as HTMLInputElement).value)}
+      />
+
+      {#if !tick.subject}
+        <p class="text-xs text-muted-foreground">
+          Not on OpenStreetMap{tick.locationHint?.length ? ` · ${tick.locationHint.join(" > ")}` : ""}
+        </p>
+
+        {#if linked.length > 0}
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="text-muted-foreground">Found in the OSM data:</span>
+            <Select
+              aria-label="Matching OSM route for {labelFor(tick)}"
+              class="w-auto max-w-56"
+              value={linked[0]!.slug}
+              onchange={(e) => onLink(tick, (e.target as HTMLSelectElement).value)}
+            >
+              {#each linked as candidate (candidate.slug)}
+                <option value={candidate.slug}>
+                  {candidate.name}{candidate.grade ? ` (${candidate.grade})` : ""}
+                </option>
+              {/each}
+            </Select>
+            <span class="text-muted-foreground">Changing the route links the tick to it.</span>
+          </div>
+        {:else}
+          <div class="flex flex-wrap items-center gap-2">
+            <Button size="xs" variant="outline" onclick={() => (addOsmTick = tick)}>
+              <span class="icon-[lucide--map-pin-plus] shrink-0 size-4"></span>
+              Add to OSM
+            </Button>
+          </div>
+        {/if}
+      {/if}
+    </li>
   {/snippet}
 
   {#snippet placeNode(node: PlaceNode)}

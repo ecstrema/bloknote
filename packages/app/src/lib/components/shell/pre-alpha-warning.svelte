@@ -28,8 +28,8 @@
         Pre-alpha software
       </Dialog.Title>
       <Dialog.Description>
-        Bloknote is in very early development and might break at any time: data can be incomplete
-        or wrong, and features can change or disappear without notice.
+        Bloknote is in very early development and might break at any time: data can be incomplete or wrong, and features
+        can change or disappear without notice.
       </Dialog.Description>
     </Dialog.Header>
     <Dialog.Footer>

@@ -12,7 +12,7 @@
     startCommonsLogin,
     uploadCommonsFile,
   } from "#lib/data/network/commons.js";
-      import { onMount } from "svelte";
+  import { onMount } from "svelte";
   import { directCommonsImage, type CommonsImage, type ResolvedImage } from "./topo-helpers.js";
 
   let {
@@ -108,7 +108,7 @@
     </Dialog.Header>
 
     <div class="flex items-start gap-2 rounded-md bg-muted/60 p-2.5 text-xs text-muted-foreground">
-      <span aria-hidden="true"  class="icon-[lucide--info] shrink-0 mt-0.5 size-3.5 shrink-0"></span>
+      <span aria-hidden="true" class="icon-[lucide--info] shrink-0 mt-0.5 size-3.5 shrink-0"></span>
       <span>
         Images are hosted on Wikimedia Commons under a free license and linked to this climbing feature on
         OpenStreetMap.

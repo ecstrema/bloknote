@@ -87,7 +87,11 @@
     </Popover.Trigger>
     <Popover.Content class="w-auto p-2">
       <div class="flex items-start gap-2">
-        <div class="flex max-h-60 min-w-28 flex-col gap-0.5 overflow-y-auto pr-1" role="listbox" aria-label="Climbing styles">
+        <div
+          class="flex max-h-60 min-w-28 flex-col gap-0.5 overflow-y-auto pr-1"
+          role="listbox"
+          aria-label="Climbing styles"
+        >
           {#each STYLE_OPTIONS as [key, label] (key)}
             <Button
               variant={key === selected ? "secondary" : "ghost"}
@@ -151,4 +155,3 @@
     {/each}
   </ul>
 {/if}
-

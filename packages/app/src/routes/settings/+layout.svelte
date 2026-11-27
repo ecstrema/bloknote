@@ -39,7 +39,11 @@
 
   function onTabChange(value: string) {
     const route =
-      value === "account" ? resolve("/settings/account") : value === "logbook" ? resolve("/settings/logbook") : resolve("/settings");
+      value === "account"
+        ? resolve("/settings/account")
+        : value === "logbook"
+          ? resolve("/settings/logbook")
+          : resolve("/settings");
     void goto(route);
   }
 

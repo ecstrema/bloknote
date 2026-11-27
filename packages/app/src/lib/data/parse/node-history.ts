@@ -22,7 +22,10 @@ export async function loadNodeHistories(nodeIds: number[] | undefined): Promise<
   for (let i = 0; i < missing.length; i += BATCH_SIZE) {
     const batch = missing.slice(i, i + BATCH_SIZE);
     for (const id of batch) {
-      cache.set(id, getFeatureHistory("node", id).catch(() => []));
+      cache.set(
+        id,
+        getFeatureHistory("node", id).catch(() => []),
+      );
     }
     await Promise.all(batch.map((id) => cache.get(id)));
   }

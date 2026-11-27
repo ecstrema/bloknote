@@ -458,10 +458,7 @@ async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string
       const fallbackTitle = slug.replace(/^world\/?/, "") || "Worldwide climbing";
       const title =
         data?.type === "geographic" ? data.name : ((data as OsmFeature | undefined)?.tags?.name ?? fallbackTitle);
-      writeFileSync(
-        join(directory, "feed.xml"),
-        renderRssFeed({ title, slug, items: recent.slice(0, RSS_MAX_ITEMS) }),
-      );
+      writeFileSync(join(directory, "feed.xml"), renderRssFeed({ title, slug, items: recent.slice(0, RSS_MAX_ITEMS) }));
     }
 
     writeFileSync(join(directory, "children.json"), JSON.stringify(children));

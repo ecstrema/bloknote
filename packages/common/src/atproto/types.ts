@@ -8,12 +8,7 @@
  * and keeps the few helpers that are not part of the lexicon schemas.
  */
 import type * as ActorSettings from "../lexicons/org/bloknote/actor/settings.defs.ts";
-import type {
-  AscentInfo,
-  AscentOutcome,
-  AttemptStyle,
-  SendStyle,
-} from "../lexicons/org/bloknote/logbook/tick.defs.ts";
+import type { AscentInfo, AscentOutcome, AttemptStyle, SendStyle } from "../lexicons/org/bloknote/logbook/tick.defs.ts";
 import type * as TickLex from "../lexicons/org/bloknote/logbook/tick.defs.ts";
 import type * as BookmarkLex from "../lexicons/org/bloknote/osm/bookmark.defs.ts";
 import type * as CommentLex from "../lexicons/org/bloknote/osm/comment.defs.ts";

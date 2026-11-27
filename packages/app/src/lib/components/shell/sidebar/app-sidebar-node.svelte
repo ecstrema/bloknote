@@ -3,7 +3,7 @@
   import * as Collapsible from "#components/ui/collapsible/index.js";
   import * as Sidebar from "#components/ui/sidebar/index.js";
   import * as DropdownMenu from "#components/ui/dropdown-menu/index.js";
-            import type { DataTree } from "#lib/types.js";
+  import type { DataTree } from "#lib/types.js";
 
   import { featureToType } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
@@ -115,7 +115,9 @@
   const treeDepth = $derived(slug ? slug.split("/").length - 1 : 0);
   // HTML5 drag & drop does not work with touch: on mobile it only hijacks the scroll gesture
   // and long-press, so reordering stays a desktop affordance
-  const canDrag = $derived(!sidebar.isMobile && itemType !== "geographic" && (!!reorderType || !!appState.osmUser.loggedIn));
+  const canDrag = $derived(
+    !sidebar.isMobile && itemType !== "geographic" && (!!reorderType || !!appState.osmUser.loggedIn),
+  );
   const parentSlug = $derived(getParentSlug(slug) ?? "");
   const dropPosition = $derived(getSidebarDropPosition(slug));
 
@@ -431,7 +433,10 @@
           <TradCamIcon />
         {/if}
         {#if isIceRoute(routeTags)}
-          <span aria-label="Ice / dry-tooling route"  class="icon-[lucide--snowflake] shrink-0 size-3.5 shrink-0 text-cyan-500"></span>
+          <span
+            aria-label="Ice / dry-tooling route"
+            class="icon-[lucide--snowflake] shrink-0 size-3.5 shrink-0 text-cyan-500"
+          ></span>
         {/if}
       {:else if itemType === "gym"}
         <span class="icon-[lucide--building] shrink-0 size-4"></span>
@@ -493,7 +498,9 @@
                 <span class="pointer-events-none absolute inset-x-1 bottom-0 z-10 h-0.5 bg-primary" aria-hidden="true"
                 ></span>
               {/if}
-              <span class={clsx("icon-[lucide--chevron-right] shrink-0 size-4 transition-transform", open && "rotate-90")}></span>
+              <span
+                class={clsx("icon-[lucide--chevron-right] shrink-0 size-4 transition-transform", open && "rotate-90")}
+              ></span>
               {#if itemType === "geographic"}
                 <span class="icon-[lucide--earth] shrink-0 size-4"></span>
               {/if}
@@ -507,47 +514,47 @@
               </Sidebar.MenuBadge>
             {/if}
 
-          {#if interacted}
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger
-                onclick={(e) => {
-                  // The action menu lives inside the Collapsible.Trigger; stop the event so
-                  // opening the menu doesn't also collapse or expand the node (issue #174).
-                  e.stopPropagation();
-                }}
-              >
-                {#snippet child({ props })}
-                  <Sidebar.MenuAction showOnHover {...props}>
-                    <span class="icon-[lucide--ellipsis] shrink-0 size-4"></span>
-                  </Sidebar.MenuAction>
-                {/snippet}
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content side="right" align="start">
-                {#if appState.osmUser.loggedIn && (itemType === "area" || isLeafRegion)}
-                  {#if item.feature.type !== "geographic" && item.feature.tags?.climbing !== "crag"}
-                    <DropdownMenu.Item onclick={() => addArea()}>Add sector</DropdownMenu.Item>
+            {#if interacted}
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger
+                  onclick={(e) => {
+                    // The action menu lives inside the Collapsible.Trigger; stop the event so
+                    // opening the menu doesn't also collapse or expand the node (issue #174).
+                    e.stopPropagation();
+                  }}
+                >
+                  {#snippet child({ props })}
+                    <Sidebar.MenuAction showOnHover {...props}>
+                      <span class="icon-[lucide--ellipsis] shrink-0 size-4"></span>
+                    </Sidebar.MenuAction>
+                  {/snippet}
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content side="right" align="start">
+                  {#if appState.osmUser.loggedIn && (itemType === "area" || isLeafRegion)}
+                    {#if item.feature.type !== "geographic" && item.feature.tags?.climbing !== "crag"}
+                      <DropdownMenu.Item onclick={() => addArea()}>Add sector</DropdownMenu.Item>
+                    {/if}
+                    {#if isLeafRegion}
+                      <DropdownMenu.Item onclick={() => addArea("crag")}>Add crag</DropdownMenu.Item>
+                    {/if}
+                    {#if itemType === "area"}
+                      <DropdownMenu.Item onclick={addRoute}>Add route</DropdownMenu.Item>
+                    {/if}
+                    <DropdownMenu.Separator />
                   {/if}
-                  {#if isLeafRegion}
-                    <DropdownMenu.Item onclick={() => addArea("crag")}>Add crag</DropdownMenu.Item>
-                  {/if}
-                  {#if itemType === "area"}
-                    <DropdownMenu.Item onclick={addRoute}>Add route</DropdownMenu.Item>
-                  {/if}
+                  <DropdownMenu.Item>Download images</DropdownMenu.Item>
                   <DropdownMenu.Separator />
-                {/if}
-                <DropdownMenu.Item>Download images</DropdownMenu.Item>
-                <DropdownMenu.Separator />
-                <DropdownMenu.Item onclick={() => appState.deleteNodes([slug])}>
-                  Delete {item.feature.type !== "geographic" && item.feature.tags?.climbing === "crag"
-                    ? "crag"
-                    : "area"}
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Root>
-          {/if}
-        </Sidebar.MenuItem>
-      {/snippet}
-        </Collapsible.Trigger>
+                  <DropdownMenu.Item onclick={() => appState.deleteNodes([slug])}>
+                    Delete {item.feature.type !== "geographic" && item.feature.tags?.climbing === "crag"
+                      ? "crag"
+                      : "area"}
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
+            {/if}
+          </Sidebar.MenuItem>
+        {/snippet}
+      </Collapsible.Trigger>
     {/if}
 
     <Collapsible.Content>

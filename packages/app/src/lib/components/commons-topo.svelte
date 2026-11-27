@@ -159,7 +159,7 @@
       class="flex h-40 w-40 shrink-0 cursor-pointer snap-start flex-col items-center justify-center gap-2 rounded-md border border-dashed text-muted-foreground transition hover:border-foreground/40 hover:text-foreground sm:h-44 sm:w-44"
       onclick={() => (addOpen = true)}
     >
-      <span aria-hidden="true"  class="icon-[lucide--image-plus] shrink-0 size-7"></span>
+      <span aria-hidden="true" class="icon-[lucide--image-plus] shrink-0 size-7"></span>
       <span class="text-xs font-medium">Add image...</span>
     </button>
   </div>

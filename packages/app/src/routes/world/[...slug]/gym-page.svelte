@@ -5,8 +5,8 @@
   import { getCoordinates, getPhone } from "#lib/data/parse/osm-tags.js";
   import type { DataTree } from "#lib/types.js";
   import type { OsmFeature } from "osm-api";
-        import MapLinks from "#lib/components/map-links.svelte";
-import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
+  import MapLinks from "#lib/components/map-links.svelte";
+  import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
   import EditableOpeningHours from "#lib/components/editable/editable-opening-hours.svelte";
   import { getFee, getFeeCharge, getWebsite } from "#lib/data/parse/gym-tags.js";
 
@@ -33,14 +33,14 @@ import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelt
 <div class="flex flex-wrap items-center gap-3 text-sm">
   {#if phone}
     <p class="flex items-center gap-1.5">
-      <span aria-hidden="true"  class="icon-[lucide--phone] shrink-0 size-4 text-muted-foreground"></span>
+      <span aria-hidden="true" class="icon-[lucide--phone] shrink-0 size-4 text-muted-foreground"></span>
       <a class="underline underline-offset-2" href={`tel:${phone}`}>{phone}</a>
     </p>
   {/if}
 
   {#if website}
     <p class="flex items-center gap-1.5">
-      <span aria-hidden="true"  class="icon-[lucide--globe] shrink-0 size-4 text-muted-foreground"></span>
+      <span aria-hidden="true" class="icon-[lucide--globe] shrink-0 size-4 text-muted-foreground"></span>
       <a class="underline underline-offset-2" href={website} target="_blank" rel="noopener noreferrer">
         {website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
       </a>

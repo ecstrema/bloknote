@@ -19,7 +19,7 @@
   import { gradingScales } from "#lib/data/grading-scales.svelte.js";
   import type { BoulderScaleId, RouteScaleId } from "@bloknote/holy-grade";
   import type { DataTree } from "#lib/types.js";
-    
+
   const LAYOUT_KEY = "bloknote:sector-stats-layout";
 
   let { item, slug }: { item: DataTree; slug: string } = $props();
@@ -203,8 +203,7 @@
   {@const maxCount = Math.max(1, ...chart.buckets.map((b) => b.total))}
   <div class="flex flex-col gap-1">
     <p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-      <span class="size-2.5 rounded-xs" style:background-color={STAT_STYLE_COLORS[chart.styles[0]!]}>
-      </span>
+      <span class="size-2.5 rounded-xs" style:background-color={STAT_STYLE_COLORS[chart.styles[0]!]}> </span>
       {chart.label}
       <span class="font-normal">({chart.count})</span>
     </p>

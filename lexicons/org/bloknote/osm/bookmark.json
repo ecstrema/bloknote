@@ -8,9 +8,7 @@
       "key": "tid",
       "record": {
         "type": "object",
-        "required": [
-          "subject"
-        ],
+        "required": ["subject"],
         "properties": {
           "subject": {
             "type": "ref",

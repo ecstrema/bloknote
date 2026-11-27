@@ -1,5 +1,5 @@
 <script lang="ts">
-      import { Button } from "#components/ui/button/index.js";
+  import { Button } from "#components/ui/button/index.js";
   import * as Dialog from "#components/ui/dialog/index.js";
   import { Textarea } from "#components/ui/textarea/index.js";
   import { getNameOSM } from "#lib/data/parse/osm-tags.js";

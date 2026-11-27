@@ -14797,6 +14797,7 @@ msgstr "A new version of Bloknote is available"
 
 #: src/lib/components/climbing-styles.svelte
 #: src/lib/components/climbing-styles.svelte
+#: src/routes/explore/+page.svelte
 msgid "Climbing styles"
 msgstr "Climbing styles"
 
@@ -14895,6 +14896,7 @@ msgstr "Point"
 #: src/lib/components/diagnostics-panel.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/pulse-panel.svelte
+#: src/routes/explore/+page.svelte
 #: src/routes/settings/logbook/tick-import.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/world/[...slug]/route-page.svelte
@@ -14959,6 +14961,7 @@ msgstr "Scale"
 msgid "Reference"
 msgstr "Reference"
 
+#: src/routes/explore/+page.svelte
 #: src/routes/settings/+layout.svelte
 msgid "<0/> Back"
 msgstr "<0/> Back"
@@ -15288,6 +15291,7 @@ msgstr "Clear search"
 msgid "Collapse all"
 msgstr "Collapse all"
 
+#: src/lib/components/shell/app-top-navigation.svelte
 #: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Filters"
 msgstr "Filters"
@@ -15396,9 +15400,8 @@ msgstr "Min grade"
 msgid "Max grade"
 msgstr "Max grade"
 
-#: src/lib/components/shell/sidebar/search-dialog.svelte
-msgid "Tag, e.g. climbing:rock"
-msgstr "Tag, e.g. climbing:rock"
+#~ msgid "Tag, e.g. climbing:rock"
+#~ msgstr "Tag, e.g. climbing:rock"
 
 #~ msgid "French"
 #~ msgstr "French"
@@ -17204,7 +17207,7 @@ msgstr "Imported {0} tick{1} ({2} already logged, {3} without an OSM route)."
 msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
 msgstr "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
 
-#. 0: rows.length; 1: rows.length === 1 ? "" \\: "s"; 2: formatters[format]; 3: counts.matched; 4: counts.alreadyLogged
+#. 0: rows.length; 1: rows.length === 1 ? "" \\: "s"; 2: formatters[ format ]; 3: counts.matched; 4: counts.alreadyLogged
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "{0} tick{1} from {2} <0/>: {3} matched, {4} already logged."
 msgstr "{0} tick{1} from {2} <0/>: {3} matched, {4} already logged."
@@ -17236,10 +17239,8 @@ msgstr "Style:"
 msgid "Some details differ from the logbook: check the preview before importing."
 msgstr "Some details differ from the logbook: check the preview before importing."
 
-#. 0: counts.unmatched; 1: counts.unmatched === 1 ? "" \\: "s"
-#: src/routes/settings/logbook/tick-import.svelte
-msgid "<0/> and {0} route{1} not found on OSM. Don't worry, you can add them still."
-msgstr "<0/> and {0} route{1} not found on OSM. Don't worry, you can add them still."
+#~ msgid "<0/> and {0} route{1} not found on OSM. Don't worry, you can add them still."
+#~ msgstr "<0/> and {0} route{1} not found on OSM. Don't worry, you can add them still."
 
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Unnamed route"
@@ -17531,10 +17532,8 @@ msgstr "Load more"
 msgid "{0} matches"
 msgstr "{0} matches"
 
-#. 0: OVERVIEW_LIMIT
-#: src/routes/explore/+page.svelte
-msgid "Charts cover the first {0} matches."
-msgstr "Charts cover the first {0} matches."
+#~ msgid "Charts cover the first {0} matches."
+#~ msgstr "Charts cover the first {0} matches."
 
 #: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Results"
@@ -17558,6 +17557,7 @@ msgstr "A search is filtering the sidebar. Click to clear it."
 msgid "{0} results"
 msgstr "{0} results"
 
+#: src/lib/components/shell/app-top-navigation.svelte
 #: src/routes/world/[...slug]/+layout.svelte
 msgid "Clear the active search"
 msgstr "Clear the active search"
@@ -17833,7 +17833,7 @@ msgstr "Max distance between routes <0/>"
 msgid "Create sectors"
 msgstr "Create sectors"
 
-#. 0: localDb.phase === "download" ? "download" \\: "parsing"; 1: " "; 2: Math.min(100, Math.round((localDb.loaded / (localDb.total ?? 1)) * 100))
+#. 0: localDb.phase === "download" ? "download" \\: "parsing"; 1: " "; 2: Math.min( 100, Math.round((localDb.loaded / (localDb.total ?? 1)) * 100), )
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "(downloading the offline dataset first, {0}{1} {2}%)"
 msgstr "(downloading the offline dataset first, {0}{1} {2}%)"
@@ -17950,3 +17950,52 @@ msgstr "Bloknote - Via Ferrata Grade Comparison"
 #: src/routes/grade-comparison/danger/+page.svelte
 msgid "Bloknote - Danger Grade Comparison"
 msgstr "Bloknote - Danger Grade Comparison"
+
+#~ msgid "<0/> and {0} route{1} not found on OSM. You can add them still."
+#~ msgstr "<0/> and {0} route{1} not found on OSM. You can add them still."
+
+#. 0: counts.unmatched; 1: counts.unmatched === 1 ? "" \\: "s"
+#: src/routes/settings/logbook/tick-import.svelte
+msgid "<0/> and {0} route{1} not found on OSM. You can add them still, and link them with OSM later from your ticks list."
+msgstr "<0/> and {0} route{1} not found on OSM. You can add them still, and link them with OSM later from your ticks list."
+
+#: src/routes/+layout.svelte
+msgid "Reconnect your ATProto account"
+msgstr "Reconnect your ATProto account"
+
+#: src/routes/+layout.svelte
+msgid "New features need permissions that your current connection is missing. Disconnect and reconnect your account to grant them."
+msgstr "New features need permissions that your current connection is missing. Disconnect and reconnect your account to grant them."
+
+#. 0: counts.fixable
+#: src/lib/components/diagnostics-panel.svelte
+msgid "With fixes ({0})"
+msgstr "With fixes ({0})"
+
+#. 0: LENGTH_BUCKETS[i - 1]; 1: LENGTH_BUCKETS[i]
+#. 0: LENGTH_BUCKETS[i - 1]; 1: m
+#: src/routes/explore/+page.svelte
+#: src/routes/explore/+page.svelte
+msgid "{0}–{1} m"
+msgstr "{0}–{1} m"
+
+#: src/routes/explore/+page.svelte
+msgid "Choose a plot"
+msgstr "Choose a plot"
+
+#: src/routes/explore/+page.svelte
+msgid "Route lengths"
+msgstr "Route lengths"
+
+#: src/routes/explore/+page.svelte
+msgid "No data for this plot."
+msgstr "No data for this plot."
+
+#. 0: routeRows.length
+#: src/routes/explore/+page.svelte
+msgid "{0} routes in the results"
+msgstr "{0} routes in the results"
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Tag, e.g. climbing:length>40"
+msgstr "Tag, e.g. climbing:length>40"

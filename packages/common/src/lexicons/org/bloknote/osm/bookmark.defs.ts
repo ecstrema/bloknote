@@ -11,21 +11,30 @@ type $nsid = typeof $nsid;
 
 export { $nsid };
 
-type Main = { $type: "org.bloknote.osm.bookmark";
+type Main = {
+  $type: "org.bloknote.osm.bookmark";
 
   /**
    * The OpenStreetMap element (node, way, or relation) being bookmarked
    */
-  "subject":OsmDefs.ElementRef;
+  subject: OsmDefs.ElementRef;
 
   /**
    * ISO 8601 timestamp when the element was bookmarked
    */
-  "createdAt"?:l.DatetimeString };
+  createdAt?: l.DatetimeString;
+};
 
 export type { Main };
 
-const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"subject":/*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any),"createdAt":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"datetime"}))}));
+const main = /*#__PURE__*/ l.record<"tid", Main>(
+  "tid",
+  $nsid,
+  /*#__PURE__*/ l.object({
+    subject: /*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any),
+    createdAt: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({ format: "datetime" })),
+  }),
+);
 
 export { main };
 

@@ -183,7 +183,13 @@ describe("AppState.createSectorWithItems", () => {
     });
     tree.integrateNodeIntoTree(tree.root.children!["estrie"]!, "estrie", "");
 
-    const state = new AppState(tree, { slugs: [], items: [] }, { current: tree.root }, new OsmUser(), new UndoManager());
+    const state = new AppState(
+      tree,
+      { slugs: [], items: [] },
+      { current: tree.root },
+      new OsmUser(),
+      new UndoManager(),
+    );
     const moved = state.moveItemsToParent(["estrie/r1", "estrie/r2"], "estrie/pic-aux-corbeaux");
     expect(moved).toEqual(["estrie/pic-aux-corbeaux/r1", "estrie/pic-aux-corbeaux/r2"]);
 
@@ -239,7 +245,13 @@ describe("AppState.createSectorWithItems", () => {
     });
     tree.integrateNodeIntoTree(tree.root.children!["estrie"]!, "estrie", "");
 
-    const state = new AppState(tree, { slugs: [], items: [] }, { current: tree.root }, new OsmUser(), new UndoManager());
+    const state = new AppState(
+      tree,
+      { slugs: [], items: [] },
+      { current: tree.root },
+      new OsmUser(),
+      new UndoManager(),
+    );
     state.moveItemsToParent(["estrie/r1"], "estrie/cliff");
 
     const rel = tree.getReactiveNode("estrie/cliff")!.feature as OsmRelation;

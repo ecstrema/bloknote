@@ -226,4 +226,3 @@
 <style>
   /* The legend lives in the MapLibre control stack, which stays white in every color mode */
 </style>
-

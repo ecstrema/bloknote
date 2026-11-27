@@ -6,7 +6,7 @@
   import type { OsmFeature } from "osm-api";
   import EditableTextarea from "./editable-textarea.svelte";
   import { Button } from "#components/ui/button/index.js";
-  
+
   const {
     feature,
     featureSlug,
@@ -74,15 +74,15 @@
       {/if}
       {#if length !== undefined && length > 30 && !isMultipitch}
         <span
-         
           aria-label="Route length exceeds 30 meters"
           title="Route length exceeds 30 meters"
-         class="icon-[lucide--triangle-alert] shrink-0 size-3 text-amber-600"></span>
+          class="icon-[lucide--triangle-alert] shrink-0 size-3 text-amber-600"
+        ></span>
       {/if}
     </span>
     {#if parsedLength?.sourceUnit === "feet"}
       <div class="flex flex-wrap items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400" role="note">
-        <span aria-hidden="true"  class="icon-[lucide--triangle-alert] shrink-0 size-3 shrink-0"></span>
+        <span aria-hidden="true" class="icon-[lucide--triangle-alert] shrink-0 size-3 shrink-0"></span>
         <span>Feet are not an officially supported length unit.</span>
         <Button
           size="xs"

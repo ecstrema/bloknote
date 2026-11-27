@@ -3,7 +3,7 @@
   import { MAP_PROVIDERS } from "#lib/data/map-providers.js";
   import { settings } from "#lib/data/settings.svelte.js";
   import { IsMobile } from "#lib/hooks/is-mobile.svelte.js";
-    
+
   let { showMore = $bindable(false) }: { showMore?: boolean } = $props();
 
   const isMobile = new IsMobile();

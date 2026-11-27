@@ -6,32 +6,17 @@
     "routeScale": {
       "type": "string",
       "description": "A route grading scale",
-      "knownValues": [
-        "French",
-        "YDS",
-        "UIAA",
-        "Saxon",
-        "UKTech",
-        "Scandinavian",
-        "Ewbank",
-        "Polish"
-      ]
+      "knownValues": ["French", "YDS", "UIAA", "Saxon", "UKTech", "Scandinavian", "Ewbank", "Polish"]
     },
     "boulderScale": {
       "type": "string",
       "description": "A boulder grading scale",
-      "knownValues": [
-        "FB",
-        "Hueco"
-      ]
+      "knownValues": ["FB", "Hueco"]
     },
     "viaFerrataScale": {
       "type": "string",
       "description": "A via ferrata grading scale",
-      "knownValues": [
-        "Huesler",
-        "Schall"
-      ]
+      "knownValues": ["Huesler", "Schall"]
     }
   }
 }

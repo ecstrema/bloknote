@@ -1,6 +1,14 @@
 import { browser } from "$app/env";
 import { MAX_RATING } from "@bloknote/common";
-import type { CommentRecord, OsmElementRef, RatingRecord, SettingsRecord, StarRecord, TickAscent, TickRecord } from "@bloknote/common";
+import type {
+  CommentRecord,
+  OsmElementRef,
+  RatingRecord,
+  SettingsRecord,
+  StarRecord,
+  TickAscent,
+  TickRecord,
+} from "@bloknote/common";
 import {
   BrowserOAuthClient,
   TokenInvalidError,
@@ -194,9 +202,7 @@ function normalizeTick(entry: LocalTickEntry): LocalTickEntry {
           return crag && !rest.locationHint ? { ...rest, locationHint: [crag] } : rest;
         })()
       : entry;
-  return typeof migrated.locationHint === "string"
-    ? { ...migrated, locationHint: [migrated.locationHint] }
-    : migrated;
+  return typeof migrated.locationHint === "string" ? { ...migrated, locationHint: [migrated.locationHint] } : migrated;
 }
 
 function createOAuthClient(): Promise<BrowserOAuthClient> {
@@ -234,7 +240,9 @@ class AtProtoClient {
    * by disconnecting and reconnecting the account (issue #227).
    */
   needsNewPermissions = $state(false);
-  ticks = $state<LocalTickEntry[]>(ensureTickLocalIds(readJson<LocalTickEntry[]>(TICKS_STORAGE_KEY, []).map(normalizeTick)));
+  ticks = $state<LocalTickEntry[]>(
+    ensureTickLocalIds(readJson<LocalTickEntry[]>(TICKS_STORAGE_KEY, []).map(normalizeTick)),
+  );
   stars = $state<LocalStarEntry[]>(readJson<LocalStarEntry[]>(STARS_STORAGE_KEY, []));
   comments = $state<LocalCommentEntry[]>(readJson<LocalCommentEntry[]>(COMMENTS_STORAGE_KEY, []));
   ratings = $state<LocalRatingEntry[]>(readJson<LocalRatingEntry[]>(RATINGS_STORAGE_KEY, []));
@@ -390,9 +398,7 @@ class AtProtoClient {
       // a subject in the meantime and updated by remapTickSubjects after the push. A re-sync
       // before the push must therefore not drop the locally assigned subject, otherwise the
       // tick falls back into the "Not in the map data" bucket and leaves the places hierarchy.
-      const localSubjects = new Map(
-        this.ticks.filter((e) => e.uri && e.subject).map((e) => [e.uri!, e.subject!]),
-      );
+      const localSubjects = new Map(this.ticks.filter((e) => e.uri && e.subject).map((e) => [e.uri!, e.subject!]));
       for (const entry of mergedTicks) {
         if (!entry.subject && entry.uri && localSubjects.has(entry.uri)) {
           entry.subject = localSubjects.get(entry.uri)!;
@@ -426,7 +432,10 @@ class AtProtoClient {
    * A uri-less entry can only be one that never reached the PDS: synced entries carry their uri,
    * and deletes remove the entry (local and remote) in one step.
    */
-  async #uploadPending(collection: string, entries: Array<LocalTickEntry | LocalStarEntry | LocalCommentEntry | LocalRatingEntry>) {
+  async #uploadPending(
+    collection: string,
+    entries: Array<LocalTickEntry | LocalStarEntry | LocalCommentEntry | LocalRatingEntry>,
+  ) {
     await Promise.allSettled(
       entries
         // Subject-less ticks (routes not on OSM yet, issue #154) are uploaded too

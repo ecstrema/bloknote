@@ -11,7 +11,15 @@ import {
   FEATURE_COLORS,
   ROUTE_STYLE_COLORS,
 } from "#lib/data/parse/route-styles.js";
-import type { DbRequest, DbResponse, MapElementFeature, NearbyCandidate, OsmRefEntry, SearchFilters, TickRouteMatch } from "./types";
+import type {
+  DbRequest,
+  DbResponse,
+  MapElementFeature,
+  NearbyCandidate,
+  OsmRefEntry,
+  SearchFilters,
+  TickRouteMatch,
+} from "./types";
 
 /** Bump when the tables change: the database is then downloaded again */
 const SCHEMA = 3;
@@ -46,7 +54,9 @@ async function probeOpfs(): Promise<boolean> {
         const root = await navigator.storage.getDirectory();
         const name = ".bloknote-opfs-probe";
         const handle = await root.getFileHandle(name, { create: true });
-        const access = await (handle as FileSystemFileHandle & { createSyncAccessHandle(): { close(): void } }).createSyncAccessHandle();
+        const access = await (
+          handle as FileSystemFileHandle & { createSyncAccessHandle(): { close(): void } }
+        ).createSyncAccessHandle();
         access.close();
         await root.removeEntry(name);
       })(),
@@ -270,8 +280,8 @@ function matchAreaCandidates(db: Database, query: string): { slug: string; data:
     .map(([slug, json]) => ({ slug: slug as string, data: JSON.parse(json as string) }))
     .sort(
       (a, b) =>
-        ((normalizeName((b.data as OsmFeature).tags?.name ?? "") === target ? 1 : 0) -
-          (normalizeName((a.data as OsmFeature).tags?.name ?? "") === target ? 1 : 0)),
+        (normalizeName((b.data as OsmFeature).tags?.name ?? "") === target ? 1 : 0) -
+        (normalizeName((a.data as OsmFeature).tags?.name ?? "") === target ? 1 : 0),
     );
 }
 
@@ -603,7 +613,13 @@ async function handle(req: DbRequest): Promise<DbResponse> {
   const { db, persistent, opfsUsable } = await openDb();
   switch (req.type) {
     case "status":
-      return { id: req.id, type: "status", ready: getMeta(db, "version") === `${req.version}:${SCHEMA}`, persistent, opfsUsable };
+      return {
+        id: req.id,
+        type: "status",
+        ready: getMeta(db, "version") === `${req.version}:${SCHEMA}`,
+        persistent,
+        opfsUsable,
+      };
     case "build":
       await buildDatabase(req.url, req.version, req.bytes, req.id);
       return { id: req.id, type: "status", ready: true, persistent, opfsUsable };
@@ -881,14 +897,16 @@ async function handle(req: DbRequest): Promise<DbResponse> {
            type = excluded.type, osm_ref = excluded.osm_ref`,
       );
       const name = getName(feature);
-      upsert.bind([
-        slug,
-        parentSlug,
-        JSON.stringify(feature),
-        type,
-        getGradeReference(feature.tags ?? {}) ?? null,
-        `${feature.type}-${feature.id}`,
-      ]).stepReset();
+      upsert
+        .bind([
+          slug,
+          parentSlug,
+          JSON.stringify(feature),
+          type,
+          getGradeReference(feature.tags ?? {}) ?? null,
+          `${feature.type}-${feature.id}`,
+        ])
+        .stepReset();
       db.exec({ sql: "DELETE FROM places WHERE slug = ?", bind: [slug] });
       if (name) db.exec({ sql: "INSERT INTO places (name, slug) VALUES (?, ?)", bind: [name, slug] });
       return { id: req.id, type: "elementUpserted" };

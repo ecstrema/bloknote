@@ -264,7 +264,7 @@ export function cliffPopupHtml(props: { ref?: string; name?: string; pending?: b
  * Features without the flag render at full opacity.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const DIMMED_OPACITY = ["case", ["get", "dimmed"], 0.2, 1] as any;
+const DIMMED_OPACITY = ["case", ["get", "dimmed", false], 0.2, 1] as any;
 
 export const CLIMBING_LAYERS: LayerSpecification[] = [
   {

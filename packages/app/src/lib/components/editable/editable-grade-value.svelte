@@ -9,7 +9,7 @@
   import * as Popover from "#components/ui/popover/index.js";
   import { convertGrade, getGradeFromReference, getScale, type ScaleId } from "@bloknote/holy-grade";
   import type { OsmFeature } from "osm-api";
-      
+
   const {
     grade,
     feature,

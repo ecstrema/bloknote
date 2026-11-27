@@ -11,26 +11,36 @@ type $nsid = typeof $nsid;
 
 export { $nsid };
 
-type Main = { $type: "org.bloknote.osm.comment";
+type Main = {
+  $type: "org.bloknote.osm.comment";
 
   /**
    * The OpenStreetMap element (node, way, or relation) being commented on
    */
-  "subject":OsmDefs.ElementRef;
+  subject: OsmDefs.ElementRef;
 
   /**
    * Comment text
    */
-  "text":string;
+  text: string;
 
   /**
    * ISO 8601 timestamp when the comment was created
    */
-  "createdAt":l.DatetimeString };
+  createdAt: l.DatetimeString;
+};
 
 export type { Main };
 
-const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"subject":/*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any),"text":/*#__PURE__*/ l.string({"maxLength":10000}),"createdAt":/*#__PURE__*/ l.string({"format":"datetime"})}));
+const main = /*#__PURE__*/ l.record<"tid", Main>(
+  "tid",
+  $nsid,
+  /*#__PURE__*/ l.object({
+    subject: /*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any),
+    text: /*#__PURE__*/ l.string({ maxLength: 10000 }),
+    createdAt: /*#__PURE__*/ l.string({ format: "datetime" }),
+  }),
+);
 
 export { main };
 

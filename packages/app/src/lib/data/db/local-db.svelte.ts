@@ -3,7 +3,16 @@ import { apiUrl } from "../network/api-url";
 import type { DataJSON } from "@bloknote/climbing-data-gen";
 import type { OsmFeature } from "osm-api";
 import type { AreaStats } from "#lib/types.js";
-import type { DbRequest, DbResponse, MapElementFeatureCollection, NearbyCandidate, OsmRefEntry, SearchFilters, TickRouteMatch, TopLevelPoint } from "./types";
+import type {
+  DbRequest,
+  DbResponse,
+  MapElementFeatureCollection,
+  NearbyCandidate,
+  OsmRefEntry,
+  SearchFilters,
+  TickRouteMatch,
+  TopLevelPoint,
+} from "./types";
 import { createDbTransport, type DbTransport } from "./db-transport";
 
 export type LocalDbStatus = "unknown" | "empty" | "downloading" | "ready" | "error";
@@ -154,7 +163,10 @@ class LocalDb {
       // Keep the previous marker when the published version cannot be fetched
     }
     try {
-      await this.send({ type: "build", version: version ?? "unknown", url: apiUrl("", "download.json"), bytes }, "status");
+      await this.send(
+        { type: "build", version: version ?? "unknown", url: apiUrl("", "download.json"), bytes },
+        "status",
+      );
       localStorage.setItem(MARKER_KEY, version ?? "unknown");
       this.status = "ready";
     } catch (err) {

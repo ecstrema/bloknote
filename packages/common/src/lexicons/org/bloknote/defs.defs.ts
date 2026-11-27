@@ -11,12 +11,23 @@ type $nsid = typeof $nsid;
 export { $nsid };
 
 /** A route grading scale */
-type RouteScale = "French" | "YDS" | "UIAA" | "Saxon" | "UKTech" | "Scandinavian" | "Ewbank" | "Polish" | l.UnknownString;
+type RouteScale =
+  | "French"
+  | "YDS"
+  | "UIAA"
+  | "Saxon"
+  | "UKTech"
+  | "Scandinavian"
+  | "Ewbank"
+  | "Polish"
+  | l.UnknownString;
 
 export type { RouteScale };
 
 /** A route grading scale */
-const routeScale = /*#__PURE__*/ l.string<{"knownValues":["French","YDS","UIAA","Saxon","UKTech","Scandinavian","Ewbank","Polish"]}>();
+const routeScale = /*#__PURE__*/ l.string<{
+  knownValues: ["French", "YDS", "UIAA", "Saxon", "UKTech", "Scandinavian", "Ewbank", "Polish"];
+}>();
 
 export { routeScale };
 
@@ -26,7 +37,7 @@ type BoulderScale = "FB" | "Hueco" | l.UnknownString;
 export type { BoulderScale };
 
 /** A boulder grading scale */
-const boulderScale = /*#__PURE__*/ l.string<{"knownValues":["FB","Hueco"]}>();
+const boulderScale = /*#__PURE__*/ l.string<{ knownValues: ["FB", "Hueco"] }>();
 
 export { boulderScale };
 
@@ -36,6 +47,6 @@ type ViaFerrataScale = "Huesler" | "Schall" | l.UnknownString;
 export type { ViaFerrataScale };
 
 /** A via ferrata grading scale */
-const viaFerrataScale = /*#__PURE__*/ l.string<{"knownValues":["Huesler","Schall"]}>();
+const viaFerrataScale = /*#__PURE__*/ l.string<{ knownValues: ["Huesler", "Schall"] }>();
 
 export { viaFerrataScale };

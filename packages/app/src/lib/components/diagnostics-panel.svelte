@@ -18,7 +18,7 @@
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getParentSlug, getParentSlugs } from "#lib/helpers/slug.js";
   import type { DataTree } from "#lib/types.js";
-          
+
   let { item, slug }: { item: DataTree; slug: string } = $props();
 
   const appState = getAppState();
@@ -216,11 +216,7 @@
         >
           Warnings ({counts.warnings})
         </Button>
-        <Button
-          size="xs"
-          variant={fixableOnly ? "default" : "outline"}
-          onclick={() => (fixableOnly = !fixableOnly)}
-        >
+        <Button size="xs" variant={fixableOnly ? "default" : "outline"} onclick={() => (fixableOnly = !fixableOnly)}>
           With fixes ({counts.fixable})
         </Button>
       </div>
@@ -245,7 +241,7 @@
 
   {#if counts.total === 0 && !loadingSubtree}
     <div class="flex items-center gap-2 rounded-md border p-4 text-sm text-muted-foreground">
-      <span aria-hidden="true"  class="icon-[lucide--check-circle-2] shrink-0 size-4 text-emerald-600"></span>
+      <span aria-hidden="true" class="icon-[lucide--check-circle-2] shrink-0 size-4 text-emerald-600"></span>
       <span>All scanned tags look good.</span>
     </div>
   {:else}
@@ -285,9 +281,15 @@
               <li class="rounded border bg-muted/30 p-2.5 text-sm flex flex-col gap-1.5">
                 <div class="flex items-center gap-2 font-medium">
                   {#if diag.severity === "error"}
-                    <span aria-hidden="true"  class="icon-[lucide--circle-alert] shrink-0 size-4 shrink-0 text-destructive"></span>
+                    <span
+                      aria-hidden="true"
+                      class="icon-[lucide--circle-alert] shrink-0 size-4 shrink-0 text-destructive"
+                    ></span>
                   {:else}
-                    <span aria-hidden="true"  class="icon-[lucide--triangle-alert] shrink-0 size-4 shrink-0 text-amber-600 dark:text-amber-400"></span>
+                    <span
+                      aria-hidden="true"
+                      class="icon-[lucide--triangle-alert] shrink-0 size-4 shrink-0 text-amber-600 dark:text-amber-400"
+                    ></span>
                   {/if}
                   <span>{diag.title}</span>
                 </div>

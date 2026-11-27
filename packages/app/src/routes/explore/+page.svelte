@@ -187,51 +187,51 @@
 
       {#if selectedPlot === "difficulty" && stats.gradeDistribution.length > 0}
         <div class="h-[240px] w-full overflow-x-auto">
-            <div class="h-full" style:min-width="{Math.max(320, stats.gradeDistribution.length * 28)}px">
-              <Chart
-                data={stats.gradeDistribution}
-                height={240}
-                x="grade"
-                y="total"
-                xScale={scaleBand().padding(0.22)}
-                yScale={scaleLinear()}
-                yDomain={[0, maxGradeCount]}
-                padding={chartPadding}
-              >
-                {#snippet children({ context })}
-                  <Layer>
-                    <Axis placement="left" ticks={Math.min(4, maxGradeCount)} grid rule />
-                    <Axis placement="bottom" rule />
-                    {#each stats.gradeDistribution as bucket (bucket.grade)}
-                      {@const x = context.xScale(bucket.grade) ?? 0}
-                      {@const bw = context.xScale.bandwidth?.() ?? 16}
-                      {#each STAT_STYLE_ORDER as style (style)}
-                        {@const count = bucket.byStyle[style] ?? 0}
-                        {#if count > 0}
-                          {@const y1 = context.yScale(bucket.total)}
-                          {@const y0 = context.yScale(bucket.total - count)}
-                          <Rect
-                            {x}
-                            y={y0}
-                            width={bw}
-                            height={Math.max(1, y1 - y0)}
-                            fill={STAT_STYLE_COLORS[style]}
-                            rx={1}
-                          />
-                        {/if}
-                      {/each}
-                      <Text
-                        x={x + bw / 2}
-                        y={context.yScale(bucket.total) - 4}
-                        textAnchor="middle"
-                        fontSize={10}
-                        value={String(bucket.total)}
-                        class="fill-muted-foreground"
-                      />
+          <div class="h-full" style:min-width="{Math.max(320, stats.gradeDistribution.length * 28)}px">
+            <Chart
+              data={stats.gradeDistribution}
+              height={240}
+              x="grade"
+              y="total"
+              xScale={scaleBand().padding(0.22)}
+              yScale={scaleLinear()}
+              yDomain={[0, maxGradeCount]}
+              padding={chartPadding}
+            >
+              {#snippet children({ context })}
+                <Layer>
+                  <Axis placement="left" ticks={Math.min(4, maxGradeCount)} grid rule />
+                  <Axis placement="bottom" rule />
+                  {#each stats.gradeDistribution as bucket (bucket.grade)}
+                    {@const x = context.xScale(bucket.grade) ?? 0}
+                    {@const bw = context.xScale.bandwidth?.() ?? 16}
+                    {#each STAT_STYLE_ORDER as style (style)}
+                      {@const count = bucket.byStyle[style] ?? 0}
+                      {#if count > 0}
+                        {@const y1 = context.yScale(bucket.total)}
+                        {@const y0 = context.yScale(bucket.total - count)}
+                        <Rect
+                          {x}
+                          y={y0}
+                          width={bw}
+                          height={Math.max(1, y1 - y0)}
+                          fill={STAT_STYLE_COLORS[style]}
+                          rx={1}
+                        />
+                      {/if}
                     {/each}
-                  </Layer>
-                {/snippet}
-              </Chart>
+                    <Text
+                      x={x + bw / 2}
+                      y={context.yScale(bucket.total) - 4}
+                      textAnchor="middle"
+                      fontSize={10}
+                      value={String(bucket.total)}
+                      class="fill-muted-foreground"
+                    />
+                  {/each}
+                </Layer>
+              {/snippet}
+            </Chart>
           </div>
         </div>
       {:else if selectedPlot !== "difficulty" && simplePlot.length > 0}

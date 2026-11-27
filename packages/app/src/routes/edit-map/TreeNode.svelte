@@ -1,5 +1,5 @@
 <script lang="ts">
-          import clsx from "clsx";
+  import clsx from "clsx";
   import { BOUNDARY_STATE_COLORS } from "./types";
   import { LARGE_BOUNDARY_BYTES } from "@bloknote/reverse-geocoding-data/shared";
 
@@ -97,7 +97,8 @@
         manuallyOpen = !open;
       }}
     >
-      <span class={clsx("icon-[lucide--chevron-right] shrink-0 size-3.5 transition-transform", open && "rotate-90")}></span>
+      <span class={clsx("icon-[lucide--chevron-right] shrink-0 size-3.5 transition-transform", open && "rotate-90")}
+      ></span>
     </button>
 
     <span class="shrink-0 text-muted-foreground" title={sourceTitle()}>

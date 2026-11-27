@@ -82,37 +82,22 @@
     "ascentOutcome": {
       "type": "string",
       "description": "Whether a climbing tick is a send or an attempt",
-      "knownValues": [
-        "send",
-        "attempt"
-      ]
+      "knownValues": ["send", "attempt"]
     },
     "sendStyle": {
       "type": "string",
       "description": "Style of a sent climb (redpoint by default, or strictly onsight, flash, or pinkpoint)",
-      "knownValues": [
-        "redpoint",
-        "onsight",
-        "flash",
-        "pinkpoint"
-      ]
+      "knownValues": ["redpoint", "onsight", "flash", "pinkpoint"]
     },
     "attemptStyle": {
       "type": "string",
       "description": "Style of an attempted climb (to top or bailed)",
-      "knownValues": [
-        "to top",
-        "bailed"
-      ]
+      "knownValues": ["to top", "bailed"]
     },
     "ascentInfo": {
       "type": "string",
       "description": "Additional climbing style/ascent qualifier. Lead is implied when unspecified.",
-      "knownValues": [
-        "toprope",
-        "solo",
-        "dab"
-      ]
+      "knownValues": ["toprope", "solo", "dab"]
     }
   }
 }

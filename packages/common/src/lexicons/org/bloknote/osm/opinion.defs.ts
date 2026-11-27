@@ -11,31 +11,42 @@ type $nsid = typeof $nsid;
 
 export { $nsid };
 
-type Main = { $type: "org.bloknote.osm.opinion";
+type Main = {
+  $type: "org.bloknote.osm.opinion";
 
   /**
    * The OpenStreetMap element (node, way, or relation) the opinion is about
    */
-  "subject":OsmDefs.ElementRef;
+  subject: OsmDefs.ElementRef;
 
   /**
    * The OpenStreetMap key the opinion is about, e.g. 'climbing:grade:uiaa' or 'name'
    */
-  "field":string;
+  field: string;
 
   /**
    * The value the author believes the field should have, e.g. '6b+' for a grade opinion
    */
-  "value":string;
+  value: string;
 
   /**
    * ISO 8601 timestamp when the opinion was posted
    */
-  "createdAt"?:l.DatetimeString };
+  createdAt?: l.DatetimeString;
+};
 
 export type { Main };
 
-const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"subject":/*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any),"field":/*#__PURE__*/ l.string({"maxLength":255}),"value":/*#__PURE__*/ l.string({"maxLength":256}),"createdAt":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"datetime"}))}));
+const main = /*#__PURE__*/ l.record<"tid", Main>(
+  "tid",
+  $nsid,
+  /*#__PURE__*/ l.object({
+    subject: /*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any),
+    field: /*#__PURE__*/ l.string({ maxLength: 255 }),
+    value: /*#__PURE__*/ l.string({ maxLength: 256 }),
+    createdAt: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({ format: "datetime" })),
+  }),
+);
 
 export { main };
 

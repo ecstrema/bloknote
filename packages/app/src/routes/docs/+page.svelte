@@ -101,9 +101,9 @@
             anyone can reuse them.
           </li>
           <li>
-            <strong>Your logbook, comments, and bookmarks live in your own Atmosphere (AT Protocol) account</strong> — a
-            personal data repository that belongs to you, not to Bloknote. You keep full control and can take your data
-            with you to other apps.
+            <strong>Your logbook, comments, and bookmarks live in your own Atmosphere (AT Protocol) account</strong> — a personal
+            data repository that belongs to you, not to Bloknote. You keep full control and can take your data with you to
+            other apps.
           </li>
         </ul>
         <p>
@@ -118,8 +118,8 @@
       {:else if active === "offline-data"}
         <h1>Offline data &amp; static builds</h1>
         <p>
-          A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static JSON
-          endpoints, published as a versioned snapshot.
+          A scheduled pipeline compiles worldwide Overpass climbing data and regional GeoJSON boundaries into static
+          JSON endpoints, published as a versioned snapshot.
         </p>
         <h2>Offline SQLite cache</h2>
         <p>
@@ -128,12 +128,14 @@
         </p>
         <h2>Service worker caches</h2>
         <ul>
-          <li><strong>App shell</strong> — the application bundles and pages, refreshed network-first on each update.</li>
+          <li>
+            <strong>App shell</strong> — the application bundles and pages, refreshed network-first on each update.
+          </li>
           <li><strong>Map tiles</strong> — vector tiles, fonts and sprites from the map providers you enable.</li>
           <li><strong>Topo images</strong> — Wikimedia Commons images, pruned with a FIFO cap.</li>
           <li>
-            <strong>Edit-map</strong> — the boundary editor is online-only: it needs live Overpass/OSM access and its
-            boundary files are never stored offline.
+            <strong>Edit-map</strong> — the boundary editor is online-only: it needs live Overpass/OSM access and its boundary
+            files are never stored offline.
           </li>
         </ul>
       {:else if active === "osm"}
@@ -154,8 +156,8 @@
           </li>
           <li><code>leisure=sports_centre</code> + <code>sport=climbing</code> — Indoor climbing gyms.</li>
           <li>
-            <code>highway=via_ferrata</code> — Via ferrata routes (fixed-cable alpine routes), shown as a dedicated
-            route style.
+            <code>highway=via_ferrata</code> — Via ferrata routes (fixed-cable alpine routes), shown as a dedicated route
+            style.
           </li>
         </ul>
         <h2>Editing &amp; changesets</h2>
@@ -187,15 +189,13 @@
       {:else if active === "lexicons"}
         <h1>Atmosphere (ATProto) Lexicons</h1>
         <p>
-          Bloknote defines open AT Protocol Lexicon schemas under <code>org.bloknote.*</code> so personal climbing logs
-          and comments are portable across apps.
+          Bloknote defines open AT Protocol Lexicon schemas under <code>org.bloknote.*</code> so personal climbing logs and
+          comments are portable across apps.
         </p>
         <h2>Core schemas</h2>
         <ul>
           <li>
-            <code>org.bloknote.osm.defs#elementRef</code> — Canonical reference to an OSM element (<code
-              >type</code
-            >
+            <code>org.bloknote.osm.defs#elementRef</code> — Canonical reference to an OSM element (<code>type</code>
             + numeric <code>id</code>), resilient to OSM name/slug changes.
           </li>
           <li>
@@ -204,8 +204,8 @@
             count or <code>bailed</code>; optional qualifiers, timestamp, and notes).
           </li>
           <li>
-            <code>org.bloknote.osm.comment</code> — Standalone comment text on an OSM element, independent of ratings
-            so each can be created and deleted separately.
+            <code>org.bloknote.osm.comment</code> — Standalone comment text on an OSM element, independent of ratings so each
+            can be created and deleted separately.
           </li>
           <li>
             <code>org.bloknote.osm.rating</code> — Standalone integer rating (<code>0–120</code>) for an OSM element.
@@ -214,11 +214,12 @@
             <code>org.bloknote.osm.bookmark</code> — Bookmarked OSM elements.
           </li>
           <li>
-            <code>org.bloknote.osm.opinion</code> — An opinion about the value of a specific OSM tag on an element
-            (e.g. a grade opinion for <code>climbing:grade:french</code>), usable for any field.
+            <code>org.bloknote.osm.opinion</code> — An opinion about the value of a specific OSM tag on an element (e.g.
+            a grade opinion for <code>climbing:grade:french</code>), usable for any field.
           </li>
           <li>
-            <code>org.bloknote.actor.settings</code> — User preferences such as preferred route and boulder grading scales, theme and language.
+            <code>org.bloknote.actor.settings</code> — User preferences such as preferred route and boulder grading scales,
+            theme and language.
           </li>
         </ul>
       {/if}

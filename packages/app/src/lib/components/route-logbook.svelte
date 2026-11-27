@@ -7,7 +7,7 @@
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
   import PendingSyncBadge from "#lib/components/pending-sync-badge.svelte";
   import { ascentFromStyle, normalizedRatingToStars, starsToNormalizedRating, type TickStyle } from "@bloknote/common";
-        import type { OsmFeature } from "osm-api";
+  import type { OsmFeature } from "osm-api";
 
   const {
     feature,
@@ -171,7 +171,8 @@
             <span
               class="icon-[lucide--star] shrink-0 size-4"
               class:text-amber-500={star <= (routeRatings[0] ? normalizedRatingToStars(routeRatings[0].rating, 5) : 0)}
-              class:text-muted-foreground={star > (routeRatings[0] ? normalizedRatingToStars(routeRatings[0].rating, 5) : 0)}
+              class:text-muted-foreground={star >
+                (routeRatings[0] ? normalizedRatingToStars(routeRatings[0].rating, 5) : 0)}
             ></span>
           </button>
         {/each}
@@ -195,13 +196,7 @@
       </div>
       <form class="flex flex-col gap-2" onsubmit={onAddComment}>
         <Textarea rows={2} bind:value={commentText} placeholder="Write a comment or route beta..." />
-        <Button
-          size="sm"
-          type="submit"
-          variant="outline"
-          class="self-start"
-          disabled={busy || !commentText.trim()}
-        >
+        <Button size="sm" type="submit" variant="outline" class="self-start" disabled={busy || !commentText.trim()}>
           <span class="icon-[lucide--message-square] shrink-0 size-4"></span>
           Post comment
         </Button>
@@ -215,7 +210,9 @@
       <ul class="space-y-1 text-xs">
         {#each routeTicks as tick (tick)}
           <li class="flex flex-wrap items-baseline gap-2">
-            <span class="rounded bg-muted px-1.5 py-0.5 font-medium capitalize">{tick.sendStyle ?? tick.attemptStyle ?? tick.outcome}</span>
+            <span class="rounded bg-muted px-1.5 py-0.5 font-medium capitalize"
+              >{tick.sendStyle ?? tick.attemptStyle ?? tick.outcome}</span
+            >
             {#if tick.climbedAt}
               <span class="text-muted-foreground">{new Date(tick.climbedAt).toLocaleDateString()}</span>
             {/if}

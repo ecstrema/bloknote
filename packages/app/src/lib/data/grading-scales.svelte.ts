@@ -1,6 +1,12 @@
 import { browser } from "$app/env";
 import type { SettingsRecord } from "@bloknote/common";
-import { getScale, type BoulderScaleId, type GradeType, type RouteScaleId, type ViaFerrataScaleId } from "@bloknote/holy-grade";
+import {
+  getScale,
+  type BoulderScaleId,
+  type GradeType,
+  type RouteScaleId,
+  type ViaFerrataScaleId,
+} from "@bloknote/holy-grade";
 import { DEFAULT_SCALES, type GradingScaleType, type PreferredScaleId } from "./grading-scale-ids.js";
 import { recordToScales, scalesToRecordFields, type StoredScales } from "./grading-scale-record.js";
 import { atproto, registerLocalScaleFields } from "./network/atproto.svelte.js";
@@ -46,7 +52,9 @@ export function storedScales(raw: unknown): Partial<StoredScales> | undefined {
     } as StoredScales["known"]);
   const validPreferred = preferred
     ? (Object.fromEntries(
-        Object.entries(preferred).filter(([type, id]) => id !== undefined && isValidScaleId(id, type as GradingScaleType)),
+        Object.entries(preferred).filter(
+          ([type, id]) => id !== undefined && isValidScaleId(id, type as GradingScaleType),
+        ),
       ) as StoredScales["preferred"])
     : undefined;
   return { known: validKnown, preferred: validPreferred };
@@ -95,12 +103,30 @@ const REGION_SCALES: [
   bounds: { lat: [number, number]; lon: [number, number] },
   scales: Partial<StoredScales["preferred"]>,
 ][] = [
-  [{ lat: [12, 75], lon: [-170, -50] }, { route: "YDS", boulder: "Hueco" }],
-  [{ lat: [49.8, 61.5], lon: [-11, 2] }, { route: "UKTech", boulder: "FB" }],
-  [{ lat: [48.9, 55.1], lon: [13.8, 24.5] }, { route: "Polish", boulder: "FB" }],
-  [{ lat: [54.5, 71.5], lon: [4, 32] }, { route: "Scandinavian", boulder: "FB" }],
-  [{ lat: [45.5, 55.5], lon: [5.5, 17.5] }, { route: "UIAA", boulder: "FB" }],
-  [{ lat: [-48, -9], lon: [110, 180] }, { route: "Ewbank", boulder: "Hueco" }],
+  [
+    { lat: [12, 75], lon: [-170, -50] },
+    { route: "YDS", boulder: "Hueco" },
+  ],
+  [
+    { lat: [49.8, 61.5], lon: [-11, 2] },
+    { route: "UKTech", boulder: "FB" },
+  ],
+  [
+    { lat: [48.9, 55.1], lon: [13.8, 24.5] },
+    { route: "Polish", boulder: "FB" },
+  ],
+  [
+    { lat: [54.5, 71.5], lon: [4, 32] },
+    { route: "Scandinavian", boulder: "FB" },
+  ],
+  [
+    { lat: [45.5, 55.5], lon: [5.5, 17.5] },
+    { route: "UIAA", boulder: "FB" },
+  ],
+  [
+    { lat: [-48, -9], lon: [110, 180] },
+    { route: "Ewbank", boulder: "Hueco" },
+  ],
 ];
 
 function scalesForPosition(lat: number, lon: number): Partial<StoredScales["preferred"]> {

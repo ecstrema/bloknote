@@ -11,26 +11,36 @@ type $nsid = typeof $nsid;
 
 export { $nsid };
 
-type Main = { $type: "org.bloknote.osm.rating";
+type Main = {
+  $type: "org.bloknote.osm.rating";
 
   /**
    * The OpenStreetMap element (node, way, or relation) being rated
    */
-  "subject":OsmDefs.ElementRef;
+  subject: OsmDefs.ElementRef;
 
   /**
    * Rating from 0 (no stars) to 120 (full rating). 120 is divisible by 3, 4, 5, 6, 8, and 10, so it adapts to those star systems without rounding.
    */
-  "rating":number;
+  rating: number;
 
   /**
    * ISO 8601 timestamp when the rating was created
    */
-  "createdAt"?:l.DatetimeString };
+  createdAt?: l.DatetimeString;
+};
 
 export type { Main };
 
-const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"subject":/*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any),"rating":/*#__PURE__*/ l.integer({"minimum":0,"maximum":120}),"createdAt":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"datetime"}))}));
+const main = /*#__PURE__*/ l.record<"tid", Main>(
+  "tid",
+  $nsid,
+  /*#__PURE__*/ l.object({
+    subject: /*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any),
+    rating: /*#__PURE__*/ l.integer({ minimum: 0, maximum: 120 }),
+    createdAt: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({ format: "datetime" })),
+  }),
+);
 
 export { main };
 

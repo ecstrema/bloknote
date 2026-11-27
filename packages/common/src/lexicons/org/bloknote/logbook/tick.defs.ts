@@ -11,71 +11,94 @@ type $nsid = typeof $nsid;
 
 export { $nsid };
 
-type Main = { $type: "org.bloknote.logbook.tick";
+type Main = {
+  $type: "org.bloknote.logbook.tick";
 
   /**
    * The OpenStreetMap climbing route, pitch, or boulder being ticked. Absent for routes that are not on OpenStreetMap (yet)
    */
-  "subject"?:OsmDefs.ElementRef;
+  subject?: OsmDefs.ElementRef;
 
   /**
    * Whether the route was sent or only attempted. Optional for minimal ticks.
    */
-  "outcome"?:AscentOutcome;
+  outcome?: AscentOutcome;
 
   /**
    * Send style: redpoint by default, or strictly onsight, flash, or pinkpoint (with preplaced gear for trad climbs). Only valid when outcome is send.
    */
-  "sendStyle"?:SendStyle;
+  sendStyle?: SendStyle;
 
   /**
    * Attempt style: hangdog (working the route with hangs) by default, or bailed. Only valid when outcome is attempt.
    */
-  "attemptStyle"?:AttemptStyle;
+  attemptStyle?: AttemptStyle;
 
   /**
    * Number of hangs, when the attempt style is hangdog
    */
-  "hangs"?:number;
+  hangs?: number;
 
   /**
    * Additional climbing style qualifiers (toprope, solo, second, aid). A clean send is implied when unspecified: these are only set to say the ascent was not clean, or had another exceptional style.
    */
-  "ascentInfo"?:(AscentInfo)[];
+  ascentInfo?: AscentInfo[];
 
   /**
    * Personal comment or notes on the ascent
    */
-  "comment"?:string;
+  comment?: string;
 
   /**
    * Route name, set for ticks without a subject
    */
-  "name"?:string;
+  name?: string;
 
   /**
    * Route grade as written in the source logbook, for ticks without a subject
    */
-  "grade"?:string;
+  grade?: string;
 
   /**
    * Hierarchical location of the crag, shallowest first (e.g. ['France', 'Vercors', 'La Balme']), for ticks without a subject
    */
-  "locationHint"?:(string)[];
+  locationHint?: string[];
 
   /**
    * ISO 8601 timestamp of when the climb occurred. Optional for minimal ticks.
    */
-  "climbedAt"?:l.DatetimeString;
+  climbedAt?: l.DatetimeString;
 
   /**
    * ISO 8601 timestamp when this tick record was created
    */
-  "createdAt"?:l.DatetimeString };
+  createdAt?: l.DatetimeString;
+};
 
 export type { Main };
 
-const main = /*#__PURE__*/ l.record<"tid", Main>("tid", $nsid, /*#__PURE__*/ l.object({"subject":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any)),"outcome":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<AscentOutcome>((() => ascentOutcome) as any)),"sendStyle":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<SendStyle>((() => sendStyle) as any)),"attemptStyle":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<AttemptStyle>((() => attemptStyle) as any)),"hangs":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({"minimum":1})),"ascentInfo":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<AscentInfo>((() => ascentInfo) as any), )),"comment":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":3000})),"name":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":300})),"grade":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"maxLength":40})),"locationHint":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.array(/*#__PURE__*/ l.string({"maxLength":300}), {"maxLength":50})),"climbedAt":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"datetime"})),"createdAt":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({"format":"datetime"}))}));
+const main = /*#__PURE__*/ l.record<"tid", Main>(
+  "tid",
+  $nsid,
+  /*#__PURE__*/ l.object({
+    subject: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<OsmDefs.ElementRef>((() => OsmDefs.elementRef) as any)),
+    outcome: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<AscentOutcome>((() => ascentOutcome) as any)),
+    sendStyle: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<SendStyle>((() => sendStyle) as any)),
+    attemptStyle: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.ref<AttemptStyle>((() => attemptStyle) as any)),
+    hangs: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({ minimum: 1 })),
+    ascentInfo: /*#__PURE__*/ l.optional(
+      /*#__PURE__*/ l.array(/*#__PURE__*/ l.ref<AscentInfo>((() => ascentInfo) as any)),
+    ),
+    comment: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({ maxLength: 3000 })),
+    name: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({ maxLength: 300 })),
+    grade: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({ maxLength: 40 })),
+    locationHint: /*#__PURE__*/ l.optional(
+      /*#__PURE__*/ l.array(/*#__PURE__*/ l.string({ maxLength: 300 }), { maxLength: 50 }),
+    ),
+    climbedAt: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({ format: "datetime" })),
+    createdAt: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.string({ format: "datetime" })),
+  }),
+);
 
 export { main };
 
@@ -103,7 +126,7 @@ type AscentOutcome = "send" | "attempt" | l.UnknownString;
 export type { AscentOutcome };
 
 /** Whether a climbing tick is a send or an attempt */
-const ascentOutcome = /*#__PURE__*/ l.string<{"knownValues":["send","attempt"]}>();
+const ascentOutcome = /*#__PURE__*/ l.string<{ knownValues: ["send", "attempt"] }>();
 
 export { ascentOutcome };
 
@@ -113,7 +136,7 @@ type SendStyle = "redpoint" | "onsight" | "flash" | "pinkpoint" | l.UnknownStrin
 export type { SendStyle };
 
 /** Style of a sent climb (redpoint by default, or strictly onsight, flash, or pinkpoint) */
-const sendStyle = /*#__PURE__*/ l.string<{"knownValues":["redpoint","onsight","flash","pinkpoint"]}>();
+const sendStyle = /*#__PURE__*/ l.string<{ knownValues: ["redpoint", "onsight", "flash", "pinkpoint"] }>();
 
 export { sendStyle };
 
@@ -123,7 +146,7 @@ type AttemptStyle = "to top" | "bailed" | l.UnknownString;
 export type { AttemptStyle };
 
 /** Style of an attempted climb (to top or bailed) */
-const attemptStyle = /*#__PURE__*/ l.string<{"knownValues":["to top","bailed"]}>();
+const attemptStyle = /*#__PURE__*/ l.string<{ knownValues: ["to top", "bailed"] }>();
 
 export { attemptStyle };
 
@@ -133,6 +156,6 @@ type AscentInfo = "toprope" | "solo" | "dab" | l.UnknownString;
 export type { AscentInfo };
 
 /** Additional climbing style/ascent qualifier. Lead is implied when unspecified. */
-const ascentInfo = /*#__PURE__*/ l.string<{"knownValues":["toprope","solo","dab"]}>();
+const ascentInfo = /*#__PURE__*/ l.string<{ knownValues: ["toprope", "solo", "dab"] }>();
 
 export { ascentInfo };

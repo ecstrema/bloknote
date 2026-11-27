@@ -26,12 +26,19 @@ function callRule(rule: ReturnType<typeof getTagRule>, value: string): boolean |
 }
 
 describe("featureToTypeOSM", () => {
-  it.each(["route_bottom", "route_top", "route", "route_start", "abseil_route", "abseil", "toprope", "drytooling", "via_ferrata"])(
-    "classifies climbing=%s as a route",
-    (climbing) => {
-      expect(featureToTypeOSM(feature({ climbing }))).toBe("route");
-    },
-  );
+  it.each([
+    "route_bottom",
+    "route_top",
+    "route",
+    "route_start",
+    "abseil_route",
+    "abseil",
+    "toprope",
+    "drytooling",
+    "via_ferrata",
+  ])("classifies climbing=%s as a route", (climbing) => {
+    expect(featureToTypeOSM(feature({ climbing }))).toBe("route");
+  });
 
   it.each(["boulder", "bouldering"])("classifies climbing=%s as an area", (climbing) => {
     expect(featureToTypeOSM(feature({ climbing }))).toBe("area");

@@ -113,7 +113,8 @@
     // selection, which the parent slug derives from — tracking it would re-run this effect and
     // close the dialog right away (issue #157).
     untrack(() => {
-      const parent = moveTargetParentSlug !== undefined ? appState.tree.getReactiveNode(moveTargetParentSlug) : undefined;
+      const parent =
+        moveTargetParentSlug !== undefined ? appState.tree.getReactiveNode(moveTargetParentSlug) : undefined;
       if (!parent) {
         dialog = null;
         return;
@@ -159,7 +160,9 @@
     let created = 0;
     suggestedClusters.forEach((cluster, index) => {
       if (!clusterChecks[index]) return;
-      if (appState.createSectorWithItems(cluster.slugs, clusterNames[index]?.trim() || undefined, moveTargetParentSlug)) {
+      if (
+        appState.createSectorWithItems(cluster.slugs, clusterNames[index]?.trim() || undefined, moveTargetParentSlug)
+      ) {
         created++;
       }
     });
@@ -255,7 +258,9 @@
                 </div>
                 {#if cluster.names.length > 0}
                   <p class="truncate pl-6 text-xs text-muted-foreground">
-                    {cluster.names.slice(0, 4).join(", ")}{cluster.names.length > 4 ? `, +${cluster.names.length - 4}` : ""}
+                    {cluster.names.slice(0, 4).join(", ")}{cluster.names.length > 4
+                      ? `, +${cluster.names.length - 4}`
+                      : ""}
                   </p>
                 {/if}
               </div>

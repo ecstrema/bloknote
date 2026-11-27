@@ -124,11 +124,10 @@
       if (info?.gradeRef === undefined || !info.grade || info.grade.scale === "unknown") continue;
       const month = tick.climbedAt.slice(0, 7);
       const current = months.get(month);
-      if (!current || info.gradeRef > current.ref) months.set(month, { ref: info.gradeRef, grade: displayGrade(info.grade) });
+      if (!current || info.gradeRef > current.ref)
+        months.set(month, { ref: info.gradeRef, grade: displayGrade(info.grade) });
     }
-    return [...months.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([month, entry]) => ({ month, ...entry }));
+    return [...months.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([month, entry]) => ({ month, ...entry }));
   });
   const maxGradeRef = $derived(Math.max(1, ...maxGradePerMonth.map((m) => m.ref)));
 
@@ -155,9 +154,7 @@
   const pyramidTypes = $derived([
     "all",
     ...new Set(
-      osmTicks
-        .map((t) => resolvedRefs[refKey(t.subject!)]?.style)
-        .filter((style): style is string => !!style),
+      osmTicks.map((t) => resolvedRefs[refKey(t.subject!)]?.style).filter((style): style is string => !!style),
     ),
   ]);
   const pyramidStats = $derived(
@@ -419,9 +416,9 @@
                 href={refHref(star.subject.type, star.subject.id)}
                 class="inline-flex rounded border px-2 py-0.5 text-xs hover:bg-muted"
               >
-                {resolvedRefs[`${star.subject.type}-${star.subject.id}`]?.name
-                  ?? star.label
-                  ?? `${star.subject.type}/${star.subject.id}`}
+                {resolvedRefs[`${star.subject.type}-${star.subject.id}`]?.name ??
+                  star.label ??
+                  `${star.subject.type}/${star.subject.id}`}
               </a>
               {#if !star.uri}
                 <PendingSyncBadge />
@@ -433,4 +430,3 @@
     {/if}
   </section>
 {/if}
-

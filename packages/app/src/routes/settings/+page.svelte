@@ -131,120 +131,144 @@
 {/snippet}
 
 <Tabs.Content value="settings">
-        <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
-          <div>
-            <h2 class="font-medium">Appearance</h2>
-            <p class="mt-1 text-sm text-muted-foreground">Theme</p>
-          </div>
-          <Select
-            aria-label="Theme"
-            bind:value={() => userPrefersMode.current, (mode) => { setMode(mode); void atproto.saveSettings({ mode }); }}
-          >
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="system">System</option>
-          </Select>
-        </section>
+  <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
+    <div>
+      <h2 class="font-medium">Appearance</h2>
+      <p class="mt-1 text-sm text-muted-foreground">Theme</p>
+    </div>
+    <Select
+      aria-label="Theme"
+      bind:value={
+        () => userPrefersMode.current,
+        (mode) => {
+          setMode(mode);
+          void atproto.saveSettings({ mode });
+        }
+      }
+    >
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+      <option value="system">System</option>
+    </Select>
+  </section>
 
-        <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
-          <div>
-            <h2 class="font-medium">Language</h2>
-            <p class="mt-1 text-sm text-muted-foreground">Language of the interface and of the names of the regions</p>
-          </div>
-          <div class="space-y-2">
-            <Select
-              aria-label="Language"
-              bind:value={() => i18n.locale, (locale) => { void setLocale(locale); void atproto.saveSettings({ locale }); }}
-            >
-              {#each locales as locale (locale)}
-                <option value={locale}>{localeNames[locale]}</option>
-              {/each}
-            </Select>
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-              <a
-                href="https://github.com/ecstrema/bloknote/issues/new?title=Translation%20issue"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Report a translation issue
-              </a>
-              <Button
-                variant="outline"
-                size="sm"
-                href="https://github.com/ecstrema/bloknote/issues/new?title=Request%20another%20language"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Request another language
-              </Button>
-            </div>
-          </div>
-        </section>
+  <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
+    <div>
+      <h2 class="font-medium">Language</h2>
+      <p class="mt-1 text-sm text-muted-foreground">Language of the interface and of the names of the regions</p>
+    </div>
+    <div class="space-y-2">
+      <Select
+        aria-label="Language"
+        bind:value={
+          () => i18n.locale,
+          (locale) => {
+            void setLocale(locale);
+            void atproto.saveSettings({ locale });
+          }
+        }
+      >
+        {#each locales as locale (locale)}
+          <option value={locale}>{localeNames[locale]}</option>
+        {/each}
+      </Select>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+        <a
+          href="https://github.com/ecstrema/bloknote/issues/new?title=Translation%20issue"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Report a translation issue
+        </a>
+        <Button
+          variant="outline"
+          size="sm"
+          href="https://github.com/ecstrema/bloknote/issues/new?title=Request%20another%20language"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Request another language
+        </Button>
+      </div>
+    </div>
+  </section>
 
-        <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,24rem)] sm:items-start">
-          <div>
-            <h2 class="font-medium">Grading scales</h2>
-            <p class="mt-1 text-sm text-muted-foreground">
-              Tick the scales you understand: grades in them are shown as written. Grades in the others are translated
-              to the preferred scale of their discipline, which is also used wherever a single scale is needed (charts,
-              comparisons). Without any preference, the scale of your location is used, falling back to French and
-              Fontainebleau. Hover a scale to learn more about it.
-            </p>
-            <div class="mt-4 hidden sm:block">
-              {#if inspected}
-                {@render scaleInfoCard(inspected)}
-              {:else}
-                <div class="grid gap-4">
-                  {#each defaultDetails as detail (detail.title)}
-                    {@render scaleInfoCard(detail)}
-                  {/each}
-                </div>
-              {/if}
-            </div>
+  <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,24rem)] sm:items-start">
+    <div>
+      <h2 class="font-medium">Grading scales</h2>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Tick the scales you understand: grades in them are shown as written. Grades in the others are translated to the
+        preferred scale of their discipline, which is also used wherever a single scale is needed (charts, comparisons).
+        Without any preference, the scale of your location is used, falling back to French and Fontainebleau. Hover a
+        scale to learn more about it.
+      </p>
+      <div class="mt-4 hidden sm:block">
+        {#if inspected}
+          {@render scaleInfoCard(inspected)}
+        {:else}
+          <div class="grid gap-4">
+            {#each defaultDetails as detail (detail.title)}
+              {@render scaleInfoCard(detail)}
+            {/each}
           </div>
-          <div class="space-y-6">
-            {@render scaleTable("route", "route", allRouteScales, "Compare route grades", resolve("/grade-comparison/route"))}
-            {@render scaleTable("boulder", "boulder", allBoulderScales, "Compare boulder grades", resolve("/grade-comparison/boulder"))}
-            {@render scaleTable("via-ferrata", "viaFerrata", allViaFerrataScales, "Compare via ferrata grades", resolve("/grade-comparison/via-ferrata"))}
-          </div>
-        </section>
+        {/if}
+      </div>
+    </div>
+    <div class="space-y-6">
+      {@render scaleTable("route", "route", allRouteScales, "Compare route grades", resolve("/grade-comparison/route"))}
+      {@render scaleTable(
+        "boulder",
+        "boulder",
+        allBoulderScales,
+        "Compare boulder grades",
+        resolve("/grade-comparison/boulder"),
+      )}
+      {@render scaleTable(
+        "via-ferrata",
+        "viaFerrata",
+        allViaFerrataScales,
+        "Compare via ferrata grades",
+        resolve("/grade-comparison/via-ferrata"),
+      )}
+    </div>
+  </section>
 
-        <section class="grid gap-4 border-y py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
-          <div>
-            <h2 class="font-medium">Data usage</h2>
-            <p class="mt-1 text-sm text-muted-foreground">
-              When enabled, Bloknote does not automatically download the full climbing dataset. Areas load as you visit
-              them, so search may only include areas you have already opened. You can still download all data from the
-              sidebar when you need complete search coverage.
-            </p>
-          </div>
-          <label class="flex min-h-10 items-center gap-3 text-sm">
-            <input type="checkbox" class="size-4 accent-primary" bind:checked={settings.lowData} />
-            Low data usage
-          </label>
-        </section>
+  <section class="grid gap-4 border-y py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
+    <div>
+      <h2 class="font-medium">Data usage</h2>
+      <p class="mt-1 text-sm text-muted-foreground">
+        When enabled, Bloknote does not automatically download the full climbing dataset. Areas load as you visit them,
+        so search may only include areas you have already opened. You can still download all data from the sidebar when
+        you need complete search coverage.
+      </p>
+    </div>
+    <label class="flex min-h-10 items-center gap-3 text-sm">
+      <input type="checkbox" class="size-4 accent-primary" bind:checked={settings.lowData} />
+      Low data usage
+    </label>
+  </section>
 
-        <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-start">
-          <div>
-            <h2 class="font-medium">Open in maps</h2>
-            <p class="mt-1 text-sm text-muted-foreground">
-              Choose which map providers appear in the "Open in" drawer. Mobile-only apps cannot be detected
-              automatically from a web browser.
-            </p>
-          </div>
-          <MapProviderToggles />
-        </section>
+  <section class="grid gap-4 border-t py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-start">
+    <div>
+      <h2 class="font-medium">Open in maps</h2>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Choose which map providers appear in the "Open in" drawer. Mobile-only apps cannot be detected automatically
+        from a web browser.
+      </p>
+    </div>
+    <MapProviderToggles />
+  </section>
 
-        <section class="grid gap-4 border-b py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
-          <div>
-            <h2 class="font-medium">About Bloknote</h2>
-            <p class="mt-1 text-sm text-muted-foreground">
-              What Bloknote is, the version you are running, and the state of your downloaded data
-            </p>
-          </div>
-          <Button variant="outline" onclick={() => (aboutOpen = true)}>About Bloknote</Button>
-        </section>
-      </Tabs.Content>
+  <section class="grid gap-4 border-b py-6 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] sm:items-center">
+    <div>
+      <h2 class="font-medium">About Bloknote</h2>
+      <p class="mt-1 text-sm text-muted-foreground">
+        What Bloknote is, the version you are running, and the state of your downloaded data
+      </p>
+    </div>
+    <Button variant="outline" onclick={() => (aboutOpen = true)}>About Bloknote</Button>
+  </section>
+</Tabs.Content>
 
 <AboutDialog bind:open={aboutOpen} />

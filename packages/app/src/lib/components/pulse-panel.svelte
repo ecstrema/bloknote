@@ -9,12 +9,18 @@
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { collectLoadedOsmNodes } from "#lib/data/parse/diagnostics.js";
   import { loadNodeHistories } from "#lib/data/parse/node-history.js";
-  import { computePulseStats, formatAge, historyVersions, type ItemVersion, type RecencyBucket } from "#lib/data/parse/pulse.js";
+  import {
+    computePulseStats,
+    formatAge,
+    historyVersions,
+    type ItemVersion,
+    type RecencyBucket,
+  } from "#lib/data/parse/pulse.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
   import { getItemUrl } from "#components/shell/sidebar/utils.js";
   import type { DataTree } from "#lib/types.js";
-    
+
   let { item, slug }: { item: DataTree; slug: string } = $props();
 
   const appState = getAppState();
@@ -245,12 +251,12 @@
 <div class="flex flex-col gap-4">
   {#if loadingSubtree}
     <div class="flex items-center gap-2 rounded-md border p-4 text-sm text-muted-foreground">
-      <span aria-hidden="true"  class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>
+      <span aria-hidden="true" class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>
       <span>Loading edit history…</span>
     </div>
   {:else if stats.total === 0}
     <div class="flex items-center gap-2 rounded-md border p-4 text-sm text-muted-foreground">
-      <span aria-hidden="true"  class="icon-[lucide--activity] shrink-0 size-4"></span>
+      <span aria-hidden="true" class="icon-[lucide--activity] shrink-0 size-4"></span>
       <span>
         {#if stats.untimed > 0}
           This item has no OSM edit timestamp yet (it has not been uploaded to OpenStreetMap).

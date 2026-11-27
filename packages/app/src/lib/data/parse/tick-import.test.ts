@@ -13,7 +13,7 @@ describe("parseCsv", () => {
 
 describe("parseTickCsv", () => {
   const mountainProject = [
-    "Date,Route,Rating,Notes,URL,Pitches,Location,\"Avg Stars\",\"Your Stars\",Style,\"Lead Style\",\"Route Type\",\"Your Rating\",Length,\"Rating Code\"",
+    'Date,Route,Rating,Notes,URL,Pitches,Location,"Avg Stars","Your Stars",Style,"Lead Style","Route Type","Your Rating",Length,"Rating Code"',
     '2026-07-26,"Death in the Afternoon",5.12a,,https://www.mountainproject.com/route/117337103/death-in-the-afternoon,1,"International > North America > Canada > Alberta > Bow Valley > Grotto Canyon > Hemingway Wall",2.8,-1,Lead,Flash,Sport,,50,6600',
     '2026-07-24,Xanadu,5.10a,,https://www.mountainproject.com/route/114252058/xanadu,1,"International > North America > Canada > Alberta > Bow Valley > Grotto Canyon > The Narrows",2.9,-1,Lead,Onsight,Sport,,,2600',
     '2026-07-20,Some Project,5.13a,crux is heady,https://www.mountainproject.com/route/1/some-project,1,"International > Canada > Baffin",2.9,-1,Lead,Redpoint,Sport,,,',

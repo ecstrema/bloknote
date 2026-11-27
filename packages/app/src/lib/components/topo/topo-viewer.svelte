@@ -4,7 +4,7 @@
   import * as Dialog from "#components/ui/dialog/index.js";
   import { Select } from "#components/ui/select/index.js";
   import { getAppState } from "#lib/data/app-state.js";
-                import type { Key } from "osm-api";
+  import type { Key } from "osm-api";
   import {
     findMatchingImageTag,
     findNextImageTagKey,
@@ -262,7 +262,9 @@
 
       {#if appState.osmUser.loggedIn && editingRouteSlug}
         <div class="flex flex-wrap items-center gap-1.5 rounded-md border bg-muted/30 p-2">
-          <Button size="sm" onclick={saveEdit}><span class="icon-[lucide--check] shrink-0 size-4"></span> Save path</Button>
+          <Button size="sm" onclick={saveEdit}
+            ><span class="icon-[lucide--check] shrink-0 size-4"></span> Save path</Button
+          >
           <Button size="sm" variant="outline" onclick={undoLastPoint} disabled={draftPoints.length === 0}>
             <span class="icon-[lucide--undo-2] shrink-0 size-4"></span> Undo
           </Button>
@@ -309,7 +311,9 @@
           >
             Dotted
           </Button>
-          <Button size="icon-sm" variant="ghost" title="Cancel" onclick={resetEditing}><span class="icon-[lucide--x] shrink-0 size-4"></span></Button>
+          <Button size="icon-sm" variant="ghost" title="Cancel" onclick={resetEditing}
+            ><span class="icon-[lucide--x] shrink-0 size-4"></span></Button
+          >
         </div>
         {#if editError}
           <p class="text-sm text-destructive">{editError}</p>

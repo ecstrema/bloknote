@@ -36,10 +36,22 @@
   /** The premade "from your logbook" filters the user can toggle (issue #166) */
   const PREMADE_FILTERS = [
     { kind: "ticked", label: "Ticked", icon: "icon-[lucide--check-circle-2]" },
-    { kind: "bookmarked", label: "Bookmarked", icon: "icon-[lucide--star]" },
+    {
+      kind: "bookmarked",
+      label: "Bookmarked",
+      icon: "icon-[lucide--bookmark]",
+    },
     { kind: "rated", label: "Rated", icon: "icon-[lucide--gauge]" },
-    { kind: "commented", label: "Commented", icon: "icon-[lucide--message-circle]" },
-  ] as const satisfies readonly { kind: PremadeFilterKind; label: string; icon: string }[];
+    {
+      kind: "commented",
+      label: "Commented",
+      icon: "icon-[lucide--message-circle]",
+    },
+  ] as const satisfies readonly {
+    kind: PremadeFilterKind;
+    label: string;
+    icon: string;
+  }[];
 
   let textInput = $state<HTMLInputElement | null>(null);
   let tagKey = $state("");

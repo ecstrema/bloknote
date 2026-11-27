@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
   import { Button } from "#components/ui/button/index.js";
-    
+
   const appState = getAppState();
 
   function isEditableTarget(target: EventTarget | null): boolean {

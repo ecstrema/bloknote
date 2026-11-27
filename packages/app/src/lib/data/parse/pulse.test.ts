@@ -188,7 +188,14 @@ describe("historyVersions", () => {
     const wayV2: OsmFeature = { ...wayV1, version: 2, timestamp: "2025-06-01T00:00:00Z" };
     const node10 = [
       { ...feature("2024-01-01T00:00:00Z"), id: 10, lat: 48.4, lon: 2.6 },
-      { ...feature("2024-01-01T00:00:00Z"), id: 10, version: 2, lat: 48.41, lon: 2.6, timestamp: "2025-03-01T00:00:00Z" },
+      {
+        ...feature("2024-01-01T00:00:00Z"),
+        id: 10,
+        version: 2,
+        lat: 48.41,
+        lon: 2.6,
+        timestamp: "2025-03-01T00:00:00Z",
+      },
     ];
     const node11 = [{ ...feature("2024-01-01T00:00:00Z"), id: 11, lat: 48.4, lon: 2.61 }];
     const nodeHistories = new Map([

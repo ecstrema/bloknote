@@ -147,4 +147,3 @@ redirected to a log file) and poll the log with **exponential backoff sleeps**: 
 4 min — expect the "Prerendering" phase to sit silently for several minutes before the adapter
 finishes. Do not use short fixed sleeps (30 s tool timeouts will kill your polling loop), and do
 not assume the build is stuck during prerendering.
-

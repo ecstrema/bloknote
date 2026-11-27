@@ -56,7 +56,12 @@ class FakeLockManager {
       grant();
       return Promise.resolve();
     }
-    return new Promise((resolve) => this.waiters.push(() => { grant(); resolve(); }));
+    return new Promise((resolve) =>
+      this.waiters.push(() => {
+        grant();
+        resolve();
+      }),
+    );
   }
   close() {
     this.forceRelease?.();
@@ -107,7 +112,6 @@ describe("db-transport", () => {
     expect(a).not.toBeInstanceOf(FakeWorker);
     expect(b).not.toBeInstanceOf(FakeWorker);
   });
-
 
   test("identical request ids from different tabs do not collide", async () => {
     const a = createDbTransport();

@@ -28,7 +28,7 @@
   import { allScales } from "@bloknote/holy-grade";
   import SidebarBulkDialogs, { type BulkDialogKind } from "./sidebar-bulk-dialogs.svelte";
   import { SidebarSelection, setSidebarSelection } from "./selection.svelte";
-              
+
   /** Above this many matches, the tree isn't opened automatically to reveal them */
   const EXPAND_LIMIT = 1000;
 
@@ -382,7 +382,9 @@
     {#if searchState.active && !localDb.ready && localDb.status !== "error"}
       <div class="flex flex-col gap-2 px-4 py-2 text-sm text-muted-foreground">
         <span>
-          {searchState.hasFilters ? "Filters need all the data." : "Results only include areas you have already opened."}
+          {searchState.hasFilters
+            ? "Filters need all the data."
+            : "Results only include areas you have already opened."}
         </span>
         {#if localDb.status === "downloading"}
           <span>Downloading all data...</span>

@@ -87,11 +87,12 @@ export function describeGeometryChange(previous: OsmFeature, el: OsmFeature): st
       6_371_000 *
       Math.asin(
         Math.sqrt(
-          Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRad(previous.lat)) * Math.cos(toRad(el.lat)) * Math.sin(dLon / 2) ** 2,
+          Math.sin(dLat / 2) ** 2 + Math.cos(toRad(previous.lat)) * Math.cos(toRad(el.lat)) * Math.sin(dLon / 2) ** 2,
         ),
       );
-    return meters >= 0.1 ? `moved ${meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`}` : undefined;
+    return meters >= 0.1
+      ? `moved ${meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`}`
+      : undefined;
   }
   if (el.type === "way" && previous.type === "way") {
     return JSON.stringify(previous.nodes) === JSON.stringify(el.nodes) ? undefined : "node list changed";
@@ -113,7 +114,9 @@ const GRADE_TAG_PREFIX = "climbing:grade:";
 /** Percent-encodes a Commons file title for a URL, keeping the "File:" prefix raw */
 function encodeCommonsTitle(file: string): string {
   const colon = file.indexOf(":");
-  return colon === -1 ? encodeURIComponent(file) : `${file.slice(0, colon + 1)}${encodeURIComponent(file.slice(colon + 1))}`;
+  return colon === -1
+    ? encodeURIComponent(file)
+    : `${file.slice(0, colon + 1)}${encodeURIComponent(file.slice(colon + 1))}`;
 }
 
 /** File page and direct image URLs for each file listed in a wikimedia_commons tag (; separated) */
@@ -154,7 +157,12 @@ function linksParagraph(el: OsmFeature, bloknoteLink: string): string {
  * The description is escaped HTML: contributor credit, a summary of what changed when the
  * previous version is available (issue #222), Commons photos, and provider links.
  */
-export function recentItemXml(el: OsmFeature, slug: string, now: number = Date.now(), previous?: OsmFeature): RecentItem | undefined {
+export function recentItemXml(
+  el: OsmFeature,
+  slug: string,
+  now: number = Date.now(),
+  previous?: OsmFeature,
+): RecentItem | undefined {
   const name = el.tags?.name;
   if (!name || !el.timestamp || !isRecentItem(el, now)) return undefined;
   const timestamp = Date.parse(el.timestamp);

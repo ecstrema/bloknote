@@ -262,7 +262,7 @@ export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature
         severity: "warning",
         title: `Route "${name}" has both a bottom and a top point`,
         description:
-          'Two points of the same route (climbing=route_bottom and climbing=route_top) are referenced here. Only one of them (usually the bottom) should be a member of this relation: group the bottom and top points in a separate climbing=route relation instead, or leave the top point out of this relation.',
+          "Two points of the same route (climbing=route_bottom and climbing=route_top) are referenced here. Only one of them (usually the bottom) should be a member of this relation: group the bottom and top points in a separate climbing=route relation instead, or leave the top point out of this relation.",
         tags: ["climbing"],
       });
     }

@@ -45,4 +45,3 @@ export function addTerrainSource(map: MapLibreMap): void {
     return result;
   };
 }
-

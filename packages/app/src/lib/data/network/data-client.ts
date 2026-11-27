@@ -43,11 +43,7 @@ class DataClient {
   getLocalSlugByOsmId(id: string): string | undefined {
     for (const [slug, node] of this.#localNodes) {
       const feature = node.feature;
-      if (
-        feature.type !== "geographic" &&
-        `${feature.type}-${feature.id}` === id
-      )
-        return slug;
+      if (feature.type !== "geographic" && `${feature.type}-${feature.id}` === id) return slug;
     }
   }
 
@@ -86,8 +82,7 @@ class DataClient {
       // Without any persistent storage the download would have to be repeated on every visit, so
       // it is left to the user. But when OPFS works while the persistent database is merely held
       // by another tab, downloading into memory makes this tab fully functional as well.
-      if (!settings.lowData && (localDb.persistent || localDb.opfsAvailable))
-        return localDb.download();
+      if (!settings.lowData && (localDb.persistent || localDb.opfsAvailable)) return localDb.download();
     });
   }
 
@@ -110,11 +105,7 @@ class DataClient {
     return localDb.ready;
   }
 
-  private async fetchJson<T>(
-    slug: string,
-    file: ApiFile,
-    customFetch: typeof fetch,
-  ): Promise<T | undefined> {
+  private async fetchJson<T>(slug: string, file: ApiFile, customFetch: typeof fetch): Promise<T | undefined> {
     if (import.meta.env.SSR) {
       const { readApiJson } = await import("./server-files");
       return readApiJson<T>(slug, file);
@@ -128,10 +119,7 @@ class DataClient {
     return res.json();
   }
 
-  async getNode(
-    slug: string,
-    customFetch: typeof fetch = globalThis.fetch,
-  ): Promise<DataJSON | undefined> {
+  async getNode(slug: string, customFetch: typeof fetch = globalThis.fetch): Promise<DataJSON | undefined> {
     const localNode = this.#localNodes.get(slug);
     if (localNode) return localNode.feature as DataJSON;
     if (await this.localReady()) {
@@ -141,17 +129,11 @@ class DataClient {
     return this.fetchJson<DataJSON>(slug, "data.json", customFetch);
   }
 
-  async getChildren(
-    slug: string,
-    customFetch: typeof fetch = globalThis.fetch,
-  ): Promise<DataJSONRecord | undefined> {
+  async getChildren(slug: string, customFetch: typeof fetch = globalThis.fetch): Promise<DataJSONRecord | undefined> {
     const localNode = this.#localNodes.get(slug);
     if (localNode) {
       return Object.fromEntries(
-        Object.entries(localNode.children ?? {}).map(([childSlug, child]) => [
-          childSlug,
-          child.feature as DataJSON,
-        ]),
+        Object.entries(localNode.children ?? {}).map(([childSlug, child]) => [childSlug, child.feature as DataJSON]),
       );
     }
     if (await this.localReady()) return localDb.getChildren(slug);
@@ -167,10 +149,7 @@ class DataClient {
     return (await this.localReady()) ? localDb.getAllMapElements() : undefined;
   }
 
-  async getStats(
-    slug: string,
-    customFetch: typeof fetch = globalThis.fetch,
-  ): Promise<AreaStats | undefined> {
+  async getStats(slug: string, customFetch: typeof fetch = globalThis.fetch): Promise<AreaStats | undefined> {
     if (this.#localNodes.has(slug)) return undefined;
     if (await this.localReady()) return localDb.getStats(slug);
     return this.fetchJson<AreaStats>(slug, "stats.json", customFetch);

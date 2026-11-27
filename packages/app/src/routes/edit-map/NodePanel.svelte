@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button } from "#components/ui/button/index.js";
-                  
+
   import { LARGE_BOUNDARY_BYTES } from "@bloknote/reverse-geocoding-data/shared";
 
   import {
@@ -625,7 +625,9 @@
         <h2 class="flex items-center gap-1 text-base font-semibold">
           <span class="truncate">{info.name}</span>
           {#if node.parent}
-            <Button size="icon-xs" variant="ghost" title="Rename" onclick={startRename}><span class="icon-[lucide--pencil] shrink-0 size-4"></span></Button>
+            <Button size="icon-xs" variant="ghost" title="Rename" onclick={startRename}
+              ><span class="icon-[lucide--pencil] shrink-0 size-4"></span></Button
+            >
           {/if}
           <span class="text-xs font-normal capitalize" style:color={BOUNDARY_STATE_COLORS[info.boundaryState]}
             >{info.boundaryState}</span
@@ -642,7 +644,8 @@
       variant="outline"
       title="Select the parent (Esc)"
       disabled={!node.parent}
-      onclick={() => (store.selected = node.parent)}><span class="icon-[lucide--arrow-up] shrink-0 size-4"></span></Button
+      onclick={() => (store.selected = node.parent)}
+      ><span class="icon-[lucide--arrow-up] shrink-0 size-4"></span></Button
     >
     <Button size="icon-sm" variant="outline" title="Zoom to" onclick={() => fitTo(node.bbox)}>
       <span class="icon-[lucide--scan] shrink-0 size-4"></span>
@@ -661,7 +664,8 @@
         title="Run git add for this area and all subareas"
         onclick={stageArea}
       >
-        {#if running === "stage"}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>{:else}<span class="icon-[lucide--check] shrink-0 size-4"></span>{/if}
+        {#if running === "stage"}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"
+          ></span>{:else}<span class="icon-[lucide--check] shrink-0 size-4"></span>{/if}
         Stage area
       </Button>
     </div>
@@ -739,7 +743,8 @@
         title="The borders with no region on the other side are coasts (or gaps): find the leaves where they have more than a point per 10 km"
         onclick={findCoasts}
       >
-        {#if running === "coasts"}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span> {coastProgress}{/if}
+        {#if running === "coasts"}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>
+          {coastProgress}{/if}
         Find precise coasts{info.children ? " in the leaves" : ""}
       </Button>
       <Button
@@ -888,7 +893,8 @@
         title={info.children ? "Only leaves have a boundary" : "Use all the polygons as the boundary of this region"}
         onclick={useQueryResult}
       >
-        {#if running === "use"}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>{:else}<span class="icon-[lucide--play] shrink-0 size-4"></span>{/if}
+        {#if running === "use"}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"
+          ></span>{:else}<span class="icon-[lucide--play] shrink-0 size-4"></span>{/if}
         Use as boundary
       </Button>
       <Button
@@ -898,7 +904,8 @@
         title="Each named polygon becomes a child region, named after its slug"
         onclick={splitQueryResult}
       >
-        {#if running === "split"}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"></span>{:else}<span class="icon-[lucide--play] shrink-0 size-4"></span>{/if}
+        {#if running === "split"}<span class="icon-[lucide--loader-circle] shrink-0 size-4 animate-spin"
+          ></span>{:else}<span class="icon-[lucide--play] shrink-0 size-4"></span>{/if}
         Split into children
       </Button>
     </div>

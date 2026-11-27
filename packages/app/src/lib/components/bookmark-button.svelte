@@ -40,10 +40,18 @@
     variant={starred ? "secondary" : "outline"}
     disabled={busy || !atproto.configured}
     onclick={toggle}
-    title={atproto.configured ? (starred ? "Remove bookmark" : "Bookmark this climb") : "Connect Atmosphere in the settings to bookmark climbs"}
-    aria-label={atproto.configured ? (starred ? "Remove bookmark" : "Bookmark this climb") : "Connect Atmosphere in the settings to bookmark climbs"}
+    title={atproto.configured
+      ? starred
+        ? "Remove bookmark"
+        : "Bookmark this climb"
+      : "Connect Atmosphere in the settings to bookmark climbs"}
+    aria-label={atproto.configured
+      ? starred
+        ? "Remove bookmark"
+        : "Bookmark this climb"
+      : "Connect Atmosphere in the settings to bookmark climbs"}
   >
-    <span class="icon-[lucide--star] shrink-0 size-4" class:text-amber-500={starred}></span>
+    <span class="icon-[lucide--bookmark] shrink-0 size-4" class:text-amber-500={starred}></span>
     {#if labelled}{starred ? "Bookmarked" : "Bookmark"}{/if}
   </Button>
 </div>

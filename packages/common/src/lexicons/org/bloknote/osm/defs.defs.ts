@@ -11,26 +11,36 @@ type $nsid = typeof $nsid;
 export { $nsid };
 
 /** Reference to an OpenStreetMap element (node, way, or relation) */
-type ElementRef = { $type?: "org.bloknote.osm.defs#elementRef";
+type ElementRef = {
+  $type?: "org.bloknote.osm.defs#elementRef";
 
   /**
    * OpenStreetMap element type
    */
-  "type":"node" | "way" | "relation" | l.UnknownString;
+  type: "node" | "way" | "relation" | l.UnknownString;
 
   /**
    * OpenStreetMap element numeric ID
    */
-  "id":number;
+  id: number;
 
   /**
    * OpenStreetMap element version the record refers to, when known. The ID can survive a way split or retagging, so this pins the exact state (e.g. the one that was ticked), retrievable from the OSM API history.
    */
-  "version"?:number };
+  version?: number;
+};
 
 export type { ElementRef };
 
 /** Reference to an OpenStreetMap element (node, way, or relation) */
-const elementRef = /*#__PURE__*/ l.typedObject<ElementRef>($nsid, "elementRef", /*#__PURE__*/ l.object({"type":/*#__PURE__*/ l.string<{"knownValues":["node","way","relation"]}>(),"id":/*#__PURE__*/ l.integer(),"version":/*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({"minimum":1}))}));
+const elementRef = /*#__PURE__*/ l.typedObject<ElementRef>(
+  $nsid,
+  "elementRef",
+  /*#__PURE__*/ l.object({
+    type: /*#__PURE__*/ l.string<{ knownValues: ["node", "way", "relation"] }>(),
+    id: /*#__PURE__*/ l.integer(),
+    version: /*#__PURE__*/ l.optional(/*#__PURE__*/ l.integer({ minimum: 1 })),
+  }),
+);
 
 export { elementRef };

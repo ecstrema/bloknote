@@ -4,7 +4,7 @@
   import { MAP_PROVIDERS, type MapCoordinates, type MapProvider } from "#lib/data/map-providers.js";
   import { settings } from "#lib/data/settings.svelte.js";
   import { IsMobile } from "#lib/hooks/is-mobile.svelte.js";
-        
+
   let { coordinates, name }: { coordinates: MapCoordinates; name?: string } = $props();
 
   const isMobile = new IsMobile();
@@ -25,7 +25,7 @@
   <Sheet.Trigger>
     {#snippet child({ props })}
       <Button {...props} variant="outline" size="sm" class="self-start">
-        <span aria-hidden="true"  class="icon-[lucide--map] shrink-0 size-4"></span>
+        <span aria-hidden="true" class="icon-[lucide--map] shrink-0 size-4"></span>
         Navigate...
       </Button>
     {/snippet}
@@ -92,7 +92,8 @@
         </div>
         <p class="truncate text-xs text-muted-foreground">{provider.description}</p>
       </div>
-      <span aria-hidden="true"  class="icon-[lucide--external-link] shrink-0 size-4 shrink-0 text-muted-foreground"></span>
+      <span aria-hidden="true" class="icon-[lucide--external-link] shrink-0 size-4 shrink-0 text-muted-foreground"
+      ></span>
     </a>
     <input
       type="checkbox"

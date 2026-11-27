@@ -31,7 +31,7 @@
    * to the preferred scale of the grade's discipline (issue #188).
    */
   const targetScaleId = $derived.by(() => {
-    if (!scale || scale.gradeType !== "route" && scale.gradeType !== "boulder" && scale.gradeType !== "viaFerrata") {
+    if (!scale || (scale.gradeType !== "route" && scale.gradeType !== "boulder" && scale.gradeType !== "viaFerrata")) {
       return;
     }
     if (gradingScales.isKnown(scale.id as PreferredScaleId)) return;
