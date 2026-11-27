@@ -113,6 +113,10 @@ export function getPhone(tags: Tags): string | undefined {
   return tags.phone?.trim() || tags["contact:phone"]?.trim() || undefined;
 }
 
+export function getEmail(tags: Tags): string | undefined {
+  return tags.email?.trim() || tags["contact:email"]?.trim() || undefined;
+}
+
 export const gradeTags: [Key, ScaleId][] = [
   ["climbing:grade:uiaa", "UIAA"],
   ["climbing:grade:yds_class", "YDS"],
@@ -442,6 +446,8 @@ export const sharedProcessedTags: ProcessedTags = {
   "contact:website": allowAll,
   phone: allowAll,
   "contact:phone": allowAll,
+  email: allowAll,
+  "contact:email": allowAll,
   wikimedia_commons: allowAll,
   "wikimedia_commons:path": allowAll,
   author: allowAll,

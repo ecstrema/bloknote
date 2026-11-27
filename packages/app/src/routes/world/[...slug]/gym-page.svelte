@@ -2,7 +2,7 @@
   import EditableDescription from "#lib/components/editable/editable-description.svelte";
   import CommonsTopo from "#lib/components/commons-topo.svelte";
   import ClimbingStyles from "#components/climbing-styles.svelte";
-  import { getCoordinates, getPhone } from "@bloknote/osm-climbing";
+  import { getCoordinates, getEmail, getPhone } from "@bloknote/osm-climbing";
   import type { DataTree } from "#lib/types.js";
   import type { OsmFeature } from "osm-api";
   import MapLinks from "#lib/components/map-links.svelte";
@@ -21,6 +21,7 @@
   const feature = $derived(item.feature);
   const coordinates = $derived(getCoordinates(feature));
   const phone = $derived(getPhone(feature.tags ?? {}));
+  const email = $derived(getEmail(feature.tags ?? {}));
   const website = $derived(getWebsite(feature.tags ?? {}));
   const fee = $derived(getFee(feature.tags ?? {}));
   const charge = $derived(getFeeCharge(feature.tags ?? {}));
@@ -35,6 +36,13 @@
     <p class="flex items-center gap-1.5">
       <span aria-hidden="true" class="icon-[lucide--phone] shrink-0 size-4 text-muted-foreground"></span>
       <a class="underline underline-offset-2" href={`tel:${phone}`}>{phone}</a>
+    </p>
+  {/if}
+
+  {#if email}
+    <p class="flex items-center gap-1.5">
+      <span aria-hidden="true" class="icon-[lucide--mail] shrink-0 size-4 text-muted-foreground"></span>
+      <a class="underline underline-offset-2" href={`mailto:${email}`}>{email}</a>
     </p>
   {/if}
 

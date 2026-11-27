@@ -5,12 +5,7 @@ import { getParentSlug } from "#lib/helpers/slug.js";
 import { getCoordinates, getGrade, getGradeReference } from "@bloknote/osm-climbing";
 import type { OsmFeature } from "osm-api";
 import { getColorFromGrade } from "#lib/data/network/grade.js";
-import {
-  buildSectorContour,
-  extractRouteStyle,
-  FEATURE_COLORS,
-  ROUTE_STYLE_COLORS,
-} from "@bloknote/osm-climbing";
+import { buildSectorContour, extractRouteStyle, FEATURE_COLORS, ROUTE_STYLE_COLORS } from "@bloknote/osm-climbing";
 import type {
   DbRequest,
   DbResponse,

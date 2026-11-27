@@ -4,6 +4,7 @@ import {
   areaClimbingValues,
   featureToTypeOSM,
   getClimbingStyles,
+  getEmail,
   getGrade,
   getLength,
   getPhone,
@@ -169,6 +170,12 @@ describe("gym phone numbers", () => {
   it("prefers phone and falls back to contact:phone", () => {
     expect(getPhone({ phone: "+1 555 0100", "contact:phone": "+1 555 0200" })).toBe("+1 555 0100");
     expect(getPhone({ "contact:phone": "+1 555 0200" })).toBe("+1 555 0200");
+  });
+
+  it("reads the email from email or contact:email (issue #249)", () => {
+    expect(getEmail({ email: "gym@example.com" })).toBe("gym@example.com");
+    expect(getEmail({ "contact:email": "gym@example.com" })).toBe("gym@example.com");
+    expect(getEmail({})).toBeUndefined();
   });
 });
 

@@ -227,6 +227,21 @@ export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature
     });
   }
 
+  const emailKeys = (["email", "contact:email"] as Key[]).filter((k) => nonEmpty(tags[k]));
+  if (emailKeys.length > 1) {
+    diagnostics.push({
+      id: "duplicate:email",
+      severity: "warning",
+      title: "Duplicate email tags",
+      description: `Both email (${tags.email}) and contact:email (${tags["contact:email"]}) are set.`,
+      tags: emailKeys,
+      fixes: emailKeys.map((keepKey) => ({
+        label: `Keep ${keepKey}`,
+        patch: { remove: emailKeys.filter((k) => k !== keepKey) },
+      })),
+    });
+  }
+
   const pitches = Number(tags["climbing:pitches"]?.trim());
   if (featureType === "route" && Number.isInteger(pitches) && pitches > 1 && tags["climbing:multipitch"] !== "yes") {
     diagnostics.push({

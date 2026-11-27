@@ -1,12 +1,7 @@
 import { resolve } from "$app/paths";
 import type { OsmFeature } from "osm-api";
 import type { MapElementFeature } from "#lib/data/db/types.js";
-import {
-  extractRouteStyle,
-  FEATURE_COLORS,
-  ROUTE_STYLE_COLORS,
-  ROUTE_STYLE_LABELS,
-} from "@bloknote/osm-climbing";
+import { extractRouteStyle, FEATURE_COLORS, ROUTE_STYLE_COLORS, ROUTE_STYLE_LABELS } from "@bloknote/osm-climbing";
 import { getCoordinates, getGrade } from "@bloknote/osm-climbing";
 import { getColorFromGrade } from "#lib/data/network/grade.js";
 import type { LayerSpecification } from "#lib/maplibre.js";
