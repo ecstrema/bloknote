@@ -2,7 +2,7 @@
   import EditableDescription from "#lib/components/editable/editable-description.svelte";
   import CommonsTopo from "#lib/components/commons-topo.svelte";
   import ClimbingStyles from "#components/climbing-styles.svelte";
-  import { getCoordinates, getPhone } from "#lib/data/parse/osm-tags.js";
+  import { getCoordinates, getPhone } from "@bloknote/osm-climbing";
   import type { DataTree } from "#lib/types.js";
   import type { OsmFeature } from "osm-api";
   import MapLinks from "#lib/components/map-links.svelte";

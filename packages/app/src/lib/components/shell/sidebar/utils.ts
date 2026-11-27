@@ -1,5 +1,5 @@
 import { featureToType, getName, type ItemType } from "#lib/data/parse/data.js";
-import { getGradeReference } from "#lib/data/parse/osm-tags.js";
+import { getGradeReference } from "@bloknote/osm-climbing";
 import type { DataTree } from "#lib/types.js";
 import type { OsmFeature } from "osm-api";
 import { getStaticIdentifier, type BasicOsmType } from "@bloknote/common";

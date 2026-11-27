@@ -7,7 +7,7 @@ import { snapshot } from "#lib/helpers/svelte.svelte.js";
 import { reversed } from "#lib/helpers/iterators.js";
 import { dataClient } from "../network/data-client.js";
 import type { AppDataTree } from "../app-data-tree.svelte.js";
-import { getCoordinates } from "../parse/osm-tags.js";
+import { getCoordinates } from "@bloknote/osm-climbing";
 import { createdCliffs } from "../cliffs.svelte.js";
 import type { Coordinates } from "@bloknote/climbing-data-gen";
 

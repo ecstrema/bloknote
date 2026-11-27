@@ -6,8 +6,8 @@ import {
   FEATURE_COLORS,
   ROUTE_STYLE_COLORS,
   ROUTE_STYLE_LABELS,
-} from "#lib/data/parse/route-styles.js";
-import { getCoordinates, getGrade } from "#lib/data/parse/osm-tags.js";
+} from "@bloknote/osm-climbing";
+import { getCoordinates, getGrade } from "@bloknote/osm-climbing";
 import { getColorFromGrade } from "#lib/data/network/grade.js";
 import type { LayerSpecification } from "#lib/maplibre.js";
 import type { Map as MapLibreMap } from "maplibre-gl";

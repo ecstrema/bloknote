@@ -1,5 +1,4 @@
 import type { DataJSON } from "@bloknote/climbing-data-gen";
-import type { ScaleId } from "@bloknote/holy-grade";
 import type { OsmFeature } from "osm-api";
 
 export interface BreadcrumbSegment {
@@ -25,7 +24,4 @@ export interface DataTree<Feature extends DataJSON = DataJSON> {
   stats?: AreaStats;
 }
 
-export type Grade = {
-  v: string;
-  scale: ScaleId | "unknown";
-};
+export type { Grade } from "@bloknote/osm-climbing";

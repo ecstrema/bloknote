@@ -1,6 +1,6 @@
 import type { AppDataTree } from "#lib/data/app-data-tree.svelte.js";
 import { featureToType } from "#lib/data/parse/data.js";
-import { getGrade } from "#lib/data/parse/osm-tags.js";
+import { getGrade } from "@bloknote/osm-climbing";
 import type { DataTree, Grade } from "#lib/types.js";
 import type { Key, OsmFeature, Tags } from "osm-api";
 

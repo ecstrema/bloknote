@@ -1,8 +1,8 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
-  import { canEditOpeningHoursGraph, parseOpeningHours } from "#lib/data/parse/opening-hours.js";
+  import { canEditOpeningHoursGraph, parseOpeningHours } from "@bloknote/osm-climbing";
   import { ensureOpeningHoursLoaded, openingHoursReady } from "#lib/data/parse/opening-hours-ready.svelte.js";
-  import { getCoordinates } from "#lib/data/parse/osm-tags.js";
+  import { getCoordinates } from "@bloknote/osm-climbing";
   import type { OsmFeature } from "osm-api";
   import EditableTooltip from "./editable-tooltip.svelte";
   import Loader from "#components/ui/loader.svelte";

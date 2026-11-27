@@ -17207,7 +17207,7 @@ msgstr "Imported {0} tick{1} ({2} already logged, {3} without an OSM route)."
 msgid "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
 msgstr "Export your logbook from <0>MountainProject</0> (profile, \"see all ticks\", export as CSV) or <1>TheCrag</1> (dashboard, actions, logbook CSV), then import it here. Routes are searched inside the crag given by the export; routes that are not on OpenStreetMap yet are imported anyway and can be added to OSM later from your ticks list."
 
-#. 0: rows.length; 1: rows.length === 1 ? "" \\: "s"; 2: formatters[ format ]; 3: counts.matched; 4: counts.alreadyLogged
+#. 0: rows.length; 1: rows.length === 1 ? "" \\: "s"; 2: formatters[format]; 3: counts.matched; 4: counts.alreadyLogged
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "{0} tick{1} from {2} <0/>: {3} matched, {4} already logged."
 msgstr "{0} tick{1} from {2} <0/>: {3} matched, {4} already logged."
@@ -17422,7 +17422,7 @@ msgstr "Back"
 msgid "The location from the logbook is matched against the map data, level by level. Click an existing level to pick it as the parent, or click missing levels to create them — the lowest down selection becomes the parent of the route."
 msgstr "The location from the logbook is matched against the map data, level by level. Click an existing level to pick it as the parent, or click missing levels to create them — the lowest down selection becomes the parent of the route."
 
-#. 0: pickedCoordinates.lat.toFixed(5); 1: pickedCoordinates.lon.toFixed( 5, )
+#. 0: pickedCoordinates.lat.toFixed(5); 1: pickedCoordinates.lon.toFixed(5)
 #: src/lib/components/tick-osm-dialog.svelte
 msgid "Location: {0}, {1} — click again to adjust."
 msgstr "Location: {0}, {1} — click again to adjust."
@@ -17833,7 +17833,7 @@ msgstr "Max distance between routes <0/>"
 msgid "Create sectors"
 msgstr "Create sectors"
 
-#. 0: localDb.phase === "download" ? "download" \\: "parsing"; 1: " "; 2: Math.min( 100, Math.round((localDb.loaded / (localDb.total ?? 1)) * 100), )
+#. 0: localDb.phase === "download" ? "download" \\: "parsing"; 1: " "; 2: Math.min(100, Math.round((localDb.loaded / (localDb.total ?? 1)) * 100))
 #: src/routes/settings/logbook/tick-import.svelte
 msgid "(downloading the offline dataset first, {0}{1} {2}%)"
 msgstr "(downloading the offline dataset first, {0}{1} {2}%)"

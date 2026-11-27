@@ -7,8 +7,8 @@
   import { Chart, Layer, Axis, Rect, Text } from "layerchart/svg";
   import { scaleBand, scaleLinear } from "d3-scale";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
-  import { getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
-  import { extractRouteStyle } from "#lib/data/parse/route-styles.js";
+  import { getGrade, getGradeReference } from "@bloknote/osm-climbing";
+  import { extractRouteStyle } from "@bloknote/osm-climbing";
   import { Button } from "#components/ui/button/index.js";
   import { gradingScales } from "#lib/data/grading-scales.svelte.js";
   import { convertGrade, getReference, getScale, type ScaleId } from "@bloknote/holy-grade";

@@ -1,4 +1,4 @@
-import { loadOpeningHours } from "./opening-hours.js";
+import { loadOpeningHours } from "@bloknote/osm-climbing";
 
 export const openingHoursReady = $state({ value: false });
 

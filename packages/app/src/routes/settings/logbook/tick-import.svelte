@@ -7,8 +7,8 @@
   import { ascentFromStyle } from "@bloknote/common";
   import { atproto, sameElementRef } from "#lib/data/network/atproto.svelte.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
-  import { getGrade } from "#lib/data/parse/osm-tags.js";
-  import { extractRouteStyle, ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
+  import { getGrade } from "@bloknote/osm-climbing";
+  import { extractRouteStyle, ROUTE_STYLE_LABELS } from "@bloknote/osm-climbing";
   import {
     parseTickCsv,
     locationSegments,

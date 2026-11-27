@@ -10,8 +10,8 @@
   import AppSidebarChildren from "./app-sidebar-children.svelte";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import { onMount, untrack } from "svelte";
-  import { getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
-  import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
+  import { getGrade, isProjectRoute } from "@bloknote/osm-climbing";
+  import { isIceRoute, isTradRoute } from "@bloknote/osm-climbing";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
   import type { OsmFeature } from "osm-api";
   import { navigating, page } from "$app/state";

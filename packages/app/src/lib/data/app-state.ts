@@ -20,7 +20,7 @@ import {
 } from "./undo/actions";
 import { getParentSlug } from "#lib/helpers/slug.js";
 import { convertGrade, getScale, type ScaleId } from "@bloknote/holy-grade";
-import { getGrade, scaleIdToTag } from "./parse/osm-tags.js";
+import { getGrade, scaleIdToTag } from "@bloknote/osm-climbing";
 import { OsmUser } from "./network/osm.svelte";
 import type { Coordinates } from "@bloknote/climbing-data-gen";
 import type { Key, OsmFeature, OsmRelation } from "osm-api";

@@ -15,7 +15,7 @@
     STAT_STYLE_ORDER,
     type GradeDistributionBucket,
     type StatStyleKey,
-  } from "#lib/data/parse/sector-stats.js";
+  } from "@bloknote/osm-climbing";
   import { gradingScales } from "#lib/data/grading-scales.svelte.js";
   import type { BoulderScaleId, RouteScaleId } from "@bloknote/holy-grade";
   import type { DataTree } from "#lib/types.js";

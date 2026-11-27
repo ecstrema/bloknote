@@ -13,7 +13,7 @@
     type OpeningHoursCoordinates,
     type OpeningHoursDrag,
     type WeekHours,
-  } from "#lib/data/parse/opening-hours.js";
+  } from "@bloknote/osm-climbing";
   import { ensureOpeningHoursLoaded, openingHoursReady } from "#lib/data/parse/opening-hours-ready.svelte.js";
 
   let {

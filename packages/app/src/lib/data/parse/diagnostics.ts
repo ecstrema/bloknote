@@ -10,7 +10,7 @@ import {
   isViaFerrata,
   parseClimbingLength,
   scaleIdToTag,
-} from "./osm-tags.js";
+} from "@bloknote/osm-climbing";
 import { findDuplicatedRoutePartNames } from "./route-parts.js";
 
 export type DiagnosticSeverity = "error" | "warning";

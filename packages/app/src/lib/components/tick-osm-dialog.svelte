@@ -8,7 +8,7 @@
   import { getAppState } from "#lib/data/app-state.js";
   import { dataClient } from "#lib/data/network/data-client.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
-  import { getCoordinates, scaleIdToTag } from "#lib/data/parse/osm-tags.js";
+  import { getCoordinates, scaleIdToTag } from "@bloknote/osm-climbing";
   import { atproto, type LocalTickEntry } from "#lib/data/network/atproto.svelte.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { setFallbackCoordinates } from "#lib/data/route-location.js";

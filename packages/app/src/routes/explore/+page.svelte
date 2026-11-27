@@ -8,11 +8,11 @@
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { searchState } from "#lib/components/shell/sidebar/search-state.svelte.js";
   import { getItemUrl } from "#components/shell/sidebar/utils.js";
-  import { computeSectorStats, STAT_STYLE_COLORS, STAT_STYLE_ORDER } from "#lib/data/parse/sector-stats.js";
+  import { computeSectorStats, STAT_STYLE_COLORS, STAT_STYLE_ORDER } from "@bloknote/osm-climbing";
   import { gradingScales } from "#lib/data/grading-scales.svelte.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { featureToType } from "#lib/data/parse/data.js";
-  import { getGrade, parseClimbingLength } from "#lib/data/parse/osm-tags.js";
+  import { getGrade, parseClimbingLength } from "@bloknote/osm-climbing";
   import { getParentSlug } from "#lib/helpers/slug.js";
   import { pageTitle } from "#lib/page-title.js";
   import { Button } from "#components/ui/button/index.js";

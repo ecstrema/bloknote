@@ -2,7 +2,7 @@ import sqlite3InitModule, { type Database } from "@sqlite.org/sqlite-wasm";
 import type { DataJSON } from "@bloknote/climbing-data-gen";
 import { featureToType, getName } from "#lib/data/parse/data.js";
 import { getParentSlug } from "#lib/helpers/slug.js";
-import { getCoordinates, getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
+import { getCoordinates, getGrade, getGradeReference } from "@bloknote/osm-climbing";
 import type { OsmFeature } from "osm-api";
 import { getColorFromGrade } from "#lib/data/network/grade.js";
 import {
@@ -10,7 +10,7 @@ import {
   extractRouteStyle,
   FEATURE_COLORS,
   ROUTE_STYLE_COLORS,
-} from "#lib/data/parse/route-styles.js";
+} from "@bloknote/osm-climbing";
 import type {
   DbRequest,
   DbResponse,

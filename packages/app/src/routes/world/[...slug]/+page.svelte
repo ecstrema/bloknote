@@ -29,8 +29,8 @@
   import EditableTags from "#components/editable/editable-tags.svelte";
   import * as Tabs from "#components/ui/tabs/index.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
-  import { getCoordinates, getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
-  import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
+  import { getCoordinates, getGrade, isProjectRoute } from "@bloknote/osm-climbing";
+  import { isIceRoute, isTradRoute } from "@bloknote/osm-climbing";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
   import ClimbingStyles from "#components/climbing-styles.svelte";
   import EditableGrade from "#components/editable/editable-grade.svelte";

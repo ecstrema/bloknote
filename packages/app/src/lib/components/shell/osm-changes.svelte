@@ -2,7 +2,7 @@
   import { Button } from "#components/ui/button/index.js";
   import * as Dialog from "#components/ui/dialog/index.js";
   import { Textarea } from "#components/ui/textarea/index.js";
-  import { getNameOSM } from "#lib/data/parse/osm-tags.js";
+  import { getNameOSM } from "@bloknote/osm-climbing";
   import { getParentSlug } from "#lib/helpers/slug.js";
   import plural from "../../../locales/plural.js";
 

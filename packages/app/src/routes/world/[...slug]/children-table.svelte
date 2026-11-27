@@ -2,9 +2,9 @@
   import { resolve } from "$app/paths";
   import { featureToType } from "#lib/data/parse/data.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
-  import { getGrade, isProjectRoute } from "#lib/data/parse/osm-tags.js";
+  import { getGrade, isProjectRoute } from "@bloknote/osm-climbing";
   import { getAreaKindLabel } from "#lib/data/parse/diagnostics.js";
-  import { isIceRoute, isTradRoute } from "#lib/data/parse/route-styles.js";
+  import { isIceRoute, isTradRoute } from "@bloknote/osm-climbing";
   import TradCamIcon from "#components/trad-cam-icon.svelte";
   import type { DataTree } from "#lib/types.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";

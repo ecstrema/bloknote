@@ -11,8 +11,8 @@
   import { DEFAULT_SCALES } from "#lib/data/grading-scale-ids.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
-  import { scaleIdToTag } from "#lib/data/parse/osm-tags.js";
-  import { ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
+  import { scaleIdToTag } from "@bloknote/osm-climbing";
+  import { ROUTE_STYLE_LABELS } from "@bloknote/osm-climbing";
   import {
     collectOrphanRoutes,
     clusterRoutes,

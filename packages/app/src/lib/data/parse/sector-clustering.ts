@@ -1,7 +1,7 @@
 import type { Coordinates } from "@bloknote/climbing-data-gen";
 import type { DataTree } from "#lib/types.js";
 import { featureToType, getName } from "./data.js";
-import { getCoordinates } from "./osm-tags.js";
+import { getCoordinates } from "@bloknote/osm-climbing";
 import { formatDistance, haversineMeters } from "./pulse.js";
 
 /**

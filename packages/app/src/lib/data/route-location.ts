@@ -1,6 +1,6 @@
 import type { Coordinates } from "@bloknote/climbing-data-gen";
 import type { DataTree } from "#lib/types.js";
-import { getCoordinates } from "./parse/osm-tags.js";
+import { getCoordinates } from "@bloknote/osm-climbing";
 import { getParentSlug } from "#lib/helpers/slug.js";
 
 /** Temporary in-memory coordinates for newly created empty sectors placed from the map */

@@ -20,6 +20,7 @@
   "dependencies": {
     "@atproto/oauth-client-browser": "catalog:",
     "@bloknote/holy-grade": "workspace:*",
+    "@bloknote/osm-climbing": "workspace:*",
     "@friendofsvelte/state": "catalog:",
     "@sqlite.org/sqlite-wasm": "catalog:",
     "d3-scale": "catalog:",

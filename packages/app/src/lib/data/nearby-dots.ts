@@ -1,6 +1,6 @@
 import { resolve } from "$app/paths";
 import { getParentSlug } from "#lib/helpers/slug.js";
-import { getCoordinates, getGrade } from "#lib/data/parse/osm-tags.js";
+import { getCoordinates, getGrade } from "@bloknote/osm-climbing";
 import type { DataTree } from "#lib/types.js";
 
 const GROUP_COLOR = "#2563eb";

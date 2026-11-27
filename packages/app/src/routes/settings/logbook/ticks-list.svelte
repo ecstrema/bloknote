@@ -6,10 +6,10 @@
   import { atproto, type LocalTickEntry } from "#lib/data/network/atproto.svelte.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { dataClient } from "#lib/data/network/data-client.js";
-  import { getGrade, getGradeReference } from "#lib/data/parse/osm-tags.js";
+  import { getGrade, getGradeReference } from "@bloknote/osm-climbing";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
-  import { extractRouteStyle, ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
+  import { extractRouteStyle, ROUTE_STYLE_LABELS } from "@bloknote/osm-climbing";
   import HolyGrade from "#components/grade/holy-grade.svelte";
   import type { Grade } from "#lib/types.js";
   import { ascentFromStyle, type TickStyle } from "@bloknote/common";

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
   import { gradingScales } from "#lib/data/grading-scales.svelte.js";
-  import { getRelatedGradeScales, scaleIdToTag, type WithSourceTag } from "#lib/data/parse/osm-tags.js";
+  import { getRelatedGradeScales, scaleIdToTag, type WithSourceTag } from "@bloknote/osm-climbing";
   import { getDefaultGradingScales } from "#lib/data/parse/region-grading.js";
   import type { Grade } from "#lib/types.js";
   import HolyGrade from "#components/grade/holy-grade.svelte";

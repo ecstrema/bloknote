@@ -1,5 +1,4 @@
 import type { OsmFeature } from "osm-api";
-import type { Coordinates } from "@bloknote/climbing-data-gen";
 import {
   allAidScales,
   allBoulderScales,
@@ -15,8 +14,19 @@ import {
   type ScaleId,
 } from "@bloknote/holy-grade";
 import type { Key, Tags } from "osm-api";
-import type { Grade } from "#lib/types.js";
 import { isValidOpeningHours } from "./opening-hours.js";
+
+/** A climbing grade value and the scale it is expressed in */
+export type Grade = {
+  v: string;
+  scale: ScaleId | "unknown";
+};
+
+/** A point on Earth, in degrees */
+export interface Coordinates {
+  lon: number;
+  lat: number;
+}
 
 export type DeprecatedTag = { deprecated: string };
 export type TagRule = ((value: string) => boolean) | DeprecatedTag;

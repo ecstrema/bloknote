@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getAppState } from "#lib/data/app-state.js";
-  import { isMultipitchRoute, parseClimbingLength } from "#lib/data/parse/osm-tags.js";
-  import { extractRouteStyle } from "#lib/data/parse/route-styles.js";
+  import { isMultipitchRoute, parseClimbingLength } from "@bloknote/osm-climbing";
+  import { extractRouteStyle } from "@bloknote/osm-climbing";
   import { cn } from "#lib/utils.js";
   import type { OsmFeature } from "osm-api";
   import EditableTextarea from "./editable-textarea.svelte";

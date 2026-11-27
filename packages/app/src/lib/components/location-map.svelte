@@ -20,7 +20,7 @@
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import type { MapElementFeature, MapElementFeatureCollection } from "#lib/data/db/types.js";
   import type { FeatureCollection } from "geojson";
-  import { FEATURE_COLORS } from "#lib/data/parse/route-styles.js";
+  import { FEATURE_COLORS } from "@bloknote/osm-climbing";
   import type { OsmFeature } from "osm-api";
   import { setMapCenterProvider } from "./map-center.js";
   import { addTerrainSource } from "./map-controls.js";

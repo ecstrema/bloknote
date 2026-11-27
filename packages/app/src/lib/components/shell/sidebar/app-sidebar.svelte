@@ -23,8 +23,8 @@
   import * as ContextMenu from "#components/ui/context-menu/index.js";
   import * as DropdownMenu from "#components/ui/dropdown-menu/index.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
-  import { scaleIdToTag } from "#lib/data/parse/osm-tags.js";
-  import { ROUTE_STYLE_LABELS } from "#lib/data/parse/route-styles.js";
+  import { scaleIdToTag } from "@bloknote/osm-climbing";
+  import { ROUTE_STYLE_LABELS } from "@bloknote/osm-climbing";
   import { allScales } from "@bloknote/holy-grade";
   import SidebarBulkDialogs, { type BulkDialogKind } from "./sidebar-bulk-dialogs.svelte";
   import { SidebarSelection, setSidebarSelection } from "./selection.svelte";

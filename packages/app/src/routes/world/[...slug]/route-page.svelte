@@ -9,7 +9,7 @@
   import ClimbingProviderLinks from "#lib/components/climbing-provider-links.svelte";
   import MapLinks from "#lib/components/map-links.svelte";
   import HolyGrade from "#components/grade/holy-grade.svelte";
-  import { getGrade } from "#lib/data/parse/osm-tags.js";
+  import { getGrade } from "@bloknote/osm-climbing";
 
   let {
     item = $bindable(),

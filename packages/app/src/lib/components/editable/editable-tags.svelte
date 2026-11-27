@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as Table from "#components/ui/table/index.js";
   import EditableTextarea from "./editable-textarea.svelte";
-  import { featureToTypeOSM, getTagRule } from "#lib/data/parse/osm-tags.js";
+  import { featureToTypeOSM, getTagRule } from "@bloknote/osm-climbing";
   import type { Key, OsmFeature, Tags } from "osm-api";
   import { cn } from "#lib/utils.js";
   import { getAppState } from "#lib/data/app-state.js";

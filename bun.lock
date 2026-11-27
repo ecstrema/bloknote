@@ -16,6 +16,7 @@
       "dependencies": {
         "@atproto/oauth-client-browser": "catalog:",
         "@bloknote/holy-grade": "workspace:*",
+        "@bloknote/osm-climbing": "workspace:*",
         "@friendofsvelte/state": "catalog:",
         "@sqlite.org/sqlite-wasm": "catalog:",
         "d3-scale": "catalog:",
@@ -96,6 +97,19 @@
       "devDependencies": {
         "@bloknote/common": "workspace:*",
         "@types/bun": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:",
+      },
+    },
+    "packages/osm-climbing": {
+      "name": "@bloknote/osm-climbing",
+      "version": "1.0.0",
+      "dependencies": {
+        "@bloknote/holy-grade": "workspace:*",
+        "opening_hours": "catalog:",
+        "osm-api": "catalog:",
+      },
+      "devDependencies": {
         "typescript": "catalog:",
         "vitest": "catalog:",
       },
@@ -237,6 +251,8 @@
     "@bloknote/common": ["@bloknote/common@workspace:packages/common"],
 
     "@bloknote/holy-grade": ["@bloknote/holy-grade@workspace:packages/holy-grade"],
+
+    "@bloknote/osm-climbing": ["@bloknote/osm-climbing@workspace:packages/osm-climbing"],
 
     "@bloknote/reverse-geocoding-data": ["@bloknote/reverse-geocoding-data@workspace:packages/reverse-geocoding-data"],
 

@@ -2,7 +2,7 @@
   import EditableGradeValue from "./editable-grade-value.svelte";
   import type { OsmFeature } from "osm-api";
   import EditableTooltip from "./editable-tooltip.svelte";
-  import type { WithSourceTag } from "#lib/data/parse/osm-tags.js";
+  import type { WithSourceTag } from "@bloknote/osm-climbing";
   import type { Grade } from "#lib/types.js";
 
   const {

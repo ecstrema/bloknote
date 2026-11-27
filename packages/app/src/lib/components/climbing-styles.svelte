@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Key, OsmFeature } from "osm-api";
   import { getAppState } from "#lib/data/app-state.js";
-  import { getClimbingStyles, isMultipitchRoute } from "#lib/data/parse/osm-tags.js";
+  import { getClimbingStyles, isMultipitchRoute } from "@bloknote/osm-climbing";
   import * as Popover from "#components/ui/popover/index.js";
   import { Button } from "#components/ui/button/index.js";
   import { Input } from "#components/ui/input/index.js";
