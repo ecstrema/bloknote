@@ -2,6 +2,7 @@
   import type { RouteScaleId } from "@bloknote/holy-grade";
   import { gradingScales } from "#lib/data/grading-scales.svelte.js";
   import { getColorFromGrade } from "#lib/data/network/grade.js";
+  import { searchState } from "#lib/components/shell/sidebar/search-state.svelte.js";
 
   const DEFAULT_ROUTE_GRADES: Record<RouteScaleId, string[]> = {
     French: ["4a", "5a", "6a", "7a", "8a", "9a"],
@@ -26,14 +27,33 @@
 
   let open = $state(false);
   let colorMode = $state<"grade" | "type" | "both">("both");
+  /** Legend-local visibility toggles for the types without a search-filter equivalent */
   let hiddenTypes = $state<string[]>([]);
 
   $effect(() => {
     onColorMode?.(colorMode);
   });
 
+  const SEARCHABLE_TYPES = ["route", "area", "gym"] as const;
+  type FilterableType = (typeof SEARCHABLE_TYPES)[number];
+
+  /**
+   * Types hidden on the map (issue #180): the searchable types share their state with the
+   * search filters, so hiding them here also filters the search, and vice versa.
+   */
+  const effectiveHiddenTypes = $derived.by(() => {
+    const selected = searchState.filters.types;
+    const hidden = [...hiddenTypes];
+    if (selected.length > 0) {
+      for (const type of SEARCHABLE_TYPES) {
+        if (!selected.includes(type)) hidden.push(type);
+      }
+    }
+    return hidden;
+  });
+
   $effect(() => {
-    onElementTypeVisibility?.(hiddenTypes);
+    onElementTypeVisibility?.(effectiveHiddenTypes);
   });
 
   const TYPE_SWATCHES = [
@@ -54,9 +74,32 @@
     { type: "gym", label: "Gyms" },
   ];
 
+  function isTypeVisible(type: string): boolean {
+    if ((SEARCHABLE_TYPES as readonly string[]).includes(type)) {
+      const selected = searchState.filters.types;
+      return selected.length === 0 || selected.includes(type as FilterableType);
+    }
+    return !hiddenTypes.includes(type);
+  }
+
   function toggleElementType(type: string, visible: boolean) {
-    if (visible) hiddenTypes = hiddenTypes.filter((t) => t !== type);
-    else hiddenTypes = [...hiddenTypes, type];
+    if (!(SEARCHABLE_TYPES as readonly string[]).includes(type)) {
+      hiddenTypes = visible ? hiddenTypes.filter((t) => t !== type) : [...hiddenTypes, type];
+      return;
+    }
+    const t = type as FilterableType;
+    const selected = searchState.filters.types;
+    if (visible) {
+      if (!selected.includes(t)) {
+        const next: FilterableType[] = [...selected, t];
+        // Every type back on: an empty filter means "any type" (issue #180)
+        searchState.filters.types = next.length === SEARCHABLE_TYPES.length ? [] : next;
+      }
+    } else {
+      // An empty filter means "every type": excluding one type must keep the others explicit
+      const next = (selected.length === 0 ? [...SEARCHABLE_TYPES] : [...selected]).filter((x) => x !== t);
+      if (next.length > 0) searchState.filters.types = next;
+    }
   }
 
   const preferredScale = $derived(gradingScales.effective("route") as RouteScaleId);
@@ -168,10 +211,10 @@
               <input
                 type="checkbox"
                 class="size-3 accent-blue-500"
-                checked={!hiddenTypes.includes(toggle.type)}
+                checked={isTypeVisible(toggle.type)}
                 onchange={(e) => toggleElementType(toggle.type, e.currentTarget.checked)}
               />
-              <span class={hiddenTypes.includes(toggle.type) ? "text-slate-400 line-through" : ""}>{toggle.label}</span>
+              <span class={isTypeVisible(toggle.type) ? "" : "text-slate-400 line-through"}>{toggle.label}</span>
             </label>
           {/each}
         </div>
