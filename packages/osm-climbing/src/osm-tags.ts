@@ -75,9 +75,15 @@ export function isProjectRoute(tags: Tags | undefined): boolean {
   return /\b(project|projet|projekt|progetto)\b/i.test(tags.name);
 }
 
-/** Whether the element is a via ferrata (issue #234) */
+/** Whether the element is a via ferrata (issue #234). `sport=via_ferrata` is the legacy way of
+ * tagging them, before `highway=via_ferrata` was accepted (issue #252) */
 export function isViaFerrata(tags: Tags): boolean {
-  return tags.climbing === "via_ferrata" || tags.highway === "via_ferrata" || tags.via_ferrata_scale !== undefined;
+  return (
+    tags.climbing === "via_ferrata" ||
+    tags.highway === "via_ferrata" ||
+    tags.sport === "via_ferrata" ||
+    tags.via_ferrata_scale !== undefined
+  );
 }
 
 const climbingStyleLabels = [
@@ -333,7 +339,7 @@ export const routeClimbingValues = new Set([
 ]);
 export const areaClimbingValues = new Set(["area", "crag", "boulder", "bouldering"]);
 const gymClimbingValues = new Set(["indoor_wall", "artificial_wall", "wall", "gym"]);
-const gymLeisureValues = new Set(["sports_centre", "sports_hall", "fitness_centre", "sport_centre"]);
+const gymLeisureValues = new Set(["sports_centre", "sports_hall", "fitness_centre", "sport_centre", "pitch"]);
 
 function hasClimbingValue(value: string | undefined, acceptedValues: ReadonlySet<string>) {
   if (!value) return false;
@@ -346,6 +352,9 @@ export function featureToTypeOSM(feature: OsmFeature): OSMClimbingFeatureType | 
 
   const tags = feature.tags;
   if (hasClimbingValue(tags.climbing, routeClimbingValues) || tags.highway === "via_ferrata") return "route";
+
+  // Legacy via ferrata tagging, before highway=via_ferrata was accepted (issue #252)
+  if (tags.sport === "via_ferrata") return "route";
 
   if (hasClimbingValue(tags.climbing, areaClimbingValues)) return "area";
 
@@ -366,6 +375,9 @@ const numericTag = lengthValidator;
 
 /** Yes/no boolean style tags */
 const yesNoTag = allowMultipleValues(new Set(["yes", "no"]));
+
+/** `fee=donation` is a valid value per https://wiki.openstreetmap.org/wiki/Key:fee (issue #250) */
+const feeTag = allowMultipleValues(new Set(["yes", "no", "donation"]));
 
 const yesNoOrNumericTag = (value: string) => yesNoTag(value) || numericTag(value);
 
@@ -415,7 +427,8 @@ export const sharedProcessedTags: ProcessedTags = {
   description: allowAll,
   official_name: allowAll,
   alt_name: allowAll,
-  sport: allowSingleValue("climbing"),
+  // sport=via_ferrata is the legacy way of tagging via ferratas (issue #252)
+  sport: allowMultipleValues(new Set(["climbing", "via_ferrata"])),
   access: allowAll,
   club: allowAll,
   federation: allowAll,
@@ -433,7 +446,7 @@ export const sharedProcessedTags: ProcessedTags = {
   "wikimedia_commons:path": allowAll,
   author: allowAll,
   opening_hours: isValidOpeningHours,
-  fee: yesNoTag,
+  fee: feeTag,
   membership: yesNoTag,
   // Physical properties
   height: numericTag,

@@ -151,4 +151,16 @@ describe("getFeatureDiagnostics", () => {
       ),
     ).toBe(false);
   });
+
+  it("does not flag missing sport=climbing on highway=via_ferrata (issue #251)", () => {
+    const diags = getFeatureDiagnostics(
+      route({ highway: "via_ferrata", name: "Via Ferrata", sac_scale: "alpine_hiking" }),
+    );
+    expect(diags.some((d) => d.id === "missing:sport")).toBe(false);
+  });
+
+  it("still flags missing sport=climbing on regular routes", () => {
+    const diags = getFeatureDiagnostics(route({ climbing: "route_bottom", name: "Route" }));
+    expect(diags.some((d) => d.id === "missing:sport")).toBe(true);
+  });
 });

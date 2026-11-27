@@ -255,3 +255,22 @@ describe("deprecated tags in processedTags / getTagRule", () => {
     expect(getRelatedGradeScales({ "climbing:sport": "yes" }).map((s) => s.id)).not.toContain("FB");
   });
 });
+
+describe("diagnostic whitelists", () => {
+  it("accepts sport=via_ferrata, the legacy via ferrata tagging (issue #252)", () => {
+    expect(callRule(getTagRule("route", "sport"), "via_ferrata")).toBe(true);
+    expect(callRule(getTagRule("area", "sport"), "via_ferrata")).toBe(true);
+    expect(featureToTypeOSM(feature({ sport: "via_ferrata" }))).toBe("route");
+    expect(isViaFerrata({ sport: "via_ferrata" })).toBe(true);
+  });
+
+  it("accepts fee=donation (issue #250)", () => {
+    expect(callRule(getTagRule("area", "fee"), "donation")).toBe(true);
+    expect(callRule(getTagRule("area", "fee"), "maybe")).toBe(false);
+  });
+
+  it("accepts leisure=pitch (issue #248)", () => {
+    expect(callRule(getTagRule("gym", "leisure"), "pitch")).toBe(true);
+    expect(featureToTypeOSM(feature({ leisure: "pitch" }))).toBe("gym");
+  });
+});

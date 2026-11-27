@@ -112,7 +112,9 @@ export function getFeatureDiagnostics(feature: OsmFeature, children?: OsmFeature
     }
   }
 
-  if (featureType && tags.sport !== "climbing") {
+  // highway=via_ferrata elements do not need sport=climbing, per
+  // https://wiki.openstreetmap.org/wiki/Tag:highway%3Dvia_ferrata (issue #251)
+  if (featureType && tags.sport !== "climbing" && tags.highway !== "via_ferrata") {
     diagnostics.push({
       id: "missing:sport",
       severity: "warning",

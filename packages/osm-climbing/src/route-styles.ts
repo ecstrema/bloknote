@@ -27,7 +27,7 @@ export const ROUTE_STYLE_LABELS: Record<string, string> = {
 };
 
 export function extractRouteStyle(tags: Record<string, string>): string {
-  if (tags.highway === "via_ferrata" || tags.climbing === "via_ferrata") {
+  if (tags.highway === "via_ferrata" || tags.climbing === "via_ferrata" || tags.sport === "via_ferrata") {
     return "viaferrata";
   }
   if (
