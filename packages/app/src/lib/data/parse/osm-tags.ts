@@ -357,6 +357,17 @@ const numericTag = lengthValidator;
 /** Yes/no boolean style tags */
 const yesNoTag = allowMultipleValues(new Set(["yes", "no"]));
 
+const yesNoOrNumericTag = (value: string) => yesNoTag(value) || numericTag(value);
+
+const urlTag = (value: string) => {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 /** Grade range tags (`:min`/`:max`/`:mean` suffixes) carry plain grades of the same scale */
 const gradeRangeTags: ProcessedTags = Object.fromEntries(
   gradeTags.flatMap(([key, scale]) =>
@@ -404,7 +415,7 @@ export const sharedProcessedTags: ProcessedTags = {
   ...Object.fromEntries(climbingStyleLabels.map(([key]) => [`climbing:${key}`, allowAll])),
   // Contact and metadata
   website: allowAll,
-  url: allowAll,
+  url: urlTag,
   "contact:website": allowAll,
   phone: allowAll,
   "contact:phone": allowAll,
@@ -465,9 +476,9 @@ const tagPrefixRules: [prefix: string, rule: TagRule][] = [
   ["name:", allowAll],
   ["alt_name:", allowAll],
   ["addr:", allowAll],
-  ["climbing:url:", allowAll],
+  ["climbing:url:", urlTag],
   ["climbing:hazard:", yesNoTag],
-  ["climbing:inclination:", numericTag],
+  ["climbing:inclination:", yesNoOrNumericTag],
 ];
 
 export function getTagRule(featureType: OSMClimbingFeatureType | undefined, key: Key): TagRule | undefined {
