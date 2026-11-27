@@ -3,6 +3,7 @@ import { join, dirname } from "path";
 
 import { ReverseGeolocator } from "./reverse-geolocation.ts";
 import type { Coordinates, DataJSON, GeographicFolderElement, OverpassRequest } from "./types.ts";
+import { isPlaygroundClimbing } from "./world-points.ts";
 import { ensureDirExists, slugify, USER_AGENT } from "@bloknote/reverse-geocoding-data";
 import {
   addRawSectorStats,
@@ -54,6 +55,8 @@ function readOsmData(osmDataFiles: string[]): Map<string, OsmFeature> {
 
     const rawData: OverpassRequest = JSON.parse(readFileSync(osmDataFile, "utf8"));
     for (const el of rawData.elements) {
+      // Playground climbing walls are equipment, not climbing destinations (issue #262)
+      if (el.tags && isPlaygroundClimbing(el.tags as Record<string, string>)) continue;
       const id = getStaticIdentifier(el.type, el.id);
       // The files may have been downloaded at different times: keep the latest version
       const existing = osmElementsMap.get(id);
@@ -151,7 +154,9 @@ function addPathToMapTree(mapTree: MapTree, path: string[], index = 0) {
     return;
   }
   addPathToMapTree(
-    mapTree.children.getOrInsertComputed(path[index], () => ({ children: new Map() })),
+    mapTree.children.getOrInsertComputed(path[index], () => ({
+      children: new Map(),
+    })),
     path,
     index + 1,
   );
@@ -358,7 +363,11 @@ function collectRecentFeatures(directory: string, features: OsmFeature[] = []): 
  * previous-version feature that was used for its change summary, so two consecutive builds
  * chain without re-fetching (the feature of the previous build is the new previous version).
  */
-type PreviousVersionsCacheEntry = { version: number; feature: OsmFeature; previous?: OsmFeature };
+type PreviousVersionsCacheEntry = {
+  version: number;
+  feature: OsmFeature;
+  previous?: OsmFeature;
+};
 type PreviousVersionsCache = Record<string, PreviousVersionsCacheEntry>;
 
 function loadPreviousVersionsCache(cacheFile: string): PreviousVersionsCache {
@@ -401,7 +410,9 @@ async function fetchPreviousVersions(
     }
     try {
       const url = `${OSM_BASE_URL}/api/0.6/${feature.type}/${feature.id}/${version - 1}.json`;
-      const response = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+      const response = await fetch(url, {
+        headers: { "User-Agent": USER_AGENT },
+      });
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
       const element = ((await response.json()) as { elements: OsmFeature[] }).elements.find(
         (e) => e.type === feature.type && e.id === feature.id,
@@ -434,9 +445,15 @@ async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string
   function visit(directory: string, slug: string): GeneratedDirectory {
     const dataPath = join(directory, "data.json");
     const data = existsSync(dataPath) ? (JSON.parse(readFileSync(dataPath, "utf8")) as DataJSON) : undefined;
-    const childDirectories = readdirSync(directory, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+    const childDirectories = readdirSync(directory, {
+      withFileTypes: true,
+    }).filter((entry) => entry.isDirectory());
     const children: DataJSONRecord = {};
-    const childResults: { slug: string; directory: string; result: GeneratedDirectory }[] = [];
+    const childResults: {
+      slug: string;
+      directory: string;
+      result: GeneratedDirectory;
+    }[] = [];
     let totalRoutes = 0;
     // Raw climbing stats of this subtree, aggregated bottom-up (issue #114): the clients then only
     // convert the few grade buckets to their preferred scale instead of parsing every feature.
@@ -492,6 +509,10 @@ async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string
     join(worldDirectory, "data-version.json"),
     // bytes is the decompressed size of download.json: when the static host serves it with
     // gzip/brotli, the transfer content-length is smaller and cannot be used as download total.
-    JSON.stringify({ version, date: generatedAt.toISOString(), bytes: Buffer.byteLength(downloadJson) }),
+    JSON.stringify({
+      version,
+      date: generatedAt.toISOString(),
+      bytes: Buffer.byteLength(downloadJson),
+    }),
   );
 }

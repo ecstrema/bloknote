@@ -40,6 +40,16 @@ out center meta;`;
 const PLACE_CLIMBING_RE = /^(area|crag|boulder)(;.*)?$/;
 const ROUTE_CLIMBING_RE = /^(route|bolt|abseil|toprope|drytooling|via_ferrata)/;
 
+/**
+ * Playground climbing walls are playground equipment, not climbing destinations: they clutter the
+ * directory, its stats, and the diagnostics (issues #258, #262). A dedicated `playground` tag
+ * (e.g. `playground=climbingwall`) or a `leisure=playground` tag marks them. Real gyms keep
+ * `leisure=pitch` / `sports_centre` tags, which cannot be skipped yet (issue #262).
+ */
+export function isPlaygroundClimbing(tags: Record<string, string>): boolean {
+  return tags.playground !== undefined || tags.leisure === "playground";
+}
+
 function isPlaceFeature(tags: Record<string, string>): boolean {
   if (!tags.climbing) return true;
   if (PLACE_CLIMBING_RE.test(tags.climbing)) return true;
@@ -72,7 +82,7 @@ export function toClimbingPoint(el: OsmFeature): ClimbingPoint | undefined {
   if (!coordinates) return;
 
   const tags = (el.tags ?? {}) as Record<string, string>;
-  if (!isPlaceFeature(tags)) return;
+  if (!isPlaceFeature(tags) || isPlaygroundClimbing(tags)) return;
 
   return {
     id: `${el.type[0]}${el.id}`,
