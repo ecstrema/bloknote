@@ -674,6 +674,24 @@ class AtProtoClient {
       label: feature.tags?.name,
       ...(comment?.trim() ? { comment: comment.trim() } : {}),
     };
+    return this.#saveNewTick(record, feature);
+  }
+
+  /**
+   * Minimal quick tick (issue #253): no date, no ascent style, no comment — the details can be
+   * added afterwards from the tick popup or the logbook.
+   */
+  async addQuickTick(feature: OsmFeature): Promise<LocalTickEntry> {
+    if (!this.session) throw new Error("ATProto is not configured");
+    const record: LocalTickEntry = {
+      subject: { type: feature.type, id: feature.id },
+      label: feature.tags?.name,
+    };
+    return this.#saveNewTick(record, feature);
+  }
+
+  /** Uploads a new tick when the feature already exists on OSM, then caches it locally */
+  async #saveNewTick(record: LocalTickEntry, feature: OsmFeature): Promise<LocalTickEntry> {
     if (this.session && feature.id > 0) {
       try {
         record.uri = await this.#createRemoteRecord(TICK_COLLECTION, remoteTickRecord(record));
@@ -742,10 +760,11 @@ class AtProtoClient {
     return entry;
   }
 
-  /** Edits a tick (ascent, date, comment) locally and in the PDS when synced */
+  /** Edits a tick (ascent, date, comment) locally and in the PDS when synced. Set `climbedAt` to
+   * `null` to delete the date (minimal ticks carry no date, issue #253). */
   async updateTick(
     entry: LocalTickEntry,
-    patch: { ascent?: TickAscent; climbedAt?: string; comment?: string },
+    patch: { ascent?: TickAscent; climbedAt?: string | null; comment?: string },
   ): Promise<LocalTickEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
     if (patch.ascent !== undefined) {
@@ -754,7 +773,10 @@ class AtProtoClient {
       delete entry.hangs;
       Object.assign(entry, patch.ascent);
     }
-    if (patch.climbedAt !== undefined) entry.climbedAt = patch.climbedAt;
+    if (patch.climbedAt !== undefined) {
+      if (patch.climbedAt === null) delete entry.climbedAt;
+      else entry.climbedAt = patch.climbedAt;
+    }
     if (patch.comment !== undefined) {
       const trimmed = patch.comment.trim();
       if (trimmed) entry.comment = trimmed;

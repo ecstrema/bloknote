@@ -42,16 +42,16 @@
     onclick={toggle}
     title={atproto.configured
       ? starred
-        ? "Remove bookmark"
-        : "Bookmark this climb"
-      : "Connect Atmosphere in the settings to bookmark climbs"}
+        ? "Remove from your to-do list"
+        : "Add this climb to your to-do list"
+      : "Connect Atmosphere in the settings to add climbs to your to-do list"}
     aria-label={atproto.configured
       ? starred
-        ? "Remove bookmark"
-        : "Bookmark this climb"
-      : "Connect Atmosphere in the settings to bookmark climbs"}
+        ? "Remove from your to-do list"
+        : "Add this climb to your to-do list"
+      : "Connect Atmosphere in the settings to add climbs to your to-do list"}
   >
     <span class="icon-[lucide--bookmark] shrink-0 size-4" class:text-amber-500={starred}></span>
-    {#if labelled}{starred ? "Bookmarked" : "Bookmark"}{/if}
+    {#if labelled}{starred ? "On to-do list" : "To-do"}{/if}
   </Button>
 </div>

@@ -16159,11 +16159,13 @@ msgstr "Log a tick for {0} selected items."
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/tick-button.svelte
 msgid "Ascent style"
 msgstr "Ascent style"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Onsight"
@@ -16171,6 +16173,7 @@ msgstr "Onsight"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Flash"
@@ -16178,6 +16181,7 @@ msgstr "Flash"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Redpoint"
@@ -16185,6 +16189,7 @@ msgstr "Redpoint"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Attempt"
 msgstr "Attempt"
@@ -16377,6 +16382,7 @@ msgid "Bloknote home"
 msgstr "Bloknote home"
 
 #: src/lib/components/route-logbook.svelte
+#: src/lib/components/tick-button.svelte
 msgid "Could not log tick"
 msgstr "Could not log tick"
 
@@ -16397,6 +16403,7 @@ msgid "Activity & Comments"
 msgstr "Activity & Comments"
 
 #: src/lib/components/route-logbook.svelte
+#: src/lib/components/tick-button.svelte
 msgid "Ascent note (optional)"
 msgstr "Ascent note (optional)"
 
@@ -16417,8 +16424,10 @@ msgid "<0/> Post comment"
 msgstr "<0/> Post comment"
 
 #. 0: routeTicks.length
+#. 0: routeTicks.length
 #. 0: sortedTicks.length
 #: src/lib/components/route-logbook.svelte
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Your ticks ({0})"
 msgstr "Your ticks ({0})"
@@ -16786,33 +16795,25 @@ msgstr "MultiLineString"
 msgid "Could not update bookmark"
 msgstr "Could not update bookmark"
 
-#: src/lib/components/bookmark-button.svelte
 #: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Bookmarked"
 msgstr "Bookmarked"
 
-#: src/lib/components/bookmark-button.svelte
-msgid "Bookmark"
-msgstr "Bookmark"
+#~ msgid "Bookmark"
+#~ msgstr "Bookmark"
 
 #: src/lib/components/route-logbook.svelte
 msgid "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
 msgstr "Ticks, comments and bookmarks are currently private: only you can see them. Follow <0>issue #172</0> for shared, live comments across apps."
 
-#: src/lib/components/bookmark-button.svelte
-#: src/lib/components/bookmark-button.svelte
-msgid "Remove bookmark"
-msgstr "Remove bookmark"
+#~ msgid "Remove bookmark"
+#~ msgstr "Remove bookmark"
 
-#: src/lib/components/bookmark-button.svelte
-#: src/lib/components/bookmark-button.svelte
-msgid "Bookmark this climb"
-msgstr "Bookmark this climb"
+#~ msgid "Bookmark this climb"
+#~ msgstr "Bookmark this climb"
 
-#: src/lib/components/bookmark-button.svelte
-#: src/lib/components/bookmark-button.svelte
-msgid "Connect Atmosphere in the settings to bookmark climbs"
-msgstr "Connect Atmosphere in the settings to bookmark climbs"
+#~ msgid "Connect Atmosphere in the settings to bookmark climbs"
+#~ msgstr "Connect Atmosphere in the settings to bookmark climbs"
 
 #: src/routes/docs/+page.svelte
 #: src/routes/docs/+page.svelte
@@ -17091,6 +17092,7 @@ msgid "<0/> Navigate..."
 msgstr "<0/> Navigate..."
 
 #: src/lib/components/route-logbook.svelte
+#: src/lib/components/tick-button.svelte
 msgid "Could not delete tick"
 msgstr "Could not delete tick"
 
@@ -17109,6 +17111,8 @@ msgstr "Remove your rating"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/route-logbook.svelte
+#: src/lib/components/tick-button.svelte
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Delete tick"
@@ -17564,12 +17568,14 @@ msgstr "Clear the active search"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "Send"
 msgstr "Send"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Pinkpoint"
@@ -17577,6 +17583,7 @@ msgstr "Pinkpoint"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Hangdog"
@@ -17584,6 +17591,7 @@ msgstr "Hangdog"
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/tick-button.svelte
 #: src/routes/settings/logbook/ticks-list.svelte
 #: src/routes/settings/logbook/user-stats-panel.svelte
 msgid "Bailed"
@@ -17999,3 +18007,75 @@ msgstr "{0} routes in the results"
 #: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Tag, e.g. climbing:length>40"
 msgstr "Tag, e.g. climbing:length>40"
+
+#: src/lib/components/bookmark-button.svelte
+#: src/lib/components/bookmark-button.svelte
+msgid "Remove from your to-do list"
+msgstr "Remove from your to-do list"
+
+#: src/lib/components/bookmark-button.svelte
+#: src/lib/components/bookmark-button.svelte
+msgid "Add this climb to your to-do list"
+msgstr "Add this climb to your to-do list"
+
+#: src/lib/components/bookmark-button.svelte
+#: src/lib/components/bookmark-button.svelte
+msgid "Connect Atmosphere in the settings to add climbs to your to-do list"
+msgstr "Connect Atmosphere in the settings to add climbs to your to-do list"
+
+#: src/lib/components/bookmark-button.svelte
+msgid "On to-do list"
+msgstr "On to-do list"
+
+#: src/lib/components/bookmark-button.svelte
+msgid "To-do"
+msgstr "To-do"
+
+#: src/lib/components/tick-button.svelte
+msgid "Could not update tick"
+msgstr "Could not update tick"
+
+#: src/lib/components/tick-button.svelte
+#: src/lib/components/tick-button.svelte
+msgid "Edit your ticks"
+msgstr "Edit your ticks"
+
+#: src/lib/components/tick-button.svelte
+#: src/lib/components/tick-button.svelte
+msgid "Tick this climb"
+msgstr "Tick this climb"
+
+#: src/lib/components/tick-button.svelte
+#: src/lib/components/tick-button.svelte
+msgid "Connect Atmosphere in the settings to log ticks"
+msgstr "Connect Atmosphere in the settings to log ticks"
+
+#: src/lib/components/tick-button.svelte
+msgid "Change the date"
+msgstr "Change the date"
+
+#: src/lib/components/tick-button.svelte
+msgid "Set the date to today"
+msgstr "Set the date to today"
+
+#: src/lib/components/tick-button.svelte
+msgid "Date"
+msgstr "Date"
+
+#: src/lib/components/tick-button.svelte
+#: src/lib/components/tick-button.svelte
+msgid "Remove the date"
+msgstr "Remove the date"
+
+#: src/lib/components/tick-button.svelte
+msgid "Ascent note"
+msgstr "Ascent note"
+
+#: src/lib/components/tick-button.svelte
+msgid "See all ticks"
+msgstr "See all ticks"
+
+#. 0: routeTicks.length === 1 ? "tick" \\: `all ${routeTicks.length} ticks`
+#: src/lib/components/tick-button.svelte
+msgid "<0/> Delete {0}"
+msgstr "<0/> Delete {0}"

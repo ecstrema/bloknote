@@ -37,6 +37,7 @@
   import EditableLength from "#components/editable/editable-length.svelte";
   import EditablePitches from "#components/editable/editable-pitches.svelte";
   import BookmarkButton from "#components/bookmark-button.svelte";
+  import TickButton from "#components/tick-button.svelte";
   import RssFeedButton from "#components/rss-feed-button.svelte";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
   import { dataClient } from "#lib/data/network/data-client.js";
@@ -364,7 +365,15 @@
       <EditablePitches feature={item.feature} featureSlug={itemSlug} />
       <ClimbingStyles feature={item.feature} featureSlug={itemSlug} editable />
     {/if}
-    <BookmarkButton class="ms-auto" feature={item.feature} />
+    {#if itemType === "route"}
+      <!-- Quick tick button (issue #253), just to the left of the to-do list button -->
+      <div class="ms-auto flex items-center gap-1">
+        <TickButton feature={item.feature} />
+        <BookmarkButton feature={item.feature} />
+      </div>
+    {:else}
+      <BookmarkButton class="ms-auto" feature={item.feature} />
+    {/if}
   {/if}
 </div>
 
