@@ -1,10 +1,14 @@
 import { gradeTextToReference } from "#lib/data/db/grade-text.js";
-import type { SearchFilters } from "#lib/data/db/types.js";
+import { formatTagFilter, parseTagFilter } from "#lib/data/db/tag-filter.js";
+import type { SearchFilters, TagFilter } from "#lib/data/db/types.js";
 import { atproto } from "#lib/data/network/atproto.svelte.js";
 
 export type PremadeFilterKind = "ticked" | "bookmarked" | "commented" | "rated";
 
-const STORAGE_KEY = "bloknote:search-filters";
+/** URL query params holding the complete search query (issue #268) */
+const URL_KEYS = ["q", "types", "styles", "tags", "mine", "gmin", "gmax", "minlen"] as const;
+
+const SEARCH_TYPES: string[] = ["route", "area", "gym"];
 
 export interface SearchResult {
   matches: Set<string>;
@@ -33,7 +37,7 @@ class SearchState {
   premades = $state<PremadeFilterKind[]>([]);
   /** Raw text of the "longer than" filter, in meters */
   minLengthText = $state("");
-  /** False until the persisted filters have been restored, so that ?q= does not race with them */
+  /** False until the query has been restored from the URL params, so that the sync effect does not wipe them */
   restored = $state(false);
 
   /** The streaming search result, written by the sidebar effect and read by the tree and the dialog */
@@ -91,31 +95,49 @@ class SearchState {
     return { ...$state.snapshot(this.filters), mineRefs: this.mineRefs, minLength: this.minLength };
   }
 
-  restore() {
-    try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
-      if (stored) {
-        if (stored.filters) this.filters = { ...this.filters, ...stored.filters };
-        if (stored.gradeText) this.gradeText = { ...this.gradeText, ...stored.gradeText };
-        if (Array.isArray(stored.premades)) {
-          this.premades = stored.premades.filter((kind: unknown): kind is PremadeFilterKind =>
-            PREMADE_KINDS.includes(kind as PremadeFilterKind),
-          );
-        }
-      }
-    } catch {
-      // Unreadable settings are ignored
-    }
+  /**
+   * Restores the search query from the URL params (issue #268): the query belongs to the tab,
+   * so it is stored in the address bar instead of localStorage, which also made it leak
+   * across tabs. Returns true when any search param was present.
+   */
+  restoreFromUrl(params: URLSearchParams): boolean {
+    const hasAny = URL_KEYS.some((key) => params.has(key));
     this.restored = true;
+    if (!hasAny) return false;
+    const list = (key: string) => params.get(key)?.split(",").map(decodeURIComponent).filter(Boolean) ?? [];
+    this.filters = {
+      text: params.get("q") ?? "",
+      types: list("types").filter((t): t is SearchFilters["types"][number] => SEARCH_TYPES.includes(t)),
+      styles: list("styles"),
+      tags: list("tags")
+        .map(parseTagFilter)
+        .filter((tag): tag is TagFilter => !!tag),
+      gradeMin: undefined,
+      gradeMax: undefined,
+    };
+    this.premades = list("mine").filter((kind): kind is PremadeFilterKind =>
+      PREMADE_KINDS.includes(kind as PremadeFilterKind),
+    );
+    this.gradeText = { min: params.get("gmin") ?? "", max: params.get("gmax") ?? "" };
+    this.minLengthText = params.get("minlen") ?? "";
+    return true;
   }
 
-  persist() {
-    try {
-      const data = $state.snapshot({ filters: this.filters, gradeText: this.gradeText, premades: this.premades });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch {
-      // The in-memory state still works when storage is unavailable
-    }
+  /** Writes the complete search query into the given URL */
+  writeToUrl(url: URL) {
+    const filters = $state.snapshot(this.filters);
+    const setOrDelete = (key: string, value: string) => {
+      if (value) url.searchParams.set(key, value);
+      else url.searchParams.delete(key);
+    };
+    setOrDelete("q", filters.text.trim());
+    setOrDelete("types", filters.types.join(","));
+    setOrDelete("styles", filters.styles.join(","));
+    setOrDelete("tags", filters.tags.map((tag) => encodeURIComponent(formatTagFilter(tag))).join(","));
+    setOrDelete("mine", this.premades.join(","));
+    setOrDelete("gmin", this.gradeText.min.trim());
+    setOrDelete("gmax", this.gradeText.max.trim());
+    setOrDelete("minlen", this.minLengthText.trim());
   }
 
   clear() {

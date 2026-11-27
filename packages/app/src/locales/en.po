@@ -15833,9 +15833,8 @@ msgstr "Upload image"
 msgid "Filename <0/>"
 msgstr "Filename <0/>"
 
-#: src/lib/components/topo/add-image-dialog.svelte
-msgid "License <0/>"
-msgstr "License <0/>"
+#~ msgid "License <0/>"
+#~ msgstr "License <0/>"
 
 #. 0: name
 #: src/lib/components/map-links.svelte
@@ -17832,6 +17831,7 @@ msgid "Suggest sectors"
 msgstr "Suggest sectors"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Max distance between routes"
 msgstr "Max distance between routes"
 
@@ -17845,9 +17845,8 @@ msgstr "Sector {0} name (optional)"
 msgid "{0} route{1} without coordinates cannot be clustered."
 msgstr "{0} route{1} without coordinates cannot be clustered."
 
-#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-msgid "Max distance between routes <0/>"
-msgstr "Max distance between routes <0/>"
+#~ msgid "Max distance between routes <0/>"
+#~ msgstr "Max distance between routes <0/>"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Create sectors"
@@ -18160,3 +18159,39 @@ msgstr "Edit the box contents"
 #: src/lib/components/map-info-box.svelte
 msgid "Close the information box"
 msgstr "Close the information box"
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "50 m"
+msgstr "50 m"
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "100 m"
+msgstr "100 m"
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "200 m"
+msgstr "200 m"
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "500 m"
+msgstr "500 m"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Select a license"
+msgstr "Select a license"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "CC BY-SA 4.0"
+msgstr "CC BY-SA 4.0"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "CC BY 4.0"
+msgstr "CC BY 4.0"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "CC0"
+msgstr "CC0"
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "License"
+msgstr "License"

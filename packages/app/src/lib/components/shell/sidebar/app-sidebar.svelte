@@ -56,30 +56,17 @@
 
   onMount(() => {
     restoreSidebarOrders();
-    searchState.restore();
+    // The search query belongs to the tab: it is restored from the URL params instead of
+    // localStorage, which restored it in every open tab (issue #268)
+    searchState.restoreFromUrl(getBrowserUrl().searchParams);
   });
 
-  $effect(() => {
-    if (searchState.restored) searchState.persist();
-  });
-
-  // The ?q= URL param pre-fills the search once the stored filters have been restored, so that
-  // external links can send someone to Bloknote with a specific search. It wins over the
-  // localStorage filters, and is left untouched when navigating without the param.
-  $effect(() => {
-    if (!searchState.restored) return;
-    // Shallow gotos don't update `page.url`, so read the browser URL (issue #212)
-    const q = getBrowserUrl().searchParams.get("q");
-    if (q !== null) searchState.filters.text = q;
-  });
-
-  // Keep the URL in sync with the current search query so it can be copied and shared.
+  // Keep the URL in sync with the complete search query so it can be copied and shared.
   // A replacing shallow goto avoids flooding the history on every keystroke.
   $effect(() => {
-    const text = searchState.filters.text;
+    if (!searchState.restored) return;
     const url = new URL(window.location.href);
-    if (text.trim() !== "") url.searchParams.set("q", text);
-    else url.searchParams.delete("q");
+    searchState.writeToUrl(url);
     void goto(url, { state: history.state, replace: true, shallow: true });
   });
 

@@ -236,7 +236,9 @@
         </Dialog.Header>
         {#if orphanRoutes.length > 0}
           <label class="flex items-center justify-between gap-2 text-sm">
-            Max distance between routes
+            <!-- The text in a span keeps wuchale from wrapping the label and the select options
+                 into a nested translation context with an undefined variable (issue #267) -->
+            <span>Max distance between routes</span>
             <Select aria-label="Max distance between routes" bind:value={clusterThreshold}>
               <option value={50}>50 m</option>
               <option value={100}>100 m</option>

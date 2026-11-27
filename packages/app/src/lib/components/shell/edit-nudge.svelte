@@ -18,6 +18,11 @@
     return () => clearTimeout(timeout);
   });
 
+  // Logging in from the nudge closes it, and it never renders while logged in (issue #265)
+  $effect(() => {
+    if (loggedIn) visible = false;
+  });
+
   function dismiss() {
     visible = false;
     localStorage.setItem(DISMISS_KEY, "true");

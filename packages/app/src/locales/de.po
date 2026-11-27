@@ -15833,9 +15833,8 @@ msgstr "Bild hochladen"
 msgid "Filename <0/>"
 msgstr "Dateiname <0/>"
 
-#: src/lib/components/topo/add-image-dialog.svelte
-msgid "License <0/>"
-msgstr "Lizenz <0/>"
+#~ msgid "License <0/>"
+#~ msgstr "Lizenz <0/>"
 
 #. 0: name
 #: src/lib/components/map-links.svelte
@@ -17832,6 +17831,7 @@ msgid "Suggest sectors"
 msgstr "Sektoren vorschlagen"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Max distance between routes"
 msgstr "Max. Abstand zwischen Routen"
 
@@ -17845,9 +17845,8 @@ msgstr "Name des Sektors {0} (optional)"
 msgid "{0} route{1} without coordinates cannot be clustered."
 msgstr "{0} Route{1} ohne Koordinaten kann/können nicht geclustert werden."
 
-#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
-msgid "Max distance between routes <0/>"
-msgstr "Max. Abstand zwischen Routen <0/>"
+#~ msgid "Max distance between routes <0/>"
+#~ msgstr "Max. Abstand zwischen Routen <0/>"
 
 #: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
 msgid "Create sectors"
@@ -18159,4 +18158,40 @@ msgstr ""
 
 #: src/lib/components/map-info-box.svelte
 msgid "Close the information box"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "50 m"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "100 m"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "200 m"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/sidebar-bulk-dialogs.svelte
+msgid "500 m"
+msgstr ""
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "Select a license"
+msgstr ""
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "CC BY-SA 4.0"
+msgstr ""
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "CC BY 4.0"
+msgstr ""
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "CC0"
+msgstr ""
+
+#: src/lib/components/topo/add-image-dialog.svelte
+msgid "License"
 msgstr ""

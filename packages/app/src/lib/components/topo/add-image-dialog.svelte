@@ -187,7 +187,9 @@
               <Input bind:value={uploadAuthor} required />
             </label>
             <label class="grid gap-1 text-sm sm:col-span-2">
-              License
+              <!-- The text in a span keeps wuchale from wrapping the label and the select options
+                   into a nested translation context with an undefined variable (issue #267) -->
+              <span>License</span>
               <Select bind:value={uploadLicense} required>
                 <option value="" disabled>Select a license</option>
                 <option value="cc-by-sa-4.0">CC BY-SA 4.0</option>
