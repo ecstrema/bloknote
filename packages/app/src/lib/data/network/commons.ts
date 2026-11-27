@@ -7,13 +7,12 @@ const FLOW_STORAGE_KEY = "bloknote:commons-oauth";
 const CLIENT_ID = "cb1b3304f08a90e52e8846257af8b143";
 
 /**
- * Wikimedia compares the redirect_uri of the authorization request verbatim with the callback
- * registered for the "Climbhub" consumer on meta.wikimedia.org — any mismatch fails the consent
- * step with "Client authentication failed" (issue #11). The consumer currently registers
- * `https://ecstrema.github.io/climbhub/commons-oauth`, but the site moved to /bloknote, so the
- * registration must be updated to `${window.location.origin}/bloknote/commons-oauth` (plus the
- * localhost dev URL) via Special:OAuthConsumerRegistration/update. The client itself is public
- * ("Client is confidential: No"), so the PKCE flow below without a client_secret is correct.
+ * Wikimedia OAuth 2.0 flow with PKCE, mirroring the requests of the reference implementation
+ * m3api-oauth2 (https://gitlab.wikimedia.org/repos/m3api/m3api-oauth2): notably, `redirect_uri` is
+ * NOT sent — MediaWiki defaults it to the callback registered for the "Bloknote" consumer on
+ * meta.wikimedia.org (`https://ecstrema.github.io/bloknote/commons-oauth`), and sending it
+ * explicitly trips the client validation with "Client authentication failed" (issue #244). The
+ * client is public ("Client is confidential: No"), so no client_secret is used.
  */
 
 type CommonsToken = { access_token: string; expires_at: number };
@@ -59,18 +58,16 @@ export async function startCommonsLogin() {
     .replaceAll("/", "_")
     .replace(/=+$/, "");
   const state = randomValue();
-  const redirectUri = new URL(resolve("/commons-oauth"), window.location.origin).toString();
 
   sessionStorage.setItem(
     FLOW_STORAGE_KEY,
-    JSON.stringify({ state, verifier, redirectUri, returnTo: window.location.href }),
+    JSON.stringify({ state, verifier, returnTo: window.location.href }),
   );
 
   const authorization = new URL(`${REST_URL}/oauth2/authorize`);
   authorization.search = new URLSearchParams({
     response_type: "code",
     client_id: CLIENT_ID,
-    redirect_uri: redirectUri,
     state,
     code_challenge: challenge,
     code_challenge_method: "S256",
@@ -87,10 +84,9 @@ export async function completeCommonsLogin(search: string): Promise<string> {
   if (!flow) throw new Error("The Wikimedia sign-in session expired. Please try again.");
   sessionStorage.removeItem(FLOW_STORAGE_KEY);
 
-  const { state, verifier, redirectUri, returnTo } = JSON.parse(flow) as {
+  const { state, verifier, returnTo } = JSON.parse(flow) as {
     state: string;
     verifier: string;
-    redirectUri: string;
     returnTo: string;
   };
   if (!params.get("code") || params.get("state") !== state) {
@@ -102,16 +98,24 @@ export async function completeCommonsLogin(search: string): Promise<string> {
     client_id: CLIENT_ID,
     code: params.get("code")!,
     code_verifier: verifier,
-    redirect_uri: redirectUri,
   });
   const response = await fetch(`${REST_URL}/oauth2/access_token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
   });
-  const result = (await response.json()) as { access_token?: string; expires_in?: number; error?: string };
+  const result = (await response.json()) as {
+    access_token?: string;
+    expires_in?: number;
+    error?: string;
+    error_description?: string;
+    message?: string;
+  };
   if (!response.ok || !result.access_token) {
-    throw new Error(result.error ?? "Wikimedia did not return an access token.");
+    throw new Error(
+      [result.error_description, result.message, result.error].find((message) => !!message) ??
+        "Wikimedia did not return an access token.",
+    );
   }
 
   sessionStorage.setItem(
