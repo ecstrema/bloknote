@@ -21,12 +21,14 @@ const FLOW_MAX_AGE_MS = 60 * 60_000;
  * (storage partitioning drops it, breaking the callback with "sign-in session expired").
  *
  * MediaWiki consumers have a single, exactly matched callback URL (the callback_is_prefix option
- * only allows paths under it, so one consumer can never cover both github.io and localhost). Local
- * development therefore uses a separate "Bloknote dev" consumer whose callback is
- * `http://localhost:5173/bloknote/commons-oauth`: put its client id in `packages/app/.env` as
- * VITE_COMMONS_CLIENT_ID.
+ * only allows paths under it, so one consumer can never cover both github.io and localhost).
+ * Local development therefore uses a separate "Bloknote dev" consumer whose callback is
+ * `http://localhost:5173/bloknote/commons-oauth`. Its client id is inlined as the dev default
+ * below (a public client id is not a secret); VITE_COMMONS_CLIENT_ID can override it.
  */
-const CLIENT_ID = import.meta.env.VITE_COMMONS_CLIENT_ID ?? "cb1b3304f08a90e52e8846257af8b143";
+const CLIENT_ID =
+  import.meta.env.VITE_COMMONS_CLIENT_ID ??
+  (import.meta.env.DEV ? "21c9d46b4143d548fbbe5c770a96fe98" : "cb1b3304f08a90e52e8846257af8b143");
 
 type CommonsToken = { access_token: string; expires_at: number };
 
