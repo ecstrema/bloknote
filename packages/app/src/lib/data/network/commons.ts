@@ -4,6 +4,8 @@ const API_URL = "https://commons.wikimedia.org/w/api.php";
 const REST_URL = "https://commons.wikimedia.org/w/rest.php";
 const TOKEN_STORAGE_KEY = "bloknote:commons-token";
 const FLOW_STORAGE_KEY = "bloknote:commons-oauth";
+/** Pending sign-in flows expire after this long (state + PKCE verifier are short-lived) */
+const FLOW_MAX_AGE_MS = 15 * 60_000;
 const CLIENT_ID = "cb1b3304f08a90e52e8846257af8b143";
 
 /**
@@ -13,9 +15,15 @@ const CLIENT_ID = "cb1b3304f08a90e52e8846257af8b143";
  * meta.wikimedia.org (`https://ecstrema.github.io/bloknote/commons-oauth`), and sending it
  * explicitly trips the client validation with "Client authentication failed" (issue #244). The
  * client is public ("Client is confidential: No"), so no client_secret is used.
+ *
+ * The pending flow (state + PKCE verifier) is stored in localStorage rather than sessionStorage:
+ * sessionStorage does not reliably survive the round trip through the Wikimedia login domains
+ * (storage partitioning drops it, breaking the callback with "sign-in session expired").
  */
 
 type CommonsToken = { access_token: string; expires_at: number };
+
+type CommonsFlow = { state: string; verifier: string; returnTo: string; createdAt: number };
 
 function randomValue() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
@@ -48,6 +56,24 @@ export function logoutCommons() {
   sessionStorage.removeItem(TOKEN_STORAGE_KEY);
 }
 
+function writeFlow(flow: CommonsFlow) {
+  localStorage.setItem(FLOW_STORAGE_KEY, JSON.stringify(flow));
+}
+
+/** Reads and consumes the pending sign-in flow, when it exists and has not expired */
+function readFlow(): CommonsFlow | undefined {
+  const raw = localStorage.getItem(FLOW_STORAGE_KEY);
+  if (!raw) return;
+  localStorage.removeItem(FLOW_STORAGE_KEY);
+  try {
+    const flow = JSON.parse(raw) as CommonsFlow;
+    if (Date.now() - flow.createdAt <= FLOW_MAX_AGE_MS) return flow;
+  } catch {
+    // Corrupted flow: drop it
+  }
+  return;
+}
+
 export async function startCommonsLogin() {
   if (!CLIENT_ID) throw new Error("Wikimedia upload is not configured for this deployment.");
 
@@ -59,10 +85,7 @@ export async function startCommonsLogin() {
     .replace(/=+$/, "");
   const state = randomValue();
 
-  sessionStorage.setItem(
-    FLOW_STORAGE_KEY,
-    JSON.stringify({ state, verifier, returnTo: window.location.href }),
-  );
+  writeFlow({ state, verifier, returnTo: window.location.href, createdAt: Date.now() });
 
   const authorization = new URL(`${REST_URL}/oauth2/authorize`);
   authorization.search = new URLSearchParams({
@@ -80,15 +103,10 @@ export async function completeCommonsLogin(search: string): Promise<string> {
   const oauthError = params.get("error_description") ?? params.get("error");
   if (oauthError) throw new Error(`Wikimedia sign-in failed: ${oauthError}`);
 
-  const flow = sessionStorage.getItem(FLOW_STORAGE_KEY);
+  const flow = readFlow();
   if (!flow) throw new Error("The Wikimedia sign-in session expired. Please try again.");
-  sessionStorage.removeItem(FLOW_STORAGE_KEY);
 
-  const { state, verifier, returnTo } = JSON.parse(flow) as {
-    state: string;
-    verifier: string;
-    returnTo: string;
-  };
+  const { state, verifier, returnTo } = flow;
   if (!params.get("code") || params.get("state") !== state) {
     throw new Error("Wikimedia sign-in could not be verified. Please try again.");
   }
