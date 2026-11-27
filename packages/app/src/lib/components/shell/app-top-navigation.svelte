@@ -9,6 +9,7 @@
   import type { BreadcrumbSegment } from "#lib/types.js";
   import { onMount, settled } from "svelte";
   import { getAppState } from "#lib/data/app-state.js";
+  import { searchState } from "#lib/components/shell/sidebar/search-state.svelte.js";
 
   const appState = getAppState();
   const breadcrumbs = $derived.by(() => appState.breadcrumbs.items);
@@ -128,6 +129,22 @@
       {#each shownBreadcrumbSegments as breadcrumb, index (breadcrumb.slug)}
         {@render breadcrumbFromDataJSON(breadcrumb, lastElement, shownBreadcrumbSegments[index + 1]?.slug)}
       {/each}
+
+      {#if searchState.active}
+        <!-- Very visible indicator that a search filters the content, one click to remove it (issue #166) -->
+        <Breadcrumb.Item>
+          <Button
+            size="xs"
+            variant="secondary"
+            onclick={() => searchState.clear()}
+            aria-label="Clear the active search"
+          >
+            <span class="icon-[lucide--search] shrink-0 size-3.5"></span>
+            <span class="max-w-40 truncate">{searchState.filters.text.trim() || "Filters"}</span>
+            <span class="icon-[lucide--x] shrink-0 size-3.5"></span>
+          </Button>
+        </Breadcrumb.Item>
+      {/if}
     </Breadcrumb.List>
   </Breadcrumb.Root>
 {/if}
