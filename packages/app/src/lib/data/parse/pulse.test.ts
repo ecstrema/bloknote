@@ -177,6 +177,39 @@ describe("historyVersions", () => {
     expect(latestRelation!.geometryChange).toBe("member list changed");
   });
 
+  it("detects way geometry changes when only a member node moved (issue #220)", () => {
+    const wayV1: OsmFeature = {
+      ...feature("2024-01-01T00:00:00Z"),
+      type: "way",
+      id: 2,
+      version: 1,
+      nodes: [10, 11],
+    };
+    const wayV2: OsmFeature = { ...wayV1, version: 2, timestamp: "2025-06-01T00:00:00Z" };
+    const node10 = [
+      { ...feature("2024-01-01T00:00:00Z"), id: 10, lat: 48.4, lon: 2.6 },
+      { ...feature("2024-01-01T00:00:00Z"), id: 10, version: 2, lat: 48.41, lon: 2.6, timestamp: "2025-03-01T00:00:00Z" },
+    ];
+    const node11 = [{ ...feature("2024-01-01T00:00:00Z"), id: 11, lat: 48.4, lon: 2.61 }];
+    const nodeHistories = new Map([
+      [10, node10],
+      [11, node11],
+    ]);
+    const [latest] = historyVersions([wayV1, wayV2], nodeHistories);
+    expect(latest!.geometryChange).toMatch(/^nodes moved 1\.1 km \(1 node: 10\)$/);
+
+    // Without the resolved node histories, the blind spot remains
+    expect(historyVersions([wayV1, wayV2])[0]!.geometryChange).toBeUndefined();
+
+    // Sub-decimeter moves are ignored
+    const tinyMove = new Map([
+      [10, [node10[0]!]],
+      [11, [{ ...node11[0]!, lat: 48.4, lon: 2.6100000001 }]],
+    ]);
+    const [unchanged] = historyVersions([wayV1, wayV2], tinyMove);
+    expect(unchanged!.geometryChange).toBeUndefined();
+  });
+
   it("marks deleted versions", () => {
     const deleted: OsmFeature = { ...feature("2025-01-01T00:00:00Z"), version: 2, visible: false, tags: {} };
     const [latest] = historyVersions([feature("2024-01-01T00:00:00Z"), deleted]);

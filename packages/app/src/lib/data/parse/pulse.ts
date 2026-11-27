@@ -115,14 +115,59 @@ export function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`;
 }
 
+/**
+ * Resolved member-node histories of a way, used to detect geometry changes that only show
+ * up on the member nodes themselves (issue #220): the way keeps the same node ids while a
+ * node was moved in its own history.
+ */
+export type NodeHistoryIndex = Map<number, OsmFeature[]>;
+
+/** Resolves the position of a node as of a given time: the latest version created at or before `at` */
+function nodePositionAt(history: OsmFeature[] | undefined, at: number): { lat: number; lon: number } | undefined {
+  if (!history || history.length === 0) return undefined;
+  let best: OsmFeature | undefined;
+  for (const version of [...history].sort((a, b) => a.version - b.version)) {
+    const ts = Date.parse(version.timestamp);
+    if (!Number.isFinite(ts) || ts <= at) best = version;
+    else break;
+  }
+  const resolved = best ?? history[0];
+  return resolved?.type === "node" && resolved.lat !== undefined && resolved.lon !== undefined ? resolved : undefined;
+}
+
 /** Geometry change description between two versions, `undefined` when unchanged */
-function geometryChange(previous: OsmFeature, feature: OsmFeature): string | undefined {
+function geometryChange(
+  previous: OsmFeature,
+  feature: OsmFeature,
+  nodeHistories?: NodeHistoryIndex,
+): string | undefined {
   if (feature.type === "node" && previous.type === "node") {
     const moved = haversineMeters(previous, feature);
     return moved >= 0.1 ? `moved ${formatDistance(moved)}` : undefined;
   }
   if (feature.type === "way" && previous.type === "way") {
-    return JSON.stringify(previous.nodes) === JSON.stringify(feature.nodes) ? undefined : "node list changed";
+    if (JSON.stringify(previous.nodes) !== JSON.stringify(feature.nodes)) return "node list changed";
+    // The node list is unchanged: detect member-node moves through their resolved positions
+    // (issue #220). Positions may be unavailable (histories not fetched or too many nodes).
+    if (!nodeHistories) return undefined;
+    const at = Date.parse(feature.timestamp);
+    const before = Date.parse(previous.timestamp);
+    let total = 0;
+    let movedCount = 0;
+    const movedIds: number[] = [];
+    for (const nodeId of feature.nodes ?? []) {
+      const a = nodePositionAt(nodeHistories.get(nodeId), before);
+      const b = nodePositionAt(nodeHistories.get(nodeId), at);
+      if (!a || !b) continue;
+      const moved = haversineMeters(a, b);
+      if (moved < 0.1) continue;
+      total += moved;
+      movedCount++;
+      movedIds.push(nodeId);
+    }
+    if (movedCount === 0) return undefined;
+    const ids = movedIds.slice(0, 5).join(", ");
+    return `nodes moved ${formatDistance(total)} (${movedCount} node${movedCount === 1 ? "" : "s"}: ${ids}${movedIds.length > 5 ? ",…" : ""})`;
   }
   if (feature.type === "relation" && previous.type === "relation") {
     return JSON.stringify(previous.members) === JSON.stringify(feature.members) ? undefined : "member list changed";
@@ -135,7 +180,7 @@ function geometryChange(previous: OsmFeature, feature: OsmFeature): string | und
  * `/history` endpoint) into a newest-first version timeline with the tags that changed at each
  * version (issue #217).
  */
-export function historyVersions(history: OsmFeature[]): ItemVersion[] {
+export function historyVersions(history: OsmFeature[], nodeHistories?: NodeHistoryIndex): ItemVersion[] {
   const sorted = [...history].sort((a, b) => a.version - b.version);
   const versions: ItemVersion[] = [];
   let previous: OsmFeature | undefined;
@@ -158,7 +203,7 @@ export function historyVersions(history: OsmFeature[]): ItemVersion[] {
       changeset: feature.changeset,
       visible: feature.visible !== false,
       tagChanges,
-      geometryChange: previous ? geometryChange(previous, feature) : undefined,
+      geometryChange: previous ? geometryChange(previous, feature, nodeHistories) : undefined,
     });
     previous = feature;
   }

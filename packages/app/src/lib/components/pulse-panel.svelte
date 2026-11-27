@@ -8,6 +8,7 @@
   import { getAppState } from "#lib/data/app-state.js";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { collectLoadedOsmNodes } from "#lib/data/parse/diagnostics.js";
+  import { loadNodeHistories } from "#lib/data/parse/node-history.js";
   import { computePulseStats, formatAge, historyVersions, type ItemVersion, type RecencyBucket } from "#lib/data/parse/pulse.js";
   import { getLocalizedName } from "#lib/data/parse/localized-name.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
@@ -118,9 +119,15 @@
     historyState = "loading";
     itemHistory = undefined;
     getFeatureHistory(target.type, target.id)
-      .then((versions) => {
+      .then(async (versions) => {
+        // Ways keep their node ids when only a member node moved: resolve the member node
+        // histories to detect those geometry changes too (issue #220)
+        const nodeHistories =
+          target.type === "way"
+            ? await loadNodeHistories(versions.flatMap((v) => (v.type === "way" ? (v.nodes ?? []) : [])))
+            : undefined;
         if (cancelled) return;
-        itemHistory = historyVersions(versions);
+        itemHistory = historyVersions(versions, nodeHistories);
         historyState = "ready";
       })
       .catch((error) => {
