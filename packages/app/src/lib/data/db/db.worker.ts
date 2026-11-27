@@ -3,6 +3,12 @@ import type { DataJSON } from "@bloknote/climbing-data-gen";
 import { featureToType, getName } from "#lib/data/parse/data.js";
 import { getParentSlug } from "#lib/helpers/slug.js";
 import { getCoordinates, getGrade, getGradeReference } from "@bloknote/osm-climbing";
+import {
+  addRawSectorStats,
+  emptyRawSectorStats,
+  featureRawSectorStats,
+  type RawSectorStats,
+} from "@bloknote/osm-climbing";
 import type { OsmFeature } from "osm-api";
 import { getColorFromGrade } from "#lib/data/network/grade.js";
 import { buildSectorContour, extractRouteStyle, FEATURE_COLORS, ROUTE_STYLE_COLORS } from "@bloknote/osm-climbing";
@@ -17,7 +23,7 @@ import type {
 } from "./types";
 
 /** Bump when the tables change: the database is then downloaded again */
-const SCHEMA = 3;
+const SCHEMA = 4;
 
 let dbPromise: Promise<{ db: Database; persistent: boolean; opfsUsable: boolean }> | undefined;
 
@@ -112,7 +118,7 @@ function createSchema(db: Database) {
     );
     CREATE INDEX elements_parent ON elements (parent_slug);
     CREATE INDEX elements_osm_ref ON elements (osm_ref);
-    CREATE TABLE stats (slug TEXT PRIMARY KEY, total_routes INTEGER NOT NULL);
+    CREATE TABLE stats (slug TEXT PRIMARY KEY, total_routes INTEGER NOT NULL, raw TEXT);
     CREATE VIRTUAL TABLE places USING fts5(
       name, slug UNINDEXED,
       tokenize = 'unicode61 remove_diacritics 2', prefix = '2 3'
@@ -173,10 +179,19 @@ async function doBuild(url: string, version: string, bytes: number | undefined) 
   // Deepest first, so that a node's total is complete before it is added to its parent
   const slugs = Object.keys(records).sort((a, b) => b.split("/").length - a.split("/").length);
   const totals = new Map<string, number>();
+  /** Raw climbing stats per subtree, aggregated bottom-up (issue #114) */
+  const raws = new Map<string, RawSectorStats>();
   for (const slug of slugs) {
+    const feature = records[slug]!;
+    const raw = emptyRawSectorStats();
+    if (feature.type !== "geographic") addRawSectorStats(raw, featureRawSectorStats(feature as OsmFeature));
+    const childRaw = raws.get(slug);
+    if (childRaw) addRawSectorStats(raw, childRaw);
+    raws.set(slug, raw);
+
     const parent = getParentSlug(slug);
     if (parent === undefined) continue;
-    const isRoute = featureToType(records[slug]!) === "route";
+    const isRoute = featureToType(feature) === "route";
     totals.set(parent, (totals.get(parent) ?? 0) + (isRoute ? 1 : (totals.get(slug) ?? 0)));
   }
 
@@ -187,7 +202,7 @@ async function doBuild(url: string, version: string, bytes: number | undefined) 
       "INSERT INTO elements (slug, parent_slug, data, type, grade_ref, osm_ref) VALUES (?, ?, ?, ?, ?, ?)",
     );
     const insertPlace = db.prepare("INSERT INTO places (name, slug) VALUES (?, ?)");
-    const insertStats = db.prepare("INSERT INTO stats (slug, total_routes) VALUES (?, ?)");
+    const insertStats = db.prepare("INSERT INTO stats (slug, total_routes, raw) VALUES (?, ?, ?)");
     try {
       const slugs = Object.keys(records);
       for (let i = 0; i < slugs.length; i++) {
@@ -210,7 +225,18 @@ async function doBuild(url: string, version: string, bytes: number | undefined) 
           postBuildProgress(i, slugs.length, "parsing");
         }
       }
-      for (const [slug, total] of totals) insertStats.bind([slug, total]).stepReset();
+      const statsRows = new Map<string, { total: number; raw?: RawSectorStats }>();
+      for (const [slug, total] of totals) statsRows.set(slug, { total });
+      // Only subtrees holding climbs need raw stats: the leaves without any would bloat the database
+      for (const [slug, raw] of raws) {
+        if (raw.total <= 0) continue;
+        const row = statsRows.get(slug);
+        if (row) row.raw = raw;
+        else statsRows.set(slug, { total: 0, raw });
+      }
+      for (const [slug, row] of statsRows) {
+        insertStats.bind([slug, row.total, row.raw ? JSON.stringify(row.raw) : null]).stepReset();
+      }
     } finally {
       insertElement.finalize();
       insertPlace.finalize();
@@ -847,8 +873,10 @@ async function handle(req: DbRequest): Promise<DbResponse> {
       return { id: req.id, type: "allMapElements", data: { type: "FeatureCollection", features } };
     }
     case "getStats": {
-      const total = db.selectValue("SELECT total_routes FROM stats WHERE slug = ?", [req.slug]) as number | undefined;
-      return { id: req.id, type: "stats", data: { totalRoutes: total ?? 0 } };
+      const rows = db.selectArrays("SELECT total_routes, raw FROM stats WHERE slug = ?", [req.slug]);
+      const total = rows[0]?.[0] as number | undefined;
+      const raw = rows[0]?.[1] ? (JSON.parse(rows[0][1] as string) as RawSectorStats) : undefined;
+      return { id: req.id, type: "stats", data: { totalRoutes: total ?? 0, raw } };
     }
     case "getOsmRefs": {
       const data: Record<string, OsmRefEntry> = {};

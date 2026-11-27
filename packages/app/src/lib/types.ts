@@ -1,4 +1,5 @@
 import type { DataJSON } from "@bloknote/climbing-data-gen";
+import type { RawSectorStats } from "@bloknote/osm-climbing";
 import type { OsmFeature } from "osm-api";
 
 export interface BreadcrumbSegment {
@@ -11,6 +12,12 @@ export type AreaStatsRecord = Record<string, AreaStats>;
 
 export interface AreaStats {
   totalRoutes: number;
+  /**
+   * Raw precomputed climbing stats of the subtree (issue #114), computed statically by the data
+   * pipeline. Absent in datasets built before it existed: the stats are then computed from the
+   * subtree features instead.
+   */
+  raw?: RawSectorStats;
 }
 
 /** Tree structure for the OSM data.

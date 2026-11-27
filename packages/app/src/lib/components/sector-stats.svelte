@@ -9,7 +9,11 @@
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { collectLoadedOsmNodes } from "#lib/data/parse/diagnostics.js";
   import {
+    addRawSectorStats,
+    cloneRawSectorStats,
     computeSectorStats,
+    expandRawSectorStats,
+    featureRawSectorStats,
     STAT_STYLE_COLORS,
     STAT_STYLE_LABELS,
     STAT_STYLE_ORDER,
@@ -43,6 +47,12 @@
 
   $effect(() => {
     const targetSlug = slug;
+    // When the raw stats were precomputed by the data pipeline (issue #114), the subtree elements
+    // are not needed: the few grade buckets are expanded instead of parsing every feature.
+    if (item.stats?.raw) {
+      dbElements = {};
+      return;
+    }
     if (building || !localDb.ready) {
       dbElements = {};
       return;
@@ -68,12 +78,26 @@
     });
   });
 
-  const stats = $derived(
-    computeSectorStats(features, {
-      routeScale: gradingScales.effective("route") as RouteScaleId,
-      boulderScale: gradingScales.effective("boulder") as BoulderScaleId,
-    }),
-  );
+  const scaleOptions = $derived({
+    routeScale: gradingScales.effective("route") as RouteScaleId,
+    boulderScale: gradingScales.effective("boulder") as BoulderScaleId,
+  });
+
+  const stats = $derived.by(() => {
+    const precomputed = item.stats?.raw;
+    if (!precomputed) return computeSectorStats(features, scaleOptions);
+
+    // The precomputed stats only know the downloaded data: adjust them with the pending local
+    // edits of this subtree (subtract the initial feature, add the final one)
+    const raw = cloneRawSectorStats(precomputed);
+    const subtreePrefix = `${slug}/`;
+    for (const [changeSlug, change] of appState.osmUser.changes) {
+      if (changeSlug !== slug && !changeSlug.startsWith(subtreePrefix)) continue;
+      if (change.initial) addRawSectorStats(raw, featureRawSectorStats(change.initial as OsmFeature), -1);
+      if (change.final) addRawSectorStats(raw, featureRawSectorStats(change.final as OsmFeature));
+    }
+    return expandRawSectorStats(raw, scaleOptions);
+  });
 
   const maxGradeCount = $derived(Math.max(1, ...stats.gradeDistribution.map((b) => b.total)));
 

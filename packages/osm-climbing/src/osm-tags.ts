@@ -30,7 +30,9 @@ export interface Coordinates {
 
 export type DeprecatedTag = { deprecated: string };
 export type TagRule = ((value: string) => boolean) | DeprecatedTag;
-export type ProcessedTags = Partial<Record<Key, TagRule>>;
+/** Tag rules keyed by tag name. Keys are plain strings: arbitrary community keys such as
+ * `ele:source` or `description:fr` are resolved through the prefix families in {@link getTagRule}. */
+export type ProcessedTags = Record<string, TagRule>;
 
 export function deprecated(message: string): DeprecatedTag {
   return { deprecated: message };
@@ -510,7 +512,10 @@ const tagPrefixRules: [prefix: string, rule: TagRule][] = [
   ["climbing:inclination:", yesNoOrNumericTag],
 ];
 
-export function getTagRule(featureType: OSMClimbingFeatureType | undefined, key: Key): TagRule | undefined {
+export function getTagRule(
+  featureType: OSMClimbingFeatureType | undefined,
+  key: Key | (string & {}),
+): TagRule | undefined {
   if (!featureType) return undefined;
   const rules = processedTags[featureType];
   if (rules[key]) return rules[key];

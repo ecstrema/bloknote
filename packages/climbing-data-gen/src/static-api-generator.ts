@@ -4,6 +4,12 @@ import { join, dirname } from "path";
 import { ReverseGeolocator } from "./reverse-geolocation.ts";
 import type { Coordinates, DataJSON, GeographicFolderElement, OverpassRequest } from "./types.ts";
 import { ensureDirExists, slugify, USER_AGENT } from "@bloknote/reverse-geocoding-data";
+import {
+  addRawSectorStats,
+  computeRawSectorStats,
+  emptyRawSectorStats,
+  type RawSectorStats,
+} from "@bloknote/osm-climbing";
 import type { OsmFeature } from "osm-api";
 import { getStaticIdentifier, osmIndexFile } from "@bloknote/common";
 import { RSS_PREVIOUS_VERSIONS_CACHE } from "./config.ts";
@@ -301,6 +307,8 @@ type DataJSONRecord = Record<string, DataJSON>;
 interface GeneratedDirectory {
   data?: DataJSON;
   totalRoutes: number;
+  /** Raw climbing stats of the whole subtree (issue #114), stored in stats.json */
+  raw: RawSectorStats;
   /** Recently added or edited features in this subtree, newest first (see rss.ts) */
   recent: RecentItem[];
 }
@@ -430,6 +438,10 @@ async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string
     const children: DataJSONRecord = {};
     const childResults: { slug: string; directory: string; result: GeneratedDirectory }[] = [];
     let totalRoutes = 0;
+    // Raw climbing stats of this subtree, aggregated bottom-up (issue #114): the clients then only
+    // convert the few grade buckets to their preferred scale instead of parsing every feature.
+    const raw = emptyRawSectorStats();
+    if (data && data.type !== "geographic") addRawSectorStats(raw, computeRawSectorStats([data as OsmFeature]));
 
     for (const entry of childDirectories) {
       const childSlug = slug ? `${slug}/${entry.name}` : entry.name;
@@ -441,6 +453,7 @@ async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string
       children[childSlug] = result.data;
       download[childSlug] = result.data;
       totalRoutes += isRoute(result.data) ? 1 : result.totalRoutes;
+      addRawSectorStats(raw, result.raw);
     }
 
     // RSS feed of the recently added or edited features in this subtree (see issue #142)
@@ -462,9 +475,9 @@ async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string
     }
 
     writeFileSync(join(directory, "children.json"), JSON.stringify(children));
-    writeFileSync(join(directory, "stats.json"), JSON.stringify({ totalRoutes }));
+    writeFileSync(join(directory, "stats.json"), JSON.stringify({ totalRoutes, raw }));
 
-    return { data, totalRoutes, recent: recent.slice(0, RSS_MAX_ITEMS) };
+    return { data, totalRoutes, raw, recent: recent.slice(0, RSS_MAX_ITEMS) };
   }
 
   visit(worldDirectory, "");

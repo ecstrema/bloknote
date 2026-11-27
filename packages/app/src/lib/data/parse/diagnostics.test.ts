@@ -166,7 +166,13 @@ describe("getFeatureDiagnostics", () => {
 
   it("flags duplicate email tags and suggests keeping one (issue #249)", () => {
     const diags = getFeatureDiagnostics(
-      route({ sport: "climbing", climbing: "indoor_wall", name: "Gym", email: "a@gym.com", "contact:email": "b@gym.com" }),
+      route({
+        sport: "climbing",
+        climbing: "indoor_wall",
+        name: "Gym",
+        email: "a@gym.com",
+        "contact:email": "b@gym.com",
+      }),
     );
     const diag = diags.find((d) => d.id === "duplicate:email");
     expect(diag).toBeDefined();
@@ -174,9 +180,9 @@ describe("getFeatureDiagnostics", () => {
 
     // A single email tag is fine
     expect(
-      getFeatureDiagnostics(route({ sport: "climbing", climbing: "indoor_wall", name: "Gym", email: "a@gym.com" })).some(
-        (d) => d.id === "duplicate:email",
-      ),
+      getFeatureDiagnostics(
+        route({ sport: "climbing", climbing: "indoor_wall", name: "Gym", email: "a@gym.com" }),
+      ).some((d) => d.id === "duplicate:email"),
     ).toBe(false);
   });
 });

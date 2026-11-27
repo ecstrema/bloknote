@@ -69,6 +69,7 @@
       "name": "@bloknote/climbing-data-gen",
       "version": "1.0.0",
       "dependencies": {
+        "@bloknote/osm-climbing": "workspace:*",
         "@bloknote/reverse-geocoding-data": "workspace:*",
         "@turf/boolean-point-in-polygon": "catalog:",
         "geojson": "catalog:",
