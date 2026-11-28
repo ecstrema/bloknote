@@ -15141,7 +15141,6 @@ msgid "Key"
 msgstr "Clave"
 
 #: src/lib/components/editable/editable-tags.svelte
-#: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Add"
 msgstr "Añadir"
 
@@ -18019,9 +18018,8 @@ msgstr ""
 msgid "{0} routes in the results"
 msgstr ""
 
-#: src/lib/components/shell/sidebar/search-dialog.svelte
-msgid "Tag, e.g. climbing:length>40"
-msgstr ""
+#~ msgid "Tag, e.g. climbing:length>40"
+#~ msgstr ""
 
 #: src/lib/components/bookmark-button.svelte
 #: src/lib/components/bookmark-button.svelte
@@ -18214,4 +18212,29 @@ msgstr ""
 
 #: src/lib/components/tick-button.svelte
 msgid "Edit this tick"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Tag filters"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Tag, e.g. climbing:length"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Tag name"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Comparison"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Tag value"
+msgstr ""
+
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+#: src/lib/components/shell/sidebar/search-dialog.svelte
+msgid "Remove this filter"
 msgstr ""

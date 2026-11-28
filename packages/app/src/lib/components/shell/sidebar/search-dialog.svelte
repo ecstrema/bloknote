@@ -4,12 +4,15 @@
   import * as Dialog from "#components/ui/dialog/index.js";
   import * as DropdownMenu from "#components/ui/dropdown-menu/index.js";
   import { Button } from "#components/ui/button/index.js";
+  import { Select } from "#components/ui/select/index.js";
   import Input from "#components/ui/input/input.svelte";
   import { localDb } from "#lib/data/db/local-db.svelte.js";
   import { gradeTextToReference } from "#lib/data/db/grade-text.js";
-  import { formatTagFilter, parseTagFilter } from "#lib/data/db/tag-filter.js";
+  import { parseTagFilter } from "#lib/data/db/tag-filter.js";
+  import type { TagFilter } from "#lib/data/db/types.js";
   import { searchState, type PremadeFilterKind } from "./search-state.svelte.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
+  import { untrack } from "svelte";
 
   let { open = $bindable(false), onShowResults }: { open?: boolean; onShowResults: () => void } = $props();
 
@@ -54,8 +57,95 @@
   }[];
 
   let textInput = $state<HTMLInputElement | null>(null);
-  let tagKey = $state("");
-  let tagValue = $state("");
+
+  /**
+   * Tag filter rows (issue #269): one row per filter with separate tag, comparison and value
+   * fields, no "add" button. The last row stays empty and ready for a new query: typing in it
+   * grows the list, blurring an untouched row removes it again.
+   */
+  interface TagRow {
+    key: string;
+    op: NonNullable<TagFilter["op"]>;
+    value: string;
+  }
+  const emptyRow = (): TagRow => ({ key: "", op: "=", value: "" });
+  let tagRows = $state<TagRow[]>([emptyRow()]);
+
+  /** Comparison operators of the row selects, in display order (issue #269) */
+  const TAG_OPS: { value: TagRow["op"]; label: string }[] = [
+    { value: "=", label: "=" },
+    { value: "!=", label: "≠" },
+    { value: "~", label: "contains" },
+    { value: ">", label: ">" },
+    { value: ">=", label: "≥" },
+    { value: "<", label: "<" },
+    { value: "<=", label: "≤" },
+  ];
+
+  $effect(() => {
+    // Seed the rows from the active filters whenever the dialog opens
+    if (!open) return;
+    const seed = untrack(() => searchState.filters.tags).map((tag) => ({
+      key: tag.key,
+      op: tag.op ?? "=",
+      value: tag.value,
+    }));
+    tagRows = [...seed, emptyRow()];
+  });
+
+  /** Converts a row to a filter: an expression pasted into the tag field keeps working (issue #236) */
+  function rowToFilter(row: TagRow): TagFilter | undefined {
+    const key = row.key.trim();
+    if (!key) return undefined;
+    const parsed = parseTagFilter(key);
+    if (parsed && (parsed.op || parsed.value)) {
+      return {
+        key: parsed.key,
+        op: row.op === "=" && !row.value.trim() ? (parsed.op ?? "=") : row.op,
+        value: parsed.value || row.value.trim(),
+      };
+    }
+    return { key, op: row.op, value: row.value.trim() };
+  }
+
+  /** Pushes the filled rows into the search state, keeping one empty row at the bottom */
+  function syncTagRows() {
+    searchState.filters.tags = tagRows.flatMap(rowToFilter).filter((tag): tag is TagFilter => !!tag);
+    const last = tagRows[tagRows.length - 1];
+    if (!last || last.key.trim() !== "" || last.value.trim() !== "") tagRows = [...tagRows, emptyRow()];
+  }
+
+  /** The search starts after a short delay: there is no "add" button anymore (issue #269) */
+  const TAG_SEARCH_DELAY_MS = 500;
+  let tagSyncTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function onTagInput() {
+    clearTimeout(tagSyncTimer);
+    tagSyncTimer = setTimeout(syncTagRows, TAG_SEARCH_DELAY_MS);
+  }
+
+  function onTagBlur(index: number) {
+    // An empty row that is not the bottom "new query" row disappears when the user defocuses it
+    const row = tagRows[index];
+    if (!row || index === tagRows.length - 1) return;
+    if (row.key.trim() === "" && row.value.trim() === "") {
+      tagRows = tagRows.filter((_, i) => i !== index);
+      syncTagRows();
+    }
+  }
+
+  function removeTagRow(index: number) {
+    clearTimeout(tagSyncTimer);
+    tagRows = tagRows.filter((_, i) => i !== index);
+    if (tagRows.length === 0) tagRows = [emptyRow()];
+    syncTagRows();
+  }
+
+  /** Flushes pending tag row edits, e.g. before showing the results or closing the dialog */
+  function flushTagRows() {
+    clearTimeout(tagSyncTimer);
+    syncTagRows();
+  }
 
   $effect(() => {
     if (open) requestAnimationFrame(() => textInput?.focus());
@@ -94,18 +184,9 @@
       : [...searchState.filters.tags, { key: "wikimedia_commons", value: "" }];
   }
 
-  function addTag() {
-    // The key input accepts expressions like climbing:length>40 or name~crag (issue #236);
-    // a separately typed value still means a plain equality match
-    const parsed = parseTagFilter(tagValue.trim() ? `${tagKey.trim()}=${tagValue.trim()}` : tagKey);
-    if (!parsed) return;
-    searchState.filters.tags = [...searchState.filters.tags, parsed];
-    tagKey = "";
-    tagValue = "";
-  }
-
   /** Opens the overview plots of the current results in a full page (issue #214) */
   function exploreResults() {
+    flushTagRows();
     open = false;
     void goto(resolve("/explore"));
   }
@@ -216,32 +297,48 @@
           />
         </div>
 
-        <form
-          class="flex items-center gap-2"
-          onsubmit={(e) => {
-            e.preventDefault();
-            addTag();
-          }}
-        >
-          <Input placeholder="Tag, e.g. climbing:length>40" class="h-8" bind:value={tagKey} />
-          <Input placeholder="Value" class="h-8" bind:value={tagValue} />
-          <Button size="xs" variant="outline" type="submit">Add</Button>
-        </form>
-
-        {#if searchState.filters.tags.length > 0}
-          <div class="flex flex-wrap gap-1">
-            {#each searchState.filters.tags as tag, i (i)}
-              <Button
-                size="xs"
-                variant="secondary"
-                onclick={() => (searchState.filters.tags = searchState.filters.tags.filter((_, j) => j !== i))}
+        <!-- Tag filter rows (issue #269): no add button, the bottom row is always ready for a new query -->
+        <div class="flex flex-col gap-1.5" role="group" aria-label="Tag filters">
+          {#each tagRows as row, i (i)}
+            <div class="flex items-center gap-1.5">
+              <Input
+                placeholder="Tag, e.g. climbing:length"
+                class="h-8 flex-1"
+                aria-label="Tag name"
+                bind:value={tagRows[i]!.key}
+                oninput={onTagInput}
+                onblur={() => onTagBlur(i)}
+              />
+              <Select
+                aria-label="Comparison"
+                class="h-8 w-auto py-0"
+                bind:value={tagRows[i]!.op}
+                onchange={onTagInput}
               >
-                {formatTagFilter(tag)}
-                <span class="icon-[lucide--x] shrink-0 size-3"></span>
+                {#each TAG_OPS as op (op.value)}
+                  <option value={op.value}>{op.label}</option>
+                {/each}
+              </Select>
+              <Input
+                placeholder="Value"
+                class="h-8 w-28"
+                aria-label="Tag value"
+                bind:value={tagRows[i]!.value}
+                oninput={onTagInput}
+                onblur={() => onTagBlur(i)}
+              />
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                title="Remove this filter"
+                aria-label="Remove this filter"
+                onclick={() => removeTagRow(i)}
+              >
+                <span class="icon-[lucide--x] shrink-0 size-3.5"></span>
               </Button>
-            {/each}
-          </div>
-        {/if}
+            </div>
+          {/each}
+        </div>
       </section>
 
       <section class="flex flex-col gap-2" aria-label="Search results overview">
@@ -273,8 +370,24 @@
     </div>
 
     <Dialog.Footer>
-      <Button variant="ghost" onclick={() => searchState.clear()}>Clear search</Button>
-      <Button onclick={onShowResults}>Show results</Button>
+      <Button
+        variant="ghost"
+        onclick={() => {
+          flushTagRows();
+          searchState.clear();
+          tagRows = [emptyRow()];
+        }}
+      >
+        Clear search
+      </Button>
+      <Button
+        onclick={() => {
+          flushTagRows();
+          onShowResults();
+        }}
+      >
+        Show results
+      </Button>
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
