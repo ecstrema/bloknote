@@ -14977,7 +14977,6 @@ msgstr "<0/> Back"
 msgid "Browse climbs"
 msgstr "Browse climbs"
 
-#: src/routes/+page.svelte
 #: src/routes/docs/+page.svelte
 #: src/routes/settings/+layout.svelte
 msgid "Settings"
@@ -18195,3 +18194,8 @@ msgstr "CC0"
 #: src/lib/components/topo/add-image-dialog.svelte
 msgid "License"
 msgstr "License"
+
+#: src/lib/components/prod-link-button.svelte
+#: src/lib/components/prod-link-button.svelte
+msgid "Open this page in the production instance"
+msgstr "Open this page in the production instance"

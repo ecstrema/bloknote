@@ -39,6 +39,7 @@
   import BookmarkButton from "#components/bookmark-button.svelte";
   import TickButton from "#components/tick-button.svelte";
   import RssFeedButton from "#components/rss-feed-button.svelte";
+  import ProdLinkButton from "#components/prod-link-button.svelte";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
   import { dataClient } from "#lib/data/network/data-client.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
@@ -332,6 +333,8 @@
 {/if}
 
 <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+  <!-- Dev-only link to the same page on the production instance (issue #270) -->
+  <ProdLinkButton />
   {#if item.feature.type === "geographic"}
     <h1 class="text-2xl font-semibold">
       {getLocalizedName(item.feature) || "No Name"}
