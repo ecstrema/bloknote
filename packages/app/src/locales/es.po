@@ -18202,3 +18202,11 @@ msgstr ""
 #: src/lib/components/prod-link-button.svelte
 msgid "Open this page in the production instance"
 msgstr ""
+
+#: src/lib/components/tick-button.svelte
+msgid "Style..."
+msgstr ""
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "No style"
+msgstr ""

@@ -12,7 +12,8 @@ export interface ImportedTick {
   area?: string;
   /** Climbing style of the route as written in the export (Sport, Trad, Boulder...) */
   routeType?: string;
-  style: TickStyle;
+  /** Ascent style, when the export states one: unknown styles are not set (issue #274) */
+  style?: TickStyle;
   /** ISO ascent date, when provided */
   date?: string;
   notes?: string;
@@ -68,20 +69,19 @@ export function parseCsv(csv: string): string[][] {
   return rows.filter((r) => r.some((v) => v.trim() !== ""));
 }
 
-/** MountainProject ascent styles, mapped to the app's tick styles */
-function mountainProjectStyle(leadStyle: string | undefined): TickStyle {
+/** MountainProject ascent styles, mapped to the app's tick styles. Unknown styles are not set:
+ * ticks do not need a style (issue #274). */
+function mountainProjectStyle(leadStyle: string | undefined): TickStyle | undefined {
   const lead = leadStyle?.trim().toLowerCase();
   if (lead === "onsight") return "onsight";
   if (lead === "flash") return "flash";
   if (lead === "pinkpoint") return "pinkpoint";
   if (lead === "redpoint" || lead === "frenchfree") return "redpoint";
-  // Plain Lead / Follow / Top Rope / Solo styles do not distinguish clean ascents: conservatively
-  // count them as hangdogs (attempts) rather than claiming a send
-  return "hangdog";
+  return undefined;
 }
 
-/** TheCrag ascent types, mapped to the app's tick styles */
-function theCragStyle(ascentType: string | undefined): TickStyle {
+/** TheCrag ascent types, mapped to the app's tick styles (undefined when unknown, issue #274) */
+function theCragStyle(ascentType: string | undefined): TickStyle | undefined {
   const type = ascentType?.trim().toLowerCase();
   if (type === "onsight") return "onsight";
   if (type === "flash") return "flash";
@@ -89,30 +89,28 @@ function theCragStyle(ascentType: string | undefined): TickStyle {
   if (type === "hangdog") return "hangdog";
   if (type === "bailed") return "bailed";
   if (type === "send" || type === "redpoint" || type === "top rope" || type === "repeat") return "redpoint";
-  return "hangdog";
+  return undefined;
 }
 
 /** Maps ascent types shared by 8a.nu, Sendage, and OpenClimbing exports (abbreviations included) */
-function ascentTypeStyle(ascentType: string | undefined): TickStyle {
+function ascentTypeStyle(ascentType: string | undefined): TickStyle | undefined {
   const type = ascentType?.trim().toLowerCase();
   if (type === "onsight" || type === "os") return "onsight";
   if (type === "flash" || type === "fl") return "flash";
   if (type === "redpoint" || type === "rp") return "redpoint";
   if (type === "bailed" || type === "bail" || type === "dnf") return "bailed";
-  // Hangdog, top rope, solo, and unknown styles are not clean leads: count them as attempts
-  return "hangdog";
+  return undefined;
 }
 
-/** UKClimbing logbook styles, mapped to the app's tick styles */
-function ukcStyle(style: string | undefined): TickStyle {
+/** UKClimbing logbook styles, mapped to the app's tick styles (undefined when unknown, issue #274) */
+function ukcStyle(style: string | undefined): TickStyle | undefined {
   const value = style?.trim().toLowerCase();
   if (value === "onsight") return "onsight";
   if (value === "flash") return "flash";
   if (value === "bailed") return "bailed";
   // UKC does not distinguish redpoints from onsights: a logged lead, solo, or boulder is a send
   if (value === "lead" || value === "solo" || value === "boulder") return "redpoint";
-  // Top rope and second are not clean leads: count them as attempts
-  return "hangdog";
+  return undefined;
 }
 
 const clean = (value: string | undefined): string | undefined => {

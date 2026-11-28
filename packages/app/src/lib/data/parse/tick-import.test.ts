@@ -204,7 +204,8 @@ describe("parseTickCsv", () => {
         area: "Squared Ledge",
         location: "USA > Massachusetts > Essex > Squared Ledge",
         routeType: "Trad",
-        style: "hangdog",
+        // "TR" is not a known clean-ascent style: no style is set (issue #274)
+        style: undefined,
         date: "2023-06-02T00:00:00.000Z",
         notes: undefined,
       },

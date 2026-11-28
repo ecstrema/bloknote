@@ -659,7 +659,7 @@ class AtProtoClient {
 
   async addTick(
     feature: OsmFeature,
-    ascent: TickAscent,
+    ascent?: TickAscent,
     comment?: string,
     climbedAt?: string,
   ): Promise<LocalTickEntry> {
@@ -669,7 +669,8 @@ class AtProtoClient {
     const climbed = climbedAt ?? now;
     const record: LocalTickEntry = {
       subject: { type: feature.type, id: feature.id },
-      ...ascent,
+      // The style is optional: unknown ascent styles are simply not set (issue #274)
+      ...(ascent ?? {}),
       climbedAt: climbed,
       label: feature.tags?.name,
       ...(comment?.trim() ? { comment: comment.trim() } : {}),
@@ -714,14 +715,14 @@ class AtProtoClient {
    */
   async addNameTick(
     tick: { name: string; grade?: string; locationHint?: string[] },
-    ascent: TickAscent,
+    ascent?: TickAscent,
     comment?: string,
     climbedAt?: string,
   ): Promise<LocalTickEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
     const now = new Date().toISOString();
     const record: LocalTickEntry = {
-      ...ascent,
+      ...(ascent ?? {}),
       climbedAt: climbedAt ?? now,
       name: tick.name,
       ...(tick.grade ? { grade: tick.grade } : {}),
@@ -761,17 +762,19 @@ class AtProtoClient {
   }
 
   /** Edits a tick (ascent, date, comment) locally and in the PDS when synced. Set `climbedAt` to
-   * `null` to delete the date (minimal ticks carry no date, issue #253). */
+   * `null` to delete the date (minimal ticks carry no date, issue #253), and `ascent` to `null`
+   * to remove the ascent style (ticks do not need one, issue #274). */
   async updateTick(
     entry: LocalTickEntry,
-    patch: { ascent?: TickAscent; climbedAt?: string | null; comment?: string },
+    patch: { ascent?: TickAscent | null; climbedAt?: string | null; comment?: string },
   ): Promise<LocalTickEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
     if (patch.ascent !== undefined) {
+      delete entry.outcome;
       delete entry.sendStyle;
       delete entry.attemptStyle;
       delete entry.hangs;
-      Object.assign(entry, patch.ascent);
+      if (patch.ascent) Object.assign(entry, patch.ascent);
     }
     if (patch.climbedAt !== undefined) {
       if (patch.climbedAt === null) delete entry.climbedAt;

@@ -341,11 +341,13 @@
     }, SAVE_DELAY_MS);
   }
 
-  function setStyle(tick: LocalTickEntry, style: TickStyle) {
+  /** Sets the style of a tick; an empty value removes the style (ticks do not need one, issue #274) */
+  function setStyle(tick: LocalTickEntry, style: TickStyle | "") {
     delete tick.sendStyle;
     delete tick.attemptStyle;
     delete tick.hangs;
-    Object.assign(tick, ascentFromStyle(style));
+    delete tick.outcome;
+    if (style) Object.assign(tick, ascentFromStyle(style));
     scheduleSave(tick);
   }
 
@@ -459,8 +461,9 @@
             aria-label="Ascent style of {labelFor(tick)}"
             class={`w-auto rounded px-1.5 py-0.5 text-[11px] font-medium capitalize ${styleOf(tick) ? STYLE_BADGE_CLASSES[styleOf(tick)!] : ""}`}
             value={styleOf(tick)}
-            onchange={(e) => setStyle(tick, (e.target as HTMLSelectElement).value as TickStyle)}
+            onchange={(e) => setStyle(tick, (e.target as HTMLSelectElement).value as TickStyle | "")}
           >
+            <option value="">No style</option>
             <optgroup label="Send">
               <option value="redpoint">Redpoint</option>
               <option value="onsight">Onsight</option>

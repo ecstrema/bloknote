@@ -22,8 +22,8 @@
   let open = $state(false);
   let busy = $state(false);
   let error = $state<string>();
-  /** Style picked in the popup, applied to the tick (defaults to the tick's current style) */
-  let style = $state<TickStyle>("redpoint");
+  /** Style picked in the popup: empty until a style is set (ticks do not need one, issue #274) */
+  let style = $state<TickStyle | undefined>(undefined);
   let comment = $state("");
 
   const ref = $derived({ type: feature.type, id: feature.id });
@@ -35,7 +35,7 @@
     if (!open) return;
     error = undefined;
     comment = tick?.comment ?? "";
-    style = tick?.sendStyle ?? (tick?.attemptStyle as TickStyle | undefined) ?? "redpoint";
+    style = tick?.sendStyle ?? (tick?.attemptStyle as TickStyle | undefined);
   });
 
   async function onTriggerClick() {
@@ -149,8 +149,9 @@
               aria-label="Ascent style"
               class="h-7 w-auto py-0 text-xs"
               bind:value={style}
-              onchange={() => void update({ ascent: ascentFromStyle(style) })}
+              onchange={() => void update({ ascent: style ? ascentFromStyle(style) : null })}
             >
+              <option value="">Style...</option>
               <optgroup label="Send">
                 <option value="redpoint">Redpoint</option>
                 <option value="onsight">Onsight</option>

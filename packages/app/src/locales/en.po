@@ -18199,3 +18199,11 @@ msgstr "License"
 #: src/lib/components/prod-link-button.svelte
 msgid "Open this page in the production instance"
 msgstr "Open this page in the production instance"
+
+#: src/lib/components/tick-button.svelte
+msgid "Style..."
+msgstr "Style..."
+
+#: src/routes/settings/logbook/ticks-list.svelte
+msgid "No style"
+msgstr "No style"

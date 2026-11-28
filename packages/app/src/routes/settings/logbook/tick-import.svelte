@@ -194,7 +194,13 @@
           continue;
         }
         if (candidate) {
-          await atproto.addTick(candidate.feature, ascentFromStyle(row.tick.style), row.tick.notes, row.tick.date);
+          // The style is optional: ticks imported without a known style carry no ascent data (issue #274)
+          await atproto.addTick(
+            candidate.feature,
+            row.tick.style ? ascentFromStyle(row.tick.style) : undefined,
+            row.tick.notes,
+            row.tick.date,
+          );
         } else {
           // Route not on OSM (yet): the tick is stored without a subject and can be linked later
           await atproto.addNameTick(
@@ -203,7 +209,7 @@
               grade: row.tick.grade,
               locationHint: locationSegments(row.tick.location ?? row.tick.area ?? row.tick.cragName),
             },
-            ascentFromStyle(row.tick.style),
+            row.tick.style ? ascentFromStyle(row.tick.style) : undefined,
             row.tick.notes,
             row.tick.date,
           );
@@ -331,9 +337,11 @@
               {#if row.tick.date}
                 <span class="text-xs text-muted-foreground">{new Date(row.tick.date).toLocaleDateString()}</span>
               {/if}
-              <span class="rounded bg-muted px-1.5 py-0.5 text-[11px] capitalize text-muted-foreground"
-                >{row.tick.style}</span
-              >
+              {#if row.tick.style}
+                <span class="rounded bg-muted px-1.5 py-0.5 text-[11px] capitalize text-muted-foreground"
+                  >{row.tick.style}</span
+                >
+              {/if}
               <Select
                 aria-label="Matching OSM route for {row.tick.routeName}"
                 class="w-auto max-w-56"
