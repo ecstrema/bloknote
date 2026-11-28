@@ -437,9 +437,13 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
     },
   },
   {
+    // Individual (unclustered) route points only render when zoomed in: at low zoom every route
+    // far from its neighbours would show as a lone dot, flooding the dezoomed map (issue #272).
+    // Clusters keep representing the dense areas, and the parent crags stay visible as areas.
     id: "routes",
     type: "circle",
     source: "route-clusters",
+    minzoom: 11,
     filter: [
       "all",
       ["==", ["geometry-type"], "Point"],
