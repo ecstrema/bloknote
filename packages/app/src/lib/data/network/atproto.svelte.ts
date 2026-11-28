@@ -238,6 +238,8 @@ async function xrpcErrorMessage(res: Response): Promise<string> {
 
 class AtProtoClient {
   session = $state<AtProtoSession | undefined>(loadSession());
+  /** Avatar URL of the connected Bluesky account, from the public profile (issue #273) */
+  avatar = $state<string>();
   /**
    * Set when the PDS rejects a write with HTTP 403: the session was authorized
    * before some of the currently required scopes existed and must be re-granted
@@ -324,7 +326,23 @@ class AtProtoClient {
     this.session = { did: oauthSession.did, handle };
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(this.session));
     rememberHandle(handle);
+    // The avatar comes from the public Bluesky profile, not the scoped session (issue #273)
+    this.avatar = await this.#fetchBskyAvatar(oauthSession.did);
     await this.#hydrate();
+  }
+
+  /** Reads the public Bluesky profile of the account for its avatar (issue #273) */
+  async #fetchBskyAvatar(did: string): Promise<string | undefined> {
+    try {
+      const res = await fetch(
+        `https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${encodeURIComponent(did)}`,
+      );
+      if (!res.ok) return undefined;
+      const data = (await res.json()) as { avatar?: string };
+      return data.avatar ?? undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   async #fetchHandle(did: string): Promise<string | undefined> {
@@ -341,6 +359,7 @@ class AtProtoClient {
   #clearSession() {
     this.#oauthSession = undefined;
     this.session = undefined;
+    this.avatar = undefined;
     if (browser) localStorage.removeItem(SESSION_STORAGE_KEY);
   }
 
@@ -553,6 +572,7 @@ class AtProtoClient {
     localStorage.removeItem(SESSION_STORAGE_KEY);
     this.#clearLocalData();
     this.settings = undefined;
+    this.avatar = undefined;
     this.#settingsWriteFailed = false;
     this.needsNewPermissions = false;
     if (session) await session.signOut().catch(() => {});

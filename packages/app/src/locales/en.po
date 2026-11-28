@@ -18237,3 +18237,8 @@ msgstr "Tag value"
 #: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Remove this filter"
 msgstr "Remove this filter"
+
+#: src/lib/components/share-bsky-button.svelte
+#: src/lib/components/share-bsky-button.svelte
+msgid "Share this page on Bluesky"
+msgstr "Share this page on Bluesky"

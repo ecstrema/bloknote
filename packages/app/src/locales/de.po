@@ -18237,3 +18237,8 @@ msgstr ""
 #: src/lib/components/shell/sidebar/search-dialog.svelte
 msgid "Remove this filter"
 msgstr ""
+
+#: src/lib/components/share-bsky-button.svelte
+#: src/lib/components/share-bsky-button.svelte
+msgid "Share this page on Bluesky"
+msgstr ""

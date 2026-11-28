@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { isLoggedIn } from "osm-api";
+  import { getUser, isLoggedIn } from "osm-api";
   import { Button } from "#components/ui/button/index.js";
   import { loginOsm, logoutOsm } from "#lib/data/network/osm.svelte.js";
   import { atproto } from "#lib/data/network/atproto.svelte.js";
@@ -17,9 +17,18 @@
   let commonsUsername = $state<string>();
   let commonsError = $state<string>();
   let atError = $state<string>();
+  /** Avatar of the OSM account, used when the Bluesky profile has none (issue #273) */
+  let osmAvatar = $state<string>();
 
   onMount(() => {
     osmLoggedIn = isLoggedIn();
+    if (osmLoggedIn) {
+      getUser("me")
+        .then((user) => {
+          osmAvatar = user.img?.href;
+        })
+        .catch(() => {});
+    }
 
     const accessToken = getCommonsAccessToken();
     if (!accessToken) {
@@ -43,9 +52,17 @@
     if (osmLoggedIn) {
       logoutOsm();
       osmLoggedIn = isLoggedIn();
+      osmAvatar = undefined;
     } else {
       loginOsm(() => {
         osmLoggedIn = isLoggedIn();
+        if (osmLoggedIn) {
+          getUser("me")
+            .then((user) => {
+              osmAvatar = user.img?.href;
+            })
+            .catch(() => {});
+        }
       });
     }
   }
@@ -103,17 +120,23 @@
       bookmarked climbs—in your own data repository, separate from OpenStreetMap.
     </p>
     {#if atproto.session}
-      <p class="mt-2 text-xs text-muted-foreground">
-        Connected as <span class="font-medium text-foreground">{atproto.session.handle ?? atproto.session.did}</span>
-        · records are stored in your ATProto repository (PDS) ·
-        <a
-          class="text-primary hover:underline"
-          href={`https://pds.ls/at://${atproto.session.did}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          browse your data on pds.ls</a
-        >
+      {@const avatar = atproto.avatar ?? osmAvatar}
+      <p class="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+        {#if avatar}
+          <img src={avatar} alt="" class="size-5 rounded-full object-cover" referrerpolicy="no-referrer" />
+        {/if}
+        <span>
+          Connected as <span class="font-medium text-foreground">{atproto.session.handle ?? atproto.session.did}</span>
+          · records are stored in your ATProto repository (PDS) ·
+          <a
+            class="text-primary hover:underline"
+            href={`https://pds.ls/at://${atproto.session.did}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            browse your data on pds.ls</a
+          >
+        </span>
       </p>
     {/if}
     {#if atError}

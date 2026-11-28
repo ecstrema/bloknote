@@ -40,6 +40,7 @@
   import TickButton from "#components/tick-button.svelte";
   import RssFeedButton from "#components/rss-feed-button.svelte";
   import ProdLinkButton from "#components/prod-link-button.svelte";
+  import ShareBskyButton from "#components/share-bsky-button.svelte";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
   import { dataClient } from "#lib/data/network/data-client.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
@@ -378,6 +379,8 @@
       <BookmarkButton class="ms-auto" feature={item.feature} />
     {/if}
   {/if}
+  <!-- Share the page on Bluesky, next to the tick / bookmark / RSS buttons (issue #273) -->
+  <ShareBskyButton />
 </div>
 
 <Tabs.Root value={effectiveTab} onValueChange={onTabChange} class="gap-4">
