@@ -41,6 +41,7 @@
   import RssFeedButton from "#components/rss-feed-button.svelte";
   import ProdLinkButton from "#components/prod-link-button.svelte";
   import ShareBskyButton from "#components/share-bsky-button.svelte";
+  import WayOsmData from "#components/way-osm-data.svelte";
   import { getNearbyDots } from "#lib/data/nearby-dots.js";
   import { dataClient } from "#lib/data/network/data-client.js";
   import { getParentSlug } from "#lib/helpers/slug.js";
@@ -527,6 +528,10 @@
         {/if}
       </div>
       <EditableTags feature={item.feature} featureSlug={itemSlug} />
+      {#if item.feature.type === "way"}
+        <!-- A way mapped as a route shows the data of all its nodes too (issue #280) -->
+        <WayOsmData way={item.feature} />
+      {/if}
     </Tabs.Content>
   {/if}
 

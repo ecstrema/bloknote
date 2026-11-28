@@ -28,8 +28,10 @@ export function featureToMapElement(
 
   const tags = feature.tags ?? {};
   const isCliff = tags.natural === "cliff";
+  // Ways mapped as lines are routes too (issue #280): they cluster and fade like route points,
+  // and their line geometry is drawn separately by the map (see the way-line layer)
   const isRoute =
-    feature.type === "node" &&
+    (feature.type === "node" || feature.type === "way") &&
     (tags.climbing === "route_bottom" ||
       tags.climbing === "route" ||
       tags.climbing === "route_top" ||
@@ -549,6 +551,18 @@ export const CLIMBING_LAYERS: LayerSpecification[] = [
       "line-color": "#2563eb",
       "line-width": 2.5,
       "line-dasharray": [2, 2],
+    },
+  },
+  {
+    // Geometry of the way mapped as the currently open route (issue #280)
+    id: "way-line",
+    type: "line",
+    source: "way-line",
+    filter: ["==", ["geometry-type"], "LineString"],
+    paint: {
+      "line-color": "#2563eb",
+      "line-width": 3,
+      "line-opacity": 0.85,
     },
   },
 ];

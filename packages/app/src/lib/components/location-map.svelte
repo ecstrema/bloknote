@@ -21,7 +21,9 @@
   import type { MapElementFeature, MapElementFeatureCollection } from "#lib/data/db/types.js";
   import type { FeatureCollection } from "geojson";
   import { FEATURE_COLORS } from "@bloknote/osm-climbing";
-  import type { OsmFeature } from "osm-api";
+  import type { OsmFeature, OsmNode } from "osm-api";
+  import { getFeature } from "osm-api";
+  import { featureToType } from "#lib/data/parse/data.js";
   import { setMapCenterProvider } from "./map-center.js";
   import { addTerrainSource } from "./map-controls.js";
   import { searchState } from "./shell/sidebar/search-state.svelte.js";
@@ -379,6 +381,13 @@
     }
     if (!map.getSource("route-line")) {
       map.addSource("route-line", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      });
+    }
+    if (!map.getSource("way-line")) {
+      // Geometry of the way mapped as the currently open route (issue #280)
+      map.addSource("way-line", {
         type: "geojson",
         data: { type: "FeatureCollection", features: [] },
       });
@@ -1310,6 +1319,46 @@
   $effect(() => {
     activeSelectionSlugs = selection ? [...selection.selected] : [];
     if (attached && shared?.map) applyHighlightFilters(shared.map, currentSlug);
+  });
+
+  // Ways mapped as routes (issue #280): fetch the line geometry live from the OSM API and draw
+  // it on the map. The way also shows as its center point, clustered like the other routes.
+  $effect(() => {
+    const map = shared?.map;
+    const source = map?.getSource<GeoJSONSource>("way-line");
+    const feature = currentFeature;
+    if (!attached || !map || !source) return;
+    if (!feature || feature.type !== "way" || feature.id < 0 || featureToType(feature) !== "route") {
+      source.setData({ type: "FeatureCollection", features: [] });
+      return;
+    }
+    let cancelled = false;
+    getFeature("way", feature.id, true)
+      .then((features) => {
+        if (cancelled) return;
+        const coordinates = features
+          .filter((f): f is OsmNode => f.type === "node")
+          .map((node) => [node.lon, node.lat] as [number, number]);
+        source.setData({
+          type: "FeatureCollection",
+          features:
+            coordinates.length >= 2
+              ? [
+                  {
+                    type: "Feature",
+                    geometry: { type: "LineString", coordinates },
+                    properties: { slug: currentSlug, elementType: "way-line" },
+                  },
+                ]
+              : [],
+        });
+      })
+      .catch(() => {
+        // Offline: the way keeps showing as its center point only
+      });
+    return () => {
+      cancelled = true;
+    };
   });
 
   // Fade the elements excluded by the active search filters on the map (issue #215). The dimming

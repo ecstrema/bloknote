@@ -96,7 +96,9 @@ function* iterateOsmFeaturesChildren(element: OsmFeature, allElements: Map<strin
   if (element.type === "way" && element.nodes) {
     for (const nodeId of element.nodes) {
       const child = allElements.get(getStaticIdentifier("node", nodeId));
-      if (child) {
+      // A way mapped as a route or cliff line (issue #280) carries untagged geometry nodes:
+      // only the ones with tags (route_bottom, bolt, ...) belong in the tree under the way
+      if (child?.tags && Object.keys(child.tags).length > 0) {
         yield child;
       }
     }

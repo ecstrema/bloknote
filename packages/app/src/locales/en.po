@@ -14876,9 +14876,13 @@ msgstr "Opening hours: {0}"
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
+#: src/lib/components/location-map.svelte
 msgid "FeatureCollection"
 msgstr "FeatureCollection"
 
+#: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
@@ -15480,6 +15484,7 @@ msgstr "Clear selection"
 msgid "Apply"
 msgstr "Apply"
 
+#: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
 #: src/lib/components/location-map.svelte
@@ -18242,3 +18247,24 @@ msgstr "Remove this filter"
 #: src/lib/components/share-bsky-button.svelte
 msgid "Share this page on Bluesky"
 msgstr "Share this page on Bluesky"
+
+#: src/lib/components/way-osm-data.svelte
+msgid "Could not load the way nodes."
+msgstr "Could not load the way nodes."
+
+#: src/lib/components/way-osm-data.svelte
+msgid "Show the nodes of this way"
+msgstr "Show the nodes of this way"
+
+#: src/lib/components/way-osm-data.svelte
+msgid "Loading nodes from OpenStreetMap..."
+msgstr "Loading nodes from OpenStreetMap..."
+
+#. 0: node.id
+#: src/lib/components/way-osm-data.svelte
+msgid "node/{0}"
+msgstr "node/{0}"
+
+#: src/lib/components/way-osm-data.svelte
+msgid "<0/> Way nodes"
+msgstr "<0/> Way nodes"

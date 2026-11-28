@@ -42,4 +42,26 @@ describe("location-map-helper", () => {
     expect(el?.properties.grade).toBe("6a");
     expect(el?.properties.fillColor).toContain("hsl(");
   });
+
+  it("treats a way mapped as a route as a route point (issue #280)", () => {
+    const wayRoute = {
+      type: "way",
+      id: 24680,
+      center: { lat: 45.2, lon: 5.2 },
+      nodes: [1, 2, 3],
+      tags: {
+        name: "Grande Voie",
+        climbing: "route",
+        sport: "climbing",
+        "climbing:grade:french": "6b",
+      },
+    } as unknown as OsmFeature;
+    const el = featureToMapElement("world/europe/france/crag/grande-voie", wayRoute);
+    expect(el).toBeDefined();
+    // The way clusters like a route point at its center; its line geometry is drawn separately
+    expect(el?.properties.elementType).toBe("route");
+    expect(el?.geometry.type).toBe("Point");
+    expect(el?.geometry.coordinates).toEqual([5.2, 45.2]);
+    expect(el?.properties.grade).toBe("6b");
+  });
 });
