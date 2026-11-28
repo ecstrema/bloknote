@@ -16208,7 +16208,9 @@ msgstr "¿Eliminar {0} elemento{1}?"
 msgid "This removes the selected items from the tree and marks them for deletion in your pending OpenStreetMap changeset."
 msgstr "Esto elimina los elementos seleccionados del árbol y los marca para su eliminación en tu conjunto de cambios pendiente de OpenStreetMap."
 
+#. 0: relationSlug
 #. 0: targetSlug
+#: src/lib/components/diagnostics-panel.svelte
 #: src/lib/components/diagnostics-panel.svelte
 msgid "Could not load \"{0}\" to apply this fix."
 msgstr "No se pudo cargar «{0}» para aplicar esta corrección."

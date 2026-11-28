@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { OsmFeature } from "osm-api";
-import { getFeatureDiagnostics } from "./diagnostics.js";
+import type { DataJSON } from "@bloknote/climbing-data-gen";
+import type { DataTree } from "#lib/types.js";
+import { collectSubtreeDiagnostics, getFeatureDiagnostics } from "./diagnostics.js";
 
 function route(tags: Record<string, string>): OsmFeature {
   return { type: "node", id: 1, lat: 0, lon: 0, tags } as OsmFeature;
@@ -197,5 +199,61 @@ describe("getFeatureDiagnostics", () => {
         route({ sport: "climbing", climbing: "indoor_wall", name: "Gym", email: "a@gym.com" }),
       ).some((d) => d.id === "duplicate:email"),
     ).toBe(false);
+  });
+});
+
+describe("collectSubtreeDiagnostics", () => {
+  const routeFeature = (id: number, name: string): OsmFeature =>
+    ({
+      type: "node",
+      id,
+      lat: 0,
+      lon: 0,
+      tags: { sport: "climbing", climbing: "route_bottom", name },
+    }) as unknown as OsmFeature;
+  const sectorFeature = (id: number, name: string, members: number[]): OsmFeature =>
+    ({
+      type: "relation",
+      id,
+      tags: { sport: "climbing", climbing: "area", name },
+      members: members.map((ref) => ({ type: "node" as const, ref, role: "" })),
+    }) as unknown as OsmFeature;
+
+  it("flags a route referenced by two sectors and offers keep-only fixes (issue #278)", () => {
+    const dbElements = {
+      "world/crag": { type: "relation", id: 10, tags: { sport: "climbing", climbing: "area", name: "Crag" } },
+      "world/crag/sector-a": sectorFeature(100, "Sector A", [1]),
+      "world/crag/sector-b": sectorFeature(200, "Sector B", [1]),
+      "world/crag/sector-a/route": routeFeature(1, "Shared Route"),
+      "world/crag/sector-b/route": routeFeature(1, "Shared Route"),
+    } as unknown as Record<string, DataJSON>;
+    const root = { feature: { type: "relation", id: 10, tags: { name: "Crag" } } } as unknown as DataTree;
+
+    const entries = collectSubtreeDiagnostics(root, "world/crag", dbElements, () => undefined);
+    const routeA = entries.find((e) => e.slug === "world/crag/sector-a/route");
+    const routeB = entries.find((e) => e.slug === "world/crag/sector-b/route");
+    expect(routeA?.diagnostics.some((d) => d.id === "duplicate:parents")).toBe(true);
+    expect(routeB?.diagnostics.some((d) => d.id === "duplicate:parents")).toBe(true);
+
+    // From the occurrence in sector A, keeping it only in sector B removes it from sector A
+    const fixA = routeA!.diagnostics.find((d) => d.id === "duplicate:parents")!.fixes![0]!;
+    expect(fixA.label).toBe("Keep only in Sector B");
+    expect(fixA.patch).toEqual({ removeFromRelations: ["world/crag/sector-a"] });
+    const fixB = routeB!.diagnostics.find((d) => d.id === "duplicate:parents")!.fixes![0]!;
+    expect(fixB.label).toBe("Keep only in Sector A");
+    expect(fixB.patch).toEqual({ removeFromRelations: ["world/crag/sector-b"] });
+  });
+
+  it("does not flag routes that appear in a single sector (issue #278)", () => {
+    const dbElements = {
+      "world/crag": { type: "relation", id: 10, tags: { sport: "climbing", climbing: "area", name: "Crag" } },
+      "world/crag/sector-a": sectorFeature(100, "Sector A", [1]),
+      "world/crag/sector-a/route": routeFeature(1, "Solo Route"),
+    } as unknown as Record<string, DataJSON>;
+    const root = { feature: { type: "relation", id: 10, tags: { name: "Crag" } } } as unknown as DataTree;
+
+    const entries = collectSubtreeDiagnostics(root, "world/crag", dbElements, () => undefined);
+    const routeA = entries.find((e) => e.slug === "world/crag/sector-a/route");
+    expect(routeA?.diagnostics.some((d) => d.id === "duplicate:parents")).toBe(false);
   });
 });

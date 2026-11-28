@@ -167,6 +167,24 @@ export class AppState {
   }
 
   /**
+   * Removes a member from the relation at `parentSlug` (issue #278): used by the diagnostics
+   * "route in multiple sectors" fixes to detach the route from one of its sectors.
+   */
+  removeRelationMember(parentSlug: string, member: { type: BasicOsmType; id: number }) {
+    const node = this.tree.getReactiveNode(parentSlug);
+    const feature = node?.feature;
+    if (!feature || feature.type !== "relation") return;
+    this.undoStack.do(
+      new UndoableRelationMembersSet(
+        this.osmUser,
+        node as DataTree<OsmRelation>,
+        parentSlug,
+        feature.members.filter((m) => !(m.type === member.type && m.ref === member.id)),
+      ),
+    );
+  }
+
+  /**
    * Applies {@link UndoableRouteCreate} to create a new route in the parent feature.
    */
   createRoute(parent: DataTree, parentSlug: string, coordinates?: Coordinates, name?: string) {

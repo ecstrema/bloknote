@@ -122,33 +122,51 @@
     }
   }
 
-  async function applyFix(targetSlug: string, patch: DiagnosticPatch) {
+  /** Loads the node at `targetSlug` into the reactive tree, from its ancestors or the database scan */
+  async function ensureNodeLoaded(targetSlug: string): Promise<boolean> {
+    if (appState.tree.getReactiveNode(targetSlug)) return true;
+    const ancestors = getParentSlugs(targetSlug);
+    let startIdx = 0;
+    for (let i = ancestors.length - 1; i >= 0; i--) {
+      if (appState.tree.getReactiveNode(ancestors[i]!)) {
+        startIdx = i;
+        break;
+      }
+    }
+    for (const parentSlug of ancestors.slice(startIdx)) {
+      await appState.fetchChildren(parentSlug);
+    }
+
+    if (appState.tree.getReactiveNode(targetSlug)) return true;
+    const fallback = dbElements[targetSlug];
+    const parentSlug = getParentSlug(targetSlug);
+    if (fallback && parentSlug !== undefined && appState.tree.getReactiveNode(parentSlug)) {
+      appState.tree.integrateNodeIntoTree({ feature: fallback }, targetSlug, parentSlug);
+    }
+    return !!appState.tree.getReactiveNode(targetSlug);
+  }
+
+  async function applyFix(targetSlug: string, patch: DiagnosticPatch, feature: OsmFeature) {
     fixError = undefined;
     fixingSlugs.add(targetSlug);
     try {
-      if (!appState.tree.getReactiveNode(targetSlug)) {
-        const ancestors = getParentSlugs(targetSlug);
-        let startIdx = 0;
-        for (let i = ancestors.length - 1; i >= 0; i--) {
-          if (appState.tree.getReactiveNode(ancestors[i]!)) {
-            startIdx = i;
-            break;
+      // Removing the element from sectors (issue #278) targets the parent relations, not the
+      // element itself: each relation is loaded, then the member is dropped from its members
+      if (patch.removeFromRelations) {
+        for (const relationSlug of patch.removeFromRelations) {
+          if (!(await ensureNodeLoaded(relationSlug))) {
+            fixError = `Could not load "${relationSlug}" to apply this fix.`;
+            return;
           }
+          appState.removeRelationMember(relationSlug, {
+            type: feature.type as "node" | "way" | "relation",
+            id: feature.id,
+          });
         }
-        for (const parentSlug of ancestors.slice(startIdx)) {
-          await appState.fetchChildren(parentSlug);
-        }
+        return;
       }
 
-      if (!appState.tree.getReactiveNode(targetSlug)) {
-        const fallback = dbElements[targetSlug];
-        const parentSlug = getParentSlug(targetSlug);
-        if (fallback && parentSlug !== undefined && appState.tree.getReactiveNode(parentSlug)) {
-          appState.tree.integrateNodeIntoTree({ feature: fallback }, targetSlug, parentSlug);
-        }
-      }
-
-      if (!appState.tree.getReactiveNode(targetSlug)) {
+      if (!(await ensureNodeLoaded(targetSlug))) {
         fixError = `Could not load "${targetSlug}" to apply this fix.`;
         return;
       }
@@ -301,7 +319,7 @@
                         size="xs"
                         variant="outline"
                         disabled={fixingSlugs.has(entry.slug)}
-                        onclick={() => applyFix(entry.slug, fix.patch)}
+                        onclick={() => applyFix(entry.slug, fix.patch, entry.feature)}
                       >
                         <span class="icon-[lucide--wrench] shrink-0 size-4"></span>
                         {fix.label}

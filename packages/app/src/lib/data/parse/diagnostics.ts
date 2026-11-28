@@ -12,12 +12,18 @@ import {
   scaleIdToTag,
 } from "@bloknote/osm-climbing";
 import { findDuplicatedRoutePartNames } from "./route-parts.js";
+import { getLocalizedName } from "./localized-name.js";
 
 export type DiagnosticSeverity = "error" | "warning";
 
 export interface DiagnosticPatch {
   set?: Partial<Record<Key, string>>;
   remove?: Key[];
+  /**
+   * Slugs of relations the diagnosed element must be removed from, as a member (issue #278):
+   * used by the "route in multiple sectors" fixes.
+   */
+  removeFromRelations?: string[];
 }
 
 export interface DiagnosticFix {
@@ -327,11 +333,59 @@ export function collectSubtreeDiagnostics(
     childrenByParent.set(parentSlug, arr);
   }
 
+  // Routes that are members of several sectors of the subtree (issue #278): the same OSM element
+  // appears in the tree more than once, under different parents
+  const parentName = (parentSlug: string): string => {
+    const feature = getReactiveNode(parentSlug)?.feature ?? merged.get(parentSlug);
+    return (feature ? getLocalizedName(feature) : undefined) || (parentSlug.split("/").pop() ?? parentSlug);
+  };
+  const effectiveFeature = (entrySlug: string): OsmFeature => {
+    const reactiveFeature = getReactiveNode(entrySlug)?.feature;
+    return reactiveFeature && reactiveFeature.type !== "geographic" ? reactiveFeature : merged.get(entrySlug)!;
+  };
+  const occurrencesByIdentifier = new Map<string, { slug: string; parentSlug: string }[]>();
+  for (const entrySlug of merged.keys()) {
+    const feature = effectiveFeature(entrySlug);
+    if (featureToTypeOSM(feature) !== "route") continue;
+    const slash = entrySlug.lastIndexOf("/");
+    const occurrences = occurrencesByIdentifier.get(`${feature.type}-${feature.id}`) ?? [];
+    occurrences.push({ slug: entrySlug, parentSlug: slash === -1 ? "" : entrySlug.slice(0, slash) });
+    occurrencesByIdentifier.set(`${feature.type}-${feature.id}`, occurrences);
+  }
+
+  /**
+   * Diagnostic for a route referenced by more than one sector (issue #278), with one fix per
+   * other sector: keeping the route only there removes it from this occurrence's parent.
+   */
+  function multipleSectorsDiagnostic(occurrence: { slug: string; parentSlug: string }): TagDiagnostic | undefined {
+    const identifier = `${effectiveFeature(occurrence.slug).type}-${effectiveFeature(occurrence.slug).id}`;
+    const otherParents = [
+      ...new Set((occurrencesByIdentifier.get(identifier) ?? []).filter((o) => o.slug !== occurrence.slug).map((o) => o.parentSlug)),
+    ];
+    if (otherParents.length === 0) return undefined;
+    return {
+      id: "duplicate:parents",
+      severity: "warning",
+      title: "Route in multiple sectors",
+      description: `This route is referenced by several sectors: ${otherParents.map(parentName).join(", ")}. A route should only belong to one sector.`,
+      tags: [],
+      fixes: otherParents.map((keepSlug) => ({
+        label: `Keep only in ${parentName(keepSlug)}`,
+        patch: { removeFromRelations: [occurrence.parentSlug] },
+      })),
+    };
+  }
+
   const list: DiagnosticEntry[] = [];
   for (const [entrySlug, feature] of merged) {
-    const reactiveFeature = getReactiveNode(entrySlug)?.feature;
-    const effective = reactiveFeature && reactiveFeature.type !== "geographic" ? reactiveFeature : feature;
+    const effective = effectiveFeature(entrySlug);
     const diagnostics = getFeatureDiagnostics(effective, childrenByParent.get(entrySlug));
+    const slash = entrySlug.lastIndexOf("/");
+    const multipleSectors = multipleSectorsDiagnostic({
+      slug: entrySlug,
+      parentSlug: slash === -1 ? "" : entrySlug.slice(0, slash),
+    });
+    if (multipleSectors) diagnostics.push(multipleSectors);
     if (diagnostics.length > 0) list.push({ slug: entrySlug, feature: effective, diagnostics });
   }
   list.sort((a, b) => a.slug.localeCompare(b.slug));
