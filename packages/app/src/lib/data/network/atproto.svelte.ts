@@ -995,17 +995,20 @@ class AtProtoClient {
       subject: ref,
       label: feature.tags?.name,
     };
+    // Optimistic UI (issue #283): the bookmark appears right away, the upload is retried by
+    // #uploadPending on the next sync when it fails (e.g. while offline)
+    this.stars = [entry, ...this.stars];
+    this.#persistStars();
     if (this.session && feature.id > 0) {
       try {
         entry.uri = await this.#createRemoteRecord(STAR_COLLECTION, {
           subject: entry.subject,
         });
+        this.#persistStars();
       } catch (error) {
         if (!this.#oauthSession) throw error;
       }
     }
-    this.stars = [entry, ...this.stars];
-    this.#persistStars();
     return true;
   }
 
@@ -1020,6 +1023,10 @@ class AtProtoClient {
       author: this.session.handle ?? this.session.did,
       label: feature.tags?.name,
     };
+    // Optimistic UI (issue #283): the comment shows up right away, #uploadPending retries on the
+    // next sync when the upload fails (e.g. while offline)
+    this.comments = [entry, ...this.comments];
+    this.#persistComments();
     if (this.session && feature.id > 0) {
       try {
         entry.uri = await this.#createRemoteRecord(COMMENT_COLLECTION, {
@@ -1027,12 +1034,11 @@ class AtProtoClient {
           text: entry.text,
           createdAt: entry.createdAt,
         });
+        this.#persistComments();
       } catch (error) {
         if (!this.#oauthSession) throw error;
       }
     }
-    this.comments = [entry, ...this.comments];
-    this.#persistComments();
     return entry;
   }
 
@@ -1044,18 +1050,21 @@ class AtProtoClient {
       rating,
       label: feature.tags?.name,
     };
+    // Optimistic UI (issue #283): the rating applies right away, #uploadPending retries on the
+    // next sync when the upload fails (e.g. while offline)
+    this.ratings = [entry, ...this.ratings];
+    this.#persistRatings();
     if (this.session && feature.id > 0) {
       try {
         entry.uri = await this.#createRemoteRecord(RATING_COLLECTION, {
           subject: entry.subject,
           rating: entry.rating,
         });
+        this.#persistRatings();
       } catch (error) {
         if (!this.#oauthSession) throw error;
       }
     }
-    this.ratings = [entry, ...this.ratings];
-    this.#persistRatings();
     return entry;
   }
 }
