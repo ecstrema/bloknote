@@ -4,8 +4,6 @@ import type { OsmFeature } from "osm-api";
 export const SITE_BASE_URL = "https://ecstrema.github.io/bloknote";
 /** OpenStreetMap website root, for element and contributor profile links */
 export const OSM_BASE_URL = "https://www.openstreetmap.org";
-/** OpenClimbing root, for the mirror page of an OSM element */
-export const OPENCLIMBING_BASE_URL = "https://openclimbing.org/en";
 /** Wikimedia Commons URLs for the wikimedia_commons tag: file pages and direct images */
 export const COMMONS_WIKI_URL = "https://commons.wikimedia.org/wiki";
 export const COMMONS_FILE_URL = "https://commons.wikimedia.org/wiki/Special:FilePath";
@@ -18,12 +16,14 @@ export const RSS_CHANGES_FETCH_LIMIT = 100;
 /** Delay between two previous-version fetches, to stay polite with the OSM API */
 export const RSS_CHANGES_FETCH_DELAY_MS = 150;
 
-/** A recently added or edited climbing feature, ready to be rendered into the region feeds */
+/** A recently added or edited changeset post, ready to be rendered into the region feeds */
 export interface RecentItem {
   /** Element last-edit timestamp, in ms since the epoch */
   timestamp: number;
   /** Pre-rendered RSS <item> XML */
   xml: string;
+  /** Slugs of the subtrees holding the elements of this post, used to place it into the feeds */
+  slugs: string[];
 }
 
 /** Escapes text for inclusion in an XML document */
@@ -103,10 +103,9 @@ export function describeGeometryChange(previous: OsmFeature, el: OsmFeature): st
   return undefined;
 }
 
-/** The "Changes: …" sentence describing what the edit actually did (issue #222) */
-function changesParagraph(previous: OsmFeature, el: OsmFeature): string | undefined {
-  const changes = describeTagChanges(previous, el) ?? describeGeometryChange(previous, el);
-  return changes ? `<p>Changes: ${escapeXml(changes)}</p>` : undefined;
+/** The change summary between two versions, without the wrapping paragraph (issues #222 and #281) */
+export function describeChanges(previous: OsmFeature, el: OsmFeature): string | undefined {
+  return describeTagChanges(previous, el) ?? describeGeometryChange(previous, el);
 }
 
 const GRADE_TAG_PREFIX = "climbing:grade:";
@@ -131,71 +130,105 @@ function commonsFiles(value: string | undefined): { page: string; image: string 
     }));
 }
 
-/** The "… was added by <contributor>" paragraph, with a link to the OSM profile */
-function authorParagraph(summary: string, user: string | undefined, created: boolean): string {
-  const verb = created ? "was added" : "was edited";
-  if (!user) return escapeXml(`${summary} ${verb} by an anonymous editor`);
-  const profile = `${OSM_BASE_URL}/user/${encodeURIComponent(user)}`;
-  return `${escapeXml(`${summary} ${verb} by`)} <a href="${escapeXml(profile)}">${escapeXml(user)}</a>`;
+/** A recently changed climbing feature grouped into its changeset post (issue #281) */
+export interface ChangesetEntry {
+  feature: OsmFeature;
+  /** Slug of the subtree holding the element, used to place the post into the region feeds */
+  slug: string;
+  /** Full display path of the element, e.g. "Québec > Canada > North > Americas" */
+  path: string;
+  /** Summary of what changed since the previous version, when known (issue #222) */
+  changes?: string;
 }
 
-/** The paragraph of links to the same feature on OpenStreetMap, OpenClimbing and Bloknote */
-function linksParagraph(el: OsmFeature, bloknoteLink: string): string {
-  const links = [
-    ["OpenStreetMap", `${OSM_BASE_URL}/${el.type}/${el.id}`],
-    ["OpenClimbing", `${OPENCLIMBING_BASE_URL}/${el.type}/${el.id}`],
-    ["Bloknote", bloknoteLink],
-  ] as const;
-  return links.map(([label, href]) => `<a href="${escapeXml(href)}">${label}</a>`).join(" · ");
+/** At most this many elements are listed in one changeset post */
+export const RSS_ELEMENTS_PER_POST = 15;
+/** At most this many Commons photos are embedded in one changeset post */
+export const RSS_IMAGES_PER_POST = 4;
+
+/** The kind counts of the created or modified entries, e.g. "2 routes, 1 crag and 3 boulders" */
+function countedKinds(entries: ChangesetEntry[], created: boolean): string | undefined {
+  const counts = new Map<string, number>();
+  for (const entry of entries) {
+    if (((entry.feature.version ?? 1) === 1) !== created) continue;
+    const kind = describeClimbingFeature(entry.feature);
+    counts.set(kind, (counts.get(kind) ?? 0) + 1);
+  }
+  const parts = [...counts].map(([kind, n]) => `${n} ${kind.toLowerCase()}${n === 1 ? "" : "s"}`);
+  if (parts.length === 0) return undefined;
+  if (parts.length === 1) return parts[0];
+  return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
 }
 
 /**
- * Renders an RSS <item> for a climbing feature, or undefined when the element is not recent
- * (last edit older than RSS_RECENT_DAYS), unnamed, or carries no last-edit timestamp.
- * The Overpass data does not need any diffing against a previous build: each element carries
- * the date of its last edit, and newly created elements simply have a recent one.
- * The description is escaped HTML: contributor credit, a summary of what changed when the
- * previous version is available (issue #222), Commons photos, and provider links.
+ * Renders one RSS <item> per OpenStreetMap changeset (issue #281) instead of one per element:
+ * the post credits the contributor, tells how many elements were created or modified, lists the
+ * changed elements with their kind, grade and full region path, and embeds their Commons photos.
+ * The changeset id, contributor and timestamps come from the Overpass data itself (out meta), so
+ * nothing has to be fetched or cached here. Entries must already be filtered by isRecentItem.
  */
-export function recentItemXml(
-  el: OsmFeature,
-  slug: string,
+export function changesetItemXml(
+  changesetId: number | undefined,
+  entries: ChangesetEntry[],
   now: number = Date.now(),
-  previous?: OsmFeature,
 ): RecentItem | undefined {
-  const name = el.tags?.name;
-  if (!name || !el.timestamp || !isRecentItem(el, now)) return undefined;
-  const timestamp = Date.parse(el.timestamp);
+  if (entries.length === 0) return undefined;
+  const timestamp = Math.max(...entries.map((entry) => Date.parse(entry.feature.timestamp!)));
+  if (!Number.isFinite(timestamp) || now - timestamp > RSS_RECENT_DAYS * 24 * 60 * 60 * 1000) return undefined;
+  const user = entries.map((entry) => entry.feature.user).find(Boolean);
+  const author = user ?? "An anonymous editor";
+  const first = entries[0]!.feature;
+  const guid = changesetId ? `osm-changeset-${changesetId}` : `osm-${first.type}-${first.id}-v${first.version ?? 0}`;
+  const link = changesetId ? `${OSM_BASE_URL}/changeset/${changesetId}` : `${OSM_BASE_URL}/${first.type}/${first.id}`;
+  const created = countedKinds(entries, true);
+  const updated = countedKinds(entries, false);
+  const actions = [created && `created ${created}`, updated && `updated ${updated}`].filter(Boolean) as string[];
+  const title = `${author} ${actions.join(" and ")}`;
 
-  const kind = describeClimbingFeature(el);
-  const gradeEntry = Object.entries(el.tags ?? {}).find(([key]) => key.startsWith(GRADE_TAG_PREFIX));
-  const summary = gradeEntry ? `${kind} graded ${gradeEntry[1]}` : kind;
-  // Slugs in the generated tree are prefixed with world/, matching the app's internal slugs
-  const cleanSlug = slug.replace(/^world\//, "");
-  const link = `${SITE_BASE_URL}/world/${cleanSlug}`;
-  const guid = `osm-${el.type}-${el.id}-v${el.version ?? 0}`;
-
-  const paragraphs = [`<p>${authorParagraph(summary, el.user, (el.version ?? 1) === 1)}</p>`];
-  if (previous && (el.version ?? 1) > 1) {
-    const changes = changesParagraph(previous, el);
-    if (changes) paragraphs.push(changes);
+  const paragraphs: string[] = [];
+  const createdCount = entries.filter((entry) => (entry.feature.version ?? 1) === 1).length;
+  paragraphs.push(
+    `<p>${escapeXml(
+      `${author} changed ${entries.length} climbing element${entries.length === 1 ? "" : "s"} (${createdCount} created, ${entries.length - createdCount} modified) on ${new Date(timestamp).toISOString().slice(0, 10)}`,
+    )}${changesetId ? ` in <a href="${escapeXml(link)}">changeset ${changesetId}</a>` : ""}.</p>`,
+  );
+  const shown = entries.slice(0, RSS_ELEMENTS_PER_POST);
+  paragraphs.push(
+    `<ul>${shown
+      .map((entry) => {
+        const kind = describeClimbingFeature(entry.feature);
+        const gradeEntry = Object.entries(entry.feature.tags ?? {}).find(([key]) => key.startsWith(GRADE_TAG_PREFIX));
+        const bits = [gradeEntry ? `${kind} graded ${gradeEntry[1]}` : kind, entry.path, entry.changes].filter(Boolean);
+        const href = `${SITE_BASE_URL}/world/${entry.slug.replace(/^world\//, "")}`;
+        return `<li><a href="${escapeXml(href)}">${escapeXml(entry.feature.tags?.name ?? "")}</a> — ${escapeXml(bits.join(", "))}</li>`;
+      })
+      .join("")}</ul>`,
+  );
+  if (entries.length > shown.length) {
+    paragraphs.push(`<p>${escapeXml(`and ${entries.length - shown.length} more elements`)}</p>`);
   }
-  for (const { page, image } of commonsFiles(el.tags?.wikimedia_commons)) {
+  const images = new Map<string, { page: string; image: string; name: string }>();
+  for (const entry of entries) {
+    for (const file of commonsFiles(entry.feature.tags?.wikimedia_commons)) {
+      images.set(file.image, { ...file, name: entry.feature.tags?.name ?? "climbing feature" });
+    }
+  }
+  for (const { page, image, name } of [...images.values()].slice(0, RSS_IMAGES_PER_POST)) {
     paragraphs.push(
       `<p><a href="${escapeXml(page)}"><img src="${escapeXml(image)}" alt="${escapeXml(`Photo of ${name}`)}" width="480"/></a></p>`,
     );
   }
-  paragraphs.push(`<p>${linksParagraph(el, link)}</p>`);
+  paragraphs.push(`<p><a href="${escapeXml(link)}">Details on OpenStreetMap</a></p>`);
 
   const xml =
     `    <item>\n` +
-    `      <title>${escapeXml(name)} — ${escapeXml(summary)}</title>\n` +
+    `      <title>${escapeXml(title)}</title>\n` +
     `      <link>${escapeXml(link)}</link>\n` +
     `      <guid isPermaLink="false">${escapeXml(guid)}</guid>\n` +
     `      <pubDate>${new Date(timestamp).toUTCString()}</pubDate>\n` +
     `      <description>${escapeXml(paragraphs.join(""))}</description>\n` +
     `    </item>`;
-  return { timestamp, xml };
+  return { timestamp, xml, slugs: entries.map((entry) => entry.slug.replace(/^world\//, "")) };
 }
 
 /** Renders a complete RSS 2.0 document for a region feed */

@@ -15,13 +15,15 @@ import type { OsmFeature } from "osm-api";
 import { getStaticIdentifier, osmIndexFile } from "@bloknote/common";
 import { RSS_PREVIOUS_VERSIONS_CACHE } from "./config.ts";
 import {
+  changesetItemXml,
+  describeChanges,
   isRecentItem,
   OSM_BASE_URL,
-  recentItemXml,
+  type ChangesetEntry,
+  type RecentItem,
   renderRssFeed,
   RSS_CHANGES_FETCH_DELAY_MS,
   RSS_CHANGES_FETCH_LIMIT,
-  type RecentItem,
   RSS_MAX_ITEMS,
 } from "./rss.ts";
 
@@ -314,8 +316,6 @@ interface GeneratedDirectory {
   totalRoutes: number;
   /** Raw climbing stats of the whole subtree (issue #114), stored in stats.json */
   raw: RawSectorStats;
-  /** Recently added or edited features in this subtree, newest first (see rss.ts) */
-  recent: RecentItem[];
 }
 
 const routeClimbingValues = new Set([
@@ -338,17 +338,46 @@ function isRoute(data: DataJSON | undefined): boolean {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Gathers every recent OSM feature of the built tree, newest edits first */
-function collectRecentFeatures(directory: string, features: OsmFeature[] = []): OsmFeature[] {
+/** A recent OSM feature with the slug and display path of the subtree holding it (issue #281) */
+interface RecentFeature {
+  feature: OsmFeature;
+  slug: string;
+  path: string;
+}
+
+/** Gathers every recent OSM feature of the built tree with its full display path */
+function collectRecentFeatures(
+  directory: string,
+  slug: string,
+  path: string[] = [],
+  entries: RecentFeature[] = [],
+): RecentFeature[] {
   const dataPath = join(directory, "data.json");
   if (existsSync(dataPath)) {
     const data = JSON.parse(readFileSync(dataPath, "utf8")) as DataJSON;
-    if (data.type !== "geographic" && isRecentItem(data as OsmFeature)) features.push(data as OsmFeature);
+    const name = data.type === "geographic" ? data.name : (data as OsmFeature).tags?.name;
+    const namePath = name ? [...path, name] : path;
+    if (data.type !== "geographic" && isRecentItem(data as OsmFeature)) {
+      entries.push({ feature: data as OsmFeature, slug, path: namePath.join(" > ") });
+    }
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        collectRecentFeatures(
+          join(directory, entry.name),
+          slug ? `${slug}/${entry.name}` : entry.name,
+          namePath,
+          entries,
+        );
+      }
+    }
+  } else {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        collectRecentFeatures(join(directory, entry.name), slug ? `${slug}/${entry.name}` : entry.name, path, entries);
+      }
+    }
   }
-  for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (entry.isDirectory()) collectRecentFeatures(join(directory, entry.name), features);
-  }
-  return features;
+  return entries;
 }
 
 /**
@@ -430,15 +459,38 @@ async function fetchPreviousVersions(
 }
 
 async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string) {
-  const recentFeatures = collectRecentFeatures(worldDirectory).sort(
-    (a, b) => Date.parse(b.timestamp!) - Date.parse(a.timestamp!),
+  const recentFeatures = collectRecentFeatures(worldDirectory, "").sort(
+    (a, b) => Date.parse(b.feature.timestamp!) - Date.parse(a.feature.timestamp!),
   );
   const cache = cacheFile ? loadPreviousVersionsCache(cacheFile) : {};
-  const previousVersions = await fetchPreviousVersions(recentFeatures, cache);
+  const previousVersions = await fetchPreviousVersions(
+    recentFeatures.map(({ feature }) => feature),
+    cache,
+  );
   if (cacheFile) {
-    const keepKeys = new Set(recentFeatures.map((f) => `${f.type}/${f.id}`));
+    const keepKeys = new Set(recentFeatures.map(({ feature }) => `${feature.type}/${feature.id}`));
     savePreviousVersionsCache(cacheFile, cache, keepKeys);
   }
+  // One RSS post per OpenStreetMap changeset (issue #281) instead of one per element: the recent
+  // elements are grouped by their changeset id, keeping the 100 most recent changesets. The
+  // Overpass data carries the changeset id, contributor and timestamps, so nothing has to be
+  // fetched or cached for the grouping itself: the dataset cache already holds everything.
+  const changesetEntries = new Map<number | string, ChangesetEntry[]>();
+  for (const { feature, slug, path } of recentFeatures) {
+    const key: number | string = feature.changeset ?? `${feature.type}/${feature.id}`;
+    const previous = previousVersions.get(`${feature.type}/${feature.id}`);
+    (changesetEntries.get(key) ?? changesetEntries.set(key, []).get(key)!).push({
+      feature,
+      slug,
+      path,
+      changes: previous ? describeChanges(previous, feature) : undefined,
+    });
+  }
+  const posts = [...changesetEntries.entries()]
+    .map(([key, entries]) => changesetItemXml(typeof key === "number" ? key : undefined, entries))
+    .filter((post): post is RecentItem => Boolean(post))
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, RSS_MAX_ITEMS);
   /** Every node of the world, written once at the root for the app to download */
   const download: DataJSONRecord = {};
 
@@ -473,17 +525,9 @@ async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string
       addRawSectorStats(raw, result.raw);
     }
 
-    // RSS feed of the recently added or edited features in this subtree (see issue #142)
-    const recent: RecentItem[] = [];
-    if (data && data.type !== "geographic") {
-      const feature = data as OsmFeature;
-      const item = recentItemXml(feature, slug, Date.now(), previousVersions.get(`${feature.type}/${feature.id}`));
-      if (item) recent.push(item);
-    }
-    for (const { result } of childResults) {
-      recent.push(...result.recent);
-    }
-    recent.sort((a, b) => b.timestamp - a.timestamp);
+    // RSS feed of the recent changesets touching this subtree (issue #281): a post appears in
+    // the feed of every subtree holding at least one of the changeset's elements
+    const recent = posts.filter((post) => post.slugs.some((s) => s === slug || s.startsWith(`${slug}/`)));
     if (recent.length > 0) {
       const fallbackTitle = slug.replace(/^world\/?/, "") || "Worldwide climbing";
       const title =
@@ -497,7 +541,7 @@ async function writeStaticApiMetadata(worldDirectory: string, cacheFile?: string
     // folders get a stats.json, which keeps the static API small (issue #257)
     if (!isRoute(data)) writeFileSync(join(directory, "stats.json"), JSON.stringify({ totalRoutes, raw }));
 
-    return { data, totalRoutes, raw, recent: recent.slice(0, RSS_MAX_ITEMS) };
+    return { data, totalRoutes, raw };
   }
 
   visit(worldDirectory, "");
