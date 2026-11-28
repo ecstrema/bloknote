@@ -22,21 +22,33 @@
   let open = $state(false);
   let busy = $state(false);
   let error = $state<string>();
-  /** Style picked in the popup: empty until a style is set (ticks do not need one, issue #274) */
+  /** The tick currently expanded into the edit form: exactly one at a time (issue #282) */
+  let expandedId = $state<string>();
+  /** Edit fields of the expanded tick, reset whenever the expansion changes */
   let style = $state<TickStyle | undefined>(undefined);
   let comment = $state("");
 
   const ref = $derived({ type: feature.type, id: feature.id });
   const routeTicks = $derived(atproto.ticks.filter((t) => sameElementRef(t.subject, ref)));
-  const tick = $derived(routeTicks[0]);
 
   $effect(() => {
-    // Reset the popup fields to the tick's values each time it opens
+    // Reset the edit form to the expanded tick's values each time the popup opens or the
+    // expansion (or the ticks themselves) changes
     if (!open) return;
+    if (!expandedId && routeTicks.length > 0) expandedId = routeTicks[0]!.localId;
+    const entry = routeTicks.find((t) => t.localId === expandedId);
+    if (!entry) return;
     error = undefined;
-    comment = tick?.comment ?? "";
-    style = tick?.sendStyle ?? (tick?.attemptStyle as TickStyle | undefined);
+    comment = entry.comment ?? "";
+    style = entry.sendStyle ?? (entry.attemptStyle as TickStyle | undefined);
   });
+
+  function expand(entry: LocalTickEntry) {
+    expandedId = entry.localId;
+    error = undefined;
+    comment = entry.comment ?? "";
+    style = entry.sendStyle ?? (entry.attemptStyle as TickStyle | undefined);
+  }
 
   async function onTriggerClick() {
     // Always open the popup, even when the climb is already ticked or the user is not
@@ -60,7 +72,8 @@
     busy = true;
     error = undefined;
     try {
-      await atproto.addQuickTick(feature);
+      const entry = await atproto.addQuickTick(feature);
+      expand(entry);
     } catch (e) {
       error = e instanceof Error ? e.message : "Could not log tick";
     } finally {
@@ -68,14 +81,25 @@
     }
   }
 
-  async function update(patch: Parameters<typeof atproto.updateTick>[1]) {
-    if (!tick) return;
+  async function update(entry: LocalTickEntry, patch: Parameters<typeof atproto.updateTick>[1]) {
     error = undefined;
     busy = true;
     try {
-      await atproto.updateTick(tick, patch);
+      await atproto.updateTick(entry, patch);
     } catch (e) {
       error = e instanceof Error ? e.message : "Could not update tick";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function onDelete(entry: LocalTickEntry) {
+    error = undefined;
+    busy = true;
+    try {
+      await atproto.deleteTick(entry);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Could not delete tick";
     } finally {
       busy = false;
     }
@@ -101,13 +125,17 @@
       <Button
         {...props}
         size="icon-sm"
-        variant={tick ? "secondary" : "outline"}
+        variant={routeTicks.length > 0 ? "secondary" : "outline"}
         disabled={busy}
         onclick={onTriggerClick}
         class={cn(className)}
-        title={atproto.configured ? (tick ? "Edit your ticks" : "Tick this climb") : "Connect Atmosphere to log ticks"}
+        title={atproto.configured
+          ? routeTicks.length > 0
+            ? "Edit your ticks"
+            : "Tick this climb"
+          : "Connect Atmosphere to log ticks"}
         aria-label={atproto.configured
-          ? tick
+          ? routeTicks.length > 0
             ? "Edit your ticks"
             : "Tick this climb"
           : "Connect Atmosphere to log ticks"}
@@ -115,7 +143,7 @@
         <span
           class={cn(
             "icon-[lucide--check] shrink-0 size-4",
-            tick ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground",
+            routeTicks.length > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground",
           )}
         ></span>
       </Button>
@@ -143,13 +171,13 @@
           <p class="text-xs text-destructive">{error}</p>
         {/if}
 
-        {#if tick}
+        {#snippet tickForm(entry: LocalTickEntry)}
           <div class="flex flex-wrap items-center gap-2">
             <Select
               aria-label="Ascent style"
               class="h-7 w-auto py-0 text-xs"
               bind:value={style}
-              onchange={() => void update({ ascent: style ? ascentFromStyle(style) : null })}
+              onchange={() => void update(entry, { ascent: style ? ascentFromStyle(style) : null })}
             >
               <option value="">Style...</option>
               <optgroup label="Send">
@@ -168,20 +196,20 @@
               size="xs"
               variant="outline"
               disabled={busy}
-              title={tick.climbedAt ? "Change the date" : "Set the date to today"}
-              onclick={() => void update({ climbedAt: new Date().toISOString() })}
+              title={entry.climbedAt ? "Change the date" : "Set the date to today"}
+              onclick={() => void update(entry, { climbedAt: new Date().toISOString() })}
             >
               <span aria-hidden="true" class="icon-[lucide--calendar] shrink-0 size-3.5"></span>
-              {tick.climbedAt ? new Date(tick.climbedAt).toLocaleDateString() : "Date"}
+              {entry.climbedAt ? new Date(entry.climbedAt).toLocaleDateString() : "Date"}
             </Button>
-            {#if tick.climbedAt}
+            {#if entry.climbedAt}
               <Button
                 size="icon-sm"
                 variant="ghost"
                 disabled={busy}
                 title="Remove the date"
                 aria-label="Remove the date"
-                onclick={() => void update({ climbedAt: null })}
+                onclick={() => void update(entry, { climbedAt: null })}
               >
                 <span aria-hidden="true" class="icon-[lucide--x] shrink-0 size-3.5"></span>
               </Button>
@@ -192,18 +220,26 @@
             aria-label="Ascent note"
             placeholder="Ascent note (optional)"
             value={comment}
-            onchange={(e) => void update({ comment: e.currentTarget.value })}
+            onchange={(e) => void update(entry, { comment: e.currentTarget.value })}
           />
 
-          {#if !tick.uri}
+          {#if !entry.uri}
             <PendingSyncBadge />
           {/if}
-        {/if}
+        {/snippet}
 
-        {#if routeTicks.length > 1}
-          <ul class="flex flex-col gap-1 border-t pt-2 text-xs">
-            {#each routeTicks.slice(1) as entry (entry.localId)}
-              <li class="flex flex-wrap items-center gap-2">
+        <!-- Any tick can be edited: clicking a collapsed row expands it and unexpands the others (issue #282) -->
+        {#each routeTicks as entry (entry.localId)}
+          {#if entry.localId === expandedId}
+            {@render tickForm(entry)}
+          {:else}
+            <div class="flex items-center gap-1 rounded border p-1.5 text-xs">
+              <button
+                type="button"
+                class="flex min-w-0 flex-1 flex-wrap items-center gap-2 text-start hover:bg-muted/50"
+                title="Edit this tick"
+                onclick={() => expand(entry)}
+              >
                 <span class="rounded bg-muted px-1.5 py-0.5 font-medium capitalize">
                   {entry.sendStyle ?? entry.attemptStyle ?? entry.outcome ?? "tick"}
                 </span>
@@ -216,20 +252,20 @@
                 {#if !entry.uri}
                   <PendingSyncBadge />
                 {/if}
-                <button
-                  type="button"
-                  class="ms-auto self-center text-muted-foreground hover:text-destructive"
-                  title="Delete tick"
-                  aria-label="Delete tick"
-                  disabled={busy}
-                  onclick={() => void atproto.deleteTick(entry)}
-                >
-                  <span aria-hidden="true" class="icon-[lucide--trash-2] shrink-0 size-3.5"></span>
-                </button>
-              </li>
-            {/each}
-          </ul>
-        {/if}
+              </button>
+              <button
+                type="button"
+                class="shrink-0 self-center text-muted-foreground hover:text-destructive"
+                title="Delete tick"
+                aria-label="Delete tick"
+                disabled={busy}
+                onclick={() => void onDelete(entry)}
+              >
+                <span aria-hidden="true" class="icon-[lucide--trash-2] shrink-0 size-3.5"></span>
+              </button>
+            </div>
+          {/if}
+        {/each}
 
         <div class="flex items-center justify-between gap-2 border-t pt-2">
           <a href={resolve("/settings/logbook")} class="text-xs text-primary hover:underline">See all ticks</a>

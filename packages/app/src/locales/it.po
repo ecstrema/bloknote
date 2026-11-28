@@ -17107,6 +17107,7 @@ msgstr ""
 
 #: src/lib/components/route-logbook.svelte
 #: src/lib/components/tick-button.svelte
+#: src/lib/components/tick-button.svelte
 msgid "Could not delete tick"
 msgstr "Impossibile eliminare il tick"
 
@@ -18209,4 +18210,8 @@ msgstr ""
 
 #: src/routes/settings/logbook/ticks-list.svelte
 msgid "No style"
+msgstr ""
+
+#: src/lib/components/tick-button.svelte
+msgid "Edit this tick"
 msgstr ""

@@ -26,6 +26,10 @@ const TICKS_STORAGE_KEY = "bloknote:atproto-ticks";
 const STARS_STORAGE_KEY = "bloknote:atproto-stars";
 const COMMENTS_STORAGE_KEY = "bloknote:atproto-comments";
 const RATINGS_STORAGE_KEY = "bloknote:atproto-ratings";
+/** URIs of ticks edited while offline, replayed to the PDS on the next sync (issue #282) */
+const TICK_EDITS_STORAGE_KEY = "bloknote:atproto-tick-edits";
+/** URIs of ticks deleted while offline, deleted from the PDS on the next sync (issue #282) */
+const TICK_DELETES_STORAGE_KEY = "bloknote:atproto-tick-deletes";
 
 const TICK_COLLECTION = "org.bloknote.logbook.tick";
 const STAR_COLLECTION = "org.bloknote.osm.bookmark";
@@ -255,6 +259,10 @@ class AtProtoClient {
   /** Last successful #hydrate, used to rate-limit the background re-syncs */
   #lastHydrateAt = 0;
   #syncing?: Promise<void>;
+  /** URIs of ticks edited while offline: pushed to the PDS by the next #hydrate (issue #282) */
+  #pendingTickEdits = new Set<string>(readJson<string[]>(TICK_EDITS_STORAGE_KEY, []));
+  /** URIs of ticks deleted while offline: deleted from the PDS by the next #hydrate (issue #282) */
+  #pendingTickDeletes = new Set<string>(readJson<string[]>(TICK_DELETES_STORAGE_KEY, []));
   /** Set after a settings write fails (e.g. a session authorized before the settings permission existed) */
   #settingsWriteFailed = false;
 
@@ -340,6 +348,9 @@ class AtProtoClient {
   async #xrpc(path: string, init?: RequestInit): Promise<Response> {
     const session = this.#oauthSession;
     if (!session) throw new Error("ATProto is not configured");
+    // Never touch the session while offline: a failing token refresh would clear it and log the
+    // user out, while the write could simply be kept locally and replayed once back online (#282)
+    if (browser && !navigator.onLine) throw new Error("You are offline");
     try {
       return await session.fetchHandler(path, init);
     } catch (error) {
@@ -392,7 +403,9 @@ class AtProtoClient {
           localId: e.localId ?? (e.uri ? localIds.get(e.uri) : undefined),
         })) as T[];
       };
-      const mergedTicks = merge(this.ticks, remoteTicks as LocalTickEntry[]);
+      const mergedTicks = merge(this.ticks, remoteTicks as LocalTickEntry[])
+        // Ticks deleted while offline stay deleted: the PDS copy is removed by #replayPendingTickWrites
+        .filter((entry) => !entry.uri || !this.#pendingTickDeletes.has(entry.uri));
       // linkTick can attach a tick to a locally created element, which only has a temporary id
       // until the changeset is pushed (issue #154): the PDS record is deliberately left without
       // a subject in the meantime and updated by remapTickSubjects after the push. A re-sync
@@ -417,6 +430,8 @@ class AtProtoClient {
         this.#uploadPending(COMMENT_COLLECTION, this.comments),
         this.#uploadPending(RATING_COLLECTION, this.ratings),
       ]);
+      // Then replay the ticks edited or deleted while offline (issue #282)
+      await this.#replayPendingTickWrites();
       this.#persistTicks();
       this.#persistStars();
       this.#persistComments();
@@ -549,11 +564,15 @@ class AtProtoClient {
     this.stars = [];
     this.comments = [];
     this.ratings = [];
+    this.#pendingTickEdits.clear();
+    this.#pendingTickDeletes.clear();
     if (browser) {
       localStorage.removeItem(TICKS_STORAGE_KEY);
       localStorage.removeItem(STARS_STORAGE_KEY);
       localStorage.removeItem(COMMENTS_STORAGE_KEY);
       localStorage.removeItem(RATINGS_STORAGE_KEY);
+      localStorage.removeItem(TICK_EDITS_STORAGE_KEY);
+      localStorage.removeItem(TICK_DELETES_STORAGE_KEY);
     }
   }
 
@@ -641,6 +660,43 @@ class AtProtoClient {
     if (browser) localStorage.setItem(TICKS_STORAGE_KEY, JSON.stringify(this.ticks));
   }
 
+  /** Persists the pending offline tick edits/deletes so they survive a page reload (issue #282) */
+  #persistPendingTickWrites() {
+    if (!browser) return;
+    localStorage.setItem(TICK_EDITS_STORAGE_KEY, JSON.stringify([...this.#pendingTickEdits]));
+    localStorage.setItem(TICK_DELETES_STORAGE_KEY, JSON.stringify([...this.#pendingTickDeletes]));
+  }
+
+  /**
+   * Replays the tick edits and deletes made while offline to the PDS (issue #282). A failed write
+   * (still offline, or a session error) keeps the entry pending for the next sync.
+   */
+  async #replayPendingTickWrites() {
+    if (this.#pendingTickEdits.size === 0 && this.#pendingTickDeletes.size === 0) return;
+    for (const uri of [...this.#pendingTickEdits]) {
+      const entry = this.ticks.find((t) => t.uri === uri);
+      if (!entry) {
+        this.#pendingTickEdits.delete(uri);
+        continue;
+      }
+      try {
+        await this.#putRemoteRecord(TICK_COLLECTION, uri, remoteTickRecord(entry));
+        this.#pendingTickEdits.delete(uri);
+      } catch {
+        if (!this.#oauthSession) return;
+      }
+    }
+    for (const uri of [...this.#pendingTickDeletes]) {
+      try {
+        await this.#deleteRemoteRecord(TICK_COLLECTION, uri);
+        this.#pendingTickDeletes.delete(uri);
+      } catch {
+        if (!this.#oauthSession) return;
+      }
+    }
+    this.#persistPendingTickWrites();
+  }
+
   #ensureTickLocalIds() {
     this.ticks = ensureTickLocalIds(this.ticks);
   }
@@ -691,20 +747,21 @@ class AtProtoClient {
     return this.#saveNewTick(record, feature);
   }
 
-  /** Uploads a new tick when the feature already exists on OSM, then caches it locally */
+  /** Adds the tick locally right away (optimistic UI, issue #282), then uploads it to the PDS.
+   * A failed upload (offline, flaky network) leaves the tick pending: #uploadPending pushes it
+   * on the next sync. Session errors still surface: the user must log in again. */
   async #saveNewTick(record: LocalTickEntry, feature: OsmFeature): Promise<LocalTickEntry> {
-    if (this.session && feature.id > 0) {
-      try {
-        record.uri = await this.#createRemoteRecord(TICK_COLLECTION, remoteTickRecord(record));
-      } catch (error) {
-        // Offline: keep the tick locally, #hydrate pushes pending records once back online.
-        // Session errors still surface: the user must log in again.
-        if (!this.#oauthSession) throw error;
-      }
-    }
     this.ticks = [record, ...this.ticks];
     this.#ensureTickLocalIds();
     this.#persistTicks();
+    if (this.session && feature.id > 0) {
+      try {
+        record.uri = await this.#createRemoteRecord(TICK_COLLECTION, remoteTickRecord(record));
+        this.#persistTicks();
+      } catch (error) {
+        if (!this.#oauthSession) throw error;
+      }
+    }
     return record;
   }
 
@@ -755,7 +812,14 @@ class AtProtoClient {
   async pushTick(entry: LocalTickEntry): Promise<LocalTickEntry> {
     if (!this.session) throw new Error("ATProto is not configured");
     if (entry.uri) {
-      await this.#putRemoteRecord(TICK_COLLECTION, entry.uri, remoteTickRecord(entry));
+      try {
+        await this.#putRemoteRecord(TICK_COLLECTION, entry.uri, remoteTickRecord(entry));
+      } catch (error) {
+        if (!this.#oauthSession) throw error;
+        // Offline or flaky network: the edit stays local and is pushed by the next sync (issue #282)
+        this.#pendingTickEdits.add(entry.uri);
+        this.#persistPendingTickWrites();
+      }
     }
     this.#persistTicks();
     return entry;
@@ -790,6 +854,9 @@ class AtProtoClient {
         await this.#putRemoteRecord(TICK_COLLECTION, entry.uri, remoteTickRecord(entry));
       } catch (error) {
         if (!this.#oauthSession) throw error;
+        // Offline or flaky network: the edit stays local and is pushed by the next sync (issue #282)
+        this.#pendingTickEdits.add(entry.uri);
+        this.#persistPendingTickWrites();
       }
     }
     this.#ensureTickLocalIds();
@@ -875,10 +942,20 @@ class AtProtoClient {
     return entry;
   }
 
-  /** Deletes a tick from the PDS (when synced) and from the local cache */
+  /** Deletes a tick from the PDS (when synced) and from the local cache. Deletes that fail while
+   * offline are kept pending and replayed by the next sync, so the tick does not reappear (#282). */
   async deleteTick(tick: LocalTickEntry): Promise<void> {
     if (!this.session) throw new Error("ATProto is not configured");
-    if (tick.uri) await this.#deleteRemoteRecord(TICK_COLLECTION, tick.uri);
+    if (tick.uri) {
+      try {
+        await this.#deleteRemoteRecord(TICK_COLLECTION, tick.uri);
+      } catch (error) {
+        if (!this.#oauthSession) throw error;
+        this.#pendingTickDeletes.add(tick.uri);
+        this.#pendingTickEdits.delete(tick.uri);
+        this.#persistPendingTickWrites();
+      }
+    }
     this.ticks = this.ticks.filter((t) => t !== tick);
     this.#persistTicks();
   }
